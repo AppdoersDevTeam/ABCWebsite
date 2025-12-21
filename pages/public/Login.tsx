@@ -16,7 +16,7 @@ export const Login = () => {
   };
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4 relative pt-24 md:pt-32">
+    <div className="min-h-[80vh] flex items-center justify-center px-4 relative pt-32 md:pt-40 pb-32">
       <div className="max-w-md w-full space-y-8 glass-card bg-white/80 p-10 shadow-xl border border-white/50 rounded-[16px] relative z-10 backdrop-blur-xl">
         <div className="text-center">
           <h2 className="mt-6 text-4xl font-serif font-bold text-charcoal">Member Login</h2>
