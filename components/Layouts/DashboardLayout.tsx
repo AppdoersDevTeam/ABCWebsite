@@ -13,6 +13,7 @@ import {
   X
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { ScrollToTop } from '../ScrollToTop';
 import { BackgroundBlobs } from '../UI/BackgroundBlobs';
 
 export const DashboardLayout = () => {
@@ -38,6 +39,7 @@ export const DashboardLayout = () => {
 
   return (
     <div className="flex min-h-screen bg-base font-sans text-charcoal relative">
+      <ScrollToTop />
       <BackgroundBlobs />
       
       {/* Mobile Sidebar Overlay */}

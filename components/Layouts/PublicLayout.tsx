@@ -4,6 +4,7 @@ import { Menu, X, Instagram, Facebook, Youtube, ChevronDown } from 'lucide-react
 import { GlowingButton } from '../UI/GlowingButton';
 import { useAuth } from '../../context/AuthContext';
 import { BackgroundBlobs } from '../UI/BackgroundBlobs';
+import { ScrollToTop } from '../ScrollToTop';
 
 export const PublicLayout = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -149,6 +150,7 @@ export const PublicLayout = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-base text-charcoal font-sans relative overflow-x-hidden selection:bg-gold selection:text-charcoal">
+      <ScrollToTop />
       <BackgroundBlobs />
       
       {/* Header */}
