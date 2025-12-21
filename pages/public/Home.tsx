@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Calendar, Heart, PlayCircle, Clock, MapPin, Users, Church, DollarSign, Video, Info, HandHeart, Gift } from 'lucide-react';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { VibrantCard } from '../../components/UI/VibrantCard';
+import { ScrollReveal } from '../../components/UI/ScrollReveal';
 
 // Internal Typewriter Component for smooth sequencing without cursor
 interface TypewriterTextProps {
@@ -164,7 +165,7 @@ export const Home = () => {
                           </div>
                           <span className="font-bold text-sm uppercase tracking-wider text-neutral group-hover:text-charcoal">Events</span>
                       </Link>
-                      <Link to="#" className="bg-gold rounded-[24px] p-6 flex flex-col items-center justify-center text-center hover:bg-yellow-400 hover:-translate-y-2 transition-all duration-300 cursor-pointer shadow-lg shadow-gold/30 group">
+                      <Link to="/events/sermons" className="bg-gold rounded-[24px] p-6 flex flex-col items-center justify-center text-center hover:bg-yellow-400 hover:-translate-y-2 transition-all duration-300 cursor-pointer shadow-lg shadow-gold/30 group">
                           <div className="p-3 bg-white/20 rounded-full mb-3">
                             <PlayCircle size={28} className="text-charcoal" />
                           </div>
@@ -200,25 +201,29 @@ export const Home = () => {
 
       {/* Grid Features */}
       <section className="py-12 md:py-20 container mx-auto px-4 relative z-10">
-          <div className="text-center mb-12 md:mb-16">
-              <span className="text-gold font-bold tracking-[0.3em] uppercase mb-4 block animate-slide-in-right">Get Involved</span>
-              <h2 className="text-4xl md:text-5xl md:text-6xl font-serif font-bold text-charcoal animate-fade-in-up">Life at Ashburton</h2>
-          </div>
+          <ScrollReveal direction="down" delay={0}>
+            <div className="text-center mb-12 md:mb-16">
+                <span className="text-gold font-bold tracking-[0.3em] uppercase mb-4 block">Get Involved</span>
+                <h2 className="text-4xl md:text-5xl md:text-6xl font-serif font-bold text-charcoal">Life at Ashburton</h2>
+            </div>
+          </ScrollReveal>
 
           <div className="grid md:grid-cols-3 gap-8">
               {[
                   { title: "Ministries", icon: <Church size={40} />, desc: "Connect with your people.", link: "/events" },
                   { title: "Giving", icon: <DollarSign size={40} />, desc: "Fuel the mission.", link: "/giving" },
-                  { title: "Sermons", icon: <Video size={40} />, desc: "Catch up on the latest.", link: "#" },
+                  { title: "Sermons", icon: <Video size={40} />, desc: "Catch up on the latest.", link: "/events/sermons" },
               ].map((item, i) => (
-                  <VibrantCard key={i} className={`group animate-fade-in-up hover-lift`} glow={i===1} style={{ animationDelay: `${300 + i * 200}ms` }}>
+                  <ScrollReveal key={i} direction="up" delay={i * 100}>
+                    <VibrantCard className={`group hover-lift`} glow={i===1}>
                       <div className="mb-6 text-charcoal p-4 bg-gold/10 rounded-full w-fit group-hover:bg-gold transition-all duration-300 shadow-sm group-hover:scale-110 group-hover:rotate-6 icon-bounce">{item.icon}</div>
                       <h3 className="text-2xl md:text-3xl font-serif font-bold text-charcoal mb-3 group-hover:text-gold transition-colors duration-300">{item.title}</h3>
                       <p className="text-neutral mb-8 leading-relaxed group-hover:text-charcoal transition-colors">{item.desc}</p>
                       <Link to={item.link} className="flex items-center text-charcoal font-bold uppercase tracking-widest text-xs group-hover:text-gold transition-colors">
                           Learn More <ArrowRight size={16} className="ml-2 group-hover:translate-x-2 transition-transform"/>
                       </Link>
-                  </VibrantCard>
+                    </VibrantCard>
+                  </ScrollReveal>
               ))}
           </div>
       </section>
@@ -226,13 +231,15 @@ export const Home = () => {
       {/* Upcoming Events */}
       <section className="py-12 md:py-20 relative z-10">
           <div className="container mx-auto px-4">
-               <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-4">
-                   <div>
-                     <h2 className="text-4xl md:text-5xl font-serif font-bold text-charcoal">Upcoming</h2>
-                     <p className="text-neutral mt-2">Join us this week.</p>
-                   </div>
-                   <Link to="/events" className="text-charcoal font-bold border-b-2 border-gold pb-1 hover:text-gold transition-colors">View Calendar</Link>
-               </div>
+               <ScrollReveal direction="down" delay={0}>
+                 <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-4">
+                     <div>
+                       <h2 className="text-4xl md:text-5xl font-serif font-bold text-charcoal">Upcoming</h2>
+                       <p className="text-neutral mt-2">Join us this week.</p>
+                     </div>
+                     <Link to="/events" className="text-charcoal font-bold border-b-2 border-gold pb-1 hover:text-gold transition-colors">View Calendar</Link>
+                 </div>
+               </ScrollReveal>
 
                <div className="grid md:grid-cols-3 gap-6">
                    {[
@@ -240,7 +247,8 @@ export const Home = () => {
                        { day: '27', month: 'OCT', title: 'Community Picnic', time: '12:00 PM' },
                        { day: '03', month: 'NOV', title: 'Baptism Sunday', time: '10:00 AM' },
                    ].map((evt, i) => (
-                       <div key={i} className="glass-card border border-white/50 shadow-sm p-0 flex rounded-[8px] overflow-hidden group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 bg-white/70 animate-fade-in-up hover-lift" style={{ animationDelay: `${400 + i * 150}ms` }}>
+                       <ScrollReveal key={i} direction="up" delay={i * 100}>
+                         <div className="glass-card border border-white/50 shadow-sm p-0 flex rounded-[8px] overflow-hidden group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 bg-white/70 hover-lift">
                            <div className="bg-gold/10 group-hover:bg-gold transition-all duration-300 w-24 flex flex-col items-center justify-center p-4 text-charcoal group-hover:scale-105">
                                <span className="text-2xl md:text-3xl font-black group-hover:scale-110 transition-transform duration-300">{evt.day}</span>
                                <span className="text-xs md:text-sm font-bold tracking-wider">{evt.month}</span>
@@ -249,7 +257,8 @@ export const Home = () => {
                                <h4 className="text-lg md:text-xl font-bold text-charcoal mb-1 group-hover:text-gold transition-colors duration-300">{evt.title}</h4>
                                <span className="text-neutral text-sm flex items-center group-hover:text-charcoal transition-colors"><Clock size={14} className="mr-2 text-gold animate-pulse-slow"/> {evt.time}</span>
                            </div>
-                       </div>
+                         </div>
+                       </ScrollReveal>
                    ))}
                </div>
           </div>
@@ -259,34 +268,38 @@ export const Home = () => {
       <section className="py-12 md:py-20 relative z-10 bg-gray-50">
           <div className="container mx-auto px-4">
               <div className="grid md:grid-cols-2 gap-8 items-center">
-                  <div className="animate-fade-in-left delay-200">
-                      <span className="text-gold font-bold tracking-[0.3em] uppercase mb-4 block text-sm">Who We Are</span>
-                      <h2 className="text-4xl md:text-5xl font-serif font-bold text-charcoal mb-6">Established 1882. <span className="text-gold">Reimagined Daily.</span></h2>
-                      <p className="text-neutral text-lg leading-relaxed mb-6">
-                          We aren't just a building. We are a movement of people passionate about Jesus and our city. 
-                          From humble beginnings to a vibrant community, our mission remains the same: <span className="text-charcoal font-bold">Impact.</span>
-                      </p>
-                      <p className="text-neutral leading-relaxed mb-8">
-                          To see lives transformed by the gospel of Jesus Christ, equipping every generation to impact their community with hope, love, and service.
-                      </p>
-                      <Link to="/about">
-                          <GlowingButton variant="outline" className="group">
-                              Read More <ArrowRight size={16} className="ml-2 group-hover:translate-x-2 transition-transform"/>
-                          </GlowingButton>
-                      </Link>
-                  </div>
-                  <div className="animate-fade-in-right delay-400">
-                      <div className="glass-card rounded-[16px] p-8 md:p-12 bg-white/80 hover-lift">
-                          <div className="grid grid-cols-2 gap-4">
-                              {['One God', 'Jesus Savior', 'Spirit Power', 'Bible Authority'].map((item, i) => (
-                                  <div key={i} className="bg-white shadow-sm p-6 rounded-[8px] border border-gray-100 flex flex-col justify-center items-center text-center hover:shadow-md hover:border-gold transition-all duration-300 group">
+                  <ScrollReveal direction="right" delay={0}>
+                    <div>
+                        <span className="text-gold font-bold tracking-[0.3em] uppercase mb-4 block text-sm">Who We Are</span>
+                        <h2 className="text-4xl md:text-5xl font-serif font-bold text-charcoal mb-6">Established 1882. <span className="text-gold">Reimagined Daily.</span></h2>
+                        <p className="text-neutral text-lg leading-relaxed mb-6">
+                            We aren't just a building. We are a movement of people passionate about Jesus and our city. 
+                            From humble beginnings to a vibrant community, our mission remains the same: <span className="text-charcoal font-bold">Impact.</span>
+                        </p>
+                        <p className="text-neutral leading-relaxed mb-8">
+                            To see lives transformed by the gospel of Jesus Christ, equipping every generation to impact their community with hope, love, and service.
+                        </p>
+                        <Link to="/about">
+                            <GlowingButton variant="outline" className="group">
+                                Read More <ArrowRight size={16} className="ml-2 group-hover:translate-x-2 transition-transform"/>
+                            </GlowingButton>
+                        </Link>
+                    </div>
+                  </ScrollReveal>
+                  <ScrollReveal direction="left" delay={200}>
+                    <div className="glass-card rounded-[16px] p-8 md:p-12 bg-white/80 hover-lift">
+                        <div className="grid grid-cols-2 gap-4">
+                            {['One God', 'Jesus Savior', 'Spirit Power', 'Bible Authority'].map((item, i) => (
+                                <ScrollReveal key={i} direction="scale" delay={i * 50}>
+                                  <div className="bg-white shadow-sm p-6 rounded-[8px] border border-gray-100 flex flex-col justify-center items-center text-center hover:shadow-md hover:border-gold transition-all duration-300 group">
                                       <span className="text-xl md:text-2xl font-serif font-bold mb-2 text-charcoal">{item.split(' ')[0]}</span>
                                       <span className="text-xs uppercase tracking-widest text-neutral group-hover:text-gold font-bold">{item.split(' ')[1]}</span>
                                   </div>
-                              ))}
-                          </div>
-                      </div>
-                  </div>
+                                </ScrollReveal>
+                            ))}
+                        </div>
+                    </div>
+                  </ScrollReveal>
               </div>
           </div>
       </section>
@@ -294,17 +307,20 @@ export const Home = () => {
       {/* Events Preview */}
       <section className="py-12 md:py-20 relative z-10">
           <div className="container mx-auto px-4">
-              <div className="text-center mb-12">
-                  <span className="text-gold font-bold tracking-[0.3em] uppercase mb-4 block text-sm">What's On</span>
-                  <h2 className="text-4xl md:text-5xl font-serif font-bold text-charcoal mb-4">Join Us This Week</h2>
-                  <p className="text-neutral text-lg max-w-2xl mx-auto">From Sunday services to community events, there's always something happening at Ashburton Baptist.</p>
-              </div>
+              <ScrollReveal direction="down" delay={0}>
+                <div className="text-center mb-12">
+                    <span className="text-gold font-bold tracking-[0.3em] uppercase mb-4 block text-sm">What's On</span>
+                    <h2 className="text-4xl md:text-5xl font-serif font-bold text-charcoal mb-4">Join Us This Week</h2>
+                    <p className="text-neutral text-lg max-w-2xl mx-auto">From Sunday services to community events, there's always something happening at Ashburton Baptist.</p>
+                </div>
+              </ScrollReveal>
               <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto mb-8">
                   {[
                       { title: "Sunday Service", time: "Every Sunday, 10:00 AM", category: "Service", icon: <PlayCircle size={24}/>, desc: "Join us for worship and teaching." },
                       { title: "Young Adults", time: "Wednesdays, 7:00 PM", category: "Connect", icon: <Users size={24}/>, desc: "A space for 18-30s to connect." },
                   ].map((evt, i) => (
-                      <div key={i} className="group relative bg-white border border-gray-100 shadow-sm p-6 rounded-[8px] hover:shadow-lg hover:border-gold/30 transition-all duration-300 animate-fade-in-up hover-lift" style={{ animationDelay: `${300 + i * 150}ms` }}>
+                      <ScrollReveal key={i} direction="up" delay={i * 150}>
+                        <div className="group relative bg-white border border-gray-100 shadow-sm p-6 rounded-[8px] hover:shadow-lg hover:border-gold/30 transition-all duration-300 hover-lift">
                           <div className="bg-gold/10 p-4 rounded-full text-charcoal mb-4 w-fit group-hover:bg-gold transition-colors duration-300 group-hover:scale-110 group-hover:rotate-6 icon-bounce">
                               {evt.icon}
                           </div>
@@ -314,16 +330,19 @@ export const Home = () => {
                           </div>
                           <h3 className="text-2xl font-serif font-bold text-charcoal mb-2 group-hover:text-gold transition-colors duration-300">{evt.title}</h3>
                           <p className="text-neutral">{evt.desc}</p>
-                      </div>
+                        </div>
+                      </ScrollReveal>
                   ))}
               </div>
-              <div className="text-center">
-                  <Link to="/events">
-                      <GlowingButton variant="outline" className="group">
-                          View All Events <ArrowRight size={16} className="ml-2 group-hover:translate-x-2 transition-transform"/>
-                      </GlowingButton>
-                  </Link>
-              </div>
+              <ScrollReveal direction="up" delay={300}>
+                <div className="text-center">
+                    <Link to="/events">
+                        <GlowingButton variant="outline" className="group">
+                            View All Events <ArrowRight size={16} className="ml-2 group-hover:translate-x-2 transition-transform"/>
+                        </GlowingButton>
+                    </Link>
+                </div>
+              </ScrollReveal>
           </div>
       </section>
 
@@ -331,8 +350,8 @@ export const Home = () => {
       <section className="py-12 md:py-20 relative z-10 bg-gray-50">
           <div className="container mx-auto px-4">
               <div className="grid md:grid-cols-2 gap-8 items-center max-w-6xl mx-auto">
-                  <div className="animate-fade-in-left delay-200">
-                      <div className="glass-card rounded-[16px] p-8 md:p-12 bg-white/80 hover-lift">
+                  <ScrollReveal direction="right" delay={0}>
+                    <div className="glass-card rounded-[16px] p-8 md:p-12 bg-white/80 hover-lift">
                           <Info className="text-gold mb-6" size={48} />
                           <h2 className="text-4xl md:text-5xl font-serif font-bold text-charcoal mb-6">We're glad you're here</h2>
                           <p className="text-neutral text-lg leading-relaxed mb-6">
@@ -361,21 +380,23 @@ export const Home = () => {
                               </GlowingButton>
                           </Link>
                       </div>
-                  </div>
-                  <div className="animate-fade-in-right delay-400">
-                      <div className="space-y-4">
-                          <h3 className="text-2xl font-serif font-bold text-charcoal mb-6">Frequently Asked Questions</h3>
-                          {[
-                              { q: "What to expect at your 1st Service", a: "We recommend arriving 15 minutes early. You'll be welcomed by our team who will help you find a seat." },
-                              { q: "How long are the Services?", a: "Our services are 90 minutes long, followed by time to connect in our Connect Café." },
-                          ].map((item, i) => (
-                              <div key={i} className="bg-white border border-gray-200 p-6 rounded-[8px] hover:border-gold transition-all duration-300 group shadow-sm hover-lift">
+                  </ScrollReveal>
+                  <ScrollReveal direction="left" delay={200}>
+                    <div className="space-y-4">
+                        <h3 className="text-2xl font-serif font-bold text-charcoal mb-6">Frequently Asked Questions</h3>
+                        {[
+                            { q: "What to expect at your 1st Service", a: "We recommend arriving 15 minutes early. You'll be welcomed by our team who will help you find a seat." },
+                            { q: "How long are the Services?", a: "Our services are 90 minutes long, followed by time to connect in our Connect Café." },
+                        ].map((item, i) => (
+                            <ScrollReveal key={i} direction="up" delay={i * 100}>
+                              <div className="bg-white border border-gray-200 p-6 rounded-[8px] hover:border-gold transition-all duration-300 group shadow-sm hover-lift">
                                   <h4 className="font-serif text-lg text-charcoal font-bold mb-2 group-hover:text-gold transition-colors duration-300">{item.q}</h4>
                                   <p className="text-neutral text-sm">{item.a}</p>
                               </div>
-                          ))}
-                      </div>
-                  </div>
+                            </ScrollReveal>
+                        ))}
+                    </div>
+                  </ScrollReveal>
               </div>
           </div>
       </section>
@@ -383,28 +404,34 @@ export const Home = () => {
       {/* Prayer Preview */}
       <section className="py-12 md:py-20 relative z-10">
           <div className="container mx-auto px-4">
-              <div className="max-w-3xl mx-auto text-center">
-                  <HandHeart className="text-gold mx-auto mb-6 animate-float" size={64} />
-                  <span className="text-gold font-bold tracking-[0.3em] uppercase mb-4 block text-sm">Prayer</span>
-                  <h2 className="text-4xl md:text-5xl font-serif font-bold text-charcoal mb-6">We are here for you</h2>
-                  <p className="text-neutral text-lg leading-relaxed mb-8 max-w-2xl mx-auto">
-                      Your request is handled with confidentiality and care. Whether you need prayer for yourself, a loved one, or a situation, 
-                      our community is ready to stand with you in prayer.
-                  </p>
-                  <div className="glass-card rounded-[16px] p-8 md:p-12 bg-white/80 mb-8 hover-lift">
-                      <p className="text-charcoal text-lg mb-6">
-                          "Bear one another's burdens, and so fulfill the law of Christ." - Galatians 6:2
-                      </p>
-                      <p className="text-neutral">
-                          Share your prayer request with us, and know that you're being lifted up in prayer by our church family.
-                      </p>
-                  </div>
-                  <Link to="/need-prayer">
-                      <GlowingButton size="lg" className="group">
-                          Share a Prayer Request <ArrowRight size={18} className="ml-2 group-hover:translate-x-2 transition-transform"/>
-                      </GlowingButton>
-                  </Link>
-              </div>
+              <ScrollReveal direction="down" delay={0}>
+                <div className="max-w-3xl mx-auto text-center">
+                    <HandHeart className="text-gold mx-auto mb-6 animate-float" size={64} />
+                    <span className="text-gold font-bold tracking-[0.3em] uppercase mb-4 block text-sm">Prayer</span>
+                    <h2 className="text-4xl md:text-5xl font-serif font-bold text-charcoal mb-6">We are here for you</h2>
+                    <p className="text-neutral text-lg leading-relaxed mb-8 max-w-2xl mx-auto">
+                        Your request is handled with confidentiality and care. Whether you need prayer for yourself, a loved one, or a situation, 
+                        our community is ready to stand with you in prayer.
+                    </p>
+                    <ScrollReveal direction="scale" delay={200}>
+                      <div className="glass-card rounded-[16px] p-8 md:p-12 bg-white/80 mb-8 hover-lift">
+                          <p className="text-charcoal text-lg mb-6">
+                              "Bear one another's burdens, and so fulfill the law of Christ." - Galatians 6:2
+                          </p>
+                          <p className="text-neutral">
+                              Share your prayer request with us, and know that you're being lifted up in prayer by our church family.
+                          </p>
+                      </div>
+                    </ScrollReveal>
+                    <ScrollReveal direction="up" delay={400}>
+                      <Link to="/need-prayer">
+                          <GlowingButton size="lg" className="group">
+                              Share a Prayer Request <ArrowRight size={18} className="ml-2 group-hover:translate-x-2 transition-transform"/>
+                          </GlowingButton>
+                      </Link>
+                    </ScrollReveal>
+                </div>
+              </ScrollReveal>
           </div>
       </section>
 
@@ -412,38 +439,56 @@ export const Home = () => {
       <section className="py-12 md:py-20 relative z-10 bg-gray-50">
           <div className="container mx-auto px-4">
               <div className="max-w-4xl mx-auto">
-                  <div className="text-center mb-12">
-                      <Gift className="text-gold mx-auto mb-6 animate-float" size={64} />
-                      <span className="text-gold font-bold tracking-[0.3em] uppercase mb-4 block text-sm">Generosity</span>
-                      <h2 className="text-4xl md:text-5xl font-serif font-bold text-charcoal mb-6">Fuel the Mission</h2>
-                      <p className="text-neutral text-lg leading-relaxed max-w-2xl mx-auto mb-8">
-                          "Each of you should give what you have decided in your heart to give, not reluctantly or under compulsion, for God loves a cheerful giver."
-                      </p>
-                      <p className="text-gold text-sm uppercase tracking-widest font-bold">- 2 Corinthians 9:7</p>
-                  </div>
+                  <ScrollReveal direction="down" delay={0}>
+                    <div className="text-center mb-12">
+                        <Gift className="text-gold mx-auto mb-6 animate-float" size={64} />
+                        <span className="text-gold font-bold tracking-[0.3em] uppercase mb-4 block text-sm">Generosity</span>
+                        <h2 className="text-4xl md:text-5xl font-serif font-bold text-charcoal mb-6">Fuel the Mission</h2>
+                        <p className="text-neutral text-lg leading-relaxed max-w-2xl mx-auto mb-8">
+                            "Each of you should give what you have decided in your heart to give, not reluctantly or under compulsion, for God loves a cheerful giver."
+                        </p>
+                        <p className="text-gold text-sm uppercase tracking-widest font-bold">- 2 Corinthians 9:7</p>
+                    </div>
+                  </ScrollReveal>
                   <div className="grid md:grid-cols-2 gap-8">
-                      <div className="glass-card rounded-[16px] p-8 bg-white/80 text-center hover-lift animate-fade-in-left delay-200">
+                      <ScrollReveal direction="right" delay={0}>
+                        <div className="glass-card rounded-[16px] p-8 bg-white/80 text-center hover-lift">
                           <div className="w-16 h-16 bg-gold/10 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-gold transition-colors duration-300">
                               <Heart className="text-gold group-hover:text-charcoal" size={32} />
                           </div>
                           <h3 className="text-2xl font-serif font-bold text-charcoal mb-4">Direct Deposit</h3>
                           <p className="text-neutral mb-6">Give directly through bank transfer. Simple and secure.</p>
-                      </div>
-                      <div className="glass-card rounded-[16px] p-8 bg-white/80 text-center hover-lift animate-fade-in-right delay-400">
+                          <Link to="/giving">
+                              <GlowingButton variant="outline" size="sm" className="group">
+                                  Learn More <ArrowRight size={14} className="ml-2 group-hover:translate-x-2 transition-transform"/>
+                              </GlowingButton>
+                          </Link>
+                        </div>
+                      </ScrollReveal>
+                      <ScrollReveal direction="left" delay={200}>
+                        <div className="glass-card rounded-[16px] p-8 bg-white/80 text-center hover-lift">
                           <div className="w-16 h-16 bg-gold rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
                               <DollarSign className="text-charcoal" size={32} />
                           </div>
                           <h3 className="text-2xl font-serif font-bold text-charcoal mb-4">Credit Card</h3>
                           <p className="text-neutral mb-6">Secure online giving via Stripe. Set up recurring giving or make a one-time impact.</p>
-                      </div>
+                          <Link to="/giving">
+                              <GlowingButton variant="outline" size="sm" className="group">
+                                  Learn More <ArrowRight size={14} className="ml-2 group-hover:translate-x-2 transition-transform"/>
+                              </GlowingButton>
+                          </Link>
+                        </div>
+                      </ScrollReveal>
                   </div>
-                  <div className="text-center mt-8">
-                      <Link to="/giving">
-                          <GlowingButton variant="outline" size="lg" className="group">
-                              Learn More About Giving <ArrowRight size={18} className="ml-2 group-hover:translate-x-2 transition-transform"/>
-                          </GlowingButton>
-                      </Link>
-                  </div>
+                  <ScrollReveal direction="up" delay={400}>
+                    <div className="text-center mt-8">
+                        <Link to="/giving">
+                            <GlowingButton variant="outline" size="lg" className="group">
+                                Learn More About Giving <ArrowRight size={18} className="ml-2 group-hover:translate-x-2 transition-transform"/>
+                            </GlowingButton>
+                        </Link>
+                    </div>
+                  </ScrollReveal>
               </div>
           </div>
       </section>

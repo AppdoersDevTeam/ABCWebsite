@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { PageHeader } from '../../components/UI/PageHeader';
 import { VibrantCard } from '../../components/UI/VibrantCard';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { Download, ChevronDown, MapPin } from 'lucide-react';
 
 export const ImNew = () => {
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
   return (
     <div className="pb-32">
       <PageHeader title="WELCOME HOME" subtitle="I'm New" />
@@ -58,28 +59,41 @@ export const ImNew = () => {
                     q: "How to Find Us", 
                     a: "Ashburton Baptist Church is located at 284 Havelock Street, Ashburton." 
                 },
-            ].map((item, i) => (
-                <div key={i} className="bg-white border border-gray-200 p-6 rounded-[8px] cursor-pointer hover:border-gold transition-all duration-300 group shadow-sm animate-fade-in-up hover-lift" style={{ animationDelay: `${600 + i * 100}ms` }}>
-                    <div className="flex justify-between items-center">
-                        <h4 className="font-serif text-lg md:text-xl text-charcoal font-bold pr-4 group-hover:text-gold transition-colors duration-300">{item.q}</h4>
-                        <ChevronDown className="text-gold flex-shrink-0 group-hover:rotate-180 transition-transform duration-300" size={20} />
-                    </div>
-                    <p className="text-neutral mt-4 text-sm leading-relaxed group-hover:text-charcoal transition-colors duration-300">{item.a}</p>
-                    {item.q === "How to Find Us" && (
-                        <div className="mt-4">
-                            <a 
-                                href="https://www.google.com/maps/search/?api=1&query=284+Havelock+Street+Ashburton+7700" 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-2 text-gold hover:text-charcoal font-bold transition-colors duration-300 group/link"
-                            >
-                                <MapPin size={18} className="group-hover/link:scale-110 transition-transform" />
-                                View Map & Directions
-                            </a>
+            ].map((item, i) => {
+                const isOpen = openFaq === i;
+                return (
+                    <div key={i} className="bg-white border border-gray-200 rounded-[8px] shadow-sm animate-fade-in-up hover-lift overflow-hidden transition-all duration-300 hover:border-gold" style={{ animationDelay: `${600 + i * 100}ms` }}>
+                        <button
+                            onClick={() => setOpenFaq(isOpen ? null : i)}
+                            className="w-full p-6 flex justify-between items-center text-left cursor-pointer group"
+                        >
+                            <h4 className="font-serif text-lg md:text-xl text-charcoal font-bold pr-4 group-hover:text-gold transition-colors duration-300">{item.q}</h4>
+                            <ChevronDown 
+                                className={`text-gold flex-shrink-0 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} 
+                                size={20} 
+                            />
+                        </button>
+                        <div className={`overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                            <div className="px-6 pb-6">
+                                <p className="text-neutral text-sm leading-relaxed">{item.a}</p>
+                                {item.q === "How to Find Us" && (
+                                    <div className="mt-4">
+                                        <a 
+                                            href="https://www.google.com/maps/search/?api=1&query=284+Havelock+Street+Ashburton+7700" 
+                                            target="_blank" 
+                                            rel="noopener noreferrer"
+                                            className="inline-flex items-center gap-2 text-gold hover:text-charcoal font-bold transition-colors duration-300 group/link"
+                                        >
+                                            <MapPin size={18} className="group-hover/link:scale-110 transition-transform" />
+                                            View Map & Directions
+                                        </a>
+                                    </div>
+                                )}
+                            </div>
                         </div>
-                    )}
-                </div>
-            ))}
+                    </div>
+                );
+            })}
         </div>
       </div>
     </div>

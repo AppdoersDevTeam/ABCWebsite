@@ -11,10 +11,12 @@ export const PublicLayout = () => {
   const [scrolled, setScrolled] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [openMobileSubmenu, setOpenMobileSubmenu] = useState<string | null>(null);
+  const [openFooterSection, setOpenFooterSection] = useState<string | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const dropdownRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+  const dropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -27,12 +29,20 @@ export const PublicLayout = () => {
       if (openDropdown) {
         const dropdown = dropdownRefs.current[openDropdown];
         if (dropdown && !dropdown.contains(event.target as Node)) {
+          if (dropdownTimeoutRef.current) {
+            clearTimeout(dropdownTimeoutRef.current);
+          }
           setOpenDropdown(null);
         }
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      if (dropdownTimeoutRef.current) {
+        clearTimeout(dropdownTimeoutRef.current);
+      }
+    };
   }, [openDropdown]);
 
   // Handle smooth scrolling to hash sections
@@ -173,8 +183,20 @@ export const PublicLayout = () => {
                   key={item.path}
                   className="relative"
                   ref={(el) => (dropdownRefs.current[item.path] = el)}
-                  onMouseEnter={() => item.submenu && item.submenu.length > 0 && setOpenDropdown(item.path)}
-                  onMouseLeave={() => setOpenDropdown(null)}
+                  onMouseEnter={() => {
+                    if (dropdownTimeoutRef.current) {
+                      clearTimeout(dropdownTimeoutRef.current);
+                      dropdownTimeoutRef.current = null;
+                    }
+                    if (item.submenu && item.submenu.length > 0) {
+                      setOpenDropdown(item.path);
+                    }
+                  }}
+                  onMouseLeave={() => {
+                    dropdownTimeoutRef.current = setTimeout(() => {
+                      setOpenDropdown(null);
+                    }, 150);
+                  }}
                 >
                   <Link
                     to={item.path}
@@ -192,23 +214,35 @@ export const PublicLayout = () => {
                   {/* Dropdown Submenu */}
                   {item.submenu && item.submenu.length > 0 && openDropdown === item.path && (
                     <div 
-                      className="absolute top-full left-0 mt-2 w-56 bg-white rounded-[8px] shadow-xl border border-gray-100 py-2 animate-fade-in-up"
-                      onMouseEnter={() => setOpenDropdown(item.path)}
-                      onMouseLeave={() => setOpenDropdown(null)}
+                      className="absolute top-full left-0 pt-2 w-56 animate-fade-in-up"
+                      onMouseEnter={() => {
+                        if (dropdownTimeoutRef.current) {
+                          clearTimeout(dropdownTimeoutRef.current);
+                          dropdownTimeoutRef.current = null;
+                        }
+                        setOpenDropdown(item.path);
+                      }}
+                      onMouseLeave={() => {
+                        dropdownTimeoutRef.current = setTimeout(() => {
+                          setOpenDropdown(null);
+                        }, 150);
+                      }}
                     >
-                      {item.submenu.map((subItem) => (
-                        <a
-                          key={subItem.path}
-                          href={subItem.path}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handleSubmenuClick(subItem.path, subItem.hash);
-                          }}
-                          className="block px-6 py-3 text-sm text-charcoal hover:bg-gold/10 hover:text-gold transition-colors font-medium cursor-pointer"
-                        >
-                          {subItem.label}
-                        </a>
-                      ))}
+                      <div className="bg-white rounded-[8px] shadow-xl border border-gray-100 py-2">
+                        {item.submenu.map((subItem) => (
+                          <a
+                            key={subItem.path}
+                            href={subItem.path}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              handleSubmenuClick(subItem.path, subItem.hash);
+                            }}
+                            className="block px-6 py-3 text-sm text-charcoal hover:bg-gold/10 hover:text-gold transition-colors font-medium cursor-pointer"
+                          >
+                            {subItem.label}
+                          </a>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -348,8 +382,14 @@ export const PublicLayout = () => {
 
             {/* Explore Section */}
             <div>
-              <h4 className="font-bold text-charcoal mb-6 uppercase tracking-widest text-xs">Explore</h4>
-              <ul className="space-y-3">
+              <button
+                onClick={() => setOpenFooterSection(openFooterSection === 'explore' ? null : 'explore')}
+                className="md:pointer-events-none flex items-center justify-between w-full md:w-auto mb-6 uppercase tracking-widest text-xs font-bold text-charcoal"
+              >
+                <span>Explore</span>
+                <ChevronDown size={16} className={`md:hidden transition-transform duration-300 ${openFooterSection === 'explore' ? 'rotate-180' : ''}`} />
+              </button>
+              <ul className={`space-y-3 ${openFooterSection === 'explore' ? 'block' : 'hidden'} md:block`}>
                 <li><Link to="/" className="text-neutral hover:text-gold transition-colors text-sm">Home</Link></li>
                 <li><Link to="/about" className="text-neutral hover:text-gold transition-colors text-sm">About</Link></li>
                 <li><Link to="/about#vision" className="text-neutral hover:text-gold transition-colors text-sm pl-4">Our Vision</Link></li>
@@ -366,8 +406,14 @@ export const PublicLayout = () => {
 
             {/* Resources Section */}
             <div>
-              <h4 className="font-bold text-charcoal mb-6 uppercase tracking-widest text-xs">Resources</h4>
-              <ul className="space-y-3">
+              <button
+                onClick={() => setOpenFooterSection(openFooterSection === 'resources' ? null : 'resources')}
+                className="md:pointer-events-none flex items-center justify-between w-full md:w-auto mb-6 uppercase tracking-widest text-xs font-bold text-charcoal"
+              >
+                <span>Resources</span>
+                <ChevronDown size={16} className={`md:hidden transition-transform duration-300 ${openFooterSection === 'resources' ? 'rotate-180' : ''}`} />
+              </button>
+              <ul className={`space-y-3 ${openFooterSection === 'resources' ? 'block' : 'hidden'} md:block`}>
                 <li><Link to="/im-new#welcome-pack" className="text-neutral hover:text-gold transition-colors text-sm">Welcome Pack</Link></li>
                 <li><Link to="/im-new#faq" className="text-neutral hover:text-gold transition-colors text-sm">FAQ</Link></li>
                 <li><Link to="/giving#direct-deposit" className="text-neutral hover:text-gold transition-colors text-sm">Direct Deposit</Link></li>
@@ -381,16 +427,24 @@ export const PublicLayout = () => {
 
             {/* Contact Section */}
             <div>
-              <h4 className="font-bold text-charcoal mb-6 uppercase tracking-widest text-xs">Get In Touch</h4>
-              <ul className="space-y-3">
-                <li><Link to="/contact#visit" className="text-neutral hover:text-gold transition-colors text-sm">Visit Us</Link></li>
-                <li><Link to="/contact#call" className="text-neutral hover:text-gold transition-colors text-sm">Call Us</Link></li>
-                <li><Link to="/contact#email" className="text-neutral hover:text-gold transition-colors text-sm">Email Us</Link></li>
-                <li><Link to="/contact#message" className="text-neutral hover:text-gold transition-colors text-sm">Send Message</Link></li>
-              </ul>
-              <div className="mt-6 space-y-2">
-                <p className="text-neutral text-sm">Phone: <a href="tel:03-308-5409" className="hover:text-gold transition-colors">03-308 5409</a></p>
-                <p className="text-neutral text-sm">Email: <a href="mailto:office@ashburtonbaptist.co.nz" className="hover:text-gold transition-colors break-all">office@ashburtonbaptist.co.nz</a></p>
+              <button
+                onClick={() => setOpenFooterSection(openFooterSection === 'contact' ? null : 'contact')}
+                className="md:pointer-events-none flex items-center justify-between w-full md:w-auto mb-6 uppercase tracking-widest text-xs font-bold text-charcoal"
+              >
+                <span>Get In Touch</span>
+                <ChevronDown size={16} className={`md:hidden transition-transform duration-300 ${openFooterSection === 'contact' ? 'rotate-180' : ''}`} />
+              </button>
+              <div className={`${openFooterSection === 'contact' ? 'block' : 'hidden'} md:block`}>
+                <ul className="space-y-3">
+                  <li><Link to="/contact#visit" className="text-neutral hover:text-gold transition-colors text-sm">Visit Us</Link></li>
+                  <li><Link to="/contact#call" className="text-neutral hover:text-gold transition-colors text-sm">Call Us</Link></li>
+                  <li><Link to="/contact#email" className="text-neutral hover:text-gold transition-colors text-sm">Email Us</Link></li>
+                  <li><Link to="/contact#message" className="text-neutral hover:text-gold transition-colors text-sm">Send Message</Link></li>
+                </ul>
+                <div className="mt-6 space-y-2">
+                  <p className="text-neutral text-sm">Phone: <a href="tel:03-308-5409" className="hover:text-gold transition-colors">03-308 5409</a></p>
+                  <p className="text-neutral text-sm">Email: <a href="mailto:office@ashburtonbaptist.co.nz" className="hover:text-gold transition-colors break-all">office@ashburtonbaptist.co.nz</a></p>
+                </div>
               </div>
             </div>
           </div>

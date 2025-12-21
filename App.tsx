@@ -9,6 +9,11 @@ import { Home } from './pages/public/Home';
 import { About } from './pages/public/About';
 import { History } from './pages/public/History';
 import { Events } from './pages/public/Events';
+import { Sermons } from './pages/public/events/Sermons';
+import { SundayService } from './pages/public/events/SundayService';
+import { YoungAdults } from './pages/public/events/YoungAdults';
+import { CommunityLunch } from './pages/public/events/CommunityLunch';
+import { KidsProgram } from './pages/public/events/KidsProgram';
 import { ImNew } from './pages/public/ImNew';
 import { Giving } from './pages/public/Giving';
 import { NeedPrayer } from './pages/public/NeedPrayer';
@@ -16,6 +21,12 @@ import { Contact } from './pages/public/Contact';
 import { Login } from './pages/public/Login';
 import { Terms } from './pages/public/Terms';
 import { Privacy } from './pages/public/Privacy';
+
+// Leadership Pages
+import { DavidMiller } from './pages/public/leadership/DavidMiller';
+import { SarahJenkins } from './pages/public/leadership/SarahJenkins';
+import { MichaelChen } from './pages/public/leadership/MichaelChen';
+import { EmilyWhite } from './pages/public/leadership/EmilyWhite';
 
 // Dashboard Pages
 import { DashboardHome } from './pages/dashboard/DashboardHome';
@@ -60,7 +71,16 @@ const AppRoutes = () => {
               <Route index element={<Home />} />
               <Route path="about" element={<About />} />
               <Route path="about/history" element={<History />} />
+              <Route path="about/leadership/david-miller" element={<DavidMiller />} />
+              <Route path="about/leadership/sarah-jenkins" element={<SarahJenkins />} />
+              <Route path="about/leadership/michael-chen" element={<MichaelChen />} />
+              <Route path="about/leadership/emily-white" element={<EmilyWhite />} />
               <Route path="events" element={<Events />} />
+              <Route path="events/sermons" element={<Sermons />} />
+              <Route path="events/sunday-service" element={<SundayService />} />
+              <Route path="events/young-adults" element={<YoungAdults />} />
+              <Route path="events/community-lunch" element={<CommunityLunch />} />
+              <Route path="events/kids-program" element={<KidsProgram />} />
               <Route path="im-new" element={<ImNew />} />
               <Route path="giving" element={<Giving />} />
               <Route path="need-prayer" element={<NeedPrayer />} />
