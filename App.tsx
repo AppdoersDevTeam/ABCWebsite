@@ -3,6 +3,7 @@ import { HashRouter as Router, Routes, Route, Navigate, Outlet } from 'react-rou
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { PublicLayout } from './components/Layouts/PublicLayout';
 import { DashboardLayout } from './components/Layouts/DashboardLayout';
+import { AdminLayout } from './components/Layouts/AdminLayout';
 
 // Public Pages
 import { Home } from './pages/public/Home';
@@ -38,6 +39,15 @@ import { Team } from './pages/dashboard/Team';
 import { EventsPrivate } from './pages/dashboard/EventsPrivate';
 import { Photos } from './pages/dashboard/Photos';
 
+// Admin Pages
+import { AdminOverview } from './pages/admin/AdminOverview';
+import { AdminPrayerWall } from './pages/admin/AdminPrayerWall';
+import { AdminNewsletter } from './pages/admin/AdminNewsletter';
+import { AdminTeam } from './pages/admin/AdminTeam';
+import { AdminEvents } from './pages/admin/AdminEvents';
+import { AdminRoster } from './pages/admin/AdminRoster';
+import { AdminPhotos } from './pages/admin/AdminPhotos';
+
 // Protected Route Component
 const ProtectedRoute = () => {
   const { user, isLoading } = useAuth();
@@ -56,6 +66,38 @@ const ProtectedRoute = () => {
 
   if (!user.is_approved) {
     return <Navigate to="/pending-approval" replace />;
+  }
+
+  // Redirect admins to admin dashboard
+  if (user.role === 'admin') {
+    return <Navigate to="/admin" replace />;
+  }
+
+  return <Outlet />;
+};
+
+// Admin Route Component
+const AdminRoute = () => {
+  const { user, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+        <div className="min-h-screen flex items-center justify-center bg-secondary text-white font-serif">
+            <div className="animate-pulse">Loading...</div>
+        </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (!user.is_approved) {
+    return <Navigate to="/pending-approval" replace />;
+  }
+
+  if (user.role !== 'admin') {
+    return <Navigate to="/dashboard" replace />;
   }
 
   return <Outlet />;
@@ -85,7 +127,7 @@ const AppRoutes = () => {
               <Route path="giving" element={<Giving />} />
               <Route path="need-prayer" element={<NeedPrayer />} />
               <Route path="contact" element={<Contact />} />
-              <Route path="login" element={user ? <Navigate to="/dashboard" /> : <Login />} />
+              <Route path="login" element={user ? (user.role === 'admin' ? <Navigate to="/admin" /> : <Navigate to="/dashboard" />) : <Login />} />
               <Route path="terms" element={<Terms />} />
               <Route path="privacy" element={<Privacy />} />
             </Route>
@@ -103,6 +145,19 @@ const AppRoutes = () => {
                 <Route path="events" element={<EventsPrivate />} />
                 <Route path="roster" element={<Roster />} />
                 <Route path="photos" element={<Photos />} />
+              </Route>
+            </Route>
+
+            {/* Admin Routes */}
+            <Route path="/admin" element={<AdminRoute />}>
+              <Route element={<AdminLayout />}>
+                <Route index element={<AdminOverview />} />
+                <Route path="prayer" element={<AdminPrayerWall />} />
+                <Route path="newsletter" element={<AdminNewsletter />} />
+                <Route path="team" element={<AdminTeam />} />
+                <Route path="events" element={<AdminEvents />} />
+                <Route path="roster" element={<AdminRoster />} />
+                <Route path="photos" element={<AdminPhotos />} />
               </Route>
             </Route>
         </Routes>

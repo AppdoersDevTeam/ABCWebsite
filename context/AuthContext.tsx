@@ -32,13 +32,15 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
     return new Promise<void>((resolve) => {
       setTimeout(() => {
         // Mock logic: emails containing "pending" will be unapproved
+        // Emails containing "admin" will have admin role
         const isApproved = !email.includes('pending');
+        const isAdmin = email.includes('admin');
         setUser({
           id: Math.random().toString(36).substr(2, 9),
           email,
           name: email.split('@')[0],
           is_approved: isApproved,
-          role: 'member'
+          role: isAdmin ? 'admin' : 'member'
         });
         setIsLoading(false);
         resolve();

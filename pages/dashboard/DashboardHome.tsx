@@ -14,7 +14,9 @@ export const DashboardHome = () => {
                 <p className="text-neutral mt-2">Here is what is happening in your community.</p>
              </div>
              <div className="hidden md:block">
-                 <span className="text-xs font-bold text-charcoal bg-gold px-4 py-2 rounded-full border border-gold uppercase tracking-widest shadow-sm">Member Access</span>
+                 <span className="text-xs font-bold text-charcoal bg-gold px-4 py-2 rounded-full border border-gold uppercase tracking-widest shadow-sm">
+                   {user?.role === 'admin' ? 'Admin Access' : 'Member Access'}
+                 </span>
              </div>
         </div>
 
