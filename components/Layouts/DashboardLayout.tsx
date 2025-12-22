@@ -38,7 +38,7 @@ export const DashboardLayout = () => {
   ];
 
   return (
-    <div className="flex min-h-screen bg-base font-sans text-charcoal relative">
+    <div className="flex h-screen bg-base font-sans text-charcoal relative overflow-hidden">
       <ScrollToTop />
       <BackgroundBlobs />
       
@@ -52,7 +52,7 @@ export const DashboardLayout = () => {
 
       {/* Sidebar */}
       <aside className={`
-        fixed lg:static inset-y-0 left-0 z-50 w-72 bg-white/80 backdrop-blur-md border-r border-gray-100 transform transition-transform duration-300 ease-in-out shadow-sm
+        fixed lg:static inset-y-0 left-0 z-50 w-72 bg-white/80 backdrop-blur-md border-r border-gray-100 transform transition-transform duration-300 ease-in-out shadow-sm h-screen
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
         <div className="flex flex-col h-full relative">
@@ -115,9 +115,9 @@ export const DashboardLayout = () => {
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative z-10">
+      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden relative z-10">
         {/* Mobile Header */}
-        <header className="lg:hidden bg-white/80 backdrop-blur-md border-b border-gray-100 flex items-center justify-between px-4 h-16 relative z-20">
+        <header className="lg:hidden bg-white/80 backdrop-blur-md border-b border-gray-100 flex items-center justify-between px-4 h-16 relative z-20 flex-shrink-0">
           <button onClick={() => setIsSidebarOpen(true)} className="text-charcoal p-2">
             <Menu size={24} />
           </button>
@@ -125,7 +125,7 @@ export const DashboardLayout = () => {
           <div className="w-8" />
         </header>
 
-        <main className="flex-1 overflow-y-auto p-4 sm:p-8">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-8 min-h-0">
           <Outlet />
         </main>
       </div>
