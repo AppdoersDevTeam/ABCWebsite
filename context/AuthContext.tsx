@@ -24,43 +24,52 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  // Cache user profile to avoid redundant fetches
+  const userProfileCache = React.useRef<{ userId: string; profile: User; timestamp: number } | null>(null);
+  const CACHE_DURATION = 30000; // 30 seconds cache
 
-  // Fetch user profile from database
-  const fetchUserProfile = async (supabaseUser: SupabaseUser): Promise<User | null> => {
+  // Fetch user profile from database with caching and optimizations
+  const fetchUserProfile = async (supabaseUser: SupabaseUser, useCache: boolean = true): Promise<User | null> => {
     try {
-      console.log('fetchUserProfile - Fetching profile for user ID:', supabaseUser.id, 'email:', supabaseUser.email);
-      
-      // Add timeout wrapper
-      let queryCompleted = false;
-      const timeoutId = setTimeout(() => {
-        if (!queryCompleted) {
-          console.warn('fetchUserProfile - Query is taking longer than expected, may be hanging');
+      // Check cache first
+      if (useCache && userProfileCache.current) {
+        const { userId, profile, timestamp } = userProfileCache.current;
+        if (userId === supabaseUser.id && Date.now() - timestamp < CACHE_DURATION) {
+          console.log('fetchUserProfile - Using cached profile');
+          return profile;
         }
-      }, 5000);
+      }
+
+      console.log('fetchUserProfile - Fetching profile for user ID:', supabaseUser.id);
       
-      const { data, error } = await supabase
+      // Use a shorter timeout (3 seconds instead of 5)
+      const queryPromise = supabase
         .from('users')
         .select('*')
         .eq('id', supabaseUser.id)
         .single();
       
-      queryCompleted = true;
-      clearTimeout(timeoutId);
-      
-      console.log('fetchUserProfile - Query result:', { 
-        hasData: !!data, 
-        error: error?.message || null,
-        errorCode: error?.code || null,
-        errorDetails: error?.details || null,
-        errorHint: error?.hint || null,
-        userData: data ? {
-          id: data.id,
-          email: data.email,
-          name: data.name,
-          is_approved: (data as any).is_approved,
-          role: (data as any).role
-        } : null
+      const timeoutPromise = new Promise<null>((resolve) => {
+        setTimeout(() => resolve(null), 3000);
       });
+      
+      const result = await Promise.race([queryPromise, timeoutPromise]);
+      
+      if (!result) {
+        console.warn('fetchUserProfile - Query timed out, using fallback');
+        const isAdminEmail = supabaseUser.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+        const fallbackUser: User = {
+          id: supabaseUser.id,
+          email: supabaseUser.email || '',
+          phone: supabaseUser.phone || undefined,
+          name: supabaseUser.user_metadata?.full_name || supabaseUser.email?.split('@')[0] || 'User',
+          is_approved: isAdminEmail,
+          role: isAdminEmail ? 'admin' : 'member',
+        };
+        return fallbackUser;
+      }
+
+      const { data, error } = result as any;
 
       if (error) {
         // If user doesn't exist in users table, create one
@@ -72,107 +81,95 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
             email: supabaseUser.email || '',
             phone: supabaseUser.phone || undefined,
             name: supabaseUser.user_metadata?.full_name || supabaseUser.email?.split('@')[0] || 'User',
-            is_approved: isAdminEmail, // Admin email is auto-approved
+            is_approved: isAdminEmail,
             role: isAdminEmail ? 'admin' : 'member',
           };
 
-          // Insert new user into database
-          const { data: insertedUser, error: insertError } = await supabase
+          // Insert new user into database (don't await - do it in background)
+          supabase
             .from('users')
             .insert([newUser])
             .select()
-            .single();
-
-          if (insertError) {
-            console.error('Error creating user profile:', insertError);
-            console.error('Insert error details:', {
-              code: insertError.code,
-              message: insertError.message,
-              details: insertError.details,
-              hint: insertError.hint
+            .single()
+            .then(({ data: insertedUser }) => {
+              if (insertedUser) {
+                userProfileCache.current = { userId: supabaseUser.id, profile: insertedUser, timestamp: Date.now() };
+              }
+            })
+            .catch((insertError) => {
+              console.error('Error creating user profile:', insertError);
             });
-            // Don't return null - try to return the user we tried to create
-            // This allows login to proceed even if insert fails (user might exist from trigger)
-            console.warn('Returning fallback user profile - may need manual fix');
-            return newUser;
-          }
 
-          console.log('User profile created successfully:', insertedUser);
-          return insertedUser || newUser;
+          // Cache and return immediately
+          userProfileCache.current = { userId: supabaseUser.id, profile: newUser, timestamp: Date.now() };
+          return newUser;
         }
-        console.error('Error fetching user profile:', error);
-        console.error('Error details:', {
-          code: error.code,
-          message: error.message,
-          details: error.details,
-          hint: error.hint
-        });
         
-        // If query failed but we have a session, create a fallback user profile
-        // This allows the app to continue functioning even if the database query fails
+        // Create fallback user profile
         const isAdminEmail = supabaseUser.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
-        console.warn('fetchUserProfile - Creating fallback user profile due to query error');
         const fallbackUser: User = {
           id: supabaseUser.id,
           email: supabaseUser.email || '',
           phone: supabaseUser.phone || undefined,
           name: supabaseUser.user_metadata?.full_name || supabaseUser.email?.split('@')[0] || 'User',
-          is_approved: isAdminEmail, // Admin email is auto-approved
+          is_approved: isAdminEmail,
           role: isAdminEmail ? 'admin' : 'member',
         };
+        userProfileCache.current = { userId: supabaseUser.id, profile: fallbackUser, timestamp: Date.now() };
         return fallbackUser;
       }
 
-      // Check if user is the admin email and update if needed
       const userData = data as User;
-      console.log('fetchUserProfile - User data retrieved:', {
-        id: userData.id,
-        email: userData.email,
-        name: userData.name,
-        is_approved: userData.is_approved,
-        role: userData.role
-      });
-      
       const isAdminEmail = userData.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
       
-      // Ensure timezone is set if missing
+      // Do timezone and admin updates asynchronously (don't block)
       const currentTimezone = getUserTimezone();
-      if (!userData.user_timezone) {
-        const { error: timezoneError } = await supabase
-          .from('users')
-          .update({ user_timezone: currentTimezone })
-          .eq('id', supabaseUser.id);
-        
-        if (!timezoneError) {
+      const needsTimezoneUpdate = !userData.user_timezone;
+      const needsAdminUpdate = isAdminEmail && (userData.role !== 'admin' || !userData.is_approved);
+      
+      if (needsTimezoneUpdate || needsAdminUpdate) {
+        // Update in background - don't wait for it
+        const updateData: any = {};
+        if (needsTimezoneUpdate) {
+          updateData.user_timezone = currentTimezone;
           userData.user_timezone = currentTimezone;
         }
-      }
-      
-      // If this is the admin email, ensure they have admin role and are approved
-      if (isAdminEmail && (userData.role !== 'admin' || !userData.is_approved)) {
-        const { error: updateError } = await supabase
-          .from('users')
-          .update({ role: 'admin', is_approved: true })
-          .eq('id', supabaseUser.id);
-
-        if (updateError) {
-          console.error('Error updating admin user:', updateError);
-        } else {
-          console.log('fetchUserProfile - Admin user updated, returning approved admin profile');
-          return { ...userData, role: 'admin' as const, is_approved: true };
+        if (needsAdminUpdate) {
+          updateData.role = 'admin';
+          updateData.is_approved = true;
+          userData.role = 'admin';
+          userData.is_approved = true;
         }
+        
+        supabase
+          .from('users')
+          .update(updateData)
+          .eq('id', supabaseUser.id)
+          .then(() => {
+            // Update cache after successful update
+            userProfileCache.current = { userId: supabaseUser.id, profile: userData, timestamp: Date.now() };
+          })
+          .catch((updateError) => {
+            console.error('Error updating user:', updateError);
+          });
       }
 
-      console.log('fetchUserProfile - Returning user profile:', {
-        id: userData.id,
-        email: userData.email,
-        is_approved: userData.is_approved,
-        role: userData.role
-      });
-      return data as User;
+      // Cache the profile
+      userProfileCache.current = { userId: supabaseUser.id, profile: userData, timestamp: Date.now() };
+      return userData;
     } catch (error) {
       console.error('Error in fetchUserProfile:', error);
-      return null;
+      // Return fallback on error
+      const isAdminEmail = supabaseUser.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+      const fallbackUser: User = {
+        id: supabaseUser.id,
+        email: supabaseUser.email || '',
+        phone: supabaseUser.phone || undefined,
+        name: supabaseUser.user_metadata?.full_name || supabaseUser.email?.split('@')[0] || 'User',
+        is_approved: isAdminEmail,
+        role: isAdminEmail ? 'admin' : 'member',
+      };
+      return fallbackUser;
     }
   };
 
@@ -205,26 +202,10 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
           // Keep loading true while fetching profile
           setIsLoading(true);
           
-          // Wrap fetchUserProfile in a timeout to prevent hanging
+          // Fetch profile (with cache enabled for faster loading)
           let userProfile: User | null = null;
           try {
-            const fetchPromise = fetchUserProfile(session.user);
-            const timeoutPromise = new Promise<User | null>((resolve) => {
-              setTimeout(() => {
-                console.warn('AuthContext - Profile fetch timed out in initAuth, using fallback user');
-                const isAdminEmail = session.user.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
-                resolve({
-                  id: session.user.id,
-                  email: session.user.email || '',
-                  phone: session.user.phone || undefined,
-                  name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'User',
-                  is_approved: isAdminEmail,
-                  role: isAdminEmail ? 'admin' : 'member',
-                });
-              }, 8000); // 8 second timeout
-            });
-            
-            userProfile = await Promise.race([fetchPromise, timeoutPromise]);
+            userProfile = await fetchUserProfile(session.user, true);
           } catch (error) {
             console.error('AuthContext - Error in profile fetch in initAuth, using fallback:', error);
             const isAdminEmail = session.user.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
@@ -298,14 +279,14 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
       // Don't set loading to false here - wait for INITIAL_SESSION event
     };
 
-    // Add timeout to prevent infinite loading (increased to 20 seconds to allow for slow profile fetches)
+    // Add timeout to prevent infinite loading (reduced to 5 seconds for faster UX)
     timeoutId = setTimeout(() => {
       if (isMounted && !initialSessionReceived) {
         console.warn('AuthContext - Auth initialization timeout, forcing isLoading to false');
         initialSessionReceived = true;
         setIsLoading(false);
       }
-    }, 20000); // Increased timeout to 20 seconds to allow for slow profile fetches
+    }, 5000); // Reduced timeout to 5 seconds
 
     initAuth().then(() => {
       // Don't clear timeout here - wait for INITIAL_SESSION event
@@ -343,26 +324,10 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
           // Keep loading true while fetching profile
           setIsLoading(true);
           
-          // Wrap fetchUserProfile in a timeout to prevent hanging
+          // Fetch profile (with cache enabled)
           let userProfile: User | null = null;
           try {
-            const fetchPromise = fetchUserProfile(session.user);
-            const timeoutPromise = new Promise<User | null>((resolve) => {
-              setTimeout(() => {
-                console.warn('AuthContext - Profile fetch timed out during INITIAL_SESSION, using fallback user');
-                const isAdminEmail = session.user.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
-                resolve({
-                  id: session.user.id,
-                  email: session.user.email || '',
-                  phone: session.user.phone || undefined,
-                  name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'User',
-                  is_approved: isAdminEmail,
-                  role: isAdminEmail ? 'admin' : 'member',
-                });
-              }, 8000); // 8 second timeout
-            });
-            
-            userProfile = await Promise.race([fetchPromise, timeoutPromise]);
+            userProfile = await fetchUserProfile(session.user, true);
           } catch (error) {
             console.error('AuthContext - Error in profile fetch during INITIAL_SESSION, using fallback:', error);
             const isAdminEmail = session.user.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
@@ -400,26 +365,10 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
         // Keep loading true while fetching profile
         setIsLoading(true);
         
-        // Wrap fetchUserProfile in a timeout to prevent hanging
+        // Fetch profile (with cache enabled)
         let userProfile: User | null = null;
         try {
-          const fetchPromise = fetchUserProfile(session.user);
-          const timeoutPromise = new Promise<User | null>((resolve) => {
-            setTimeout(() => {
-              console.warn('AuthContext - Profile fetch timed out, using fallback user');
-              const isAdminEmail = session.user.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
-              resolve({
-                id: session.user.id,
-                email: session.user.email || '',
-                phone: session.user.phone || undefined,
-                name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'User',
-                is_approved: isAdminEmail,
-                role: isAdminEmail ? 'admin' : 'member',
-              });
-            }, 8000); // 8 second timeout
-          });
-          
-          userProfile = await Promise.race([fetchPromise, timeoutPromise]);
+          userProfile = await fetchUserProfile(session.user, true);
         } catch (error) {
           console.error('AuthContext - Error in profile fetch, using fallback:', error);
           const isAdminEmail = session.user.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
@@ -515,28 +464,15 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
       if (error) throw error;
 
       if (data.user) {
-        console.log('Login successful, fetching user profile for:', data.user.email);
-        const userProfile = await fetchUserProfile(data.user);
-        console.log('Fetched user profile:', userProfile);
+        // Clear cache to force fresh fetch on login
+        userProfileCache.current = null;
+        // Single profile fetch (no redundant calls)
+        const userProfile = await fetchUserProfile(data.user, false);
         
         if (!userProfile) {
-          console.error('User profile is null - this should not happen');
-          // Try to create it one more time
-          const retryProfile = await fetchUserProfile(data.user);
-          if (!retryProfile) {
-            throw new Error('Failed to fetch or create user profile. Please contact support.');
-          }
-          setUser(retryProfile);
-        } else {
-          setUser(userProfile);
-          // Refresh profile one more time to ensure we have the absolute latest data
-          // This is important if user was just approved
-          console.log('Login - Refreshing profile one more time to ensure latest approval status');
-          const refreshedProfile = await fetchUserProfile(data.user);
-          if (refreshedProfile) {
-            setUser(refreshedProfile);
-          }
+          throw new Error('Failed to fetch or create user profile. Please contact support.');
         }
+        setUser(userProfile);
       }
     } catch (error) {
       console.error('Login error:', error);
@@ -715,16 +651,15 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
-        console.log('refreshUserProfile - Refreshing profile for user:', session.user.id);
-        const userProfile = await fetchUserProfile(session.user);
+        // Clear cache to force fresh fetch
+        userProfileCache.current = null;
+        const userProfile = await fetchUserProfile(session.user, false);
         if (userProfile) {
-          console.log('refreshUserProfile - Profile refreshed:', userProfile);
           setUser(userProfile);
         } else {
           console.warn('refreshUserProfile - Failed to fetch profile');
         }
       } else {
-        console.log('refreshUserProfile - No session found');
         setUser(null);
       }
     } catch (error) {

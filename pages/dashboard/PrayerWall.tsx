@@ -21,43 +21,50 @@ export const PrayerWall = () => {
   const [fallingHearts, setFallingHearts] = useState<Array<{ id: number; left: number; delay: number }>>([]);
 
   useEffect(() => {
-    fetchPrayerRequests();
-    if (user) {
-      fetchUserPrayerCounts();
-    }
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        // Parallelize queries for faster loading
+        const queries = [
+          supabase
+            .from('prayer_requests')
+            .select('*')
+            .eq('is_confidential', false)
+            .order('created_at', { ascending: false })
+        ];
+
+        // Only fetch prayer counts if user exists
+        if (user) {
+          queries.push(
+            supabase
+              .from('prayer_counts')
+              .select('prayer_request_id')
+              .eq('user_id', user.id)
+          );
+        }
+
+        const results = await Promise.allSettled(queries);
+
+        // Process prayer requests
+        if (results[0].status === 'fulfilled' && !results[0].value.error) {
+          setRequests(results[0].value.data || []);
+        } else {
+          console.error('Error fetching prayer requests:', results[0].status === 'rejected' ? results[0].reason : results[0].value.error);
+        }
+
+        // Process prayer counts if user exists
+        if (user && results[1] && results[1].status === 'fulfilled' && !results[1].value.error) {
+          setPrayingFor(new Set(results[1].value.data?.map((p: any) => p.prayer_request_id) || []));
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
   }, [user]);
-
-  const fetchPrayerRequests = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('prayer_requests')
-        .select('*')
-        .eq('is_confidential', false) // Only show non-confidential requests
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setRequests(data || []);
-    } catch (error) {
-      console.error('Error fetching prayer requests:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const fetchUserPrayerCounts = async () => {
-    if (!user) return;
-    try {
-      const { data, error } = await supabase
-        .from('prayer_counts')
-        .select('prayer_request_id')
-        .eq('user_id', user.id);
-
-      if (error) throw error;
-      setPrayingFor(new Set(data?.map(p => p.prayer_request_id) || []));
-    } catch (error) {
-      console.error('Error fetching prayer counts:', error);
-    }
-  };
 
   const handleSubmitRequest = async () => {
     if (!formData.content || (!formData.isAnonymous && !formData.name)) {

@@ -19,83 +19,71 @@ export const DashboardHome = () => {
   const fetchStats = async () => {
     setIsLoadingStats(true);
     try {
-      // Fetch prayer requests from last 24 hours (only non-deleted requests)
+      const today = new Date();
       const twentyFourHoursAgo = new Date();
       twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
       
-      // Count only requests that still exist (not deleted)
-      const { data: prayerRequests, error: prayerError } = await supabase
-        .from('prayer_requests')
-        .select('id')
-        .eq('is_confidential', false) // Only non-confidential for regular users
-        .gte('created_at', twentyFourHoursAgo.toISOString());
+      // Parallelize all queries for faster loading
+      const [prayerResult, eventsResult, newsletterResult] = await Promise.allSettled([
+        // Prayer requests query
+        supabase
+          .from('prayer_requests')
+          .select('id')
+          .eq('is_confidential', false)
+          .gte('created_at', twentyFourHoursAgo.toISOString()),
+        
+        // Events query
+        supabase
+          .from('events')
+          .select('*')
+          .or('category.ilike.%Service%,title.ilike.%Sunday%')
+          .gte('date', today.toISOString().split('T')[0])
+          .order('date', { ascending: true })
+          .limit(1),
+        
+        // Newsletter query
+        supabase
+          .from('newsletters')
+          .select('created_at, month, year')
+          .order('created_at', { ascending: false })
+          .limit(1)
+      ]);
 
-      if (prayerError) {
-        console.error('Error fetching prayer requests:', prayerError);
-        setPrayerRequests24h(0);
+      // Process prayer requests
+      if (prayerResult.status === 'fulfilled' && !prayerResult.value.error) {
+        setPrayerRequests24h(prayerResult.value.data?.length || 0);
       } else {
-        // Count only existing (non-deleted) requests
-        setPrayerRequests24h(prayerRequests?.length || 0);
+        setPrayerRequests24h(0);
       }
 
-      // Calculate next Sunday service (Sunday at 10AM)
-      const today = new Date();
-      const currentDay = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
-      
-      // Calculate days until next Sunday
+      // Process next service
+      const currentDay = today.getDay();
       let daysUntilSunday;
       if (currentDay === 0) {
-        // If today is Sunday, check if it's before 10 AM
         const currentHour = today.getHours();
-        if (currentHour < 10) {
-          // Today's service hasn't happened yet
-          daysUntilSunday = 0;
-        } else {
-          // Today's service already happened, get next Sunday
-          daysUntilSunday = 7;
-        }
+        daysUntilSunday = currentHour < 10 ? 0 : 7;
       } else {
-        // Get next Sunday
         daysUntilSunday = 7 - currentDay;
       }
       
       const nextSunday = new Date(today);
       nextSunday.setDate(today.getDate() + daysUntilSunday);
-      nextSunday.setHours(10, 0, 0, 0); // 10 AM
-      
-      // Check if there's a Sunday Service event in the events table
-      const { data: events, error: eventsError } = await supabase
-        .from('events')
-        .select('*')
-        .or('category.ilike.%Service%,title.ilike.%Sunday%')
-        .gte('date', today.toISOString().split('T')[0])
-        .order('date', { ascending: true })
-        .limit(1);
+      nextSunday.setHours(10, 0, 0, 0);
 
-      if (!eventsError && events && events.length > 0) {
-        // Use the event date if found
-        const eventDate = new Date(`${events[0].date}T${events[0].time}`);
+      if (eventsResult.status === 'fulfilled' && !eventsResult.value.error && eventsResult.value.data && eventsResult.value.data.length > 0) {
+        const eventDate = new Date(`${eventsResult.value.data[0].date}T${eventsResult.value.data[0].time}`);
         setNextService(eventDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' }));
       } else {
-        // Fallback to calculated next Sunday
         setNextService(nextSunday.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' }));
       }
 
-      // Fetch last newsletter date
-      const { data: newsletters, error: newsletterError } = await supabase
-        .from('newsletters')
-        .select('created_at, month, year')
-        .order('created_at', { ascending: false })
-        .limit(1);
-
-      if (newsletterError) {
-        console.error('Error fetching newsletters:', newsletterError);
-      } else if (newsletters && newsletters.length > 0) {
-        const lastNewsletter = new Date(newsletters[0].created_at);
-        // Use month and year from newsletter if available, otherwise use created_at
-        if (newsletters[0].month && newsletters[0].year) {
-          setLastNewsletterDate(`${newsletters[0].month} ${newsletters[0].year}`);
+      // Process newsletter
+      if (newsletterResult.status === 'fulfilled' && !newsletterResult.value.error && newsletterResult.value.data && newsletterResult.value.data.length > 0) {
+        const newsletter = newsletterResult.value.data[0];
+        if (newsletter.month && newsletter.year) {
+          setLastNewsletterDate(`${newsletter.month} ${newsletter.year}`);
         } else {
+          const lastNewsletter = new Date(newsletter.created_at);
           setLastNewsletterDate(lastNewsletter.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }));
         }
       }

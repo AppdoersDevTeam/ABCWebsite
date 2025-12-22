@@ -27,25 +27,37 @@ export const PendingApproval = () => {
     }
   }, [user]);
 
-  // Periodically check if user has been approved
+  // Periodically check if user has been approved (with exponential backoff)
   useEffect(() => {
     if (!user || isRevoked) return;
+
+    let checkCount = 0;
+    let timeoutId: NodeJS.Timeout | null = null;
 
     const checkApproval = async () => {
       try {
         await refreshUserProfile();
+        checkCount++;
+        
+        // Exponential backoff: 10s, 20s, 30s, then 30s intervals
+        const delay = checkCount <= 1 ? 10000 : checkCount <= 2 ? 20000 : 30000;
+        
+        if (timeoutId) clearTimeout(timeoutId);
+        timeoutId = setTimeout(checkApproval, delay);
       } catch (error) {
         console.error('Error checking approval status:', error);
+        // On error, retry after 30 seconds
+        if (timeoutId) clearTimeout(timeoutId);
+        timeoutId = setTimeout(checkApproval, 30000);
       }
     };
 
-    // Check immediately
+    // Check immediately, then use exponential backoff
     checkApproval();
 
-    // Then check every 5 seconds
-    const intervalId = setInterval(checkApproval, 5000);
-
-    return () => clearInterval(intervalId);
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, [user, isRevoked, refreshUserProfile]);
 
   // Redirect if user becomes approved
