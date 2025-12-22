@@ -8,6 +8,7 @@ export interface User {
   is_approved: boolean;
   role: 'member' | 'admin';
   created_at?: string;
+  user_timezone?: string;
 }
 
 export interface NavItem {
@@ -51,6 +52,7 @@ export interface PrayerRequest {
   prayer_count: number;
   created_at: string;
   updated_at?: string;
+  user_timezone?: string;
 }
 
 export interface PrayerCount {

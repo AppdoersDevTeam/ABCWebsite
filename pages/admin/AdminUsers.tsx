@@ -5,6 +5,7 @@ import { supabase } from '../../lib/supabase';
 import { User } from '../../types';
 import { CreateUserProfile } from './CreateUserProfile';
 import { SkeletonPageHeader, SkeletonStatsCard, SkeletonUserCard } from '../../components/UI/Skeleton';
+import { formatRelativeDateInTimezone } from '../../lib/dateUtils';
 
 export const AdminUsers = () => {
   const { user } = useAuth();
@@ -123,26 +124,9 @@ export const AdminUsers = () => {
   };
 
 
-  const formatDate = (dateString: string | undefined) => {
-    if (!dateString) return 'Unknown';
-    
-    try {
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) return 'Invalid date';
-      
-      const now = new Date();
-      const diffTime = Math.abs(now.getTime() - date.getTime());
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-      if (diffDays === 0) return 'Today';
-      if (diffDays === 1) return '1 day ago';
-      if (diffDays < 7) return `${diffDays} days ago`;
-      if (diffDays < 30) return `${Math.floor(diffDays / 7)} week${Math.floor(diffDays / 7) > 1 ? 's' : ''} ago`;
-      return date.toLocaleDateString();
-    } catch (error) {
-      console.error('Error formatting date:', error);
-      return 'Unknown';
-    }
+  const formatDate = (dateString: string | undefined, userTimezone?: string) => {
+    // For admin views, display dates in the admin's current timezone
+    return formatRelativeDateInTimezone(dateString, userTimezone);
   };
 
   const filteredUsers = () => {
@@ -308,7 +292,7 @@ export const AdminUsers = () => {
                         )}
                         {u.created_at && (
                           <p className="text-xs text-neutral flex items-center gap-2 mt-2">
-                            <span className="font-bold">Joined:</span> {formatDate(u.created_at)}
+                            <span className="font-bold">Joined:</span> {formatDate(u.created_at, u.user_timezone)}
                           </p>
                         )}
                       </div>

@@ -6,6 +6,7 @@ import { Heart, Edit, Trash2, Plus } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { PrayerRequest } from '../../types';
 import { SkeletonPageHeader, SkeletonPrayerCard } from '../../components/UI/Skeleton';
+import { getUserTimezone, formatRelativeDateInTimezone } from '../../lib/dateUtils';
 
 export const AdminPrayerWall = () => {
   const [requests, setRequests] = useState<PrayerRequest[]>([]);
@@ -42,6 +43,7 @@ export const AdminPrayerWall = () => {
     }
 
     try {
+      const userTimezone = getUserTimezone();
       const { data, error } = await supabase
         .from('prayer_requests')
         .insert([
@@ -51,6 +53,7 @@ export const AdminPrayerWall = () => {
             is_anonymous: formData.isAnonymous,
             is_confidential: formData.isConfidential,
             prayer_count: 0,
+            user_timezone: userTimezone,
           },
         ])
         .select()
@@ -140,16 +143,9 @@ export const AdminPrayerWall = () => {
     }
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffTime = Math.abs(now.getTime() - date.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-    if (diffDays === 1) return '1 day ago';
-    if (diffDays < 7) return `${diffDays} days ago`;
-    if (diffDays < 30) return `${Math.floor(diffDays / 7)} week${Math.floor(diffDays / 7) > 1 ? 's' : ''} ago`;
-    return date.toLocaleDateString();
+  const formatDate = (dateString: string, originalTimezone?: string) => {
+    // For admin views, display dates in the admin's current timezone
+    return formatRelativeDateInTimezone(dateString, originalTimezone);
   };
 
   if (isLoading) {
@@ -202,7 +198,7 @@ export const AdminPrayerWall = () => {
                       )}
                     </div>
                     <span className="text-xs text-neutral uppercase tracking-widest">
-                      {formatDate(req.created_at)}
+                      {formatDate(req.created_at, req.user_timezone)}
                     </span>
                   </div>
                 </div>

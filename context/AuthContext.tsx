@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, PropsWithChildre
 import { User } from '../types';
 import { supabase } from '../lib/supabase';
 import { ADMIN_EMAIL } from '../lib/constants';
+import { getUserTimezone } from '../lib/dateUtils';
 import type { AuthError, Session, User as SupabaseUser } from '@supabase/supabase-js';
 
 interface AuthContextType {
@@ -133,6 +134,19 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
       });
       
       const isAdminEmail = userData.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+      
+      // Ensure timezone is set if missing
+      const currentTimezone = getUserTimezone();
+      if (!userData.user_timezone) {
+        const { error: timezoneError } = await supabase
+          .from('users')
+          .update({ user_timezone: currentTimezone })
+          .eq('id', supabaseUser.id);
+        
+        if (!timezoneError) {
+          userData.user_timezone = currentTimezone;
+        }
+      }
       
       // If this is the admin email, ensure they have admin role and are approved
       if (isAdminEmail && (userData.role !== 'admin' || !userData.is_approved)) {
@@ -464,6 +478,15 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
         if (session?.user) {
           const userProfile = await fetchUserProfile(session.user);
           if (userProfile) {
+            // Ensure timezone is set for OAuth users
+            const userTimezone = getUserTimezone();
+            if (!userProfile.user_timezone) {
+              await supabase
+                .from('users')
+                .update({ user_timezone: userTimezone })
+                .eq('id', session.user.id);
+              userProfile.user_timezone = userTimezone;
+            }
             setUser(userProfile);
           }
         }
@@ -562,6 +585,7 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
   const signUpWithEmail = async (email: string, password: string, name: string, phone?: string) => {
     setIsLoading(true);
     try {
+      const userTimezone = getUserTimezone();
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -569,6 +593,7 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
           data: {
             full_name: name,
             phone: phone || null,
+            timezone: userTimezone,
           },
         },
       });
@@ -578,6 +603,14 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
       if (data.user) {
         // User profile will be created in fetchUserProfile
         const userProfile = await fetchUserProfile(data.user);
+        // Ensure timezone is set in the user profile
+        if (userProfile && !userProfile.user_timezone) {
+          await supabase
+            .from('users')
+            .update({ user_timezone: userTimezone })
+            .eq('id', data.user.id);
+          userProfile.user_timezone = userTimezone;
+        }
         setUser(userProfile);
       }
     } catch (error) {
@@ -591,6 +624,7 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
   const signUpWithPhone = async (phone: string, password: string, name: string, email?: string) => {
     setIsLoading(true);
     try {
+      const userTimezone = getUserTimezone();
       const { data, error } = await supabase.auth.signUp({
         phone,
         password,
@@ -598,6 +632,7 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
           data: {
             full_name: name,
             email: email || null,
+            timezone: userTimezone,
           },
         },
       });
@@ -606,6 +641,14 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
 
       if (data.user) {
         const userProfile = await fetchUserProfile(data.user);
+        // Ensure timezone is set in the user profile
+        if (userProfile && !userProfile.user_timezone) {
+          await supabase
+            .from('users')
+            .update({ user_timezone: userTimezone })
+            .eq('id', data.user.id);
+          userProfile.user_timezone = userTimezone;
+        }
         setUser(userProfile);
       }
     } catch (error) {

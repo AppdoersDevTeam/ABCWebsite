@@ -26,6 +26,7 @@ DECLARE
   user_name TEXT;
   user_email TEXT;
   user_phone TEXT;
+  user_timezone TEXT;
 BEGIN
   -- Extract email
   user_email := NEW.email;
@@ -40,15 +41,19 @@ BEGIN
     'User'
   );
   
+  -- Extract timezone from metadata (if provided during signup)
+  user_timezone := NEW.raw_user_meta_data->>'timezone';
+  
   -- Insert into public.users table
-  INSERT INTO public.users (id, email, phone, name, is_approved, role)
+  INSERT INTO public.users (id, email, phone, name, is_approved, role, user_timezone)
   VALUES (
     NEW.id,
     user_email,
     user_phone,
     user_name,
     is_admin, -- true for admin email, false for others
-    CASE WHEN is_admin THEN 'admin' ELSE 'member' END
+    CASE WHEN is_admin THEN 'admin' ELSE 'member' END,
+    user_timezone -- Store timezone if available
   )
   ON CONFLICT (id) DO NOTHING; -- Prevent errors if user already exists
   

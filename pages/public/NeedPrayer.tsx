@@ -3,6 +3,7 @@ import { PageHeader } from '../../components/UI/PageHeader';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
+import { getUserTimezone } from '../../lib/dateUtils';
 
 export const NeedPrayer = () => {
   const { user } = useAuth();
@@ -28,6 +29,7 @@ export const NeedPrayer = () => {
     }
 
     try {
+      const userTimezone = getUserTimezone();
       const { error: submitError } = await supabase.from('prayer_requests').insert([
         {
           user_id: user?.id,
@@ -36,6 +38,7 @@ export const NeedPrayer = () => {
           is_anonymous: formData.isAnonymous || !formData.name,
           is_confidential: formData.isConfidential,
           prayer_count: 0,
+          user_timezone: userTimezone,
         },
       ]);
 

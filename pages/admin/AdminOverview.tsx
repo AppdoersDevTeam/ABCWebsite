@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { User } from '../../types';
 import { SkeletonPageHeader, SkeletonCard, SkeletonUserCard, SkeletonStatsCard } from '../../components/UI/Skeleton';
+import { formatRelativeDateInTimezone, formatFullDateTimeInTimezone } from '../../lib/dateUtils';
 
 export const AdminOverview = () => {
   const { user } = useAuth();
@@ -215,26 +216,9 @@ export const AdminOverview = () => {
     }
   };
 
-  const formatDate = (dateString: string | undefined) => {
-    if (!dateString) return 'Unknown';
-    
-    try {
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) return 'Invalid date';
-      
-      const now = new Date();
-      const diffTime = Math.abs(now.getTime() - date.getTime());
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-      if (diffDays === 0) return 'Today';
-      if (diffDays === 1) return '1 day ago';
-      if (diffDays < 7) return `${diffDays} days ago`;
-      if (diffDays < 30) return `${Math.floor(diffDays / 7)} week${Math.floor(diffDays / 7) > 1 ? 's' : ''} ago`;
-      return date.toLocaleDateString();
-    } catch (error) {
-      console.error('Error formatting date:', error);
-      return 'Unknown';
-    }
+  const formatDate = (dateString: string | undefined, userTimezone?: string) => {
+    // For admin views, display dates in the admin's current timezone
+    return formatRelativeDateInTimezone(dateString, userTimezone);
   };
 
   const stats = useMemo(() => [
@@ -466,8 +450,8 @@ export const AdminOverview = () => {
                             </p>
                           )}
                           {pendingUser.created_at && (
-                            <p className="text-xs text-neutral flex items-center gap-2 mt-2">
-                              <span className="font-bold">Signed up:</span> {formatDate(pendingUser.created_at)}
+                              <p className="text-xs text-neutral flex items-center gap-2 mt-2">
+                              <span className="font-bold">Signed up:</span> {formatDate(pendingUser.created_at, pendingUser.user_timezone)}
                             </p>
                           )}
                         </div>
@@ -511,7 +495,7 @@ export const AdminOverview = () => {
                       <p className="font-bold text-charcoal">{u.name} ({u.email})</p>
                       <p className="text-neutral">
                         Role: {u.role} | Approved: {u.is_approved ? 'Yes' : 'No'} | 
-                        Created: {u.created_at ? new Date(u.created_at).toLocaleString() : 'Unknown'}
+                        Created: {u.created_at ? formatFullDateTimeInTimezone(u.created_at, u.user_timezone) : 'Unknown'}
                       </p>
                     </div>
                     {!u.is_approved && (
