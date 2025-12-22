@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { Mail, Phone } from 'lucide-react';
+import { supabase } from '../../lib/supabase';
 
 export const Login = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -13,12 +14,16 @@ export const Login = () => {
   const [name, setName] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
   const { loginWithEmail, loginWithPhone, signUpWithEmail, signUpWithPhone, signInWithGoogle, isLoading, user, refreshUserProfile } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user) {
-      console.log('Login - User found, redirecting. User:', user);
+    // Only redirect if user is already logged in when component mounts
+    // (e.g., if they navigate to /login while already logged in)
+    // Don't redirect if we're currently in the process of logging in (handleSubmit will handle that)
+    if (user && !isLoading && !isLoggingIn) {
+      console.log('Login - User already logged in, redirecting. User:', user);
       // Small delay to ensure state is fully set
       setTimeout(() => {
         // Check if user is approved first
@@ -35,7 +40,7 @@ export const Login = () => {
         }
       }, 100);
     }
-  }, [user, navigate]);
+  }, [user, isLoading, navigate, isLoggingIn]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,6 +56,10 @@ export const Login = () => {
           }
           await signUpWithEmail(email, password, name, phone || undefined);
           setSuccess('Account created! Please wait for admin approval.');
+          // For sign up, redirect to pending approval
+          setTimeout(() => {
+            navigate('/pending-approval', { replace: true });
+          }, 500);
         } else {
           if (!phone || !password || !name) {
             setError('Please fill in all required fields');
@@ -58,24 +67,108 @@ export const Login = () => {
           }
           await signUpWithPhone(phone, password, name, email || undefined);
           setSuccess('Account created! Please wait for admin approval.');
+          // For sign up, redirect to pending approval
+          setTimeout(() => {
+            navigate('/pending-approval', { replace: true });
+          }, 500);
         }
       } else {
-        if (authMethod === 'email') {
-          if (!email || !password) {
-            setError('Please enter email and password');
-            return;
+        // Handle login
+        setIsLoggingIn(true);
+        try {
+          if (authMethod === 'email') {
+            if (!email || !password) {
+              setError('Please enter email and password');
+              setIsLoggingIn(false);
+              return;
+            }
+            await loginWithEmail(email, password);
+          } else {
+            if (!phone || !password) {
+              setError('Please enter phone and password');
+              setIsLoggingIn(false);
+              return;
+            }
+            await loginWithPhone(phone, password);
           }
-          await loginWithEmail(email, password);
-        } else {
-          if (!phone || !password) {
-            setError('Please enter phone and password');
-            return;
+          
+          // After login, get session immediately and redirect
+          // Don't wait for profile fetch - redirect immediately and let route guards handle it
+          const { data: { session } } = await supabase.auth.getSession();
+          
+          if (session?.user) {
+            console.log('Login - Session found, attempting to fetch user profile for redirect');
+            
+            // Try to get user profile with a short timeout
+            const profilePromise = supabase
+              .from('users')
+              .select('*')
+              .eq('id', session.user.id)
+              .single()
+              .then(result => result.data);
+            
+            const timeoutPromise = new Promise((resolve) => {
+              setTimeout(() => resolve(null), 2000); // 2 second timeout
+            });
+            
+            const userData = await Promise.race([profilePromise, timeoutPromise]) as any;
+            
+            let redirectPath = '/dashboard'; // Default to dashboard
+            
+            if (userData) {
+              console.log('Login - User profile fetched, redirecting. User:', {
+                id: userData.id,
+                email: userData.email,
+                is_approved: userData.is_approved,
+                role: userData.role
+              });
+              
+              if (!userData.is_approved) {
+                redirectPath = '/pending-approval';
+              } else if (userData.role === 'admin') {
+                redirectPath = '/admin';
+              }
+            } else {
+              // Profile fetch timed out or failed, use context user if available
+              console.warn('Login - Profile fetch timed out, using context user or defaulting to dashboard');
+              if (user) {
+                if (!user.is_approved) {
+                  redirectPath = '/pending-approval';
+                } else if (user.role === 'admin') {
+                  redirectPath = '/admin';
+                }
+              }
+            }
+            
+            console.log('Login - Redirecting to:', redirectPath);
+            
+            // Redirect immediately - don't wait for profile refresh
+            navigate(redirectPath, { replace: true });
+            
+            // Fallback: if navigation doesn't work after a short delay, use window.location
+            setTimeout(() => {
+              const currentHash = window.location.hash;
+              if (currentHash.includes('login') || currentHash === '#/') {
+                console.log('Login - Navigation may have failed, using window.location fallback');
+                window.location.hash = `#${redirectPath}`;
+              }
+            }, 500);
+            
+            // Refresh profile in background (don't wait for it)
+            refreshUserProfile().catch(err => {
+              console.warn('Login - Background profile refresh failed:', err);
+            });
+          } else {
+            console.error('Login - No session found after login');
+            throw new Error('Login failed - no session created');
           }
-          await loginWithPhone(phone, password);
+        } finally {
+          setIsLoggingIn(false);
         }
       }
     } catch (err: any) {
       console.error('Login error:', err);
+      setIsLoggingIn(false);
       // Redirect to error page instead of showing error in form
       navigate(`/login-error?error=login_failed`, { replace: true });
     }
