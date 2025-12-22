@@ -14,10 +14,15 @@ export const AdminOverview = () => {
   const [isLoadingUsers, setIsLoadingUsers] = useState(true);
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [showAllUsers, setShowAllUsers] = useState(false);
+  const [prayerRequests24h, setPrayerRequests24h] = useState(0);
+  const [nextService, setNextService] = useState<string | null>(null);
+  const [lastNewsletterDate, setLastNewsletterDate] = useState<string | null>(null);
+  const [isLoadingStats, setIsLoadingStats] = useState(true);
 
   useEffect(() => {
     console.log('AdminOverview - useEffect triggered, fetching pending users');
     fetchPendingUsers();
+    fetchStats();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -118,6 +123,98 @@ export const AdminOverview = () => {
   };
 
 
+  const fetchStats = async () => {
+    setIsLoadingStats(true);
+    try {
+      // Fetch prayer requests from last 24 hours (only non-deleted requests)
+      // Since requests are hard-deleted, we just need to count existing requests
+      const twentyFourHoursAgo = new Date();
+      twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
+      
+      // Count only requests that still exist (not deleted)
+      // Hard-deleted requests won't appear in the query, so this automatically excludes them
+      const { data: prayerRequests, error: prayerError } = await supabase
+        .from('prayer_requests')
+        .select('id')
+        .gte('created_at', twentyFourHoursAgo.toISOString());
+
+      if (prayerError) {
+        console.error('Error fetching prayer requests:', prayerError);
+        setPrayerRequests24h(0);
+      } else {
+        // Count only existing (non-deleted) requests
+        setPrayerRequests24h(prayerRequests?.length || 0);
+      }
+
+      if (prayerError) {
+        console.error('Error fetching prayer requests:', prayerError);
+      } else {
+        setPrayerRequests24h(prayerCount || 0);
+      }
+
+      // Calculate next Sunday service (Sunday at 10AM)
+      const today = new Date();
+      const currentDay = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+      
+      // Calculate days until next Sunday
+      let daysUntilSunday;
+      if (currentDay === 0) {
+        // If today is Sunday, check if it's before 10 AM
+        const currentHour = today.getHours();
+        if (currentHour < 10) {
+          // Today's service hasn't happened yet
+          daysUntilSunday = 0;
+        } else {
+          // Today's service already happened, get next Sunday
+          daysUntilSunday = 7;
+        }
+      } else {
+        // Get next Sunday
+        daysUntilSunday = 7 - currentDay;
+      }
+      
+      const nextSunday = new Date(today);
+      nextSunday.setDate(today.getDate() + daysUntilSunday);
+      nextSunday.setHours(10, 0, 0, 0); // 10 AM
+      
+      // Check if there's a Sunday Service event in the events table
+      const { data: events, error: eventsError } = await supabase
+        .from('events')
+        .select('*')
+        .or('category.ilike.%Service%,title.ilike.%Sunday%')
+        .gte('date', today.toISOString().split('T')[0])
+        .order('date', { ascending: true })
+        .limit(1);
+
+      if (!eventsError && events && events.length > 0) {
+        // Use the event date if found
+        const eventDate = new Date(`${events[0].date}T${events[0].time}`);
+        setNextService(eventDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' }));
+      } else {
+        // Fallback to calculated next Sunday
+        setNextService(nextSunday.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' }));
+      }
+
+      // Fetch last newsletter date
+      const { data: newsletters, error: newsletterError } = await supabase
+        .from('newsletters')
+        .select('created_at')
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (newsletterError) {
+        console.error('Error fetching newsletters:', newsletterError);
+      } else if (newsletters && newsletters.length > 0) {
+        const lastNewsletter = new Date(newsletters[0].created_at);
+        setLastNewsletterDate(lastNewsletter.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }));
+      }
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+    } finally {
+      setIsLoadingStats(false);
+    }
+  };
+
   const formatDate = (dateString: string | undefined) => {
     if (!dateString) return 'Unknown';
     
@@ -141,14 +238,60 @@ export const AdminOverview = () => {
   };
 
   const stats = useMemo(() => [
-    { label: 'Pending Approvals', value: pendingCount.toString(), icon: <UserCheck size={24} />, path: '#pending-users', color: 'text-gold', highlight: pendingCount > 0 },
-    { label: 'Prayer Requests', value: '12', icon: <MessageSquare size={24} />, path: '/admin/prayer', color: 'text-blue-500' },
-    { label: 'Team Members', value: '8', icon: <Users size={24} />, path: '/admin/team', color: 'text-purple-500' },
-    { label: 'Upcoming Events', value: '5', icon: <Calendar size={24} />, path: '/admin/events', color: 'text-green-500' },
-    { label: 'Newsletters', value: '3', icon: <BookOpen size={24} />, path: '/admin/newsletter', color: 'text-orange-500' },
-    { label: 'Photo Folders', value: '7', icon: <Image size={24} />, path: '/admin/photos', color: 'text-pink-500' },
-    { label: 'Roster Assignments', value: '15', icon: <ClipboardList size={24} />, path: '/admin/roster', color: 'text-indigo-500' },
-  ], [pendingCount]);
+    { 
+      label: 'Pending Approvals', 
+      value: pendingCount.toString(), 
+      icon: <UserCheck size={24} />, 
+      path: '#pending-users', 
+      color: 'text-gold', 
+      highlight: pendingCount > 0 
+    },
+    { 
+      label: 'New Prayer Requests (24h)', 
+      value: isLoadingStats ? '...' : prayerRequests24h.toString(), 
+      icon: <MessageSquare size={24} />, 
+      path: '/admin/prayer', 
+      color: 'text-blue-500',
+      subtitle: isLoadingStats ? 'Loading...' : undefined
+    },
+    { 
+      label: 'Next Service', 
+      value: isLoadingStats ? '...' : (nextService || 'Sunday 10AM'), 
+      icon: <Calendar size={24} />, 
+      path: '/admin/events', 
+      color: 'text-green-500',
+      subtitle: isLoadingStats ? 'Loading...' : undefined
+    },
+    { 
+      label: 'Last Newsletter', 
+      value: isLoadingStats ? '...' : (lastNewsletterDate || 'None'), 
+      icon: <BookOpen size={24} />, 
+      path: '/admin/newsletter', 
+      color: 'text-orange-500',
+      subtitle: isLoadingStats ? 'Loading...' : undefined
+    },
+    { 
+      label: 'Team Members', 
+      value: '8', 
+      icon: <Users size={24} />, 
+      path: '/admin/team', 
+      color: 'text-purple-500' 
+    },
+    { 
+      label: 'Photo Folders', 
+      value: '7', 
+      icon: <Image size={24} />, 
+      path: '/admin/photos', 
+      color: 'text-pink-500' 
+    },
+    { 
+      label: 'Roster Assignments', 
+      value: '15', 
+      icon: <ClipboardList size={24} />, 
+      path: '/admin/roster', 
+      color: 'text-indigo-500' 
+    },
+  ], [pendingCount, prayerRequests24h, nextService, lastNewsletterDate, isLoadingStats]);
 
   console.log('AdminOverview - Rendering, user:', user, 'pendingCount:', pendingCount, 'isLoadingUsers:', isLoadingUsers);
 
@@ -191,7 +334,16 @@ export const AdminOverview = () => {
                 {stat.icon}
               </div>
               <h3 className="font-bold text-xl mb-2 text-charcoal">{stat.label}</h3>
-              <p className={`text-4xl font-serif font-bold mb-2 ${stat.highlight ? 'text-gold' : 'text-charcoal'}`}>{stat.value}</p>
+              <p className={`text-4xl font-serif font-bold mb-1 ${stat.highlight ? 'text-gold' : 'text-charcoal'}`}>{stat.value}</p>
+              {stat.subtitle && (
+                <p className="text-sm text-neutral mb-2">{stat.subtitle}</p>
+              )}
+              {stat.label === 'Next Service' && nextService && !isLoadingStats && (
+                <p className="text-sm text-neutral mt-1">Every Sunday at 10:00 AM</p>
+              )}
+              {stat.label === 'Last Newsletter' && lastNewsletterDate && !isLoadingStats && (
+                <p className="text-sm text-neutral mt-1">Uploaded {lastNewsletterDate}</p>
+              )}
               <div className="pt-4 border-t border-gray-100">
                 <span className="text-gold font-bold text-sm">Manage →</span>
               </div>
@@ -200,17 +352,25 @@ export const AdminOverview = () => {
 
           if (stat.path.startsWith('#')) {
             return (
-              <a key={i} href={stat.path} onClick={(e) => {
-                e.preventDefault();
-                document.getElementById(stat.path.substring(1))?.scrollIntoView({ behavior: 'smooth' });
-              }}>
+              <a 
+                key={i} 
+                href={stat.path} 
+                onClick={(e) => {
+                  e.preventDefault();
+                  const element = document.getElementById(stat.path.substring(1));
+                  if (element) {
+                    element.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
+                className="block"
+              >
                 {content}
               </a>
             );
           }
 
           return (
-            <Link key={i} to={stat.path}>
+            <Link key={i} to={stat.path} className="block">
               {content}
             </Link>
           );
