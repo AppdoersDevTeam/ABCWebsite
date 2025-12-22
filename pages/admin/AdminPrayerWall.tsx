@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { VibrantCard } from '../../components/UI/VibrantCard';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { Modal } from '../../components/UI/Modal';
-import { MessageCircle, Heart, Edit, Trash2, Plus } from 'lucide-react';
+import { Heart, Edit, Trash2, Plus } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { PrayerRequest } from '../../types';
 import { SkeletonPageHeader, SkeletonPrayerCard } from '../../components/UI/Skeleton';
@@ -106,23 +106,37 @@ export const AdminPrayerWall = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this prayer request?')) {
+    if (!window.confirm('Are you sure you want to delete this prayer request? This action cannot be undone.')) {
       return;
     }
 
     try {
       // First delete all prayer counts for this request
-      await supabase.from('prayer_counts').delete().eq('prayer_request_id', id);
+      const { error: countsError } = await supabase
+        .from('prayer_counts')
+        .delete()
+        .eq('prayer_request_id', id);
 
-      // Then delete the request
-      const { error } = await supabase.from('prayer_requests').delete().eq('id', id);
+      if (countsError) {
+        console.error('Error deleting prayer counts:', countsError);
+        // Continue with deletion even if counts deletion fails (CASCADE will handle it)
+      }
+
+      // Then delete the request (this will permanently remove it from the database)
+      const { error } = await supabase
+        .from('prayer_requests')
+        .delete()
+        .eq('id', id);
 
       if (error) throw error;
 
+      // Remove from local state and refresh from database to ensure consistency
       setRequests(requests.filter(req => req.id !== id));
+      // Refetch to ensure the deletion is reflected everywhere
+      await fetchPrayerRequests();
     } catch (error) {
       console.error('Error deleting prayer request:', error);
-      alert('Failed to delete prayer request');
+      alert('Failed to delete prayer request. Please make sure you have admin permissions.');
     }
   };
 
@@ -212,13 +226,10 @@ export const AdminPrayerWall = () => {
               <p className="text-charcoal leading-relaxed mb-6 text-lg font-light pl-12 border-l-2 border-gold/20">
                 {req.content}
               </p>
-              <div className="flex items-center space-x-6 border-t border-gray-100 pt-4 pl-12">
-                <button className="flex items-center text-sm text-neutral hover:text-gold transition-colors font-bold uppercase tracking-wider">
+              <div className="flex items-center border-t border-gray-100 pt-4 pl-12">
+                <div className="flex items-center text-sm text-neutral font-bold uppercase tracking-wider">
                   <Heart size={16} className="mr-2" /> Praying ({req.prayer_count})
-                </button>
-                <button className="flex items-center text-sm text-neutral hover:text-charcoal transition-colors font-bold uppercase tracking-wider">
-                  <MessageCircle size={16} className="mr-2" /> Encouragement
-                </button>
+                </div>
               </div>
             </div>
           ))}
