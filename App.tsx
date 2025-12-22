@@ -55,56 +55,13 @@ import { AdminPhotos } from './pages/admin/AdminPhotos';
 
 // Protected Route Component
 const ProtectedRoute = () => {
-  const { user, isLoading, refreshUserProfile } = useAuth();
-  const [hasRefreshed, setHasRefreshed] = useState(false);
+  const { user, isLoading } = useAuth();
 
-  // Track the user ID to detect when it changes after refresh
-  const [lastUserId, setLastUserId] = useState<string | null>(null);
-
-  // Refresh profile on mount to ensure we have latest approval status
-  useEffect(() => {
-    if (user && !hasRefreshed) {
-      console.log('ProtectedRoute - User found, refreshing profile. Current user:', {
-        id: user.id,
-        email: user.email,
-        is_approved: user.is_approved,
-        role: user.role
-      });
-      setLastUserId(user.id);
-      refreshUserProfile().then(() => {
-        console.log('ProtectedRoute - Refresh function completed');
-        // Wait a bit for state to update, then mark as refreshed
-        setTimeout(() => {
-          console.log('ProtectedRoute - Setting hasRefreshed to true after delay');
-          setHasRefreshed(true);
-        }, 300);
-      }).catch((error) => {
-        console.error('ProtectedRoute - Error refreshing profile:', error);
-        // Even if refresh fails, allow check to proceed
-        setHasRefreshed(true);
-      });
-    } else if (!user) {
-      setHasRefreshed(true); // No user, no need to refresh
-      setLastUserId(null);
-    }
-  }, [user, hasRefreshed, refreshUserProfile]);
-
-  // Detect when user state changes after refresh (indicates state update)
-  useEffect(() => {
-    if (user && lastUserId === user.id && hasRefreshed) {
-      console.log('ProtectedRoute - User state updated after refresh:', {
-        id: user.id,
-        email: user.email,
-        is_approved: user.is_approved,
-        role: user.role
-      });
-    }
-  }, [user, lastUserId, hasRefreshed]);
-
-  if (isLoading || (user && !hasRefreshed)) {
+  // Only show loading during initial auth check
+  if (isLoading) {
     return (
-        <div className="min-h-screen flex items-center justify-center bg-secondary text-white font-serif">
-            <div className="animate-pulse">Loading...</div>
+        <div className="min-h-screen flex items-center justify-center bg-base text-charcoal font-serif">
+            <div className="animate-pulse text-xl">Loading...</div>
         </div>
     );
   }
@@ -137,14 +94,11 @@ const ProtectedRoute = () => {
 const AdminRoute = () => {
   const { user, isLoading } = useAuth();
 
-  // Debug logging
-  console.log('AdminRoute - isLoading:', isLoading, 'user:', user);
-
-  // Show loading state - AuthContext handles timeout logic
+  // Only show loading during initial auth check
   if (isLoading) {
     return (
-        <div className="min-h-screen flex items-center justify-center bg-secondary text-white font-serif">
-            <div className="animate-pulse">Loading...</div>
+        <div className="min-h-screen flex items-center justify-center bg-base text-charcoal font-serif">
+            <div className="animate-pulse text-xl">Loading...</div>
         </div>
     );
   }
