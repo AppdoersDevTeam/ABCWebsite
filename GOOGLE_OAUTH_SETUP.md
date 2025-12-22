@@ -49,8 +49,27 @@ https://zwxlccqhafdnvdohzxkg.supabase.co/auth/v1/callback
    ```
    https://zwxlccqhafdnvdohzxkg.supabase.co/auth/v1/callback
    ```
+6. **Important:** Set the **Site URL** in Supabase:
+   - Go to **Settings** > **Authentication** > **URL Configuration**
+   - Set **Site URL** to your production URL (e.g., `https://ashburtonbaptistchurch.vercel.app` or `https://www.ashburtonbaptist.co.nz`)
+   - This should NOT be `http://localhost:3000` for production
 
-### Step 4: How to Find Your Supabase Project Reference
+### Step 4: Configure Environment Variables in Vercel
+
+To ensure OAuth redirects work correctly in production, you need to set the `VITE_SITE_URL` environment variable:
+
+1. Go to your Vercel project dashboard
+2. Navigate to **Settings** > **Environment Variables**
+3. Add a new environment variable:
+   - **Name:** `VITE_SITE_URL`
+   - **Value:** Your production URL (e.g., `https://ashburtonbaptistchurch.vercel.app` or `https://www.ashburtonbaptist.co.nz`)
+   - **Environment:** Production (and Preview if you want it for preview deployments)
+4. **Important:** Do NOT include a trailing slash
+5. Redeploy your application after adding the variable
+
+**Note:** For local development, this variable is optional - the code will fall back to `window.location.origin` if not set.
+
+### Step 5: How to Find Your Supabase Project Reference
 
 1. Go to your Supabase Dashboard
 2. Click on **Settings** > **API**
@@ -75,11 +94,29 @@ After adding the Supabase callback URL:
 3. Try signing in with Google again
 4. The error should be resolved
 
+## Troubleshooting
+
+### Issue: OAuth redirects to `localhost:3000` in production
+
+**Solution:**
+1. Check that `VITE_SITE_URL` is set in Vercel environment variables
+2. Verify the Supabase **Site URL** is set to your production URL (not localhost)
+3. Ensure the environment variable has no trailing slash
+4. Redeploy your application after making changes
+
+### Issue: `redirect_uri_mismatch` error
+
+**Solution:**
+1. Verify all redirect URIs are added in Google Cloud Console (see Step 2)
+2. Make sure the Supabase callback URL is included
+3. Wait a few minutes for changes to propagate
+
 ## Notes
 
 - The Supabase callback URL is **required** - this is how Supabase handles OAuth
 - Your app's redirect URLs are still needed for the final redirect after Supabase processes the OAuth
 - Make sure there are no trailing slashes inconsistencies (except where noted)
 - Changes in Google Cloud Console can take a few minutes to take effect
+- The `VITE_SITE_URL` environment variable ensures correct redirects in production deployments
 
 

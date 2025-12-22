@@ -598,12 +598,17 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
   const signInWithGoogle = async () => {
     setIsLoading(true);
     try {
-      // Ensure we don't have double slashes in the redirect URL
-      const baseUrl = window.location.origin.replace(/\/$/, ''); // Remove trailing slash if present
+      // Use environment variable for production URL, fallback to window.location.origin for development
+      const siteUrl = import.meta.env.VITE_SITE_URL || window.location.origin;
+      const baseUrl = siteUrl.replace(/\/$/, ''); // Remove trailing slash if present
+      const redirectUrl = `${baseUrl}/#/auth/callback`;
+      
+      console.log('signInWithGoogle - Redirect URL:', redirectUrl);
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${baseUrl}/#/auth/callback`,
+          redirectTo: redirectUrl,
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
@@ -636,8 +641,11 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
 
   const sendPasswordReset = async (email: string) => {
     try {
+      // Use environment variable for production URL, fallback to window.location.origin for development
+      const siteUrl = import.meta.env.VITE_SITE_URL || window.location.origin;
+      const baseUrl = siteUrl.replace(/\/$/, '');
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: `${baseUrl}/reset-password`,
       });
 
       if (error) throw error;
