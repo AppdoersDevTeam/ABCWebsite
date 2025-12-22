@@ -4,6 +4,8 @@ import { ArrowRight, Calendar, Heart, PlayCircle, Clock, MapPin, Users, Church, 
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { VibrantCard } from '../../components/UI/VibrantCard';
 import { ScrollReveal } from '../../components/UI/ScrollReveal';
+import { supabase } from '../../lib/supabase';
+import { Event } from '../../types';
 
 // Internal Typewriter Component for smooth sequencing without cursor
 interface TypewriterTextProps {
@@ -41,6 +43,8 @@ const TypewriterText: React.FC<TypewriterTextProps> = ({ text, delay, className 
 export const Home = () => {
   const heroRef = useRef<HTMLDivElement>(null);
   const [cycle, setCycle] = useState(0);
+  const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
+  const [isLoadingEvents, setIsLoadingEvents] = useState(true);
 
   // Restart animation loop every 2 minutes
   useEffect(() => {
@@ -49,6 +53,42 @@ export const Home = () => {
     }, 120000); // 2 minutes
     return () => clearInterval(interval);
   }, []);
+
+  // Fetch upcoming events
+  useEffect(() => {
+    fetchUpcomingEvents();
+  }, []);
+
+  const fetchUpcomingEvents = async () => {
+    setIsLoadingEvents(true);
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      const { data, error } = await supabase
+        .from('events')
+        .select('*')
+        .eq('is_public', true)
+        .gte('date', today.toISOString().split('T')[0])
+        .order('date', { ascending: true })
+        .limit(3);
+
+      if (error) throw error;
+      setUpcomingEvents(data || []);
+    } catch (error) {
+      console.error('Error fetching upcoming events:', error);
+      setUpcomingEvents([]);
+    } finally {
+      setIsLoadingEvents(false);
+    }
+  };
+
+  const formatEventDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
+    return { day, month };
+  };
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -242,24 +282,53 @@ export const Home = () => {
                </ScrollReveal>
 
                <div className="grid md:grid-cols-3 gap-6">
-                   {[
-                       { day: '24', month: 'OCT', title: 'Worship Night', time: '7:00 PM' },
-                       { day: '27', month: 'OCT', title: 'Community Picnic', time: '12:00 PM' },
-                       { day: '03', month: 'NOV', title: 'Baptism Sunday', time: '10:00 AM' },
-                   ].map((evt, i) => (
+                   {isLoadingEvents ? (
+                     // Loading skeleton
+                     Array.from({ length: 3 }).map((_, i) => (
                        <ScrollReveal key={i} direction="up" delay={i * 100}>
-                         <div className="glass-card border border-white/50 shadow-sm p-0 flex rounded-[8px] overflow-hidden group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 bg-white/70 hover-lift">
-                           <div className="bg-gold/10 group-hover:bg-gold transition-all duration-300 w-24 flex flex-col items-center justify-center p-4 text-charcoal group-hover:scale-105">
-                               <span className="text-2xl md:text-3xl font-black group-hover:scale-110 transition-transform duration-300">{evt.day}</span>
-                               <span className="text-xs md:text-sm font-bold tracking-wider">{evt.month}</span>
+                         <div className="glass-card border border-white/50 shadow-sm p-0 flex rounded-[8px] overflow-hidden bg-white/70 animate-pulse">
+                           <div className="bg-gray-200 w-24 flex flex-col items-center justify-center p-4">
+                             <div className="h-8 w-8 bg-gray-300 rounded mb-2"></div>
+                             <div className="h-4 w-12 bg-gray-300 rounded"></div>
                            </div>
                            <div className="p-6 flex-1 flex flex-col justify-center">
-                               <h4 className="text-lg md:text-xl font-bold text-charcoal mb-1 group-hover:text-gold transition-colors duration-300">{evt.title}</h4>
-                               <span className="text-neutral text-sm flex items-center group-hover:text-charcoal transition-colors"><Clock size={14} className="mr-2 text-gold animate-pulse-slow"/> {evt.time}</span>
+                             <div className="h-6 w-32 bg-gray-200 rounded mb-2"></div>
+                             <div className="h-4 w-24 bg-gray-200 rounded"></div>
                            </div>
                          </div>
                        </ScrollReveal>
-                   ))}
+                     ))
+                   ) : upcomingEvents.length === 0 ? (
+                     // Empty state
+                     <div className="col-span-3 text-center py-12">
+                       <Calendar className="text-gray-300 mx-auto mb-4" size={48} />
+                       <p className="text-neutral text-lg">No upcoming events scheduled</p>
+                       <p className="text-neutral text-sm mt-2">Check back soon for new events!</p>
+                     </div>
+                   ) : (
+                     // Real events
+                     upcomingEvents.map((evt, i) => {
+                       const { day, month } = formatEventDate(evt.date);
+                       return (
+                         <ScrollReveal key={evt.id} direction="up" delay={i * 100}>
+                           <Link to="/events">
+                             <div className="glass-card border border-white/50 shadow-sm p-0 flex rounded-[8px] overflow-hidden group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 bg-white/70 hover-lift cursor-pointer">
+                               <div className="bg-gold/10 group-hover:bg-gold transition-all duration-300 w-24 flex flex-col items-center justify-center p-4 text-charcoal group-hover:scale-105">
+                                 <span className="text-2xl md:text-3xl font-black group-hover:scale-110 transition-transform duration-300">{day}</span>
+                                 <span className="text-xs md:text-sm font-bold tracking-wider">{month}</span>
+                               </div>
+                               <div className="p-6 flex-1 flex flex-col justify-center">
+                                 <h4 className="text-lg md:text-xl font-bold text-charcoal mb-1 group-hover:text-gold transition-colors duration-300">{evt.title}</h4>
+                                 <span className="text-neutral text-sm flex items-center group-hover:text-charcoal transition-colors">
+                                   <Clock size={14} className="mr-2 text-gold animate-pulse-slow"/> {evt.time}
+                                 </span>
+                               </div>
+                             </div>
+                           </Link>
+                         </ScrollReveal>
+                       );
+                     })
+                   )}
                </div>
           </div>
       </section>

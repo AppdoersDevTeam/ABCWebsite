@@ -24,22 +24,13 @@ export const DashboardHome = () => {
       twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
       
       // Parallelize all queries for faster loading
-      const [prayerResult, eventsResult, newsletterResult] = await Promise.allSettled([
+      const [prayerResult, newsletterResult] = await Promise.allSettled([
         // Prayer requests query
         supabase
           .from('prayer_requests')
           .select('id')
           .eq('is_confidential', false)
           .gte('created_at', twentyFourHoursAgo.toISOString()),
-        
-        // Events query
-        supabase
-          .from('events')
-          .select('*')
-          .or('category.ilike.%Service%,title.ilike.%Sunday%')
-          .gte('date', today.toISOString().split('T')[0])
-          .order('date', { ascending: true })
-          .limit(1),
         
         // Newsletter query
         supabase
@@ -56,7 +47,7 @@ export const DashboardHome = () => {
         setPrayerRequests24h(0);
       }
 
-      // Process next service
+      // Calculate next Sunday service (Sunday at 10AM)
       const currentDay = today.getDay();
       let daysUntilSunday;
       if (currentDay === 0) {
@@ -70,12 +61,10 @@ export const DashboardHome = () => {
       nextSunday.setDate(today.getDate() + daysUntilSunday);
       nextSunday.setHours(10, 0, 0, 0);
 
-      if (eventsResult.status === 'fulfilled' && !eventsResult.value.error && eventsResult.value.data && eventsResult.value.data.length > 0) {
-        const eventDate = new Date(`${eventsResult.value.data[0].date}T${eventsResult.value.data[0].time}`);
-        setNextService(eventDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' }));
-      } else {
-        setNextService(nextSunday.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' }));
-      }
+      // Always use calculated next Sunday - format as "dd month"
+      const month = nextSunday.toLocaleDateString('en-US', { month: 'long' });
+      const day = nextSunday.getDate();
+      setNextService(`${day} ${month}`);
 
       // Process newsletter
       if (newsletterResult.status === 'fulfilled' && !newsletterResult.value.error && newsletterResult.value.data && newsletterResult.value.data.length > 0) {
@@ -117,10 +106,10 @@ export const DashboardHome = () => {
                 </div>
                 <h3 className="font-bold text-xl mb-2 text-charcoal">Next Service</h3>
                 <p className="text-4xl font-serif font-bold mb-1 text-charcoal">
-                  {isLoadingStats ? '...' : (nextService ? nextService.split(',')[0] : 'Sunday')}
+                  {isLoadingStats ? '...' : (nextService || 'Sunday')}
                 </p>
                 <p className="text-neutral mb-4">
-                  {isLoadingStats ? 'Loading...' : (nextService ? nextService.split(',')[1]?.trim() || '10:00 AM' : '10:00 AM')}
+                  {isLoadingStats ? 'Loading...' : 'Every Sunday at 10:00 AM'}
                 </p>
                 <div className="pt-4 border-t border-gray-100">
                     <span className="text-gold font-bold text-sm">View Events →</span>

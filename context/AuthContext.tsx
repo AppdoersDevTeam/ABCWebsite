@@ -598,12 +598,37 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
   const signInWithGoogle = async () => {
     setIsLoading(true);
     try {
-      // Use environment variable for production URL, fallback to window.location.origin for development
-      const siteUrl = import.meta.env.VITE_SITE_URL || window.location.origin;
+      // Determine the correct redirect URL
+      // Priority: 1. Environment variable, 2. Current origin (if not localhost), 3. Current origin as fallback
+      const envSiteUrl = import.meta.env.VITE_SITE_URL;
+      const currentOrigin = window.location.origin;
+      const isLocalhost = currentOrigin.includes('localhost') || currentOrigin.includes('127.0.0.1');
+      
+      let siteUrl: string;
+      if (envSiteUrl) {
+        siteUrl = envSiteUrl;
+        console.log('signInWithGoogle - Using VITE_SITE_URL from environment:', siteUrl);
+      } else if (!isLocalhost) {
+        // In production but no env var - use current origin
+        siteUrl = currentOrigin;
+        console.warn('signInWithGoogle - No VITE_SITE_URL set, using current origin:', siteUrl);
+      } else {
+        // Localhost - use current origin
+        siteUrl = currentOrigin;
+        console.log('signInWithGoogle - Development mode, using current origin:', siteUrl);
+      }
+      
       const baseUrl = siteUrl.replace(/\/$/, ''); // Remove trailing slash if present
       const redirectUrl = `${baseUrl}/#/auth/callback`;
       
-      console.log('signInWithGoogle - Redirect URL:', redirectUrl);
+      console.log('signInWithGoogle - Final redirect URL:', redirectUrl);
+      console.log('signInWithGoogle - Current location:', {
+        origin: window.location.origin,
+        hostname: window.location.hostname,
+        href: window.location.href,
+        envSiteUrl: envSiteUrl || 'NOT SET',
+        isLocalhost
+      });
       
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
@@ -616,7 +641,10 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('signInWithGoogle - Supabase OAuth error:', error);
+        throw error;
+      }
     } catch (error) {
       console.error('Google sign in error:', error);
       throw error;

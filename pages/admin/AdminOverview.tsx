@@ -19,11 +19,23 @@ export const AdminOverview = () => {
   const [nextService, setNextService] = useState<string | null>(null);
   const [lastNewsletterDate, setLastNewsletterDate] = useState<string | null>(null);
   const [isLoadingStats, setIsLoadingStats] = useState(true);
+  const [teamMembersCount, setTeamMembersCount] = useState(0);
+  const [photoFoldersCount, setPhotoFoldersCount] = useState(0);
+  const [rosterAssignmentsCount, setRosterAssignmentsCount] = useState(0);
+  const [pendingPrayerRequestsCount, setPendingPrayerRequestsCount] = useState(0);
+  const [recentActivities, setRecentActivities] = useState<Array<{
+    id: string;
+    type: 'prayer' | 'event' | 'team_member' | 'newsletter' | 'roster';
+    title: string;
+    date: string;
+  }>>([]);
+  const [isLoadingActivities, setIsLoadingActivities] = useState(true);
 
   useEffect(() => {
     console.log('AdminOverview - useEffect triggered, fetching pending users');
     fetchPendingUsers();
     fetchStats();
+    fetchRecentActivities();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -147,10 +159,43 @@ export const AdminOverview = () => {
         setPrayerRequests24h(prayerRequests?.length || 0);
       }
 
-      if (prayerError) {
-        console.error('Error fetching prayer requests:', prayerError);
-      } else {
-        setPrayerRequests24h(prayerCount || 0);
+      // Fetch pending prayer requests (recent ones from last 7 days for "pending review")
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      const { data: recentPrayerRequests, error: recentPrayerError } = await supabase
+        .from('prayer_requests')
+        .select('id')
+        .gte('created_at', sevenDaysAgo.toISOString());
+
+      if (!recentPrayerError) {
+        setPendingPrayerRequestsCount(recentPrayerRequests?.length || 0);
+      }
+
+      // Fetch team members count
+      const { count: teamCount, error: teamError } = await supabase
+        .from('team_members')
+        .select('*', { count: 'exact', head: true });
+
+      if (!teamError) {
+        setTeamMembersCount(teamCount || 0);
+      }
+
+      // Fetch photo folders count
+      const { count: photoFoldersCount, error: photoFoldersError } = await supabase
+        .from('photo_folders')
+        .select('*', { count: 'exact', head: true });
+
+      if (!photoFoldersError) {
+        setPhotoFoldersCount(photoFoldersCount || 0);
+      }
+
+      // Fetch roster assignments count
+      const { count: rosterCount, error: rosterError } = await supabase
+        .from('roster')
+        .select('*', { count: 'exact', head: true });
+
+      if (!rosterError) {
+        setRosterAssignmentsCount(rosterCount || 0);
       }
 
       // Calculate next Sunday service (Sunday at 10AM)
@@ -178,23 +223,10 @@ export const AdminOverview = () => {
       nextSunday.setDate(today.getDate() + daysUntilSunday);
       nextSunday.setHours(10, 0, 0, 0); // 10 AM
       
-      // Check if there's a Sunday Service event in the events table
-      const { data: events, error: eventsError } = await supabase
-        .from('events')
-        .select('*')
-        .or('category.ilike.%Service%,title.ilike.%Sunday%')
-        .gte('date', today.toISOString().split('T')[0])
-        .order('date', { ascending: true })
-        .limit(1);
-
-      if (!eventsError && events && events.length > 0) {
-        // Use the event date if found
-        const eventDate = new Date(`${events[0].date}T${events[0].time}`);
-        setNextService(eventDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' }));
-      } else {
-        // Fallback to calculated next Sunday
-        setNextService(nextSunday.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' }));
-      }
+      // Always use calculated next Sunday - format as "dd month"
+      const month = nextSunday.toLocaleDateString('en-US', { month: 'long' });
+      const day = nextSunday.getDate();
+      setNextService(`${day} ${month}`);
 
       // Fetch last newsletter date
       const { data: newsletters, error: newsletterError } = await supabase
@@ -213,6 +245,166 @@ export const AdminOverview = () => {
       console.error('Error fetching stats:', error);
     } finally {
       setIsLoadingStats(false);
+    }
+  };
+
+  const fetchRecentActivities = async () => {
+    setIsLoadingActivities(true);
+    try {
+      // Fetch recent activities from multiple tables
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      const cutoffDate = thirtyDaysAgo.toISOString();
+
+      // Parallel fetch from all tables
+      const [
+        prayerRequestsResult,
+        eventsResult,
+        teamMembersResult,
+        newslettersResult,
+        rosterResult
+      ] = await Promise.allSettled([
+        // Recent prayer requests
+        supabase
+          .from('prayer_requests')
+          .select('id, name, created_at')
+          .gte('created_at', cutoffDate)
+          .order('created_at', { ascending: false })
+          .limit(10),
+        
+        // Recent events (created or updated)
+        supabase
+          .from('events')
+          .select('id, title, created_at, updated_at')
+          .or(`created_at.gte.${cutoffDate},updated_at.gte.${cutoffDate}`)
+          .order('created_at', { ascending: false })
+          .limit(10),
+        
+        // Recent team members
+        supabase
+          .from('team_members')
+          .select('id, name, created_at, updated_at')
+          .or(`created_at.gte.${cutoffDate},updated_at.gte.${cutoffDate}`)
+          .order('created_at', { ascending: false })
+          .limit(10),
+        
+        // Recent newsletters
+        supabase
+          .from('newsletters')
+          .select('id, title, created_at, updated_at')
+          .or(`created_at.gte.${cutoffDate},updated_at.gte.${cutoffDate}`)
+          .order('created_at', { ascending: false })
+          .limit(10),
+        
+        // Recent roster updates
+        supabase
+          .from('roster')
+          .select('id, name, role, date, created_at, updated_at')
+          .or(`created_at.gte.${cutoffDate},updated_at.gte.${cutoffDate}`)
+          .order('created_at', { ascending: false })
+          .limit(10)
+      ]);
+
+      const activities: Array<{
+        id: string;
+        type: 'prayer' | 'event' | 'team_member' | 'newsletter' | 'roster';
+        title: string;
+        date: string;
+      }> = [];
+
+      // Process prayer requests
+      if (prayerRequestsResult.status === 'fulfilled' && !prayerRequestsResult.value.error) {
+        const requests = prayerRequestsResult.value.data || [];
+        requests.forEach((req: any) => {
+          activities.push({
+            id: req.id,
+            type: 'prayer',
+            title: `New prayer request: ${req.name}`,
+            date: req.created_at
+          });
+        });
+      }
+
+      // Process events
+      if (eventsResult.status === 'fulfilled' && !eventsResult.value.error) {
+        const events = eventsResult.value.data || [];
+        events.forEach((event: any) => {
+          const mostRecentDate = event.updated_at && new Date(event.updated_at) > new Date(event.created_at) 
+            ? event.updated_at 
+            : event.created_at;
+          const isUpdate = event.updated_at && event.updated_at !== event.created_at && 
+            new Date(event.updated_at) > new Date(event.created_at);
+          activities.push({
+            id: event.id,
+            type: 'event',
+            title: isUpdate ? `Event updated: ${event.title}` : `New event: ${event.title}`,
+            date: mostRecentDate
+          });
+        });
+      }
+
+      // Process team members
+      if (teamMembersResult.status === 'fulfilled' && !teamMembersResult.value.error) {
+        const members = teamMembersResult.value.data || [];
+        members.forEach((member: any) => {
+          const mostRecentDate = member.updated_at && new Date(member.updated_at) > new Date(member.created_at) 
+            ? member.updated_at 
+            : member.created_at;
+          const isUpdate = member.updated_at && member.updated_at !== member.created_at && 
+            new Date(member.updated_at) > new Date(member.created_at);
+          activities.push({
+            id: member.id,
+            type: 'team_member',
+            title: isUpdate ? `Team member updated: ${member.name}` : `Team member added: ${member.name}`,
+            date: mostRecentDate
+          });
+        });
+      }
+
+      // Process newsletters
+      if (newslettersResult.status === 'fulfilled' && !newslettersResult.value.error) {
+        const newsletters = newslettersResult.value.data || [];
+        newsletters.forEach((newsletter: any) => {
+          const mostRecentDate = newsletter.updated_at && new Date(newsletter.updated_at) > new Date(newsletter.created_at) 
+            ? newsletter.updated_at 
+            : newsletter.created_at;
+          const isUpdate = newsletter.updated_at && newsletter.updated_at !== newsletter.created_at && 
+            new Date(newsletter.updated_at) > new Date(newsletter.created_at);
+          activities.push({
+            id: newsletter.id,
+            type: 'newsletter',
+            title: isUpdate ? `Newsletter updated: ${newsletter.title}` : `Newsletter uploaded: ${newsletter.title}`,
+            date: mostRecentDate
+          });
+        });
+      }
+
+      // Process roster
+      if (rosterResult.status === 'fulfilled' && !rosterResult.value.error) {
+        const rosterItems = rosterResult.value.data || [];
+        rosterItems.forEach((item: any) => {
+          const mostRecentDate = item.updated_at && new Date(item.updated_at) > new Date(item.created_at) 
+            ? item.updated_at 
+            : item.created_at;
+          const isUpdate = item.updated_at && item.updated_at !== item.created_at && 
+            new Date(item.updated_at) > new Date(item.created_at);
+          activities.push({
+            id: item.id,
+            type: 'roster',
+            title: isUpdate ? `Roster updated: ${item.name} - ${item.role}` : `Roster assignment: ${item.name} - ${item.role}`,
+            date: mostRecentDate
+          });
+        });
+      }
+
+      // Sort all activities by date (most recent first) and take top 10
+      activities.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      setRecentActivities(activities.slice(0, 10));
+    } catch (error) {
+      console.error('Error fetching recent activities:', error);
+      setRecentActivities([]);
+    } finally {
+      setIsLoadingActivities(false);
     }
   };
 
@@ -256,26 +448,29 @@ export const AdminOverview = () => {
     },
     { 
       label: 'Team Members', 
-      value: '8', 
+      value: isLoadingStats ? '...' : teamMembersCount.toString(), 
       icon: <Users size={24} />, 
       path: '/admin/team', 
-      color: 'text-purple-500' 
+      color: 'text-purple-500',
+      subtitle: isLoadingStats ? 'Loading...' : undefined
     },
     { 
       label: 'Photo Folders', 
-      value: '7', 
+      value: isLoadingStats ? '...' : photoFoldersCount.toString(), 
       icon: <Image size={24} />, 
       path: '/admin/photos', 
-      color: 'text-pink-500' 
+      color: 'text-pink-500',
+      subtitle: isLoadingStats ? 'Loading...' : undefined
     },
     { 
       label: 'Roster Assignments', 
-      value: '15', 
+      value: isLoadingStats ? '...' : rosterAssignmentsCount.toString(), 
       icon: <ClipboardList size={24} />, 
       path: '/admin/roster', 
-      color: 'text-indigo-500' 
+      color: 'text-indigo-500',
+      subtitle: isLoadingStats ? 'Loading...' : undefined
     },
-  ], [pendingCount, prayerRequests24h, nextService, lastNewsletterDate, isLoadingStats]);
+  ], [pendingCount, prayerRequests24h, nextService, lastNewsletterDate, isLoadingStats, teamMembersCount, photoFoldersCount, rosterAssignmentsCount]);
 
   console.log('AdminOverview - Rendering, user:', user, 'pendingCount:', pendingCount, 'isLoadingUsers:', isLoadingUsers);
 
@@ -539,7 +734,7 @@ export const AdminOverview = () => {
             </Link>
             <Link to="/admin/prayer" className="block p-4 bg-white border border-gray-100 rounded-[4px] hover:border-gold hover:shadow-md transition-all">
               <span className="font-bold text-charcoal">Review New Prayer Requests</span>
-              <p className="text-sm text-neutral mt-1">3 pending approval</p>
+              <p className="text-sm text-neutral mt-1">{pendingPrayerRequestsCount > 0 ? `${pendingPrayerRequestsCount} recent request${pendingPrayerRequestsCount === 1 ? '' : 's'}` : 'No recent requests'}</p>
             </Link>
             <Link to="/admin/events" className="block p-4 bg-white border border-gray-100 rounded-[4px] hover:border-gold hover:shadow-md transition-all">
               <span className="font-bold text-charcoal">Add New Event</span>
@@ -554,29 +749,38 @@ export const AdminOverview = () => {
 
         <div className="glass-card bg-white/60 p-8 rounded-[8px] border border-gray-100">
           <h3 className="font-serif text-2xl mb-4 text-charcoal font-bold">Recent Activity</h3>
-          <div className="space-y-4">
-            <div className="flex items-start gap-3 pb-4 border-b border-gray-100">
-              <div className="w-2 h-2 rounded-full bg-gold mt-2"></div>
-              <div>
-                <p className="text-sm text-charcoal font-bold">New prayer request submitted</p>
-                <p className="text-xs text-neutral">2 hours ago</p>
-              </div>
+          {isLoadingActivities ? (
+            <div className="space-y-4">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="flex items-start gap-3 pb-4 border-b border-gray-100 animate-pulse">
+                  <div className="w-2 h-2 rounded-full bg-gray-300 mt-2"></div>
+                  <div className="flex-1">
+                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                  </div>
+                </div>
+              ))}
             </div>
-            <div className="flex items-start gap-3 pb-4 border-b border-gray-100">
-              <div className="w-2 h-2 rounded-full bg-gold mt-2"></div>
-              <div>
-                <p className="text-sm text-charcoal font-bold">Event updated: Sunday Service</p>
-                <p className="text-xs text-neutral">1 day ago</p>
-              </div>
+          ) : recentActivities.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-neutral text-sm">No recent activity</p>
             </div>
-            <div className="flex items-start gap-3">
-              <div className="w-2 h-2 rounded-full bg-gold mt-2"></div>
-              <div>
-                <p className="text-sm text-charcoal font-bold">Team member added</p>
-                <p className="text-xs text-neutral">3 days ago</p>
-              </div>
+          ) : (
+            <div className="space-y-4">
+              {recentActivities.map((activity, index) => (
+                <div 
+                  key={activity.id} 
+                  className={`flex items-start gap-3 ${index < recentActivities.length - 1 ? 'pb-4 border-b border-gray-100' : ''}`}
+                >
+                  <div className="w-2 h-2 rounded-full bg-gold mt-2"></div>
+                  <div>
+                    <p className="text-sm text-charcoal font-bold">{activity.title}</p>
+                    <p className="text-xs text-neutral">{formatRelativeDateInTimezone(activity.date)}</p>
+                  </div>
+                </div>
+              ))}
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>
