@@ -14,9 +14,22 @@ export const PublicLayout = () => {
   const [openFooterSection, setOpenFooterSection] = useState<string | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user, refreshUserProfile } = useAuth();
   const dropdownRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const dropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Refresh user profile when component mounts if user is logged in
+  // This ensures we have the latest approval status for the header button
+  useEffect(() => {
+    if (user) {
+      console.log('PublicLayout - User found, refreshing profile to ensure latest approval status');
+      // Only refresh once when component mounts
+      refreshUserProfile().catch((error) => {
+        console.error('PublicLayout - Error refreshing profile:', error);
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -49,6 +62,11 @@ export const PublicLayout = () => {
   useEffect(() => {
     const scrollToHash = () => {
       const hash = window.location.hash;
+      // Skip OAuth callback parameters (access_token, error, etc.)
+      if (hash && (hash.includes('access_token') || hash.includes('error=') || hash.includes('expires_at'))) {
+        return; // Don't try to scroll to OAuth parameters
+      }
+      
       // Validate hash: must start with # and have at least one valid character
       if (hash && hash.length > 1 && hash.startsWith('#')) {
         try {

@@ -1,27 +1,37 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FileText, Download, Upload, Trash2, X } from 'lucide-react';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { Modal } from '../../components/UI/Modal';
-
-interface Newsletter {
-  id: string;
-  title: string;
-  month: string;
-  year: string;
-  description?: string;
-  fileUrl?: string;
-}
+import { supabase } from '../../lib/supabase';
+import { Newsletter as NewsletterType } from '../../types';
 
 export const AdminNewsletter = () => {
-  const [newsletters, setNewsletters] = useState<Newsletter[]>([
-    { id: '1', title: 'October 2023', month: 'October', year: '2023', description: 'Harvest Edition' },
-    { id: '2', title: 'September 2023', month: 'September', year: '2023' },
-    { id: '3', title: 'August 2023', month: 'August', year: '2023' },
-    { id: '4', title: 'July 2023', month: 'July', year: '2023' },
-  ]);
-
+  const [newsletters, setNewsletters] = useState<NewsletterType[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [uploadData, setUploadData] = useState({ month: '', year: '', description: '', file: null as File | null });
+  const [isUploading, setIsUploading] = useState(false);
+
+  useEffect(() => {
+    fetchNewsletters();
+  }, []);
+
+  const fetchNewsletters = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('newsletters')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setNewsletters(data || []);
+    } catch (error) {
+      console.error('Error fetching newsletters:', error);
+      alert('Failed to load newsletters');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -29,34 +39,104 @@ export const AdminNewsletter = () => {
     }
   };
 
-  const handleUpload = () => {
+  const handleUpload = async () => {
     if (!uploadData.file || !uploadData.month || !uploadData.year) {
       alert('Please fill in all required fields and select a file');
       return;
     }
 
-    const newNewsletter: Newsletter = {
-      id: Date.now().toString(),
-      title: `${uploadData.month} ${uploadData.year}`,
-      month: uploadData.month,
-      year: uploadData.year,
-      description: uploadData.description,
-      fileUrl: URL.createObjectURL(uploadData.file),
-    };
+    setIsUploading(true);
 
-    setNewsletters([newNewsletter, ...newsletters]);
-    setUploadData({ month: '', year: '', description: '', file: null });
-    setIsUploadModalOpen(false);
-    alert('Newsletter uploaded successfully!');
+    try {
+      // Upload PDF to Supabase Storage
+      const fileExt = uploadData.file.name.split('.').pop();
+      const fileName = `newsletters/${uploadData.month}-${uploadData.year}-${Date.now()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('newsletters')
+        .upload(fileName, uploadData.file, {
+          cacheControl: '3600',
+          upsert: false,
+        });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: urlData } = supabase.storage.from('newsletters').getPublicUrl(fileName);
+
+      // Save newsletter record to database
+      const { data, error: dbError } = await supabase
+        .from('newsletters')
+        .insert([
+          {
+            title: `${uploadData.month} ${uploadData.year}`,
+            month: uploadData.month,
+            year: parseInt(uploadData.year),
+            pdf_url: urlData.publicUrl,
+          },
+        ])
+        .select()
+        .single();
+
+      if (dbError) throw dbError;
+
+      setNewsletters([data, ...newsletters]);
+      setUploadData({ month: '', year: '', description: '', file: null });
+      setIsUploadModalOpen(false);
+      alert('Newsletter uploaded successfully!');
+    } catch (error: any) {
+      console.error('Error uploading newsletter:', error);
+      alert(error.message || 'Failed to upload newsletter');
+    } finally {
+      setIsUploading(false);
+    }
   };
 
-  const handleDelete = (id: string) => {
-    if (window.confirm('Are you sure you want to delete this newsletter?')) {
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('Are you sure you want to delete this newsletter?')) {
+      return;
+    }
+
+    try {
+      const newsletter = newsletters.find(nl => nl.id === id);
+      
+      // Delete file from storage
+      if (newsletter?.pdf_url) {
+        const fileName = newsletter.pdf_url.split('/').pop();
+        if (fileName) {
+          await supabase.storage.from('newsletters').remove([fileName]);
+        }
+      }
+
+      // Delete record from database
+      const { error } = await supabase.from('newsletters').delete().eq('id', id);
+
+      if (error) throw error;
+
       setNewsletters(newsletters.filter(nl => nl.id !== id));
+    } catch (error) {
+      console.error('Error deleting newsletter:', error);
+      alert('Failed to delete newsletter');
     }
   };
 
   const latestNewsletter = newsletters[0];
+
+  if (isLoading) {
+    return (
+      <div className="space-y-8">
+        <div className="flex justify-between items-center border-b border-gray-200 pb-6">
+          <div>
+            <h1 className="text-4xl font-serif font-bold text-charcoal">Newsletter Management</h1>
+            <p className="text-neutral mt-1">Upload and manage church newsletters.</p>
+          </div>
+        </div>
+        <div className="text-center py-12">
+          <p className="text-neutral">Loading newsletters...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -82,18 +162,31 @@ export const AdminNewsletter = () => {
             <h2 className="text-3xl md:text-4xl font-serif text-charcoal mb-2 font-bold">
               {latestNewsletter?.title || 'No Newsletter'}
             </h2>
-            {latestNewsletter?.description && (
-              <p className="text-neutral mb-8 font-medium">{latestNewsletter.description}</p>
+            {latestNewsletter && (
+              <p className="text-neutral mb-8 font-medium">{latestNewsletter.month} {latestNewsletter.year}</p>
             )}
-            <div className="flex gap-3 justify-center">
-              <button className="bg-charcoal text-white px-8 py-3 rounded-[4px] font-bold uppercase tracking-wider hover:bg-gold hover:text-charcoal transition-colors shadow-lg">
-                Read Online
-              </button>
-              <button className="bg-gray-100 text-charcoal px-8 py-3 rounded-[4px] font-bold uppercase tracking-wider hover:bg-gray-200 transition-colors">
-                <Download size={18} className="inline mr-2" />
-                Download
-              </button>
-            </div>
+            {latestNewsletter ? (
+              <div className="flex gap-3 justify-center">
+                <a
+                  href={latestNewsletter.pdf_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-charcoal text-white px-8 py-3 rounded-[4px] font-bold uppercase tracking-wider hover:bg-gold hover:text-charcoal transition-colors shadow-lg"
+                >
+                  Read Online
+                </a>
+                <a
+                  href={latestNewsletter.pdf_url}
+                  download
+                  className="bg-gray-100 text-charcoal px-8 py-3 rounded-[4px] font-bold uppercase tracking-wider hover:bg-gray-200 transition-colors"
+                >
+                  <Download size={18} className="inline mr-2" />
+                  Download
+                </a>
+              </div>
+            ) : (
+              <p className="text-neutral">Upload your first newsletter to get started</p>
+            )}
           </div>
         </div>
 
@@ -217,8 +310,8 @@ export const AdminNewsletter = () => {
             >
               Cancel
             </button>
-            <GlowingButton onClick={handleUpload} disabled={!uploadData.file || !uploadData.month || !uploadData.year}>
-              Upload Newsletter
+            <GlowingButton onClick={handleUpload} disabled={!uploadData.file || !uploadData.month || !uploadData.year || isUploading}>
+              {isUploading ? 'Uploading...' : 'Upload Newsletter'}
             </GlowingButton>
           </div>
         </div>

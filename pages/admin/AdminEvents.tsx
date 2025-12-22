@@ -1,28 +1,77 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { Modal } from '../../components/UI/Modal';
 import { Calendar as CalIcon, Edit, Trash2, Plus } from 'lucide-react';
 import { Event } from '../../types';
+import { supabase } from '../../lib/supabase';
 
 export const AdminEvents = () => {
-  const [events, setEvents] = useState<Event[]>([
-    { id: '1', title: "Worship Team Rehearsal", date: "Oct 24", time: "7:30 PM", location: "Main Auditorium", category: "Rehearsal" },
-    { id: '2', title: "Elders Meeting", date: "Oct 26", time: "6:00 PM", location: "Meeting Room B", category: "Meeting" },
-    { id: '3', title: "Working Bee", date: "Oct 29", time: "8:00 AM", location: "Grounds", category: "Service" },
-  ]);
-
+  const [events, setEvents] = useState<Event[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
-  const [formData, setFormData] = useState({ title: '', date: '', time: '', location: '', category: '' });
+  const [formData, setFormData] = useState({ 
+    title: '', 
+    date: '', 
+    time: '', 
+    location: '', 
+    category: '',
+    description: '',
+    is_public: true,
+  });
 
-  const handleCreate = () => {
-    const newEvent: Event = {
-      id: Date.now().toString(),
-      ...formData,
-    };
-    setEvents([...events, newEvent]);
-    setFormData({ title: '', date: '', time: '', location: '', category: '' });
-    setIsModalOpen(false);
+  useEffect(() => {
+    fetchEvents();
+  }, []);
+
+  const fetchEvents = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('events')
+        .select('*')
+        .order('date', { ascending: true });
+
+      if (error) throw error;
+      setEvents(data || []);
+    } catch (error) {
+      console.error('Error fetching events:', error);
+      alert('Failed to load events');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCreate = async () => {
+    if (!formData.title || !formData.date || !formData.time || !formData.location) {
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('events')
+        .insert([
+          {
+            title: formData.title,
+            date: formData.date,
+            time: formData.time,
+            location: formData.location,
+            category: formData.category || 'Other',
+            description: formData.description,
+            is_public: formData.is_public,
+          },
+        ])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setEvents([...events, data]);
+      setFormData({ title: '', date: '', time: '', location: '', category: '', description: '', is_public: true });
+      setIsModalOpen(false);
+    } catch (error: any) {
+      console.error('Error creating event:', error);
+      alert(error.message || 'Failed to create event');
+    }
   };
 
   const handleEdit = (event: Event) => {
@@ -33,33 +82,84 @@ export const AdminEvents = () => {
       time: event.time,
       location: event.location,
       category: event.category,
+      description: event.description || '',
+      is_public: event.is_public,
     });
     setIsModalOpen(true);
   };
 
-  const handleUpdate = () => {
+  const handleUpdate = async () => {
     if (!editingEvent) return;
-    setEvents(events.map(e =>
-      e.id === editingEvent.id
-        ? { ...e, ...formData }
-        : e
-    ));
-    setFormData({ title: '', date: '', time: '', location: '', category: '' });
-    setEditingEvent(null);
-    setIsModalOpen(false);
+
+    try {
+      const { error } = await supabase
+        .from('events')
+        .update({
+          title: formData.title,
+          date: formData.date,
+          time: formData.time,
+          location: formData.location,
+          category: formData.category || 'Other',
+          description: formData.description,
+          is_public: formData.is_public,
+        })
+        .eq('id', editingEvent.id);
+
+      if (error) throw error;
+
+      fetchEvents();
+      setFormData({ title: '', date: '', time: '', location: '', category: '', description: '', is_public: true });
+      setEditingEvent(null);
+      setIsModalOpen(false);
+    } catch (error: any) {
+      console.error('Error updating event:', error);
+      alert(error.message || 'Failed to update event');
+    }
   };
 
-  const handleDelete = (id: string) => {
-    if (window.confirm('Are you sure you want to delete this event?')) {
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('Are you sure you want to delete this event?')) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase.from('events').delete().eq('id', id);
+
+      if (error) throw error;
+
       setEvents(events.filter(e => e.id !== id));
+    } catch (error) {
+      console.error('Error deleting event:', error);
+      alert('Failed to delete event');
     }
   };
 
   const openCreateModal = () => {
     setEditingEvent(null);
-    setFormData({ title: '', date: '', time: '', location: '', category: '' });
+    setFormData({ title: '', date: '', time: '', location: '', category: '', description: '', is_public: true });
     setIsModalOpen(true);
   };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-8">
+        <div className="flex justify-between items-center border-b border-gray-200 pb-6">
+          <div>
+            <h1 className="text-4xl font-serif font-bold text-charcoal">Events Management</h1>
+            <p className="text-neutral mt-1">Create and manage church events and meetings.</p>
+          </div>
+        </div>
+        <div className="text-center py-12">
+          <p className="text-neutral">Loading events...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -74,8 +174,16 @@ export const AdminEvents = () => {
         </GlowingButton>
       </div>
 
-      <div className="space-y-4">
-        {events.map((evt) => (
+      {events.length === 0 ? (
+        <div className="text-center py-12">
+          <p className="text-neutral">No events yet. Create your first event!</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {events.map((evt) => {
+            const formattedDate = formatDate(evt.date);
+            const dateParts = formattedDate.split(' ');
+            return (
           <div key={evt.id} className="flex items-center p-6 bg-white border border-gray-100 shadow-sm rounded-[8px] hover:border-gold hover:shadow-md transition-all group relative">
             <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
               <button
@@ -94,8 +202,8 @@ export const AdminEvents = () => {
               </button>
             </div>
             <div className="flex-shrink-0 w-20 text-center border-r border-gray-100 pr-6 mr-6">
-              <span className="block text-xs text-gold uppercase font-bold tracking-widest">{evt.date.split(' ')[0]}</span>
-              <span className="block text-3xl font-serif text-charcoal font-bold">{evt.date.split(' ')[1]}</span>
+              <span className="block text-xs text-gold uppercase font-bold tracking-widest">{dateParts[0]}</span>
+              <span className="block text-3xl font-serif text-charcoal font-bold">{dateParts[1]}</span>
             </div>
             <div className="flex-1">
               <h3 className="text-xl font-bold text-charcoal group-hover:text-gold transition-colors">{evt.title}</h3>
@@ -103,15 +211,28 @@ export const AdminEvents = () => {
                 <span className="w-2 h-2 rounded-full bg-gold mr-2"></span>
                 {evt.time} • {evt.location}
               </p>
-              {evt.category && (
-                <span className="inline-block mt-2 text-xs bg-gold/10 text-gold px-2 py-1 rounded uppercase tracking-wider font-bold">
-                  {evt.category}
-                </span>
-              )}
+              <div className="flex items-center gap-2 mt-2">
+                {evt.category && (
+                  <span className="inline-block text-xs bg-gold/10 text-gold px-2 py-1 rounded uppercase tracking-wider font-bold">
+                    {evt.category}
+                  </span>
+                )}
+                {evt.is_public ? (
+                  <span className="inline-block text-xs bg-green-100 text-green-700 px-2 py-1 rounded uppercase tracking-wider font-bold">
+                    Public
+                  </span>
+                ) : (
+                  <span className="inline-block text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded uppercase tracking-wider font-bold">
+                    Private
+                  </span>
+                )}
+              </div>
             </div>
           </div>
-        ))}
-      </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* Create/Edit Modal */}
       <Modal
@@ -138,11 +259,10 @@ export const AdminEvents = () => {
             <div>
               <label className="block text-sm font-bold text-charcoal mb-2">Date *</label>
               <input
-                type="text"
+                type="date"
                 value={formData.date}
                 onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                 className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none"
-                placeholder="e.g., Oct 24"
               />
             </div>
             <div>
@@ -181,12 +301,32 @@ export const AdminEvents = () => {
               <option value="Other">Other</option>
             </select>
           </div>
+          <div>
+            <label className="block text-sm font-bold text-charcoal mb-2">Description (Optional)</label>
+            <textarea
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              rows={3}
+              className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none"
+              placeholder="Event description..."
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="is_public"
+              checked={formData.is_public}
+              onChange={(e) => setFormData({ ...formData, is_public: e.target.checked })}
+              className="w-4 h-4"
+            />
+            <label htmlFor="is_public" className="text-sm text-charcoal">Make this event public</label>
+          </div>
           <div className="flex gap-3 justify-end pt-4">
             <button
               onClick={() => {
                 setIsModalOpen(false);
                 setEditingEvent(null);
-                setFormData({ title: '', date: '', time: '', location: '', category: '' });
+                setFormData({ title: '', date: '', time: '', location: '', category: '', description: '', is_public: true });
               }}
               className="px-6 py-2 border border-gray-200 rounded-[4px] text-charcoal hover:bg-gray-50 transition-colors"
             >

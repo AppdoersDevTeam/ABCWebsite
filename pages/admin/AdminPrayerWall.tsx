@@ -1,76 +1,157 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { VibrantCard } from '../../components/UI/VibrantCard';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { Modal } from '../../components/UI/Modal';
 import { MessageCircle, Heart, Edit, Trash2, Plus } from 'lucide-react';
-
-interface PrayerRequest {
-  id: string;
-  name: string;
-  date: string;
-  content: string;
-  count: number;
-  isAnonymous?: boolean;
-}
+import { supabase } from '../../lib/supabase';
+import { PrayerRequest } from '../../types';
 
 export const AdminPrayerWall = () => {
-  const [requests, setRequests] = useState<PrayerRequest[]>([
-    { id: '1', name: "Sarah M.", date: "2 days ago", content: "Please pray for my mother who is going into surgery tomorrow.", count: 5 },
-    { id: '2', name: "Anonymous", date: "4 days ago", content: "Seeking guidance for a new job opportunity.", count: 2, isAnonymous: true },
-    { id: '3', name: "The Wilson Family", date: "1 week ago", content: "Praise God for our new baby boy!", count: 12 },
-  ]);
-
+  const [requests, setRequests] = useState<PrayerRequest[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingRequest, setEditingRequest] = useState<PrayerRequest | null>(null);
-  const [formData, setFormData] = useState({ name: '', content: '', isAnonymous: false });
+  const [formData, setFormData] = useState({ name: '', content: '', isAnonymous: false, isConfidential: false });
 
-  const handleCreate = () => {
-    const newRequest: PrayerRequest = {
-      id: Date.now().toString(),
-      name: formData.isAnonymous ? 'Anonymous' : formData.name,
-      date: 'Just now',
-      content: formData.content,
-      count: 0,
-      isAnonymous: formData.isAnonymous,
-    };
-    setRequests([newRequest, ...requests]);
-    setFormData({ name: '', content: '', isAnonymous: false });
-    setIsCreateModalOpen(false);
+  useEffect(() => {
+    fetchPrayerRequests();
+  }, []);
+
+  const fetchPrayerRequests = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('prayer_requests')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setRequests(data || []);
+    } catch (error) {
+      console.error('Error fetching prayer requests:', error);
+      alert('Failed to load prayer requests');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCreate = async () => {
+    if (!formData.content || (!formData.isAnonymous && !formData.name)) {
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('prayer_requests')
+        .insert([
+          {
+            name: formData.isAnonymous ? 'Anonymous' : formData.name,
+            content: formData.content,
+            is_anonymous: formData.isAnonymous,
+            is_confidential: formData.isConfidential,
+            prayer_count: 0,
+          },
+        ])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setRequests([data, ...requests]);
+      setFormData({ name: '', content: '', isAnonymous: false, isConfidential: false });
+      setIsCreateModalOpen(false);
+    } catch (error) {
+      console.error('Error creating prayer request:', error);
+      alert('Failed to create prayer request');
+    }
   };
 
   const handleEdit = (request: PrayerRequest) => {
     setEditingRequest(request);
     setFormData({
-      name: request.isAnonymous ? '' : request.name,
+      name: request.is_anonymous ? '' : request.name,
       content: request.content,
-      isAnonymous: request.isAnonymous || false,
+      isAnonymous: request.is_anonymous || false,
+      isConfidential: request.is_confidential || false,
     });
     setIsEditModalOpen(true);
   };
 
-  const handleUpdate = () => {
+  const handleUpdate = async () => {
     if (!editingRequest) return;
-    setRequests(requests.map(req =>
-      req.id === editingRequest.id
-        ? {
-            ...req,
-            name: formData.isAnonymous ? 'Anonymous' : formData.name,
-            content: formData.content,
-            isAnonymous: formData.isAnonymous,
-          }
-        : req
-    ));
-    setFormData({ name: '', content: '', isAnonymous: false });
-    setEditingRequest(null);
-    setIsEditModalOpen(false);
-  };
 
-  const handleDelete = (id: string) => {
-    if (window.confirm('Are you sure you want to delete this prayer request?')) {
-      setRequests(requests.filter(req => req.id !== id));
+    try {
+      const { error } = await supabase
+        .from('prayer_requests')
+        .update({
+          name: formData.isAnonymous ? 'Anonymous' : formData.name,
+          content: formData.content,
+          is_anonymous: formData.isAnonymous,
+          is_confidential: formData.isConfidential,
+        })
+        .eq('id', editingRequest.id);
+
+      if (error) throw error;
+
+      // Refresh requests
+      fetchPrayerRequests();
+      setFormData({ name: '', content: '', isAnonymous: false, isConfidential: false });
+      setEditingRequest(null);
+      setIsEditModalOpen(false);
+    } catch (error) {
+      console.error('Error updating prayer request:', error);
+      alert('Failed to update prayer request');
     }
   };
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('Are you sure you want to delete this prayer request?')) {
+      return;
+    }
+
+    try {
+      // First delete all prayer counts for this request
+      await supabase.from('prayer_counts').delete().eq('prayer_request_id', id);
+
+      // Then delete the request
+      const { error } = await supabase.from('prayer_requests').delete().eq('id', id);
+
+      if (error) throw error;
+
+      setRequests(requests.filter(req => req.id !== id));
+    } catch (error) {
+      console.error('Error deleting prayer request:', error);
+      alert('Failed to delete prayer request');
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - date.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 1) return '1 day ago';
+    if (diffDays < 7) return `${diffDays} days ago`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)} week${Math.floor(diffDays / 7) > 1 ? 's' : ''} ago`;
+    return date.toLocaleDateString();
+  };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-8">
+        <div className="flex justify-between items-center border-b border-gray-200 pb-6">
+          <div>
+            <h1 className="text-4xl font-serif font-bold text-charcoal">Prayer Wall Management</h1>
+            <p className="text-neutral mt-1">Manage all prayer requests from the community.</p>
+          </div>
+        </div>
+        <div className="text-center py-12">
+          <p className="text-neutral">Loading prayer requests...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -85,48 +166,66 @@ export const AdminPrayerWall = () => {
         </GlowingButton>
       </div>
 
-      <div className="grid gap-6">
-        {requests.map((req) => (
-          <div key={req.id} className="bg-white border border-gray-100 shadow-sm p-6 rounded-[8px] hover:shadow-md hover:border-gold transition-all duration-300">
-            <div className="flex justify-between items-start mb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-gold/10 text-charcoal flex items-center justify-center font-bold">
-                  {req.name.charAt(0)}
+      {requests.length === 0 ? (
+        <div className="text-center py-12">
+          <p className="text-neutral">No prayer requests yet.</p>
+        </div>
+      ) : (
+        <div className="grid gap-6">
+          {requests.map((req) => (
+            <div
+              key={req.id}
+              className="bg-white border border-gray-100 shadow-sm p-6 rounded-[8px] hover:shadow-md hover:border-gold transition-all duration-300"
+            >
+              <div className="flex justify-between items-start mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-gold/10 text-charcoal flex items-center justify-center font-bold">
+                    {req.name.charAt(0)}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-charcoal block">{req.name}</span>
+                      {req.is_confidential && (
+                        <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded">Confidential</span>
+                      )}
+                    </div>
+                    <span className="text-xs text-neutral uppercase tracking-widest">
+                      {formatDate(req.created_at)}
+                    </span>
+                  </div>
                 </div>
-                <div>
-                  <span className="font-bold text-charcoal block">{req.name}</span>
-                  <span className="text-xs text-neutral uppercase tracking-widest">{req.date}</span>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleEdit(req)}
+                    className="p-2 text-neutral hover:text-gold hover:bg-gold/10 rounded-[4px] transition-colors"
+                    title="Edit"
+                  >
+                    <Edit size={18} />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(req.id)}
+                    className="p-2 text-neutral hover:text-red-500 hover:bg-red-50 rounded-[4px] transition-colors"
+                    title="Delete"
+                  >
+                    <Trash2 size={18} />
+                  </button>
                 </div>
               </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => handleEdit(req)}
-                  className="p-2 text-neutral hover:text-gold hover:bg-gold/10 rounded-[4px] transition-colors"
-                  title="Edit"
-                >
-                  <Edit size={18} />
+              <p className="text-charcoal leading-relaxed mb-6 text-lg font-light pl-12 border-l-2 border-gold/20">
+                {req.content}
+              </p>
+              <div className="flex items-center space-x-6 border-t border-gray-100 pt-4 pl-12">
+                <button className="flex items-center text-sm text-neutral hover:text-gold transition-colors font-bold uppercase tracking-wider">
+                  <Heart size={16} className="mr-2" /> Praying ({req.prayer_count})
                 </button>
-                <button
-                  onClick={() => handleDelete(req.id)}
-                  className="p-2 text-neutral hover:text-red-500 hover:bg-red-50 rounded-[4px] transition-colors"
-                  title="Delete"
-                >
-                  <Trash2 size={18} />
+                <button className="flex items-center text-sm text-neutral hover:text-charcoal transition-colors font-bold uppercase tracking-wider">
+                  <MessageCircle size={16} className="mr-2" /> Encouragement
                 </button>
               </div>
             </div>
-            <p className="text-charcoal leading-relaxed mb-6 text-lg font-light pl-12 border-l-2 border-gold/20">{req.content}</p>
-            <div className="flex items-center space-x-6 border-t border-gray-100 pt-4 pl-12">
-              <button className="flex items-center text-sm text-neutral hover:text-gold transition-colors font-bold uppercase tracking-wider">
-                <Heart size={16} className="mr-2" /> Praying ({req.count})
-              </button>
-              <button className="flex items-center text-sm text-neutral hover:text-charcoal transition-colors font-bold uppercase tracking-wider">
-                <MessageCircle size={16} className="mr-2" /> Encouragement
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {/* Create Modal */}
       <Modal
@@ -159,6 +258,16 @@ export const AdminPrayerWall = () => {
             />
             <label htmlFor="anonymous" className="text-sm text-charcoal">Post as Anonymous</label>
           </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="confidential"
+              checked={formData.isConfidential}
+              onChange={(e) => setFormData({ ...formData, isConfidential: e.target.checked })}
+              className="w-4 h-4"
+            />
+            <label htmlFor="confidential" className="text-sm text-charcoal">Keep Confidential (Pastors only)</label>
+          </div>
           <div>
             <label className="block text-sm font-bold text-charcoal mb-2">Prayer Request</label>
             <textarea
@@ -173,7 +282,7 @@ export const AdminPrayerWall = () => {
             <button
               onClick={() => {
                 setIsCreateModalOpen(false);
-                setFormData({ name: '', content: '', isAnonymous: false });
+                setFormData({ name: '', content: '', isAnonymous: false, isConfidential: false });
               }}
               className="px-6 py-2 border border-gray-200 rounded-[4px] text-charcoal hover:bg-gray-50 transition-colors"
             >
@@ -218,6 +327,16 @@ export const AdminPrayerWall = () => {
             />
             <label htmlFor="edit-anonymous" className="text-sm text-charcoal">Post as Anonymous</label>
           </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="edit-confidential"
+              checked={formData.isConfidential}
+              onChange={(e) => setFormData({ ...formData, isConfidential: e.target.checked })}
+              className="w-4 h-4"
+            />
+            <label htmlFor="edit-confidential" className="text-sm text-charcoal">Keep Confidential (Pastors only)</label>
+          </div>
           <div>
             <label className="block text-sm font-bold text-charcoal mb-2">Prayer Request</label>
             <textarea
@@ -233,7 +352,7 @@ export const AdminPrayerWall = () => {
               onClick={() => {
                 setIsEditModalOpen(false);
                 setEditingRequest(null);
-                setFormData({ name: '', content: '', isAnonymous: false });
+                setFormData({ name: '', content: '', isAnonymous: false, isConfidential: false });
               }}
               className="px-6 py-2 border border-gray-200 rounded-[4px] text-charcoal hover:bg-gray-50 transition-colors"
             >

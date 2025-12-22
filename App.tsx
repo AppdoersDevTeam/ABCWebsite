@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ADMIN_EMAIL } from './lib/constants';
 import { PublicLayout } from './components/Layouts/PublicLayout';
 import { DashboardLayout } from './components/Layouts/DashboardLayout';
 import { AdminLayout } from './components/Layouts/AdminLayout';
@@ -20,6 +21,9 @@ import { Giving } from './pages/public/Giving';
 import { NeedPrayer } from './pages/public/NeedPrayer';
 import { Contact } from './pages/public/Contact';
 import { Login } from './pages/public/Login';
+import { LoginError } from './pages/public/LoginError';
+import { OAuthCallback } from './pages/public/OAuthCallback';
+import { OAuthCallbackWrapper } from './pages/public/OAuthCallbackWrapper';
 import { Terms } from './pages/public/Terms';
 import { Privacy } from './pages/public/Privacy';
 
@@ -41,6 +45,7 @@ import { Photos } from './pages/dashboard/Photos';
 
 // Admin Pages
 import { AdminOverview } from './pages/admin/AdminOverview';
+import { AdminUsers } from './pages/admin/AdminUsers';
 import { AdminPrayerWall } from './pages/admin/AdminPrayerWall';
 import { AdminNewsletter } from './pages/admin/AdminNewsletter';
 import { AdminTeam } from './pages/admin/AdminTeam';
@@ -50,9 +55,53 @@ import { AdminPhotos } from './pages/admin/AdminPhotos';
 
 // Protected Route Component
 const ProtectedRoute = () => {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, refreshUserProfile } = useAuth();
+  const [hasRefreshed, setHasRefreshed] = useState(false);
 
-  if (isLoading) {
+  // Track the user ID to detect when it changes after refresh
+  const [lastUserId, setLastUserId] = useState<string | null>(null);
+
+  // Refresh profile on mount to ensure we have latest approval status
+  useEffect(() => {
+    if (user && !hasRefreshed) {
+      console.log('ProtectedRoute - User found, refreshing profile. Current user:', {
+        id: user.id,
+        email: user.email,
+        is_approved: user.is_approved,
+        role: user.role
+      });
+      setLastUserId(user.id);
+      refreshUserProfile().then(() => {
+        console.log('ProtectedRoute - Refresh function completed');
+        // Wait a bit for state to update, then mark as refreshed
+        setTimeout(() => {
+          console.log('ProtectedRoute - Setting hasRefreshed to true after delay');
+          setHasRefreshed(true);
+        }, 300);
+      }).catch((error) => {
+        console.error('ProtectedRoute - Error refreshing profile:', error);
+        // Even if refresh fails, allow check to proceed
+        setHasRefreshed(true);
+      });
+    } else if (!user) {
+      setHasRefreshed(true); // No user, no need to refresh
+      setLastUserId(null);
+    }
+  }, [user, hasRefreshed, refreshUserProfile]);
+
+  // Detect when user state changes after refresh (indicates state update)
+  useEffect(() => {
+    if (user && lastUserId === user.id && hasRefreshed) {
+      console.log('ProtectedRoute - User state updated after refresh:', {
+        id: user.id,
+        email: user.email,
+        is_approved: user.is_approved,
+        role: user.role
+      });
+    }
+  }, [user, lastUserId, hasRefreshed]);
+
+  if (isLoading || (user && !hasRefreshed)) {
     return (
         <div className="min-h-screen flex items-center justify-center bg-secondary text-white font-serif">
             <div className="animate-pulse">Loading...</div>
@@ -61,18 +110,26 @@ const ProtectedRoute = () => {
   }
 
   if (!user) {
+    console.log('ProtectedRoute - No user, redirecting to login');
     return <Navigate to="/login" replace />;
   }
 
   if (!user.is_approved) {
+    console.log('ProtectedRoute - User not approved, redirecting to pending-approval. User:', {
+      id: user.id,
+      email: user.email,
+      is_approved: user.is_approved
+    });
     return <Navigate to="/pending-approval" replace />;
   }
 
   // Redirect admins to admin dashboard
   if (user.role === 'admin') {
+    console.log('ProtectedRoute - Admin user, redirecting to admin dashboard');
     return <Navigate to="/admin" replace />;
   }
 
+  console.log('ProtectedRoute - User approved, allowing access to dashboard');
   return <Outlet />;
 };
 
@@ -80,6 +137,10 @@ const ProtectedRoute = () => {
 const AdminRoute = () => {
   const { user, isLoading } = useAuth();
 
+  // Debug logging
+  console.log('AdminRoute - isLoading:', isLoading, 'user:', user);
+
+  // Show loading state - AuthContext handles timeout logic
   if (isLoading) {
     return (
         <div className="min-h-screen flex items-center justify-center bg-secondary text-white font-serif">
@@ -89,17 +150,31 @@ const AdminRoute = () => {
   }
 
   if (!user) {
+    console.log('AdminRoute - No user, redirecting to login');
     return <Navigate to="/login" replace />;
   }
 
+  // Only allow the specific admin email to access admin dashboard
+  const isAdminEmail = user.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+  console.log('AdminRoute - isAdminEmail:', isAdminEmail, 'user.email:', user.email, 'ADMIN_EMAIL:', ADMIN_EMAIL);
+  
+  if (!isAdminEmail) {
+    // Redirect non-admin users to dashboard
+    console.log('AdminRoute - Not admin email, redirecting to dashboard');
+    return <Navigate to="/dashboard" replace />;
+  }
+
   if (!user.is_approved) {
+    console.log('AdminRoute - User not approved, redirecting to pending-approval');
     return <Navigate to="/pending-approval" replace />;
   }
 
   if (user.role !== 'admin') {
+    console.log('AdminRoute - User role is not admin, redirecting to dashboard');
     return <Navigate to="/dashboard" replace />;
   }
 
+  console.log('AdminRoute - All checks passed, rendering Outlet');
   return <Outlet />;
 };
 
@@ -110,7 +185,7 @@ const AppRoutes = () => {
         <Routes>
             {/* Public Routes */}
             <Route path="/" element={<PublicLayout />}>
-              <Route index element={<Home />} />
+              <Route index element={<OAuthCallbackWrapper />} />
               <Route path="about" element={<About />} />
               <Route path="about/history" element={<History />} />
               <Route path="about/leadership/david-miller" element={<DavidMiller />} />
@@ -127,7 +202,17 @@ const AppRoutes = () => {
               <Route path="giving" element={<Giving />} />
               <Route path="need-prayer" element={<NeedPrayer />} />
               <Route path="contact" element={<Contact />} />
-              <Route path="login" element={user ? (user.role === 'admin' ? <Navigate to="/admin" /> : <Navigate to="/dashboard" />) : <Login />} />
+              <Route path="login" element={
+                user ? (
+                  !user.is_approved ? <Navigate to="/pending-approval" replace /> :
+                  user.role === 'admin' ? <Navigate to="/admin" replace /> : <Navigate to="/dashboard" replace />
+                ) : (
+                  <Login />
+                )
+              } />
+              <Route path="login-error" element={<LoginError />} />
+              {/* OAuth callback route - Supabase redirects here after OAuth */}
+              <Route path="auth/callback" element={<OAuthCallback />} />
               <Route path="terms" element={<Terms />} />
               <Route path="privacy" element={<Privacy />} />
             </Route>
@@ -152,6 +237,7 @@ const AppRoutes = () => {
             <Route path="/admin" element={<AdminRoute />}>
               <Route element={<AdminLayout />}>
                 <Route index element={<AdminOverview />} />
+                <Route path="users" element={<AdminUsers />} />
                 <Route path="prayer" element={<AdminPrayerWall />} />
                 <Route path="newsletter" element={<AdminNewsletter />} />
                 <Route path="team" element={<AdminTeam />} />

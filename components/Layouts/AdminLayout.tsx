@@ -11,7 +11,8 @@ import {
   Menu,
   MessageSquare,
   X,
-  Shield
+  Shield,
+  UserCog
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { ScrollToTop } from '../ScrollToTop';
@@ -30,6 +31,7 @@ export const AdminLayout = () => {
 
   const navItems = [
     { label: 'Overview', path: '/admin', icon: <Home size={20} /> },
+    { label: 'User Management', path: '/admin/users', icon: <UserCog size={20} /> },
     { label: 'Prayer Wall', path: '/admin/prayer', icon: <MessageSquare size={20} /> },
     { label: 'Newsletters', path: '/admin/newsletter', icon: <BookOpen size={20} /> },
     { label: 'Team', path: '/admin/team', icon: <Users size={20} /> },
@@ -100,11 +102,11 @@ export const AdminLayout = () => {
           <div className="p-4 border-t border-gray-100">
             <div className="flex items-center space-x-3 px-4 py-4 mb-2 rounded-[4px] bg-gold/10 border border-gold/20">
               <div className="w-10 h-10 rounded-full bg-gold flex items-center justify-center text-charcoal font-bold text-lg">
-                {user?.name.charAt(0).toUpperCase()}
+                {user?.name?.charAt(0)?.toUpperCase() || 'A'}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold text-charcoal truncate">{user?.name}</p>
-                <p className="text-xs text-neutral truncate">{user?.email}</p>
+                <p className="text-sm font-bold text-charcoal truncate">{user?.name || 'Admin'}</p>
+                <p className="text-xs text-neutral truncate">{user?.email || ''}</p>
                 <span className="text-[10px] text-gold font-bold uppercase tracking-wider">Admin</span>
               </div>
             </div>
