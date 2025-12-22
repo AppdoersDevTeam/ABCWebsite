@@ -1,100 +1,332 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { Modal } from '../../components/UI/Modal';
 import { FolderPlus, Image as ImageIcon, Upload, Edit, Trash2, X, Plus } from 'lucide-react';
+import { supabase } from '../../lib/supabase';
+import { PhotoFolder, Photo } from '../../types';
+import { SkeletonPageHeader, SkeletonCard } from '../../components/UI/Skeleton';
 
-interface PhotoFolder {
-  id: string;
-  name: string;
-  photos: string[];
+interface PhotoFolderWithPhotos extends PhotoFolder {
+  photos: Photo[];
 }
 
 export const AdminPhotos = () => {
-  const [folders, setFolders] = useState<PhotoFolder[]>([
-    { id: '1', name: 'Sunday Service', photos: [
-      'https://images.unsplash.com/photo-1511632765486-a01980978a63?auto=format&fit=crop&w=500&q=60',
-      'https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&w=500&q=60',
-    ]},
-    { id: '2', name: 'Community Events', photos: [
-      'https://images.unsplash.com/photo-1529070538774-32973fcf5223?auto=format&fit=crop&w=500&q=60',
-      'https://images.unsplash.com/photo-1478147427282-58a87a120781?auto=format&fit=crop&w=500&q=60',
-    ]},
-    { id: '3', name: 'Youth Group', photos: [
-      'https://images.unsplash.com/photo-1511649475669-e288648b2339?auto=format&fit=crop&w=500&q=60',
-    ]},
-  ]);
-
-  const [selectedFolder, setSelectedFolder] = useState<PhotoFolder | null>(null);
+  const [folders, setFolders] = useState<PhotoFolderWithPhotos[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedFolder, setSelectedFolder] = useState<PhotoFolderWithPhotos | null>(null);
   const [isFolderModalOpen, setIsFolderModalOpen] = useState(false);
   const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
-  const [editingFolder, setEditingFolder] = useState<PhotoFolder | null>(null);
+  const [editingFolder, setEditingFolder] = useState<PhotoFolderWithPhotos | null>(null);
   const [folderName, setFolderName] = useState('');
-  const [uploadedPhotos, setUploadedPhotos] = useState<string[]>([]);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  const handleCreateFolder = () => {
-    const newFolder: PhotoFolder = {
-      id: Date.now().toString(),
-      name: folderName,
-      photos: [],
-    };
-    setFolders([...folders, newFolder]);
-    setFolderName('');
-    setIsFolderModalOpen(false);
+  useEffect(() => {
+    fetchFoldersAndPhotos();
+  }, []);
+
+  const fetchFoldersAndPhotos = async () => {
+    try {
+      setIsLoading(true);
+      
+      // Fetch all folders
+      const { data: foldersData, error: foldersError } = await supabase
+        .from('photo_folders')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (foldersError) throw foldersError;
+
+      // Fetch all photos
+      const { data: photosData, error: photosError } = await supabase
+        .from('photos')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (photosError) throw photosError;
+
+      // Group photos by folder_id
+      const foldersWithPhotos: PhotoFolderWithPhotos[] = (foldersData || []).map(folder => ({
+        ...folder,
+        photos: (photosData || []).filter(photo => photo.folder_id === folder.id)
+      }));
+
+      setFolders(foldersWithPhotos);
+    } catch (error) {
+      console.error('Error fetching folders and photos:', error);
+      alert('Failed to load folders and photos');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleEditFolder = (folder: PhotoFolder) => {
+  const handleCreateFolder = async () => {
+    if (!folderName.trim()) {
+      alert('Please enter a folder name');
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('photo_folders')
+        .insert([{ name: folderName.trim() }])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      const newFolder: PhotoFolderWithPhotos = { ...data, photos: [] };
+      setFolders([newFolder, ...folders]);
+      setFolderName('');
+      setIsFolderModalOpen(false);
+      alert('Folder created successfully!');
+    } catch (error: any) {
+      console.error('Error creating folder:', error);
+      alert(error.message || 'Failed to create folder');
+    }
+  };
+
+  const handleEditFolder = (folder: PhotoFolderWithPhotos) => {
     setEditingFolder(folder);
     setFolderName(folder.name);
     setIsFolderModalOpen(true);
   };
 
-  const handleUpdateFolder = () => {
-    if (!editingFolder) return;
-    setFolders(folders.map(f =>
-      f.id === editingFolder.id
-        ? { ...f, name: folderName }
-        : f
-    ));
-    setFolderName('');
-    setEditingFolder(null);
-    setIsFolderModalOpen(false);
+  const handleUpdateFolder = async () => {
+    if (!editingFolder || !folderName.trim()) {
+      alert('Please enter a folder name');
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('photo_folders')
+        .update({ name: folderName.trim() })
+        .eq('id', editingFolder.id);
+
+      if (error) throw error;
+
+      setFolders(folders.map(f =>
+        f.id === editingFolder.id
+          ? { ...f, name: folderName.trim() }
+          : f
+      ));
+      
+      if (selectedFolder?.id === editingFolder.id) {
+        setSelectedFolder({ ...selectedFolder, name: folderName.trim() });
+      }
+      
+      setFolderName('');
+      setEditingFolder(null);
+      setIsFolderModalOpen(false);
+      alert('Folder updated successfully!');
+    } catch (error: any) {
+      console.error('Error updating folder:', error);
+      alert(error.message || 'Failed to update folder');
+    }
   };
 
-  const handleDeleteFolder = (id: string) => {
-    if (window.confirm('Are you sure you want to delete this folder and all its photos?')) {
+  const handleDeleteFolder = async (id: string) => {
+    if (!window.confirm('Are you sure you want to delete this folder and all its photos?')) {
+      return;
+    }
+
+    try {
+      setIsDeleting(true);
+      const folder = folders.find(f => f.id === id);
+      
+      // Delete all photos in the folder from storage first
+      if (folder && folder.photos.length > 0) {
+        const photoPaths = folder.photos.map(photo => {
+          // Extract file path from URL
+          // Supabase storage URLs are typically: https://[project].supabase.co/storage/v1/object/public/photos/[folder]/[filename]
+          const photosIndex = photo.url.indexOf('/photos/');
+          if (photosIndex !== -1) {
+            return photo.url.substring(photosIndex + '/photos/'.length);
+          } else {
+            // Fallback: try to extract from URL parts
+            const urlParts = photo.url.split('/');
+            const fileName = urlParts[urlParts.length - 1];
+            const folderName = urlParts[urlParts.length - 2];
+            return `${folderName}/${fileName}`;
+          }
+        });
+
+        // Remove photos from storage
+        const { error: storageError } = await supabase.storage
+          .from('photos')
+          .remove(photoPaths);
+
+        if (storageError) {
+          console.warn('Error deleting photos from storage:', storageError);
+          // Continue with database deletion even if storage deletion fails
+        }
+      }
+
+      // Delete folder (photos will be cascade deleted due to ON DELETE CASCADE)
+      const { error } = await supabase
+        .from('photo_folders')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
       setFolders(folders.filter(f => f.id !== id));
       if (selectedFolder?.id === id) {
         setSelectedFolder(null);
       }
+      alert('Folder deleted successfully!');
+    } catch (error: any) {
+      console.error('Error deleting folder:', error);
+      alert(error.message || 'Failed to delete folder');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const files = Array.from(e.target.files);
-      const newPhotos = files.map(file => URL.createObjectURL(file));
-      setUploadedPhotos([...uploadedPhotos, ...newPhotos]);
+      setSelectedFiles([...selectedFiles, ...files]);
+      
+      // Create preview URLs
+      const newPreviewUrls = files.map(file => URL.createObjectURL(file));
+      setPreviewUrls([...previewUrls, ...newPreviewUrls]);
     }
   };
 
-  const handleAddPhotos = () => {
-    if (!selectedFolder || uploadedPhotos.length === 0) return;
-    setFolders(folders.map(f =>
-      f.id === selectedFolder.id
-        ? { ...f, photos: [...f.photos, ...uploadedPhotos] }
-        : f
-    ));
-    setUploadedPhotos([]);
-    setIsPhotoModalOpen(false);
-    setSelectedFolder(folders.find(f => f.id === selectedFolder.id) || null);
+  const handleAddPhotos = async () => {
+    if (!selectedFolder || selectedFiles.length === 0) return;
+
+    setIsUploading(true);
+
+    try {
+      const uploadedPhotoUrls: string[] = [];
+
+      // Upload each file to storage
+      for (const file of selectedFiles) {
+        const fileExt = file.name.split('.').pop() || 'jpg';
+        const fileName = `photos/${selectedFolder.id}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('photos')
+          .upload(fileName, file, {
+            cacheControl: '3600',
+            upsert: false,
+          });
+
+        if (uploadError) {
+          console.error('Error uploading file:', uploadError);
+          continue;
+        }
+
+        // Get public URL
+        const { data: urlData } = supabase.storage.from('photos').getPublicUrl(fileName);
+        uploadedPhotoUrls.push(urlData.publicUrl);
+      }
+
+      if (uploadedPhotoUrls.length === 0) {
+        alert('Failed to upload photos. Please try again.');
+        return;
+      }
+
+      // Save photo records to database
+      const photosToInsert = uploadedPhotoUrls.map(url => ({
+        folder_id: selectedFolder.id,
+        url: url,
+      }));
+
+      const { data: insertedPhotos, error: dbError } = await supabase
+        .from('photos')
+        .insert(photosToInsert)
+        .select();
+
+      if (dbError) throw dbError;
+
+      // Update local state
+      const updatedFolder = {
+        ...selectedFolder,
+        photos: [...selectedFolder.photos, ...(insertedPhotos || [])]
+      };
+
+      setFolders(folders.map(f =>
+        f.id === selectedFolder.id ? updatedFolder : f
+      ));
+      setSelectedFolder(updatedFolder);
+
+      // Clean up preview URLs
+      previewUrls.forEach(url => URL.revokeObjectURL(url));
+      setSelectedFiles([]);
+      setPreviewUrls([]);
+      setIsPhotoModalOpen(false);
+      
+      alert(`Successfully uploaded ${insertedPhotos?.length || 0} photo(s)!`);
+    } catch (error: any) {
+      console.error('Error uploading photos:', error);
+      alert(error.message || 'Failed to upload photos');
+    } finally {
+      setIsUploading(false);
+    }
   };
 
-  const handleDeletePhoto = (folderId: string, photoIndex: number) => {
-    setFolders(folders.map(f =>
-      f.id === folderId
-        ? { ...f, photos: f.photos.filter((_, i) => i !== photoIndex) }
-        : f
-    ));
+  const handleDeletePhoto = async (photo: Photo) => {
+    if (!window.confirm('Are you sure you want to delete this photo?')) {
+      return;
+    }
+
+    try {
+      // Extract file path from URL
+      // Supabase storage URLs are typically: https://[project].supabase.co/storage/v1/object/public/photos/[folder]/[filename]
+      // We need to extract everything after /photos/
+      let filePath = '';
+      const photosIndex = photo.url.indexOf('/photos/');
+      if (photosIndex !== -1) {
+        // Extract path after /photos/
+        filePath = photo.url.substring(photosIndex + '/photos/'.length);
+      } else {
+        // Fallback: try to extract from URL parts
+        const urlParts = photo.url.split('/');
+        const fileName = urlParts[urlParts.length - 1];
+        const folderName = urlParts[urlParts.length - 2];
+        filePath = `${folderName}/${fileName}`;
+      }
+
+      // Delete from storage
+      const { error: storageError } = await supabase.storage
+        .from('photos')
+        .remove([filePath]);
+
+      if (storageError) {
+        console.warn('Error deleting photo from storage:', storageError);
+        // Continue with database deletion even if storage deletion fails
+      }
+
+      // Delete from database
+      const { error: dbError } = await supabase
+        .from('photos')
+        .delete()
+        .eq('id', photo.id);
+
+      if (dbError) throw dbError;
+
+      // Update local state
+      const updatedFolder = {
+        ...selectedFolder!,
+        photos: selectedFolder!.photos.filter(p => p.id !== photo.id)
+      };
+
+      setFolders(folders.map(f =>
+        f.id === updatedFolder.id ? updatedFolder : f
+      ));
+      setSelectedFolder(updatedFolder);
+
+      alert('Photo deleted successfully!');
+    } catch (error: any) {
+      console.error('Error deleting photo:', error);
+      alert(error.message || 'Failed to delete photo');
+    }
   };
 
   const openCreateFolderModal = () => {
@@ -103,11 +335,35 @@ export const AdminPhotos = () => {
     setIsFolderModalOpen(true);
   };
 
-  const openPhotoUploadModal = (folder: PhotoFolder) => {
+  const openPhotoUploadModal = (folder: PhotoFolderWithPhotos) => {
     setSelectedFolder(folder);
-    setUploadedPhotos([]);
+    setSelectedFiles([]);
+    setPreviewUrls([]);
     setIsPhotoModalOpen(true);
   };
+
+  const viewFolderPhotos = (folder: PhotoFolderWithPhotos) => {
+    setSelectedFolder(folder);
+  };
+
+  const removePreviewPhoto = (index: number) => {
+    URL.revokeObjectURL(previewUrls[index]);
+    setSelectedFiles(selectedFiles.filter((_, i) => i !== index));
+    setPreviewUrls(previewUrls.filter((_, i) => i !== index));
+  };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-8">
+        <SkeletonPageHeader />
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <SkeletonCard key={i} className="h-64" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -129,16 +385,22 @@ export const AdminPhotos = () => {
             key={folder.id}
             className="bg-white border border-gray-100 rounded-[8px] p-6 hover:border-gold hover:shadow-md transition-all group relative"
           >
-            <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
               <button
-                onClick={() => handleEditFolder(folder)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleEditFolder(folder);
+                }}
                 className="p-2 bg-white border border-gray-200 rounded-[4px] text-neutral hover:text-gold hover:border-gold transition-colors"
                 title="Edit Folder"
               >
                 <Edit size={16} />
               </button>
               <button
-                onClick={() => handleDeleteFolder(folder.id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDeleteFolder(folder.id);
+                }}
                 className="p-2 bg-white border border-gray-200 rounded-[4px] text-neutral hover:text-red-500 hover:border-red-200 transition-colors"
                 title="Delete Folder"
               >
@@ -146,29 +408,40 @@ export const AdminPhotos = () => {
               </button>
             </div>
 
-            <div className="mb-4">
+            <div 
+              className="mb-4 cursor-pointer"
+              onClick={() => viewFolderPhotos(folder)}
+            >
               <h3 className="font-bold text-xl text-charcoal mb-2">{folder.name}</h3>
               <p className="text-sm text-neutral">{folder.photos.length} photos</p>
             </div>
 
-            {folder.photos.length > 0 ? (
-              <div className="grid grid-cols-3 gap-2 mb-4">
-                {folder.photos.slice(0, 3).map((photo, i) => (
-                  <div key={i} className="aspect-square rounded-[4px] overflow-hidden bg-gray-100">
-                    <img src={photo} alt={`${folder.name} ${i + 1}`} className="w-full h-full object-cover" />
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="aspect-square rounded-[4px] bg-gray-100 flex items-center justify-center mb-4">
-                <ImageIcon size={32} className="text-neutral" />
-              </div>
-            )}
+            <div 
+              className="cursor-pointer"
+              onClick={() => viewFolderPhotos(folder)}
+            >
+              {folder.photos.length > 0 ? (
+                <div className="grid grid-cols-3 gap-2 mb-4">
+                  {folder.photos.slice(0, 3).map((photo) => (
+                    <div key={photo.id} className="aspect-square rounded-[4px] overflow-hidden bg-gray-100">
+                      <img src={photo.url} alt={photo.title || `${folder.name} photo`} className="w-full h-full object-cover" />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="aspect-square rounded-[4px] bg-gray-100 flex items-center justify-center mb-4">
+                  <ImageIcon size={32} className="text-neutral" />
+                </div>
+              )}
+            </div>
 
             <GlowingButton
               size="sm"
               fullWidth
-              onClick={() => openPhotoUploadModal(folder)}
+              onClick={(e) => {
+                e.stopPropagation();
+                openPhotoUploadModal(folder);
+              }}
             >
               <Plus size={16} className="mr-2" />
               Add Photos
@@ -190,16 +463,16 @@ export const AdminPhotos = () => {
             </button>
           </div>
           <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4">
-            {selectedFolder.photos.map((photo, i) => (
-              <div key={i} className="group relative break-inside-avoid rounded-[8px] overflow-hidden cursor-pointer shadow-sm hover:shadow-lg transition-shadow">
+            {selectedFolder.photos.map((photo) => (
+              <div key={photo.id} className="group relative break-inside-avoid rounded-[8px] overflow-hidden cursor-pointer shadow-sm hover:shadow-lg transition-shadow">
                 <img
-                  src={photo}
-                  alt={`${selectedFolder.name} ${i + 1}`}
+                  src={photo.url}
+                  alt={photo.title || `${selectedFolder.name} photo`}
                   className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                   <button
-                    onClick={() => handleDeletePhoto(selectedFolder.id, i)}
+                    onClick={() => handleDeletePhoto(photo)}
                     className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
                     title="Delete Photo"
                   >
@@ -246,7 +519,7 @@ export const AdminPhotos = () => {
             </button>
             <GlowingButton
               onClick={editingFolder ? handleUpdateFolder : handleCreateFolder}
-              disabled={!folderName}
+              disabled={!folderName.trim() || isDeleting}
             >
               {editingFolder ? 'Update Folder' : 'Create Folder'}
             </GlowingButton>
@@ -259,7 +532,9 @@ export const AdminPhotos = () => {
         isOpen={isPhotoModalOpen}
         onClose={() => {
           setIsPhotoModalOpen(false);
-          setUploadedPhotos([]);
+          previewUrls.forEach(url => URL.revokeObjectURL(url));
+          setSelectedFiles([]);
+          setPreviewUrls([]);
         }}
         title={`Upload Photos to ${selectedFolder?.name || 'Folder'}`}
       >
@@ -282,15 +557,15 @@ export const AdminPhotos = () => {
               </label>
             </div>
           </div>
-          {uploadedPhotos.length > 0 && (
+          {previewUrls.length > 0 && (
             <div>
-              <p className="text-sm font-bold text-charcoal mb-2">Preview ({uploadedPhotos.length} photos):</p>
+              <p className="text-sm font-bold text-charcoal mb-2">Preview ({previewUrls.length} photos):</p>
               <div className="grid grid-cols-4 gap-2 max-h-64 overflow-y-auto">
-                {uploadedPhotos.map((photo, i) => (
+                {previewUrls.map((previewUrl, i) => (
                   <div key={i} className="aspect-square rounded-[4px] overflow-hidden bg-gray-100 relative group">
-                    <img src={photo} alt={`Preview ${i + 1}`} className="w-full h-full object-cover" />
+                    <img src={previewUrl} alt={`Preview ${i + 1}`} className="w-full h-full object-cover" />
                     <button
-                      onClick={() => setUploadedPhotos(uploadedPhotos.filter((_, idx) => idx !== i))}
+                      onClick={() => removePreviewPhoto(i)}
                       className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       <X size={12} />
@@ -304,7 +579,9 @@ export const AdminPhotos = () => {
             <button
               onClick={() => {
                 setIsPhotoModalOpen(false);
-                setUploadedPhotos([]);
+                previewUrls.forEach(url => URL.revokeObjectURL(url));
+                setSelectedFiles([]);
+                setPreviewUrls([]);
               }}
               className="px-6 py-2 border border-gray-200 rounded-[4px] text-charcoal hover:bg-gray-50 transition-colors"
             >
@@ -312,9 +589,9 @@ export const AdminPhotos = () => {
             </button>
             <GlowingButton
               onClick={handleAddPhotos}
-              disabled={uploadedPhotos.length === 0}
+              disabled={selectedFiles.length === 0 || isUploading}
             >
-              Add Photos
+              {isUploading ? 'Uploading...' : 'Add Photos'}
             </GlowingButton>
           </div>
         </div>
