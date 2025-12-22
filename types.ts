@@ -29,6 +29,14 @@ export interface RosterMember {
   updated_at?: string;
 }
 
+export interface RosterImage {
+  id: string;
+  date: string; // ISO date string (YYYY-MM-DD)
+  pdf_url: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface Event {
   id: string;
   title: string;
@@ -132,6 +140,11 @@ export interface Database {
         Row: RosterMember;
         Insert: Omit<RosterMember, 'id' | 'created_at' | 'updated_at'>;
         Update: Partial<Omit<RosterMember, 'id' | 'created_at'>>;
+      };
+      roster_images: {
+        Row: RosterImage;
+        Insert: Omit<RosterImage, 'id' | 'created_at' | 'updated_at'>;
+        Update: Partial<Omit<RosterImage, 'id' | 'created_at'>>;
       };
       photos: {
         Row: Photo;

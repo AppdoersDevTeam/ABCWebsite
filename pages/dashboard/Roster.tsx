@@ -1,76 +1,191 @@
-import React from 'react';
-import { Download, Filter, ChevronLeft, ChevronRight, Check, X, Clock } from 'lucide-react';
-import { GlowingButton } from '../../components/UI/GlowingButton';
-import { RosterMember } from '../../types';
+import React, { useState, useEffect } from 'react';
+import { ChevronLeft, ChevronRight, Calendar, FileText } from 'lucide-react';
+import { RosterImage } from '../../types';
+import { supabase } from '../../lib/supabase';
+import { SkeletonPageHeader } from '../../components/UI/Skeleton';
 
 export const Roster = () => {
-  const rosterData: RosterMember[] = [
-    { id: '1', name: 'Sarah Jenkins', role: 'Worship Leader', date: 'Oct 24', status: 'confirmed', team: 'Worship' },
-    { id: '2', name: 'Michael Chen', role: 'Bass Guitar', date: 'Oct 24', status: 'pending', team: 'Worship' },
-    { id: '3', name: 'David Smith', role: 'Sound Engineer', date: 'Oct 24', status: 'confirmed', team: 'Tech' },
-    { id: '4', name: 'Emily White', role: 'Visuals', date: 'Oct 24', status: 'declined', team: 'Tech' },
-  ];
+  const [rosterImages, setRosterImages] = useState<RosterImage[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    fetchRosterImages();
+  }, []);
+
+  useEffect(() => {
+    // Set current index to most recent date when PDFs load
+    if (rosterImages.length > 0 && currentIndex === 0) {
+      setCurrentIndex(0); // Already sorted by date DESC, so index 0 is most recent
+    }
+  }, [rosterImages]);
+
+  const fetchRosterImages = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('roster_images')
+        .select('*')
+        .order('date', { ascending: false });
+
+      if (error) throw error;
+      setRosterImages(data || []);
+    } catch (error) {
+      console.error('Error fetching roster PDFs:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+    }
+  };
+
+  const handleNext = () => {
+    if (currentIndex < rosterImages.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+  };
+
+  const formatDateShort = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      month: 'short', 
+      day: 'numeric',
+      year: 'numeric'
+    });
+  };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-8">
+        <SkeletonPageHeader />
+        <div className="bg-white border border-gray-100 rounded-[8px] p-8">
+          <div className="h-96 bg-gray-100 rounded animate-pulse" />
+        </div>
+      </div>
+    );
+  }
+
+  if (rosterImages.length === 0) {
+    return (
+      <div className="space-y-8">
+        <div className="border-b border-gray-200 pb-6">
+          <h1 className="text-4xl font-serif font-bold text-charcoal">Roster</h1>
+          <p className="text-neutral mt-1">View roster schedules.</p>
+        </div>
+        <div className="text-center py-12 bg-white border border-gray-100 rounded-[8px]">
+          <FileText size={48} className="mx-auto text-neutral mb-4" />
+          <p className="text-neutral text-lg mb-2">No roster PDFs available</p>
+          <p className="text-neutral text-sm">Check back later for updated rosters</p>
+        </div>
+      </div>
+    );
+  }
+
+  const currentRoster = rosterImages[currentIndex];
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-gray-200 pb-6">
-        <div>
-          <h1 className="text-4xl font-serif font-bold text-charcoal">Roster</h1>
-          <p className="text-neutral mt-1">Manage team schedules.</p>
-        </div>
-        <div className="flex gap-3">
-          <GlowingButton variant="outline" size="sm" className="flex items-center"><Filter size={16} className="mr-2"/> Filter</GlowingButton>
-          <GlowingButton variant="gold" size="sm" className="flex items-center"><Download size={16} className="mr-2"/> Export</GlowingButton>
-        </div>
+      <div className="border-b border-gray-200 pb-6">
+        <h1 className="text-4xl font-serif font-bold text-charcoal">Roster</h1>
+        <p className="text-neutral mt-1">View roster schedules.</p>
       </div>
 
-      {/* Date Nav */}
+      {/* Date Navigation */}
       <div className="flex items-center justify-between bg-white p-4 rounded-[8px] border border-gray-200 shadow-sm">
-        <button className="p-2 hover:bg-gray-100 rounded-full text-charcoal transition-colors"><ChevronLeft /></button>
-        <div className="text-center">
-            <h3 className="font-bold text-xl text-charcoal">Sunday Service</h3>
-            <p className="text-sm text-gold font-bold uppercase tracking-widest">Oct 24 • 10:00 AM</p>
+        <button
+          onClick={handlePrevious}
+          disabled={currentIndex === 0}
+          className={`p-2 rounded-full text-charcoal transition-colors ${
+            currentIndex === 0
+              ? 'opacity-30 cursor-not-allowed'
+              : 'hover:bg-gray-100'
+          }`}
+        >
+          <ChevronLeft size={24} />
+        </button>
+        <div className="text-center flex-1">
+          <div className="flex items-center justify-center gap-2 text-gold mb-1">
+            <Calendar size={18} />
+            <span className="text-sm font-bold uppercase tracking-wider">
+              {formatDateShort(currentRoster.date)}
+            </span>
+          </div>
+          <h3 className="font-bold text-xl text-charcoal">{formatDate(currentRoster.date)}</h3>
+          {rosterImages.length > 1 && (
+            <p className="text-xs text-neutral mt-1">
+              {currentIndex + 1} of {rosterImages.length}
+            </p>
+          )}
         </div>
-        <button className="p-2 hover:bg-gray-100 rounded-full text-charcoal transition-colors"><ChevronRight /></button>
+        <button
+          onClick={handleNext}
+          disabled={currentIndex === rosterImages.length - 1}
+          className={`p-2 rounded-full text-charcoal transition-colors ${
+            currentIndex === rosterImages.length - 1
+              ? 'opacity-30 cursor-not-allowed'
+              : 'hover:bg-gray-100'
+          }`}
+        >
+          <ChevronRight size={24} />
+        </button>
       </div>
 
-      {/* Cards Grid */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {rosterData.map((member) => (
-              <div key={member.id} className="bg-white border border-gray-100 p-6 rounded-[8px] hover:border-gold hover:shadow-md transition-all duration-300 relative overflow-hidden group shadow-sm">
-                  {/* Status Indicator Bar */}
-                  <div className={`absolute left-0 top-0 bottom-0 w-1 ${
-                      member.status === 'confirmed' ? 'bg-green-500' : 
-                      member.status === 'declined' ? 'bg-red-500' : 'bg-gold'
-                  }`}></div>
-
-                  <div className="flex justify-between items-start mb-4 pl-4">
-                      <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-charcoal font-serif font-bold">
-                              {member.name.charAt(0)}
-                          </div>
-                          <div>
-                              <h4 className="font-bold text-charcoal">{member.name}</h4>
-                              <p className="text-xs text-neutral uppercase tracking-wider">{member.team}</p>
-                          </div>
-                      </div>
-                      
-                      {member.status === 'confirmed' && <Check size={20} className="text-green-500" />}
-                      {member.status === 'declined' && <X size={20} className="text-red-500" />}
-                      {member.status === 'pending' && <Clock size={20} className="text-gold animate-pulse" />}
-                  </div>
-
-                  <div className="pl-4">
-                      <p className="text-sm text-neutral mb-4">Role: <span className="text-charcoal font-bold">{member.role}</span></p>
-                      
-                      <div className="flex gap-2">
-                          <button className="flex-1 bg-gray-50 hover:bg-gray-100 py-2 rounded text-xs font-bold text-charcoal uppercase tracking-wider transition-colors">Edit</button>
-                          <button className="flex-1 bg-gray-50 hover:bg-gray-100 py-2 rounded text-xs font-bold text-charcoal uppercase tracking-wider transition-colors">Contact</button>
-                      </div>
-                  </div>
-              </div>
-          ))}
+      {/* Roster PDF Display */}
+      <div className="bg-white border border-gray-100 rounded-[8px] p-6 shadow-sm">
+        <div className="relative w-full">
+          <iframe
+            src={currentRoster.pdf_url}
+            className="w-full h-[800px] rounded-[4px] border border-gray-200"
+            title={`Roster for ${formatDateShort(currentRoster.date)}`}
+          />
+        </div>
+        <div className="mt-4 text-center">
+          <a
+            href={currentRoster.pdf_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-gold hover:text-charcoal font-bold text-sm transition-colors inline-flex items-center gap-2"
+          >
+            <FileText size={16} />
+            Open PDF in new tab
+          </a>
+        </div>
       </div>
+
+      {/* Date List (Optional - shows all available dates) */}
+      {rosterImages.length > 1 && (
+        <div className="bg-white border border-gray-100 rounded-[8px] p-4">
+          <p className="text-sm font-bold text-charcoal mb-3">Available Rosters:</p>
+          <div className="flex flex-wrap gap-2">
+            {rosterImages.map((roster, index) => (
+              <button
+                key={roster.id}
+                onClick={() => setCurrentIndex(index)}
+                className={`px-3 py-1 rounded-[4px] text-sm font-bold transition-colors ${
+                  index === currentIndex
+                    ? 'bg-gold text-white'
+                    : 'bg-gray-100 text-charcoal hover:bg-gray-200'
+                }`}
+              >
+                {formatDateShort(roster.date)}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
