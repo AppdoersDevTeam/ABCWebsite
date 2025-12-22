@@ -4,6 +4,7 @@ import { GlowingButton } from '../../components/UI/GlowingButton';
 import { Modal } from '../../components/UI/Modal';
 import { supabase } from '../../lib/supabase';
 import { Newsletter as NewsletterType } from '../../types';
+import { SkeletonPageHeader, SkeletonCard } from '../../components/UI/Skeleton';
 
 export const AdminNewsletter = () => {
   const [newsletters, setNewsletters] = useState<NewsletterType[]>([]);
@@ -125,14 +126,16 @@ export const AdminNewsletter = () => {
   if (isLoading) {
     return (
       <div className="space-y-8">
-        <div className="flex justify-between items-center border-b border-gray-200 pb-6">
-          <div>
-            <h1 className="text-4xl font-serif font-bold text-charcoal">Newsletter Management</h1>
-            <p className="text-neutral mt-1">Upload and manage church newsletters.</p>
+        <SkeletonPageHeader />
+        <div className="grid md:grid-cols-3 gap-6">
+          <div className="md:col-span-2">
+            <SkeletonCard className="h-96" />
           </div>
-        </div>
-        <div className="text-center py-12">
-          <p className="text-neutral">Loading newsletters...</p>
+          <div className="space-y-3">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <SkeletonCard key={i} className="h-20" />
+            ))}
+          </div>
         </div>
       </div>
     );

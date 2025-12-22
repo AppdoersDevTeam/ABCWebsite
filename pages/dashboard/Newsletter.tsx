@@ -3,6 +3,7 @@ import { VibrantCard } from '../../components/UI/VibrantCard';
 import { FileText, Download } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Newsletter as NewsletterType } from '../../types';
+import { SkeletonPageHeader, SkeletonCard } from '../../components/UI/Skeleton';
 
 export const Newsletter = () => {
   const [newsletters, setNewsletters] = useState<NewsletterType[]>([]);
@@ -31,12 +32,16 @@ export const Newsletter = () => {
   if (isLoading) {
     return (
       <div className="space-y-8">
-        <div className="border-b border-gray-200 pb-6">
-          <h1 className="text-4xl font-serif font-bold text-charcoal">Newsletters</h1>
-          <p className="text-neutral mt-1">Church life updates.</p>
-        </div>
-        <div className="text-center py-12">
-          <p className="text-neutral">Loading newsletters...</p>
+        <SkeletonPageHeader />
+        <div className="grid md:grid-cols-3 gap-6">
+          <div className="md:col-span-2">
+            <SkeletonCard className="h-96" />
+          </div>
+          <div className="space-y-3">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <SkeletonCard key={i} className="h-20" />
+            ))}
+          </div>
         </div>
       </div>
     );

@@ -6,6 +6,7 @@ import { MessageCircle, Heart } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { PrayerRequest } from '../../types';
+import { SkeletonPageHeader, SkeletonPrayerCard } from '../../components/UI/Skeleton';
 
 export const PrayerWall = () => {
   const { user } = useAuth();
@@ -168,14 +169,11 @@ export const PrayerWall = () => {
   if (isLoading) {
     return (
       <div className="space-y-8">
-        <div className="flex justify-between items-center border-b border-gray-200 pb-6">
-          <div>
-            <h1 className="text-4xl font-serif font-bold text-charcoal">Prayer Wall</h1>
-            <p className="text-neutral mt-1">Bear one another's burdens.</p>
-          </div>
-        </div>
-        <div className="text-center py-12">
-          <p className="text-neutral">Loading prayer requests...</p>
+        <SkeletonPageHeader />
+        <div className="grid gap-6">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <SkeletonPrayerCard key={i} />
+          ))}
         </div>
       </div>
     );

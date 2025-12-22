@@ -4,6 +4,7 @@ import { Users, UserCheck, X, Shield, ShieldOff, Ban, Plus } from 'lucide-react'
 import { supabase } from '../../lib/supabase';
 import { User } from '../../types';
 import { CreateUserProfile } from './CreateUserProfile';
+import { SkeletonPageHeader, SkeletonStatsCard, SkeletonUserCard } from '../../components/UI/Skeleton';
 
 export const AdminUsers = () => {
   const { user } = useAuth();
@@ -194,52 +195,60 @@ export const AdminUsers = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid md:grid-cols-4 gap-4">
-        <div className="bg-white border border-gray-200 p-6 rounded-[8px] shadow-sm">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-neutral font-bold">Total Users</p>
-              <p className="text-3xl font-bold text-charcoal mt-2">{allUsers.length}</p>
+      {isLoadingUsers ? (
+        <div className="grid md:grid-cols-4 gap-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <SkeletonStatsCard key={i} />
+          ))}
+        </div>
+      ) : (
+        <div className="grid md:grid-cols-4 gap-4">
+          <div className="bg-white border border-gray-200 p-6 rounded-[8px] shadow-sm">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-neutral font-bold">Total Users</p>
+                <p className="text-3xl font-bold text-charcoal mt-2">{allUsers.length}</p>
+              </div>
+              <div className="p-3 bg-blue-100 rounded-full">
+                <Users size={24} className="text-blue-600" />
+              </div>
             </div>
-            <div className="p-3 bg-blue-100 rounded-full">
-              <Users size={24} className="text-blue-600" />
+          </div>
+          <div className="bg-white border border-gray-200 p-6 rounded-[8px] shadow-sm">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-neutral font-bold">Pending Approval</p>
+                <p className="text-3xl font-bold text-gold mt-2">{pendingCount}</p>
+              </div>
+              <div className="p-3 bg-yellow-100 rounded-full">
+                <UserCheck size={24} className="text-yellow-600" />
+              </div>
+            </div>
+          </div>
+          <div className="bg-white border border-gray-200 p-6 rounded-[8px] shadow-sm">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-neutral font-bold">Approved Users</p>
+                <p className="text-3xl font-bold text-green-600 mt-2">{allUsers.filter(u => u.is_approved).length}</p>
+              </div>
+              <div className="p-3 bg-green-100 rounded-full">
+                <UserCheck size={24} className="text-green-600" />
+              </div>
+            </div>
+          </div>
+          <div className="bg-white border border-gray-200 p-6 rounded-[8px] shadow-sm">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-neutral font-bold">Admins</p>
+                <p className="text-3xl font-bold text-red-600 mt-2">{allUsers.filter(u => u.role === 'admin').length}</p>
+              </div>
+              <div className="p-3 bg-red-100 rounded-full">
+                <Shield size={24} className="text-red-600" />
+              </div>
             </div>
           </div>
         </div>
-        <div className="bg-white border border-gray-200 p-6 rounded-[8px] shadow-sm">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-neutral font-bold">Pending Approval</p>
-              <p className="text-3xl font-bold text-gold mt-2">{pendingCount}</p>
-            </div>
-            <div className="p-3 bg-yellow-100 rounded-full">
-              <UserCheck size={24} className="text-yellow-600" />
-            </div>
-          </div>
-        </div>
-        <div className="bg-white border border-gray-200 p-6 rounded-[8px] shadow-sm">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-neutral font-bold">Approved Users</p>
-              <p className="text-3xl font-bold text-green-600 mt-2">{allUsers.filter(u => u.is_approved).length}</p>
-            </div>
-            <div className="p-3 bg-green-100 rounded-full">
-              <UserCheck size={24} className="text-green-600" />
-            </div>
-          </div>
-        </div>
-        <div className="bg-white border border-gray-200 p-6 rounded-[8px] shadow-sm">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-neutral font-bold">Admins</p>
-              <p className="text-3xl font-bold text-red-600 mt-2">{allUsers.filter(u => u.role === 'admin').length}</p>
-            </div>
-            <div className="p-3 bg-red-100 rounded-full">
-              <Shield size={24} className="text-red-600" />
-            </div>
-          </div>
-        </div>
-      </div>
+      )}
 
       {/* Filter Tabs */}
       <div className="flex gap-2 border-b border-gray-200">
@@ -287,8 +296,10 @@ export const AdminUsers = () => {
 
       {/* Users List */}
       {isLoadingUsers ? (
-        <div className="text-center py-12 bg-white rounded-[8px] border border-gray-200">
-          <div className="animate-pulse">Loading users...</div>
+        <div className="space-y-3">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <SkeletonUserCard key={i} />
+          ))}
         </div>
       ) : filteredUsers().length === 0 ? (
         <div className="text-center py-12 bg-white rounded-[8px] border border-gray-200">

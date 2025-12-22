@@ -5,6 +5,7 @@ import { VibrantCard } from '../../components/UI/VibrantCard';
 import { Calendar, Users, Music, ArrowRight, Video } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Event } from '../../types';
+import { SkeletonCard } from '../../components/UI/Skeleton';
 
 export const Events = () => {
   const [publicEvents, setPublicEvents] = useState<Event[]>([]);
@@ -85,7 +86,14 @@ export const Events = () => {
       <PageHeader title="CALENDAR" subtitle="What's On" />
       
       <div className="container mx-auto px-4 -mt-10 relative z-10">
-        <div className="grid gap-6 max-w-5xl mx-auto">
+        {isLoading ? (
+          <div className="grid gap-6 max-w-5xl mx-auto">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <SkeletonCard key={i} className="h-32" />
+            ))}
+          </div>
+        ) : (
+          <div className="grid gap-6 max-w-5xl mx-auto">
             {allEvents.map((evt, i) => {
               const eventId = evt.title.toLowerCase().replace(/\s+/g, '-');
               const content = (
@@ -124,7 +132,8 @@ export const Events = () => {
                 </div>
               );
             })}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

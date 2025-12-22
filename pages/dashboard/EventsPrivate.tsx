@@ -3,6 +3,7 @@ import { VibrantCard } from '../../components/UI/VibrantCard';
 import { Calendar as CalIcon } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Event } from '../../types';
+import { SkeletonPageHeader, SkeletonEventCard } from '../../components/UI/Skeleton';
 
 export const EventsPrivate = () => {
   const [events, setEvents] = useState<Event[]>([]);
@@ -36,12 +37,11 @@ export const EventsPrivate = () => {
   if (isLoading) {
     return (
       <div className="space-y-8">
-        <div className="border-b border-gray-200 pb-6">
-          <h1 className="text-4xl font-serif font-bold text-charcoal">Internal Calendar</h1>
-          <p className="text-neutral mt-1">Meetings & Rehearsals.</p>
-        </div>
-        <div className="text-center py-12">
-          <p className="text-neutral">Loading events...</p>
+        <SkeletonPageHeader />
+        <div className="space-y-4">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <SkeletonEventCard key={i} />
+          ))}
         </div>
       </div>
     );

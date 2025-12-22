@@ -5,6 +5,7 @@ import { Calendar, MessageSquare, BookOpen, Users, Image, ClipboardList, ArrowUp
 import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { User } from '../../types';
+import { SkeletonPageHeader, SkeletonCard, SkeletonUserCard, SkeletonStatsCard } from '../../components/UI/Skeleton';
 
 export const AdminOverview = () => {
   const { user } = useAuth();
@@ -155,8 +156,11 @@ export const AdminOverview = () => {
     console.log('AdminOverview - No user, showing loading');
     return (
       <div className="space-y-8">
-        <div className="text-center py-12">
-          <p className="text-neutral">Loading...</p>
+        <SkeletonPageHeader />
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 7 }).map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
         </div>
       </div>
     );
@@ -232,7 +236,13 @@ export const AdminOverview = () => {
           )}
         </div>
 
-        {pendingCount === 0 ? (
+        {isLoadingUsers ? (
+          <div className="space-y-4">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <SkeletonUserCard key={i} />
+            ))}
+          </div>
+        ) : pendingCount === 0 ? (
           <div className="text-center py-12 bg-gray-50 rounded-[8px] border border-gray-100">
             <UserCheck size={48} className="text-gray-300 mx-auto mb-4" />
             <p className="text-neutral text-lg font-medium">No pending user approvals</p>

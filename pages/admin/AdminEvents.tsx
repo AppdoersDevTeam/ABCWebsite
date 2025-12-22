@@ -4,6 +4,7 @@ import { Modal } from '../../components/UI/Modal';
 import { Calendar as CalIcon, Edit, Trash2, Plus } from 'lucide-react';
 import { Event } from '../../types';
 import { supabase } from '../../lib/supabase';
+import { SkeletonPageHeader, SkeletonEventCard } from '../../components/UI/Skeleton';
 
 export const AdminEvents = () => {
   const [events, setEvents] = useState<Event[]>([]);
@@ -148,14 +149,11 @@ export const AdminEvents = () => {
   if (isLoading) {
     return (
       <div className="space-y-8">
-        <div className="flex justify-between items-center border-b border-gray-200 pb-6">
-          <div>
-            <h1 className="text-4xl font-serif font-bold text-charcoal">Events Management</h1>
-            <p className="text-neutral mt-1">Create and manage church events and meetings.</p>
-          </div>
-        </div>
-        <div className="text-center py-12">
-          <p className="text-neutral">Loading events...</p>
+        <SkeletonPageHeader />
+        <div className="space-y-4">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <SkeletonEventCard key={i} />
+          ))}
         </div>
       </div>
     );
