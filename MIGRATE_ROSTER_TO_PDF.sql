@@ -103,3 +103,4 @@ CREATE TRIGGER update_roster_images_updated_at
 -- Step 10: Create index on date if it doesn't exist
 CREATE INDEX IF NOT EXISTS idx_roster_images_date ON roster_images(date DESC);
 
+

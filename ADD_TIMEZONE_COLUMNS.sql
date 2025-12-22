@@ -20,3 +20,4 @@ CREATE INDEX IF NOT EXISTS idx_users_user_timezone ON users(user_timezone);
 COMMENT ON COLUMN prayer_requests.user_timezone IS 'IANA timezone identifier (e.g., America/New_York) when the prayer request was created';
 COMMENT ON COLUMN users.user_timezone IS 'IANA timezone identifier (e.g., America/New_York) when the user signed up';
 
+

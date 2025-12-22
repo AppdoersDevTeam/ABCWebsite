@@ -4,6 +4,7 @@ import { PageHeader } from '../../../components/UI/PageHeader';
 import { VibrantCard } from '../../../components/UI/VibrantCard';
 import { ScrollReveal } from '../../../components/UI/ScrollReveal';
 import { ArrowLeft, Youtube, ExternalLink, Loader2 } from 'lucide-react';
+import { fetchVideosByHandle, isYouTubeApiConfigured, type YouTubeVideo as YouTubeVideoType } from '../../../lib/youtube';
 
 interface YouTubeVideo {
   id: string;
@@ -74,72 +75,40 @@ export const Sermons = () => {
         setLoading(true);
         setError(null);
 
-        // Use YouTube RSS feed - this doesn't require an API key
-        // First, we need to get the channel ID from the handle
-        // We'll use a CORS proxy to fetch the channel page and extract the channel ID
-        
-        // Method 1: Try to get channel ID from YouTube's public data
-        // Using a CORS proxy service (for development - in production use your own backend)
-        const proxyUrl = 'https://api.allorigins.win/get?url=';
-        const channelPageUrl = encodeURIComponent(`https://www.youtube.com/@${channelHandle}`);
-        
-        const channelResponse = await fetch(`${proxyUrl}${channelPageUrl}`);
-        const channelData = await channelResponse.json();
-        
-        // Parse the HTML to find channel ID
-        const htmlContent = channelData.contents;
-        const channelIdMatch = htmlContent.match(/"channelId":"([^"]+)"/);
-        
-        if (!channelIdMatch) {
-          // Fallback: Try using the handle directly with RSS
-          // YouTube RSS format: https://www.youtube.com/feeds/videos.xml?channel_id=CHANNEL_ID
-          // But we can also try: https://www.youtube.com/feeds/videos.xml?user=USERNAME
-          throw new Error('Could not find channel ID. Using alternative method...');
+        // Try to use YouTube Data API v3 if configured
+        if (isYouTubeApiConfigured()) {
+          try {
+            const fetchedVideos = await fetchVideosByHandle(channelHandle, 50);
+            
+            // Map the API response to our interface
+            const mappedVideos: YouTubeVideo[] = fetchedVideos.map((video: YouTubeVideoType) => ({
+              id: video.id,
+              title: video.title,
+              publishedAt: video.publishedAt,
+              thumbnail: video.thumbnail,
+              description: video.description
+            }));
+            
+            if (mappedVideos.length > 0) {
+              setVideos(mappedVideos);
+              return; // Success, exit early
+            }
+          } catch (apiError: any) {
+            console.warn('YouTube API error:', apiError);
+            // Fall through to use placeholders
+          }
+        } else {
+          console.info('YouTube API key not configured. Using placeholder videos. See YOUTUBE_API_SETUP.md for setup instructions.');
         }
         
-        const channelId = channelIdMatch[1];
-        
-        // Fetch videos from RSS feed
-        const rssUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`;
-        const rssResponse = await fetch(`${proxyUrl}${encodeURIComponent(rssUrl)}`);
-        const rssData = await rssResponse.json();
-        
-        // Parse RSS XML
-        const parser = new DOMParser();
-        const xmlDoc = parser.parseFromString(rssData.contents, 'text/xml');
-        const entries = xmlDoc.getElementsByTagName('entry');
-        
-        const fetchedVideos: YouTubeVideo[] = Array.from(entries).slice(0, 50).map((entry: any) => {
-          const videoId = entry.getElementsByTagName('yt:videoId')[0]?.textContent || 
-                         entry.getElementsByTagName('yt:videoId')[0]?.textContent ||
-                         entry.querySelector('yt\\:videoId')?.textContent ||
-                         entry.querySelector('[name="videoId"]')?.textContent ||
-                         '';
-          
-          // Extract from video URL if needed
-          const videoUrl = entry.getElementsByTagName('link')[0]?.getAttribute('href') || '';
-          const extractedId = videoUrl.match(/[?&]v=([^&]+)/)?.[1] || videoId;
-          
-          return {
-            id: extractedId || videoUrl.split('/').pop()?.split('?')[0] || '',
-            title: entry.getElementsByTagName('title')[0]?.textContent || 'Untitled',
-            publishedAt: entry.getElementsByTagName('published')[0]?.textContent || '',
-            thumbnail: `https://img.youtube.com/vi/${extractedId || ''}/mqdefault.jpg`,
-            description: entry.getElementsByTagName('media:description')[0]?.textContent || 
-                        entry.getElementsByTagName('description')[0]?.textContent || ''
-          };
-        }).filter((video: YouTubeVideo) => video.id); // Filter out videos without IDs
-        
-        if (fetchedVideos.length === 0) {
-          throw new Error('No videos found. The channel may not have any public videos.');
-        }
-        
-        setVideos(fetchedVideos);
-      } catch (err: any) {
-        console.error('Error fetching videos:', err);
-        // Fallback: Use placeholder videos if API fails
+        // Fallback: Use placeholder videos if API is not configured or fails
         setVideos(placeholderVideos);
         setError(null); // Don't show error, just use placeholders
+      } catch (err: any) {
+        console.error('Error fetching videos:', err);
+        // Fallback: Use placeholder videos if everything fails
+        setVideos(placeholderVideos);
+        setError(null);
       } finally {
         setLoading(false);
       }

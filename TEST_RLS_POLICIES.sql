@@ -53,3 +53,4 @@ WHERE email = 'devteam@appdoers.co.nz';
 -- Note: This won't work in SQL Editor, but useful for debugging in app
 -- SELECT auth.uid() as current_user_id;
 
+

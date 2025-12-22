@@ -82,3 +82,4 @@ After adding the Supabase callback URL:
 - Make sure there are no trailing slashes inconsistencies (except where noted)
 - Changes in Google Cloud Console can take a few minutes to take effect
 
+

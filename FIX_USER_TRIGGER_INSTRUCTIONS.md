@@ -127,3 +127,4 @@ The service_role key has full database access. Only use it:
 - In local development environments
 - Never in browser/client JavaScript
 
+
