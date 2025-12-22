@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { Users, UserCheck, X, Shield, ShieldOff, Ban, Plus } from 'lucide-react';
+import { Users, UserCheck, X, Shield, Ban, Plus } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { User } from '../../types';
 import { CreateUserProfile } from './CreateUserProfile';
@@ -13,7 +13,7 @@ export const AdminUsers = () => {
   const [pendingCount, setPendingCount] = useState(0);
   const [isLoadingUsers, setIsLoadingUsers] = useState(true);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'admins'>('all');
+  const [filter, setFilter] = useState<'all' | 'pending' | 'approved'>('all');
 
   useEffect(() => {
     fetchUsers();
@@ -122,26 +122,6 @@ export const AdminUsers = () => {
     }
   };
 
-  const handleChangeRole = async (userId: string, newRole: 'admin' | 'member', userName: string) => {
-    const action = newRole === 'admin' ? 'grant admin privileges to' : 'revoke admin privileges from';
-    if (!window.confirm(`Are you sure you want to ${action} ${userName}?`)) {
-      return;
-    }
-
-    try {
-      const { error } = await supabase
-        .from('users')
-        .update({ role: newRole })
-        .eq('id', userId);
-
-      if (error) throw error;
-      alert(`User role updated successfully`);
-      fetchUsers();
-    } catch (error) {
-      console.error('Error changing role:', error);
-      alert('Failed to change user role');
-    }
-  };
 
   const formatDate = (dateString: string | undefined) => {
     if (!dateString) return 'Unknown';
@@ -171,8 +151,6 @@ export const AdminUsers = () => {
         return allUsers.filter(u => !u.is_approved);
       case 'approved':
         return allUsers.filter(u => u.is_approved);
-      case 'admins':
-        return allUsers.filter(u => u.role === 'admin');
       default:
         return allUsers;
     }
@@ -183,7 +161,7 @@ export const AdminUsers = () => {
       <div className="flex justify-between items-center border-b border-gray-200 pb-6">
         <div>
           <h1 className="text-4xl font-serif font-bold text-charcoal">User Management</h1>
-          <p className="text-neutral mt-1">Manage user roles, permissions, and approvals</p>
+          <p className="text-neutral mt-1">Manage user permissions and approvals</p>
         </div>
         <button
           onClick={() => setIsCreateModalOpen(true)}
@@ -196,13 +174,13 @@ export const AdminUsers = () => {
 
       {/* Stats Cards */}
       {isLoadingUsers ? (
-        <div className="grid md:grid-cols-4 gap-4">
-          {Array.from({ length: 4 }).map((_, i) => (
+        <div className="grid md:grid-cols-3 gap-4">
+          {Array.from({ length: 3 }).map((_, i) => (
             <SkeletonStatsCard key={i} />
           ))}
         </div>
       ) : (
-        <div className="grid md:grid-cols-4 gap-4">
+        <div className="grid md:grid-cols-3 gap-4">
           <div className="bg-white border border-gray-200 p-6 rounded-[8px] shadow-sm">
             <div className="flex items-center justify-between">
               <div>
@@ -233,17 +211,6 @@ export const AdminUsers = () => {
               </div>
               <div className="p-3 bg-green-100 rounded-full">
                 <UserCheck size={24} className="text-green-600" />
-              </div>
-            </div>
-          </div>
-          <div className="bg-white border border-gray-200 p-6 rounded-[8px] shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-neutral font-bold">Admins</p>
-                <p className="text-3xl font-bold text-red-600 mt-2">{allUsers.filter(u => u.role === 'admin').length}</p>
-              </div>
-              <div className="p-3 bg-red-100 rounded-full">
-                <Shield size={24} className="text-red-600" />
               </div>
             </div>
           </div>
@@ -281,16 +248,6 @@ export const AdminUsers = () => {
           }`}
         >
           Approved ({allUsers.filter(u => u.is_approved).length})
-        </button>
-        <button
-          onClick={() => setFilter('admins')}
-          className={`px-6 py-3 font-bold transition-colors ${
-            filter === 'admins'
-              ? 'text-charcoal border-b-2 border-gold'
-              : 'text-neutral hover:text-charcoal'
-          }`}
-        >
-          Admins ({allUsers.filter(u => u.role === 'admin').length})
         </button>
       </div>
 
@@ -359,27 +316,6 @@ export const AdminUsers = () => {
                   </div>
                 </div>
                 <div className="flex gap-2 flex-wrap flex-shrink-0">
-                  {/* Role Management */}
-                  {u.role === 'admin' ? (
-                    <button
-                      onClick={() => handleChangeRole(u.id, 'member', u.name)}
-                      className="bg-orange-100 border-2 border-orange-300 text-orange-700 px-4 py-2 rounded-[4px] font-bold hover:bg-orange-200 transition-colors shadow-sm flex items-center gap-2 text-sm"
-                      title="Revoke admin privileges"
-                    >
-                      <ShieldOff size={16} />
-                      Remove Admin
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => handleChangeRole(u.id, 'admin', u.name)}
-                      className="bg-purple-100 border-2 border-purple-300 text-purple-700 px-4 py-2 rounded-[4px] font-bold hover:bg-purple-200 transition-colors shadow-sm flex items-center gap-2 text-sm"
-                      title="Grant admin privileges"
-                    >
-                      <Shield size={16} />
-                      Make Admin
-                    </button>
-                  )}
-                  
                   {/* Approval Management */}
                   {u.is_approved ? (
                     <button
