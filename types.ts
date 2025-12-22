@@ -89,6 +89,17 @@ export interface PhotoFolder {
   created_at: string;
 }
 
+export interface TeamMember {
+  id: string;
+  name: string;
+  role: string;
+  email?: string;
+  phone?: string;
+  img?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface Database {
   public: {
     Tables: {
@@ -131,6 +142,11 @@ export interface Database {
         Row: PhotoFolder;
         Insert: Omit<PhotoFolder, 'id' | 'created_at'>;
         Update: Partial<Omit<PhotoFolder, 'id' | 'created_at'>>;
+      };
+      team_members: {
+        Row: TeamMember;
+        Insert: Omit<TeamMember, 'id' | 'created_at' | 'updated_at'>;
+        Update: Partial<Omit<TeamMember, 'id' | 'created_at'>>;
       };
     };
   };

@@ -1,40 +1,69 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { VibrantCard } from '../../components/UI/VibrantCard';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { Modal } from '../../components/UI/Modal';
 import { Mail, Phone, Edit, Trash2, Plus, User } from 'lucide-react';
-
-interface TeamMember {
-  id: string;
-  name: string;
-  role: string;
-  email?: string;
-  phone?: string;
-  img?: string;
-}
+import { TeamMember } from '../../types';
+import { supabase } from '../../lib/supabase';
+import { SkeletonPageHeader } from '../../components/UI/Skeleton';
 
 export const AdminTeam = () => {
-  const [members, setMembers] = useState<TeamMember[]>([
-    { id: '1', name: "Alex Johnson", role: "Youth Pastor", email: "alex@church.com", phone: "03-308 5409", img: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80" },
-    { id: '2', name: "Maria Garcia", role: "Worship Leader", email: "maria@church.com", phone: "03-308 5410", img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&q=80" },
-    { id: '3', name: "James Wilson", role: "Elder", email: "james@church.com", phone: "03-308 5411", img: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=200&q=80" },
-    { id: '4', name: "Linda Chen", role: "Admin", email: "linda@church.com", phone: "03-308 5412", img: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=200&q=80" },
-    { id: '5', name: "Robert Taylor", role: "Facilities", email: "robert@church.com", phone: "03-308 5413", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80" },
-    { id: '6', name: "Patricia Lee", role: "Children's Ministry", email: "patricia@church.com", phone: "03-308 5414", img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=200&q=80" },
-  ]);
-
+  const [members, setMembers] = useState<TeamMember[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
   const [formData, setFormData] = useState({ name: '', role: '', email: '', phone: '', img: '' });
 
-  const handleCreate = () => {
-    const newMember: TeamMember = {
-      id: Date.now().toString(),
-      ...formData,
-    };
-    setMembers([...members, newMember]);
-    setFormData({ name: '', role: '', email: '', phone: '', img: '' });
-    setIsModalOpen(false);
+  useEffect(() => {
+    fetchMembers();
+  }, []);
+
+  const fetchMembers = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('team_members')
+        .select('*')
+        .order('name', { ascending: true });
+
+      if (error) throw error;
+      setMembers(data || []);
+    } catch (error) {
+      console.error('Error fetching team members:', error);
+      alert('Failed to load team members');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCreate = async () => {
+    if (!formData.name || !formData.role) {
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('team_members')
+        .insert([
+          {
+            name: formData.name,
+            role: formData.role,
+            email: formData.email || null,
+            phone: formData.phone || null,
+            img: formData.img || null,
+          },
+        ])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setMembers([...members, data]);
+      setFormData({ name: '', role: '', email: '', phone: '', img: '' });
+      setIsModalOpen(false);
+    } catch (error: any) {
+      console.error('Error creating team member:', error);
+      alert(error.message || 'Failed to create team member');
+    }
   };
 
   const handleEdit = (member: TeamMember) => {
@@ -49,21 +78,47 @@ export const AdminTeam = () => {
     setIsModalOpen(true);
   };
 
-  const handleUpdate = () => {
+  const handleUpdate = async () => {
     if (!editingMember) return;
-    setMembers(members.map(m =>
-      m.id === editingMember.id
-        ? { ...m, ...formData }
-        : m
-    ));
-    setFormData({ name: '', role: '', email: '', phone: '', img: '' });
-    setEditingMember(null);
-    setIsModalOpen(false);
+
+    try {
+      const { error } = await supabase
+        .from('team_members')
+        .update({
+          name: formData.name,
+          role: formData.role,
+          email: formData.email || null,
+          phone: formData.phone || null,
+          img: formData.img || null,
+        })
+        .eq('id', editingMember.id);
+
+      if (error) throw error;
+
+      fetchMembers();
+      setFormData({ name: '', role: '', email: '', phone: '', img: '' });
+      setEditingMember(null);
+      setIsModalOpen(false);
+    } catch (error: any) {
+      console.error('Error updating team member:', error);
+      alert(error.message || 'Failed to update team member');
+    }
   };
 
-  const handleDelete = (id: string) => {
-    if (window.confirm('Are you sure you want to delete this team member?')) {
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('Are you sure you want to delete this team member?')) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase.from('team_members').delete().eq('id', id);
+
+      if (error) throw error;
+
       setMembers(members.filter(m => m.id !== id));
+    } catch (error: any) {
+      console.error('Error deleting team member:', error);
+      alert(error.message || 'Failed to delete team member');
     }
   };
 
@@ -72,6 +127,19 @@ export const AdminTeam = () => {
     setFormData({ name: '', role: '', email: '', phone: '', img: '' });
     setIsModalOpen(true);
   };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-8">
+        <SkeletonPageHeader />
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="h-32 bg-gray-100 rounded animate-pulse" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -86,7 +154,12 @@ export const AdminTeam = () => {
         </GlowingButton>
       </div>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {members.length === 0 ? (
+        <div className="text-center py-12">
+          <p className="text-neutral">No team members yet. Add your first team member to get started.</p>
+        </div>
+      ) : (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {members.map((member) => (
           <VibrantCard key={member.id} className="group bg-white shadow-sm hover:shadow-md hover:border-gold relative">
             <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -134,7 +207,8 @@ export const AdminTeam = () => {
             </div>
           </VibrantCard>
         ))}
-      </div>
+        </div>
+      )}
 
       {/* Create/Edit Modal */}
       <Modal

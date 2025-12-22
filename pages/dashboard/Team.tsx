@@ -1,16 +1,46 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { VibrantCard } from '../../components/UI/VibrantCard';
-import { Mail, Phone } from 'lucide-react';
+import { Mail, Phone, User } from 'lucide-react';
+import { TeamMember } from '../../types';
+import { supabase } from '../../lib/supabase';
+import { SkeletonPageHeader } from '../../components/UI/Skeleton';
 
 export const Team = () => {
-  const staff = [
-    { name: "Alex Johnson", role: "Youth Pastor", img: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80" },
-    { name: "Maria Garcia", role: "Worship Leader", img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&q=80" },
-    { name: "James Wilson", role: "Elder", img: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=200&q=80" },
-    { name: "Linda Chen", role: "Admin", img: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=200&q=80" },
-    { name: "Robert Taylor", role: "Facilities", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80" },
-    { name: "Patricia Lee", role: "Children's Ministry", img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=200&q=80" },
-  ];
+  const [members, setMembers] = useState<TeamMember[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetchMembers();
+  }, []);
+
+  const fetchMembers = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('team_members')
+        .select('*')
+        .order('name', { ascending: true });
+
+      if (error) throw error;
+      setMembers(data || []);
+    } catch (error) {
+      console.error('Error fetching team members:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-8">
+        <SkeletonPageHeader />
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="h-32 bg-gray-100 rounded animate-pulse" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -19,23 +49,43 @@ export const Team = () => {
          <p className="text-neutral mt-1">Staff and Leadership.</p>
       </div>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {staff.map((member, i) => (
-            <VibrantCard key={i} className="flex items-center space-x-6 group bg-white shadow-sm hover:shadow-md hover:border-gold">
-                <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-gray-100 group-hover:border-gold transition-colors flex-shrink-0">
-                     <img src={member.img} alt={member.name} className="w-full h-full object-cover" />
+      {members.length === 0 ? (
+        <div className="text-center py-12">
+          <p className="text-neutral">No team members available yet.</p>
+        </div>
+      ) : (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {members.map((member) => (
+            <VibrantCard key={member.id} className="flex items-center space-x-6 group bg-white shadow-sm hover:shadow-md hover:border-gold">
+              <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-gray-100 group-hover:border-gold transition-colors flex-shrink-0">
+                {member.img ? (
+                  <img src={member.img} alt={member.name} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full bg-gold/10 flex items-center justify-center">
+                    <User size={32} className="text-gold" />
+                  </div>
+                )}
+              </div>
+              <div>
+                <h4 className="font-bold text-xl text-charcoal">{member.name}</h4>
+                <p className="text-xs text-gold font-bold uppercase tracking-wider mb-4">{member.role}</p>
+                <div className="flex space-x-4 text-neutral">
+                  {member.email && (
+                    <a href={`mailto:${member.email}`} className="hover:text-gold transition-colors" title={member.email}>
+                      <Mail size={18} />
+                    </a>
+                  )}
+                  {member.phone && (
+                    <a href={`tel:${member.phone}`} className="hover:text-gold transition-colors" title={member.phone}>
+                      <Phone size={18} />
+                    </a>
+                  )}
                 </div>
-                <div>
-                    <h4 className="font-bold text-xl text-charcoal">{member.name}</h4>
-                    <p className="text-xs text-gold font-bold uppercase tracking-wider mb-4">{member.role}</p>
-                    <div className="flex space-x-4 text-neutral">
-                        <Mail size={18} className="hover:text-gold cursor-pointer transition-colors" />
-                        <Phone size={18} className="hover:text-gold cursor-pointer transition-colors" />
-                    </div>
-                </div>
+              </div>
             </VibrantCard>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
