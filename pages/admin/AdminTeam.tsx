@@ -12,7 +12,22 @@ export const AdminTeam = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
-  const [formData, setFormData] = useState({ name: '', role: '', email: '', phone: '', img: '', description: '' });
+  const roleOptions = [
+    'Administrator',
+    'Associated Pastor',
+    'Attendee',
+    'Children Pastor',
+    'Deacon',
+    'Elder',
+    'Member',
+    'Ministry Leader',
+    'Receptionist',
+    'Senior Pastor',
+    'Youth Adult Pastor',
+    'Youth Pastor'
+  ];
+
+  const [formData, setFormData] = useState({ name: '', role: 'Attendee', email: '', phone: '', img: '', description: '' });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -211,7 +226,7 @@ export const AdminTeam = () => {
           }
           
           setMembers([...members, retryData]);
-          setFormData({ name: '', role: '', email: '', phone: '', img: '', description: '' });
+          setFormData({ name: '', role: 'Attendee', email: '', phone: '', img: '', description: '' });
           handleRemoveFile();
           setIsModalOpen(false);
           alert('Team member saved successfully!\n\nNote: Description was not saved because the description column does not exist in the database yet.\n\nTo enable description field, please run this SQL in Supabase SQL Editor:\n\nALTER TABLE team_members ADD COLUMN IF NOT EXISTS description VARCHAR(350) NOT NULL DEFAULT \'\';\nUPDATE team_members SET description = \'\' WHERE description IS NULL;\nALTER TABLE team_members ALTER COLUMN description SET NOT NULL;\nALTER TABLE team_members ALTER COLUMN description DROP DEFAULT;');
@@ -221,7 +236,7 @@ export const AdminTeam = () => {
       }
 
       setMembers([...members, data]);
-      setFormData({ name: '', role: '', email: '', phone: '', img: '', description: '' });
+      setFormData({ name: '', role: 'Attendee', email: '', phone: '', img: '', description: '' });
       handleRemoveFile();
       setIsModalOpen(false);
     } catch (error: any) {
@@ -396,7 +411,7 @@ export const AdminTeam = () => {
           }
           
           fetchMembers();
-          setFormData({ name: '', role: '', email: '', phone: '', img: '', description: '' });
+          setFormData({ name: '', role: 'Attendee', email: '', phone: '', img: '', description: '' });
           handleRemoveFile();
           setEditingMember(null);
           setIsModalOpen(false);
@@ -407,7 +422,7 @@ export const AdminTeam = () => {
       }
 
       fetchMembers();
-      setFormData({ name: '', role: '', email: '', phone: '', img: '', description: '' });
+      setFormData({ name: '', role: 'Attendee', email: '', phone: '', img: '', description: '' });
       handleRemoveFile();
       setEditingMember(null);
       setIsModalOpen(false);
@@ -438,7 +453,7 @@ export const AdminTeam = () => {
 
   const openCreateModal = () => {
     setEditingMember(null);
-    setFormData({ name: '', role: '', email: '', phone: '', img: '', description: '' });
+    setFormData({ name: '', role: 'Attendee', email: '', phone: '', img: '', description: '' });
     handleRemoveFile();
     setIsModalOpen(true);
   };
@@ -534,7 +549,7 @@ export const AdminTeam = () => {
         onClose={() => {
           setIsModalOpen(false);
           setEditingMember(null);
-          setFormData({ name: '', role: '', email: '', phone: '', img: '', description: '' });
+          setFormData({ name: '', role: 'Attendee', email: '', phone: '', img: '', description: '' });
           handleRemoveFile();
         }}
         title={editingMember ? 'Edit Team Member' : 'Add Team Member'}
@@ -552,13 +567,18 @@ export const AdminTeam = () => {
           </div>
           <div>
             <label className="block text-sm font-bold text-charcoal mb-2">Role *</label>
-            <input
-              type="text"
+            <select
               value={formData.role}
               onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-              className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none"
-              placeholder="e.g., Youth Pastor"
-            />
+              className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none bg-white"
+              required
+            >
+              {roleOptions.map((role) => (
+                <option key={role} value={role}>
+                  {role}
+                </option>
+              ))}
+            </select>
           </div>
           <div>
             <label className="block text-sm font-bold text-charcoal mb-2">Email *</label>
@@ -702,7 +722,7 @@ export const AdminTeam = () => {
               onClick={() => {
                 setIsModalOpen(false);
                 setEditingMember(null);
-                setFormData({ name: '', role: '', email: '', phone: '', img: '', description: '' });
+                setFormData({ name: '', role: 'Attendee', email: '', phone: '', img: '', description: '' });
                 handleRemoveFile();
               }}
               className="px-6 py-2 border border-gray-200 rounded-[4px] text-charcoal hover:bg-gray-50 transition-colors"
