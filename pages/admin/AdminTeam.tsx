@@ -138,9 +138,9 @@ export const AdminTeam = () => {
       return;
     }
 
-    // Validate photo - must be uploaded
-    if (!selectedFile && !formData.img) {
-      alert('Photo is required. Please upload a photo.');
+    // Validate photo - required for all roles except Attendee
+    if (trimmedRole !== 'Attendee' && !selectedFile && !formData.img) {
+      alert('Photo is required for this role. Please upload a photo.');
       return;
     }
 
@@ -430,9 +430,9 @@ export const AdminTeam = () => {
         return;
       }
 
-      // Validate photo - must be uploaded (for update, check if there's existing image or new file)
-      if (!selectedFile && !imageUrl && !editingMember?.img) {
-        alert('Photo is required. Please upload a photo.');
+      // Validate photo - required for all roles except Attendee (for update, check if there's existing image or new file)
+      if (trimmedRole !== 'Attendee' && !selectedFile && !imageUrl && !editingMember?.img) {
+        alert('Photo is required for this role. Please upload a photo.');
         setIsUploading(false);
         return;
       }
@@ -694,7 +694,9 @@ export const AdminTeam = () => {
             />
           </div>
           <div>
-            <label className="block text-sm font-bold text-charcoal mb-2">Photo * (max 300KB, required)</label>
+            <label className="block text-sm font-bold text-charcoal mb-2">
+              Photo {formData.role !== 'Attendee' ? '*' : ''} (max 300KB{formData.role !== 'Attendee' ? ', required' : ', optional for Attendee'})
+            </label>
             <div className="flex items-center gap-4">
               {/* Photo Preview - Circular like team management view */}
               <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-gray-200 flex-shrink-0">
