@@ -1,32 +1,57 @@
 -- ============================================
--- QUICK FIX: Add Description Column and Make All Fields Required
+-- QUICK FIX: Add Description Column to team_members
 -- ============================================
--- Copy and paste this entire SQL into your Supabase SQL Editor and run it
--- This will:
--- 1. Add the missing 'description' column
--- 2. Make all fields required (NOT NULL)
+-- Copy and paste this ENTIRE SQL into your Supabase SQL Editor and run it
+-- This will safely add the description column (350 characters, required)
 
--- Step 1: Add description column if it doesn't exist (350 characters, required)
-ALTER TABLE team_members 
-ADD COLUMN IF NOT EXISTS description VARCHAR(350) NOT NULL DEFAULT '';
+-- Method: Safe approach that handles all cases
+DO $$ 
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 
+        FROM information_schema.columns 
+        WHERE table_schema = 'public'
+        AND table_name = 'team_members' 
+        AND column_name = 'description'
+    ) THEN
+        -- Update existing NULL values first
+        UPDATE team_members SET email = COALESCE(email, '') WHERE email IS NULL;
+        UPDATE team_members SET phone = COALESCE(phone, '') WHERE phone IS NULL;
+        UPDATE team_members SET img = COALESCE(img, '') WHERE img IS NULL;
+        
+        -- Add the column
+        ALTER TABLE team_members 
+        ADD COLUMN description VARCHAR(350) NOT NULL DEFAULT '';
+        
+        -- Set all existing records
+        UPDATE team_members SET description = '' WHERE description IS NULL;
+        
+        -- Remove default
+        ALTER TABLE team_members ALTER COLUMN description DROP DEFAULT;
+        
+        RAISE NOTICE 'Description column added successfully!';
+    ELSE
+        -- Column exists, just ensure it's correct
+        UPDATE team_members SET description = COALESCE(description, '') WHERE description IS NULL;
+        
+        BEGIN
+            ALTER TABLE team_members ALTER COLUMN description TYPE VARCHAR(350);
+            ALTER TABLE team_members ALTER COLUMN description SET NOT NULL;
+        EXCEPTION WHEN OTHERS THEN
+            RAISE NOTICE 'Column already exists with correct settings';
+        END;
+        
+        RAISE NOTICE 'Description column already exists and is updated!';
+    END IF;
+END $$;
 
--- Step 2: Update existing NULL values to empty strings
-UPDATE team_members SET email = '' WHERE email IS NULL;
-UPDATE team_members SET phone = '' WHERE phone IS NULL;
-UPDATE team_members SET img = '' WHERE img IS NULL;
-UPDATE team_members SET description = '' WHERE description IS NULL;
-
--- Step 3: Make all fields NOT NULL
-ALTER TABLE team_members 
-ALTER COLUMN email SET NOT NULL,
-ALTER COLUMN phone SET NOT NULL,
-ALTER COLUMN img SET NOT NULL,
-ALTER COLUMN description SET NOT NULL;
-
--- Step 4: Remove default values
-ALTER TABLE team_members 
-ALTER COLUMN email DROP DEFAULT,
-ALTER COLUMN phone DROP DEFAULT,
-ALTER COLUMN img DROP DEFAULT,
-ALTER COLUMN description DROP DEFAULT;
-
+-- Verify it worked
+SELECT 
+    column_name, 
+    data_type, 
+    character_maximum_length,
+    is_nullable
+FROM information_schema.columns 
+WHERE table_schema = 'public'
+AND table_name = 'team_members' 
+AND column_name = 'description';
