@@ -93,21 +93,60 @@ export const AdminTeam = () => {
 
       // Upload file if selected
       if (selectedFile) {
-        const fileExt = selectedFile.name.split('.').pop() || 'png';
-        const fileName = `team-images/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+        try {
+          const fileExt = selectedFile.name.split('.').pop() || 'png';
+          const fileName = `team-images/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
 
-        const { error: uploadError } = await supabase.storage
-          .from('team-images')
-          .upload(fileName, selectedFile, {
-            cacheControl: '3600',
-            upsert: false,
+          const { error: uploadError } = await supabase.storage
+            .from('team-images')
+            .upload(fileName, selectedFile, {
+              cacheControl: '3600',
+              upsert: false,
+            });
+
+          if (uploadError) {
+            // If bucket doesn't exist or upload fails, save as base64 in database
+            console.warn('Storage upload failed, saving as base64:', uploadError.message);
+            
+            // Convert file to base64
+            const reader = new FileReader();
+            const base64Promise = new Promise<string>((resolve, reject) => {
+              reader.onloadend = () => {
+                if (reader.result) {
+                  resolve(reader.result as string);
+                } else {
+                  reject(new Error('Failed to convert file to base64'));
+                }
+              };
+              reader.onerror = reject;
+            });
+            
+            reader.readAsDataURL(selectedFile);
+            imageUrl = await base64Promise;
+          } else {
+            // Get public URL
+            const { data: urlData } = supabase.storage.from('team-images').getPublicUrl(fileName);
+            imageUrl = urlData.publicUrl;
+          }
+        } catch (uploadError: any) {
+          // Fallback: convert to base64 if storage fails
+          console.warn('Storage upload failed, using base64 fallback:', uploadError.message);
+          
+          const reader = new FileReader();
+          const base64Promise = new Promise<string>((resolve, reject) => {
+            reader.onloadend = () => {
+              if (reader.result) {
+                resolve(reader.result as string);
+              } else {
+                reject(new Error('Failed to convert file to base64'));
+              }
+            };
+            reader.onerror = reject;
           });
-
-        if (uploadError) throw uploadError;
-
-        // Get public URL
-        const { data: urlData } = supabase.storage.from('team-images').getPublicUrl(fileName);
-        imageUrl = urlData.publicUrl;
+          
+          reader.readAsDataURL(selectedFile);
+          imageUrl = await base64Promise;
+        }
       }
 
       const { data, error } = await supabase
@@ -165,24 +204,63 @@ export const AdminTeam = () => {
 
       // Upload new file if selected
       if (selectedFile) {
-        const fileExt = selectedFile.name.split('.').pop() || 'png';
-        const fileName = `team-images/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+        try {
+          const fileExt = selectedFile.name.split('.').pop() || 'png';
+          const fileName = `team-images/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
 
-        const { error: uploadError } = await supabase.storage
-          .from('team-images')
-          .upload(fileName, selectedFile, {
-            cacheControl: '3600',
-            upsert: false,
+          const { error: uploadError } = await supabase.storage
+            .from('team-images')
+            .upload(fileName, selectedFile, {
+              cacheControl: '3600',
+              upsert: false,
+            });
+
+          if (uploadError) {
+            // If bucket doesn't exist or upload fails, save as base64 in database
+            console.warn('Storage upload failed, saving as base64:', uploadError.message);
+            
+            // Convert file to base64
+            const reader = new FileReader();
+            const base64Promise = new Promise<string>((resolve, reject) => {
+              reader.onloadend = () => {
+                if (reader.result) {
+                  resolve(reader.result as string);
+                } else {
+                  reject(new Error('Failed to convert file to base64'));
+                }
+              };
+              reader.onerror = reject;
+            });
+            
+            reader.readAsDataURL(selectedFile);
+            imageUrl = await base64Promise;
+          } else {
+            // Get public URL
+            const { data: urlData } = supabase.storage.from('team-images').getPublicUrl(fileName);
+            imageUrl = urlData.publicUrl;
+          }
+        } catch (uploadError: any) {
+          // Fallback: convert to base64 if storage fails
+          console.warn('Storage upload failed, using base64 fallback:', uploadError.message);
+          
+          const reader = new FileReader();
+          const base64Promise = new Promise<string>((resolve, reject) => {
+            reader.onloadend = () => {
+              if (reader.result) {
+                resolve(reader.result as string);
+              } else {
+                reject(new Error('Failed to convert file to base64'));
+              }
+            };
+            reader.onerror = reject;
           });
+          
+          reader.readAsDataURL(selectedFile);
+          imageUrl = await base64Promise;
+        }
 
-        if (uploadError) throw uploadError;
-
-        // Get public URL
-        const { data: urlData } = supabase.storage.from('team-images').getPublicUrl(fileName);
-        imageUrl = urlData.publicUrl;
-
-        // Delete old image from storage if it exists and is from our storage
-        if (oldImageUrl && oldImageUrl.includes('team-images')) {
+        // Delete old image from storage if it exists and is from our storage (not base64)
+        if (oldImageUrl && oldImageUrl.includes('team-images') && !oldImageUrl.startsWith('data:')) {
           try {
             // Extract file path from URL
             const urlParts = oldImageUrl.split('/team-images/');
