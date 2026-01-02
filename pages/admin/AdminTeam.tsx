@@ -794,7 +794,7 @@ export const AdminTeam = () => {
                   : 'border-gray-200 focus:border-gold'
               }`}
               placeholder="type at least 200 characters of information here"
-              rows={6}
+              rows={3}
               maxLength={350}
               required
             />
