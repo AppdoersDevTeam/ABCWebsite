@@ -94,6 +94,16 @@ export const AdminTeam = () => {
       return;
     }
 
+    // Validate description length (200-350 characters)
+    if (trimmedDescription.length < 200) {
+      alert('Description must be at least 200 characters long. Current length: ' + trimmedDescription.length);
+      return;
+    }
+    if (trimmedDescription.length > 350) {
+      alert('Description must not exceed 350 characters. Current length: ' + trimmedDescription.length);
+      return;
+    }
+
     setIsUploading(true);
 
     try {
@@ -174,30 +184,10 @@ export const AdminTeam = () => {
         .single();
 
       if (error) {
-        // If error is about missing description column, try without it
+        // If error is about missing description column, show error and don't save
         if (error.message && error.message.includes('description')) {
-          console.warn('Description column not found, saving without description field');
-          const insertDataWithoutDescription = {
-            name: trimmedName,
-            role: trimmedRole,
-            email: trimmedEmail,
-            phone: trimmedPhone,
-            img: imageUrl || '',
-          };
-          
-          const { data: retryData, error: retryError } = await supabase
-            .from('team_members')
-            .insert([insertDataWithoutDescription])
-            .select()
-            .single();
-          
-          if (retryError) throw retryError;
-          
-          setMembers([...members, retryData]);
-          setFormData({ name: '', role: '', email: '', phone: '', img: '', description: '' });
-          handleRemoveFile();
-          setIsModalOpen(false);
-          alert('Team member saved successfully. Note: Description column not found in database. Please run the SQL migration to add the description column.');
+          alert('Error: Description column not found in database. Please run the SQL migration first:\n\nALTER TABLE team_members ADD COLUMN IF NOT EXISTS description VARCHAR(350) NOT NULL;');
+          setIsUploading(false);
           return;
         }
         throw error;
@@ -325,6 +315,18 @@ export const AdminTeam = () => {
         return;
       }
 
+      // Validate description length (200-350 characters)
+      if (trimmedDescription.length < 200) {
+        alert('Description must be at least 200 characters long. Current length: ' + trimmedDescription.length);
+        setIsUploading(false);
+        return;
+      }
+      if (trimmedDescription.length > 350) {
+        alert('Description must not exceed 350 characters. Current length: ' + trimmedDescription.length);
+        setIsUploading(false);
+        return;
+      }
+
       // Build update data object with all required fields
       const updateData: any = {
         name: trimmedName,
@@ -341,30 +343,10 @@ export const AdminTeam = () => {
         .eq('id', editingMember.id);
 
       if (error) {
-        // If error is about missing description column, try without it
+        // If error is about missing description column, show error and don't update
         if (error.message && error.message.includes('description')) {
-          console.warn('Description column not found, updating without description field');
-          const updateDataWithoutDescription = {
-            name: trimmedName,
-            role: trimmedRole,
-            email: trimmedEmail,
-            phone: trimmedPhone,
-            img: imageUrl || '',
-          };
-          
-          const { error: retryError } = await supabase
-            .from('team_members')
-            .update(updateDataWithoutDescription)
-            .eq('id', editingMember.id);
-          
-          if (retryError) throw retryError;
-          
-          fetchMembers();
-          setFormData({ name: '', role: '', email: '', phone: '', img: '', description: '' });
-          handleRemoveFile();
-          setEditingMember(null);
-          setIsModalOpen(false);
-          alert('Team member updated successfully. Note: Description column not found in database. Please run the SQL migration to add the description column.');
+          alert('Error: Description column not found in database. Please run the SQL migration first:\n\nALTER TABLE team_members ADD COLUMN IF NOT EXISTS description VARCHAR(350) NOT NULL;');
+          setIsUploading(false);
           return;
         }
         throw error;
@@ -628,21 +610,38 @@ export const AdminTeam = () => {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-bold text-charcoal mb-2">Description * (max 300 characters)</label>
+            <label className="block text-sm font-bold text-charcoal mb-2">Description * (200-350 characters)</label>
             <textarea
               value={formData.description}
               onChange={(e) => {
                 const value = e.target.value;
-                if (value.length <= 300) {
+                if (value.length <= 350) {
                   setFormData({ ...formData, description: value });
                 }
               }}
-              className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none resize-none"
-              placeholder="Enter description (max 300 characters)"
-              rows={4}
-              maxLength={300}
+              className={`w-full p-3 rounded-[4px] border focus:outline-none resize-none ${
+                formData.description.length > 0 && formData.description.length < 200
+                  ? 'border-red-300 focus:border-red-500'
+                  : formData.description.length > 350
+                  ? 'border-red-300 focus:border-red-500'
+                  : 'border-gray-200 focus:border-gold'
+              }`}
+              placeholder="Enter description (minimum 200 characters, maximum 350 characters)"
+              rows={6}
+              maxLength={350}
+              required
             />
-            <p className="text-xs text-neutral mt-1">{formData.description.length}/300 characters</p>
+            <p className={`text-xs mt-1 ${
+              formData.description.length > 0 && formData.description.length < 200
+                ? 'text-red-500'
+                : formData.description.length > 350
+                ? 'text-red-500'
+                : formData.description.length >= 200 && formData.description.length <= 350
+                ? 'text-green-600'
+                : 'text-neutral'
+            }`}>
+              {formData.description.length}/350 characters {formData.description.length > 0 && formData.description.length < 200 && `(minimum 200 required)`}
+            </p>
           </div>
           <div className="flex gap-3 justify-end pt-4">
             <button
@@ -658,7 +657,16 @@ export const AdminTeam = () => {
             </button>
             <GlowingButton
               onClick={editingMember ? handleUpdate : handleCreate}
-              disabled={!formData.name.trim() || !formData.role.trim() || !formData.email.trim() || !formData.phone.trim() || !formData.description.trim() || isUploading}
+              disabled={
+                !formData.name.trim() || 
+                !formData.role.trim() || 
+                !formData.email.trim() || 
+                !formData.phone.trim() || 
+                !formData.description.trim() || 
+                formData.description.trim().length < 200 || 
+                formData.description.trim().length > 350 || 
+                isUploading
+              }
             >
               {isUploading ? 'Uploading...' : (editingMember ? 'Update Member' : 'Add Member')}
             </GlowingButton>

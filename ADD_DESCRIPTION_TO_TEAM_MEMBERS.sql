@@ -12,7 +12,7 @@ BEGIN
         AND column_name = 'description'
     ) THEN
         ALTER TABLE team_members 
-        ADD COLUMN description VARCHAR(300);
+        ADD COLUMN description VARCHAR(350) NOT NULL;
         
         RAISE NOTICE 'Description column added successfully';
     ELSE

@@ -6,9 +6,9 @@
 -- 1. Add the missing 'description' column
 -- 2. Make all fields required (NOT NULL)
 
--- Step 1: Add description column if it doesn't exist
+-- Step 1: Add description column if it doesn't exist (350 characters, required)
 ALTER TABLE team_members 
-ADD COLUMN IF NOT EXISTS description VARCHAR(300) NOT NULL DEFAULT '';
+ADD COLUMN IF NOT EXISTS description VARCHAR(350) NOT NULL DEFAULT '';
 
 -- Step 2: Update existing NULL values to empty strings
 UPDATE team_members SET email = '' WHERE email IS NULL;
