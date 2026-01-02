@@ -82,7 +82,15 @@ export const AdminTeam = () => {
   };
 
   const handleCreate = async () => {
-    if (!formData.name || !formData.role) {
+    // Validate all required fields (trim whitespace)
+    const trimmedName = formData.name.trim();
+    const trimmedRole = formData.role.trim();
+    const trimmedEmail = formData.email.trim();
+    const trimmedPhone = formData.phone.trim();
+    const trimmedDescription = formData.description.trim();
+
+    if (!trimmedName || !trimmedRole || !trimmedEmail || !trimmedPhone || !trimmedDescription) {
+      alert('Please fill in all required fields: Name, Role, Email, Phone, and Description');
       return;
     }
 
@@ -149,19 +157,15 @@ export const AdminTeam = () => {
         }
       }
 
-      // Build insert data object, conditionally including description
+      // Build insert data object with all required fields
       const insertData: any = {
-        name: formData.name,
-        role: formData.role,
-        email: formData.email || null,
-        phone: formData.phone || null,
-        img: imageUrl || null,
+        name: trimmedName,
+        role: trimmedRole,
+        email: trimmedEmail,
+        phone: trimmedPhone,
+        img: imageUrl || '', // Empty string if no image uploaded
+        description: trimmedDescription,
       };
-
-      // Only include description if it has a value (handles case where column might not exist)
-      if (formData.description && formData.description.trim()) {
-        insertData.description = formData.description;
-      }
 
       const { data, error } = await supabase
         .from('team_members')
@@ -169,34 +173,7 @@ export const AdminTeam = () => {
         .select()
         .single();
 
-      if (error) {
-        // If error is about missing description column, try without it
-        if (error.message && error.message.includes('description')) {
-          console.warn('Description column not found, saving without description field');
-          const { data: retryData, error: retryError } = await supabase
-            .from('team_members')
-            .insert([
-              {
-                name: formData.name,
-                role: formData.role,
-                email: formData.email || null,
-                phone: formData.phone || null,
-                img: imageUrl || null,
-              },
-            ])
-            .select()
-            .single();
-          
-          if (retryError) throw retryError;
-          setMembers([...members, retryData]);
-          setFormData({ name: '', role: '', email: '', phone: '', img: '', description: '' });
-          handleRemoveFile();
-          setIsModalOpen(false);
-          alert('Team member saved successfully. Note: Description column not found in database. Please run the migration SQL to enable description field.');
-          return;
-        }
-        throw error;
-      }
+      if (error) throw error;
 
       setMembers([...members, data]);
       setFormData({ name: '', role: '', email: '', phone: '', img: '', description: '' });
@@ -307,51 +284,35 @@ export const AdminTeam = () => {
         }
       }
 
-      // Build update data object, conditionally including description
-      const updateData: any = {
-        name: formData.name,
-        role: formData.role,
-        email: formData.email || null,
-        phone: formData.phone || null,
-        img: imageUrl || null,
-      };
+      // Validate all required fields (trim whitespace)
+      const trimmedName = formData.name.trim();
+      const trimmedRole = formData.role.trim();
+      const trimmedEmail = formData.email.trim();
+      const trimmedPhone = formData.phone.trim();
+      const trimmedDescription = formData.description.trim();
 
-      // Only include description if it has a value (handles case where column might not exist)
-      if (formData.description !== undefined) {
-        updateData.description = formData.description || null;
+      if (!trimmedName || !trimmedRole || !trimmedEmail || !trimmedPhone || !trimmedDescription) {
+        alert('Please fill in all required fields: Name, Role, Email, Phone, and Description');
+        setIsUploading(false);
+        return;
       }
+
+      // Build update data object with all required fields
+      const updateData: any = {
+        name: trimmedName,
+        role: trimmedRole,
+        email: trimmedEmail,
+        phone: trimmedPhone,
+        img: imageUrl || '', // Empty string if no image uploaded
+        description: trimmedDescription,
+      };
 
       const { error } = await supabase
         .from('team_members')
         .update(updateData)
         .eq('id', editingMember.id);
 
-      if (error) {
-        // If error is about missing description column, try without it
-        if (error.message && error.message.includes('description')) {
-          console.warn('Description column not found, updating without description field');
-          const { error: retryError } = await supabase
-            .from('team_members')
-            .update({
-              name: formData.name,
-              role: formData.role,
-              email: formData.email || null,
-              phone: formData.phone || null,
-              img: imageUrl || null,
-            })
-            .eq('id', editingMember.id);
-          
-          if (retryError) throw retryError;
-          fetchMembers();
-          setFormData({ name: '', role: '', email: '', phone: '', img: '', description: '' });
-          handleRemoveFile();
-          setEditingMember(null);
-          setIsModalOpen(false);
-          alert('Team member updated successfully. Note: Description column not found in database. Please run the migration SQL to enable description field.');
-          return;
-        }
-        throw error;
-      }
+      if (error) throw error;
 
       fetchMembers();
       setFormData({ name: '', role: '', email: '', phone: '', img: '', description: '' });
@@ -508,98 +469,110 @@ export const AdminTeam = () => {
             />
           </div>
           <div>
-            <label className="block text-sm font-bold text-charcoal mb-2">Email</label>
+            <label className="block text-sm font-bold text-charcoal mb-2">Email *</label>
             <input
               type="email"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none"
               placeholder="email@church.com"
+              required
             />
           </div>
           <div>
-            <label className="block text-sm font-bold text-charcoal mb-2">Phone</label>
+            <label className="block text-sm font-bold text-charcoal mb-2">Phone *</label>
             <input
               type="tel"
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
               className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none"
               placeholder="03-308 5409"
+              required
             />
           </div>
           <div>
-            <label className="block text-sm font-bold text-charcoal mb-2">Image (Optional, max 300KB)</label>
-            <div className="space-y-3">
-              {previewUrl || selectedFile ? (
-                <div className="relative border border-gray-200 rounded-[4px] p-4 bg-gray-50">
-                  {(() => {
-                    // Check if we should show image preview
-                    const isImage = selectedFile 
-                      ? selectedFile.type.startsWith('image/')
-                      : previewUrl && !previewUrl.toLowerCase().endsWith('.pdf') && (previewUrl.startsWith('blob:') || previewUrl.startsWith('http'));
-                    
-                    if (isImage && previewUrl) {
-                      return (
-                        <div className="relative">
-                          <img 
-                            src={previewUrl} 
-                            alt="Preview" 
-                            className="w-full h-48 object-cover rounded-[4px]"
-                          />
-                          <button
-                            type="button"
-                            onClick={handleRemoveFile}
-                            className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-md hover:bg-gray-100 transition-colors"
-                            title="Remove image"
-                          >
-                            <X size={16} className="text-charcoal" />
-                          </button>
-                        </div>
-                      );
-                    } else {
-                      return (
-                        <div className="flex items-center justify-center p-8">
-                          <div className="text-center">
-                            <ImageIcon size={32} className="mx-auto text-gold mb-2" />
-                            <p className="text-sm text-charcoal font-bold">{selectedFile?.name || 'File uploaded'}</p>
-                            <button
-                              type="button"
-                              onClick={handleRemoveFile}
-                              className="mt-2 text-xs text-neutral hover:text-gold transition-colors"
-                            >
-                              Remove file
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    }
-                  })()}
-                </div>
-              ) : (
-                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-[4px] cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
-                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                    <Upload size={32} className="text-neutral mb-2" />
-                    <p className="text-sm text-charcoal font-bold">Click to upload image</p>
-                    <p className="text-xs text-neutral mt-1">PNG, JPEG, or PDF (max 300KB)</p>
+            <label className="block text-sm font-bold text-charcoal mb-2">Image * (max 300KB)</label>
+            <div className="flex items-center gap-4">
+              {/* Photo Preview - Circular like team management view */}
+              <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-gray-200 flex-shrink-0">
+                {previewUrl && (() => {
+                  // Check if we should show image preview
+                  const isImage = selectedFile 
+                    ? selectedFile.type.startsWith('image/')
+                    : previewUrl && !previewUrl.toLowerCase().endsWith('.pdf') && (previewUrl.startsWith('blob:') || previewUrl.startsWith('http') || previewUrl.startsWith('data:'));
+                  
+                  if (isImage && previewUrl) {
+                    return (
+                      <img 
+                        src={previewUrl} 
+                        alt="Team member" 
+                        className="w-full h-full object-cover"
+                      />
+                    );
+                  } else {
+                    return (
+                      <div className="w-full h-full bg-gold/10 flex items-center justify-center">
+                        <User size={32} className="text-gold" />
+                      </div>
+                    );
+                  }
+                })()}
+                {!previewUrl && (
+                  <div className="w-full h-full bg-gold/10 flex items-center justify-center">
+                    <User size={32} className="text-gold" />
                   </div>
-                  <input
-                    type="file"
-                    className="hidden"
-                    accept=".png,.jpeg,.jpg,.pdf"
-                    onChange={handleFileSelect}
-                    id="team-image-upload"
-                  />
+                )}
+              </div>
+
+              {/* Upload Button on the Right */}
+              <div className="flex-1">
+                <label 
+                  htmlFor="team-image-upload"
+                  className="flex items-center justify-center gap-2 px-4 py-2 border-2 border-gray-300 rounded-[4px] cursor-pointer bg-white hover:bg-gray-50 hover:border-gold transition-colors"
+                >
+                  <Upload size={18} className="text-charcoal" />
+                  <span className="text-sm font-bold text-charcoal">
+                    {previewUrl || selectedFile ? 'Change Image' : 'Upload Image'}
+                  </span>
                 </label>
-              )}
-              {selectedFile && (
-                <p className="text-xs text-neutral">
-                  Selected: {selectedFile.name} ({(selectedFile.size / 1024).toFixed(1)} KB)
-                </p>
-              )}
+                <input
+                  type="file"
+                  className="hidden"
+                  accept=".png,.jpeg,.jpg,.pdf"
+                  onChange={handleFileSelect}
+                  id="team-image-upload"
+                />
+                {selectedFile && (
+                  <div className="mt-2 flex items-center gap-2">
+                    <p className="text-xs text-neutral">
+                      {selectedFile.name} ({(selectedFile.size / 1024).toFixed(1)} KB)
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleRemoveFile}
+                      className="text-xs text-red-500 hover:text-red-700 transition-colors"
+                      title="Remove file"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                )}
+                {!selectedFile && previewUrl && (
+                  <button
+                    type="button"
+                    onClick={handleRemoveFile}
+                    className="mt-2 text-xs text-red-500 hover:text-red-700 transition-colors"
+                    title="Remove image"
+                  >
+                    Remove image
+                  </button>
+                )}
+                <p className="text-xs text-neutral mt-1">PNG, JPEG, or PDF (max 300KB)</p>
+              </div>
             </div>
           </div>
           <div>
-            <label className="block text-sm font-bold text-charcoal mb-2">Description (Optional, max 300 characters)</label>
+            <label className="block text-sm font-bold text-charcoal mb-2">Description * (max 300 characters)</label>
             <textarea
               value={formData.description}
               onChange={(e) => {
@@ -629,7 +602,7 @@ export const AdminTeam = () => {
             </button>
             <GlowingButton
               onClick={editingMember ? handleUpdate : handleCreate}
-              disabled={!formData.name || !formData.role || isUploading}
+              disabled={!formData.name.trim() || !formData.role.trim() || !formData.email.trim() || !formData.phone.trim() || !formData.description.trim() || isUploading}
             >
               {isUploading ? 'Uploading...' : (editingMember ? 'Update Member' : 'Add Member')}
             </GlowingButton>

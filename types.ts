@@ -101,10 +101,10 @@ export interface TeamMember {
   id: string;
   name: string;
   role: string;
-  email?: string;
-  phone?: string;
-  img?: string;
-  description?: string;
+  email: string;
+  phone: string;
+  img: string;
+  description: string;
   created_at?: string;
   updated_at?: string;
 }
