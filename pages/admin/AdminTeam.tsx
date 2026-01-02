@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { VibrantCard } from '../../components/UI/VibrantCard';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { Modal } from '../../components/UI/Modal';
-import { Mail, Phone, Edit, Trash2, Plus, User } from 'lucide-react';
+import { Mail, Phone, Edit, Trash2, Plus, User, Upload, X, Image as ImageIcon } from 'lucide-react';
 import { TeamMember } from '../../types';
 import { supabase } from '../../lib/supabase';
 import { SkeletonPageHeader } from '../../components/UI/Skeleton';
@@ -13,6 +13,9 @@ export const AdminTeam = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
   const [formData, setFormData] = useState({ name: '', role: '', email: '', phone: '', img: '', description: '' });
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     fetchMembers();
@@ -35,12 +38,78 @@ export const AdminTeam = () => {
     }
   };
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      
+      // Validate file type
+      const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'application/pdf'];
+      if (!validTypes.includes(file.type)) {
+        alert('Please select a PNG, JPEG, or PDF file');
+        return;
+      }
+      
+      // Validate file size (300KB = 300 * 1024 bytes)
+      const maxSize = 300 * 1024;
+      if (file.size > maxSize) {
+        alert('File size must be less than 300KB');
+        return;
+      }
+      
+      setSelectedFile(file);
+      
+      // Create preview URL
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setPreviewUrl(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        // For PDF, show a placeholder
+        setPreviewUrl(null);
+      }
+    }
+  };
+
+  const handleRemoveFile = () => {
+    if (previewUrl && previewUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(previewUrl);
+    }
+    setSelectedFile(null);
+    setPreviewUrl(null);
+    setFormData({ ...formData, img: '' });
+  };
+
   const handleCreate = async () => {
     if (!formData.name || !formData.role) {
       return;
     }
 
+    setIsUploading(true);
+
     try {
+      let imageUrl = formData.img;
+
+      // Upload file if selected
+      if (selectedFile) {
+        const fileExt = selectedFile.name.split('.').pop() || 'png';
+        const fileName = `team-images/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('team-images')
+          .upload(fileName, selectedFile, {
+            cacheControl: '3600',
+            upsert: false,
+          });
+
+        if (uploadError) throw uploadError;
+
+        // Get public URL
+        const { data: urlData } = supabase.storage.from('team-images').getPublicUrl(fileName);
+        imageUrl = urlData.publicUrl;
+      }
+
       const { data, error } = await supabase
         .from('team_members')
         .insert([
@@ -49,7 +118,7 @@ export const AdminTeam = () => {
             role: formData.role,
             email: formData.email || null,
             phone: formData.phone || null,
-            img: formData.img || null,
+            img: imageUrl || null,
             description: formData.description || null,
           },
         ])
@@ -60,10 +129,13 @@ export const AdminTeam = () => {
 
       setMembers([...members, data]);
       setFormData({ name: '', role: '', email: '', phone: '', img: '', description: '' });
+      handleRemoveFile();
       setIsModalOpen(false);
     } catch (error: any) {
       console.error('Error creating team member:', error);
       alert(error.message || 'Failed to create team member');
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -77,13 +149,54 @@ export const AdminTeam = () => {
       img: member.img || '',
       description: member.description || '',
     });
+    setSelectedFile(null);
+    setPreviewUrl(member.img || null);
     setIsModalOpen(true);
   };
 
   const handleUpdate = async () => {
     if (!editingMember) return;
 
+    setIsUploading(true);
+
     try {
+      let imageUrl = formData.img;
+      let oldImageUrl = editingMember.img;
+
+      // Upload new file if selected
+      if (selectedFile) {
+        const fileExt = selectedFile.name.split('.').pop() || 'png';
+        const fileName = `team-images/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('team-images')
+          .upload(fileName, selectedFile, {
+            cacheControl: '3600',
+            upsert: false,
+          });
+
+        if (uploadError) throw uploadError;
+
+        // Get public URL
+        const { data: urlData } = supabase.storage.from('team-images').getPublicUrl(fileName);
+        imageUrl = urlData.publicUrl;
+
+        // Delete old image from storage if it exists and is from our storage
+        if (oldImageUrl && oldImageUrl.includes('team-images')) {
+          try {
+            // Extract file path from URL
+            const urlParts = oldImageUrl.split('/team-images/');
+            if (urlParts.length > 1) {
+              const filePath = `team-images/${urlParts[1]}`;
+              await supabase.storage.from('team-images').remove([filePath]);
+            }
+          } catch (deleteError) {
+            console.warn('Error deleting old image:', deleteError);
+            // Continue even if deletion fails
+          }
+        }
+      }
+
       const { error } = await supabase
         .from('team_members')
         .update({
@@ -91,7 +204,7 @@ export const AdminTeam = () => {
           role: formData.role,
           email: formData.email || null,
           phone: formData.phone || null,
-          img: formData.img || null,
+          img: imageUrl || null,
           description: formData.description || null,
         })
         .eq('id', editingMember.id);
@@ -100,11 +213,14 @@ export const AdminTeam = () => {
 
       fetchMembers();
       setFormData({ name: '', role: '', email: '', phone: '', img: '', description: '' });
+      handleRemoveFile();
       setEditingMember(null);
       setIsModalOpen(false);
     } catch (error: any) {
       console.error('Error updating team member:', error);
       alert(error.message || 'Failed to update team member');
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -128,6 +244,7 @@ export const AdminTeam = () => {
   const openCreateModal = () => {
     setEditingMember(null);
     setFormData({ name: '', role: '', email: '', phone: '', img: '', description: '' });
+    handleRemoveFile();
     setIsModalOpen(true);
   };
 
@@ -223,6 +340,7 @@ export const AdminTeam = () => {
           setIsModalOpen(false);
           setEditingMember(null);
           setFormData({ name: '', role: '', email: '', phone: '', img: '', description: '' });
+          handleRemoveFile();
         }}
         title={editingMember ? 'Edit Team Member' : 'Add Team Member'}
       >
@@ -268,14 +386,75 @@ export const AdminTeam = () => {
             />
           </div>
           <div>
-            <label className="block text-sm font-bold text-charcoal mb-2">Image URL (Optional)</label>
-            <input
-              type="url"
-              value={formData.img}
-              onChange={(e) => setFormData({ ...formData, img: e.target.value })}
-              className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none"
-              placeholder="https://..."
-            />
+            <label className="block text-sm font-bold text-charcoal mb-2">Image (Optional, max 300KB)</label>
+            <div className="space-y-3">
+              {previewUrl || selectedFile ? (
+                <div className="relative border border-gray-200 rounded-[4px] p-4 bg-gray-50">
+                  {(() => {
+                    // Check if we should show image preview
+                    const isImage = selectedFile 
+                      ? selectedFile.type.startsWith('image/')
+                      : previewUrl && !previewUrl.toLowerCase().endsWith('.pdf') && (previewUrl.startsWith('blob:') || previewUrl.startsWith('http'));
+                    
+                    if (isImage && previewUrl) {
+                      return (
+                        <div className="relative">
+                          <img 
+                            src={previewUrl} 
+                            alt="Preview" 
+                            className="w-full h-48 object-cover rounded-[4px]"
+                          />
+                          <button
+                            type="button"
+                            onClick={handleRemoveFile}
+                            className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-md hover:bg-gray-100 transition-colors"
+                            title="Remove image"
+                          >
+                            <X size={16} className="text-charcoal" />
+                          </button>
+                        </div>
+                      );
+                    } else {
+                      return (
+                        <div className="flex items-center justify-center p-8">
+                          <div className="text-center">
+                            <ImageIcon size={32} className="mx-auto text-gold mb-2" />
+                            <p className="text-sm text-charcoal font-bold">{selectedFile?.name || 'File uploaded'}</p>
+                            <button
+                              type="button"
+                              onClick={handleRemoveFile}
+                              className="mt-2 text-xs text-neutral hover:text-gold transition-colors"
+                            >
+                              Remove file
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    }
+                  })()}
+                </div>
+              ) : (
+                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-[4px] cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
+                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                    <Upload size={32} className="text-neutral mb-2" />
+                    <p className="text-sm text-charcoal font-bold">Click to upload image</p>
+                    <p className="text-xs text-neutral mt-1">PNG, JPEG, or PDF (max 300KB)</p>
+                  </div>
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept=".png,.jpeg,.jpg,.pdf"
+                    onChange={handleFileSelect}
+                    id="team-image-upload"
+                  />
+                </label>
+              )}
+              {selectedFile && (
+                <p className="text-xs text-neutral">
+                  Selected: {selectedFile.name} ({(selectedFile.size / 1024).toFixed(1)} KB)
+                </p>
+              )}
+            </div>
           </div>
           <div>
             <label className="block text-sm font-bold text-charcoal mb-2">Description (Optional, max 300 characters)</label>
@@ -300,6 +479,7 @@ export const AdminTeam = () => {
                 setIsModalOpen(false);
                 setEditingMember(null);
                 setFormData({ name: '', role: '', email: '', phone: '', img: '', description: '' });
+                handleRemoveFile();
               }}
               className="px-6 py-2 border border-gray-200 rounded-[4px] text-charcoal hover:bg-gray-50 transition-colors"
             >
@@ -307,9 +487,9 @@ export const AdminTeam = () => {
             </button>
             <GlowingButton
               onClick={editingMember ? handleUpdate : handleCreate}
-              disabled={!formData.name || !formData.role}
+              disabled={!formData.name || !formData.role || isUploading}
             >
-              {editingMember ? 'Update Member' : 'Add Member'}
+              {isUploading ? 'Uploading...' : (editingMember ? 'Update Member' : 'Add Member')}
             </GlowingButton>
           </div>
         </div>
