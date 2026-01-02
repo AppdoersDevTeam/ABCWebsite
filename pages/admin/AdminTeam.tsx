@@ -149,22 +149,54 @@ export const AdminTeam = () => {
         }
       }
 
+      // Build insert data object, conditionally including description
+      const insertData: any = {
+        name: formData.name,
+        role: formData.role,
+        email: formData.email || null,
+        phone: formData.phone || null,
+        img: imageUrl || null,
+      };
+
+      // Only include description if it has a value (handles case where column might not exist)
+      if (formData.description && formData.description.trim()) {
+        insertData.description = formData.description;
+      }
+
       const { data, error } = await supabase
         .from('team_members')
-        .insert([
-          {
-            name: formData.name,
-            role: formData.role,
-            email: formData.email || null,
-            phone: formData.phone || null,
-            img: imageUrl || null,
-            description: formData.description || null,
-          },
-        ])
+        .insert([insertData])
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        // If error is about missing description column, try without it
+        if (error.message && error.message.includes('description')) {
+          console.warn('Description column not found, saving without description field');
+          const { data: retryData, error: retryError } = await supabase
+            .from('team_members')
+            .insert([
+              {
+                name: formData.name,
+                role: formData.role,
+                email: formData.email || null,
+                phone: formData.phone || null,
+                img: imageUrl || null,
+              },
+            ])
+            .select()
+            .single();
+          
+          if (retryError) throw retryError;
+          setMembers([...members, retryData]);
+          setFormData({ name: '', role: '', email: '', phone: '', img: '', description: '' });
+          handleRemoveFile();
+          setIsModalOpen(false);
+          alert('Team member saved successfully. Note: Description column not found in database. Please run the migration SQL to enable description field.');
+          return;
+        }
+        throw error;
+      }
 
       setMembers([...members, data]);
       setFormData({ name: '', role: '', email: '', phone: '', img: '', description: '' });
@@ -275,19 +307,51 @@ export const AdminTeam = () => {
         }
       }
 
+      // Build update data object, conditionally including description
+      const updateData: any = {
+        name: formData.name,
+        role: formData.role,
+        email: formData.email || null,
+        phone: formData.phone || null,
+        img: imageUrl || null,
+      };
+
+      // Only include description if it has a value (handles case where column might not exist)
+      if (formData.description !== undefined) {
+        updateData.description = formData.description || null;
+      }
+
       const { error } = await supabase
         .from('team_members')
-        .update({
-          name: formData.name,
-          role: formData.role,
-          email: formData.email || null,
-          phone: formData.phone || null,
-          img: imageUrl || null,
-          description: formData.description || null,
-        })
+        .update(updateData)
         .eq('id', editingMember.id);
 
-      if (error) throw error;
+      if (error) {
+        // If error is about missing description column, try without it
+        if (error.message && error.message.includes('description')) {
+          console.warn('Description column not found, updating without description field');
+          const { error: retryError } = await supabase
+            .from('team_members')
+            .update({
+              name: formData.name,
+              role: formData.role,
+              email: formData.email || null,
+              phone: formData.phone || null,
+              img: imageUrl || null,
+            })
+            .eq('id', editingMember.id);
+          
+          if (retryError) throw retryError;
+          fetchMembers();
+          setFormData({ name: '', role: '', email: '', phone: '', img: '', description: '' });
+          handleRemoveFile();
+          setEditingMember(null);
+          setIsModalOpen(false);
+          alert('Team member updated successfully. Note: Description column not found in database. Please run the migration SQL to enable description field.');
+          return;
+        }
+        throw error;
+      }
 
       fetchMembers();
       setFormData({ name: '', role: '', email: '', phone: '', img: '', description: '' });
