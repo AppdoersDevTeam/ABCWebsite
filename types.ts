@@ -104,6 +104,7 @@ export interface TeamMember {
   email?: string;
   phone?: string;
   img?: string;
+  description?: string;
   created_at?: string;
   updated_at?: string;
 }

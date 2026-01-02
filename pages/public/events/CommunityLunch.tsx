@@ -24,7 +24,7 @@ export const CommunityLunch = () => {
             <div className="bg-gold/10 p-6 rounded-full w-24 h-24 mx-auto mb-6 flex items-center justify-center">
               <UtensilsCrossed size={48} className="text-gold" />
             </div>
-            <h2 className="text-4xl md:text-5xl font-serif font-bold text-charcoal mb-4">Community Lunch</h2>
+            <h2 className="text-4xl md:text-5xl font-serif font-normal text-charcoal mb-4">Community Lunch</h2>
             <p className="text-xl text-neutral leading-relaxed">
               A free lunch for our neighbors. Every first Sunday of the month, we open our doors 
               to serve a hot meal and build community with those around us.
@@ -37,7 +37,7 @@ export const CommunityLunch = () => {
               <div className="flex items-start gap-4">
                 <Clock className="text-gold flex-shrink-0 mt-1" size={24} />
                 <div>
-                  <h3 className="font-serif text-2xl font-bold text-charcoal mb-2">When We Serve</h3>
+                  <h3 className="font-serif text-2xl font-normal text-charcoal mb-2">When We Serve</h3>
                   <p className="text-neutral mb-2"><strong className="text-charcoal">First Sunday of Each Month</strong></p>
                   <p className="text-neutral text-lg font-bold text-gold">12:00 PM</p>
                   <p className="text-neutral text-sm mt-2">Following our morning service</p>
@@ -49,7 +49,7 @@ export const CommunityLunch = () => {
               <div className="flex items-start gap-4">
                 <MapPin className="text-gold flex-shrink-0 mt-1" size={24} />
                 <div>
-                  <h3 className="font-serif text-2xl font-bold text-charcoal mb-2">Location</h3>
+                  <h3 className="font-serif text-2xl font-normal text-charcoal mb-2">Location</h3>
                   <p className="text-neutral mb-2">284 Havelock Street</p>
                   <p className="text-neutral">Ashburton 7700</p>
                 </div>
@@ -61,7 +61,7 @@ export const CommunityLunch = () => {
           <VibrantCard className="p-8 md:p-12 bg-white/80 animate-fade-in-up delay-600">
             <div className="flex items-start gap-4 mb-6">
               <Heart className="text-gold flex-shrink-0 mt-1" size={32} />
-              <h3 className="font-serif text-3xl font-bold text-charcoal">Our Mission</h3>
+              <h3 className="font-serif text-3xl font-normal text-charcoal">Our Mission</h3>
             </div>
             <div className="space-y-4 text-neutral leading-relaxed">
               <p>
@@ -79,7 +79,7 @@ export const CommunityLunch = () => {
 
           {/* What to Expect */}
           <VibrantCard className="p-8 md:p-12 bg-white/80 animate-fade-in-up delay-700">
-            <h3 className="font-serif text-3xl font-bold text-charcoal mb-6">What to Expect</h3>
+            <h3 className="font-serif text-3xl font-normal text-charcoal mb-6">What to Expect</h3>
             <div className="space-y-4 text-neutral leading-relaxed">
               <p>
                 When you arrive, you'll be welcomed by our team and shown to a seat. We serve a hot, 
@@ -97,7 +97,7 @@ export const CommunityLunch = () => {
           <VibrantCard className="p-8 md:p-12 bg-white/80 animate-fade-in-up delay-800">
             <div className="flex items-start gap-4 mb-6">
               <Users className="text-gold flex-shrink-0 mt-1" size={32} />
-              <h3 className="font-serif text-3xl font-bold text-charcoal">Get Involved</h3>
+              <h3 className="font-serif text-3xl font-normal text-charcoal">Get Involved</h3>
             </div>
             <div className="space-y-4 text-neutral leading-relaxed">
               <p>

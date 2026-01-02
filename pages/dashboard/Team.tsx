@@ -45,7 +45,7 @@ export const Team = () => {
   return (
     <div className="space-y-8">
       <div className="border-b border-gray-200 pb-6">
-         <h1 className="text-4xl font-serif font-bold text-charcoal">Directory</h1>
+         <h1 className="text-4xl font-serif font-normal text-charcoal">Directory</h1>
          <p className="text-neutral mt-1">Staff and Leadership.</p>
       </div>
 

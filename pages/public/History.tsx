@@ -50,7 +50,7 @@ export const History = () => {
       <div className="container mx-auto px-4 -mt-10 relative z-10 max-w-5xl">
         {/* Header Section */}
         <div className="text-center mb-16 animate-fade-in-up">
-          <h2 className="text-4xl md:text-6xl font-serif font-bold text-charcoal mb-6">
+          <h2 className="text-4xl md:text-6xl font-serif font-normal text-charcoal mb-6">
             Ashburton Baptist Church
           </h2>
           <p className="text-2xl md:text-3xl text-gold font-bold mb-4">Est. 1882</p>
@@ -70,13 +70,13 @@ export const History = () => {
                       {item.icon}
                     </div>
                     <div className="md:mt-4">
-                      <span className="text-2xl md:text-3xl font-serif font-bold text-charcoal block">{item.year}</span>
+                      <span className="text-2xl md:text-3xl font-serif font-normal text-charcoal block">{item.year}</span>
                     </div>
                   </div>
                 </div>
                 <div className="flex-1">
                   <VibrantCard className="p-8 md:p-10 bg-white/80">
-                    <h3 className="text-2xl md:text-3xl font-serif font-bold text-charcoal mb-4">{item.title}</h3>
+                    <h3 className="text-2xl md:text-3xl font-serif font-normal text-charcoal mb-4">{item.title}</h3>
                     <p className="text-neutral leading-relaxed text-lg">{item.content}</p>
                   </VibrantCard>
                 </div>
@@ -92,7 +92,7 @@ export const History = () => {
         <section className="mt-20 md:mt-32 animate-fade-in-up delay-1100">
           <VibrantCard className="p-8 md:p-12 text-center bg-white/80 border-l-4 border-l-gold">
             <Heart className="text-gold mx-auto mb-6 animate-float" size={48} />
-            <h3 className="text-3xl md:text-4xl font-serif font-bold text-charcoal mb-8">Gratitude and Thanks</h3>
+            <h3 className="text-3xl md:text-4xl font-serif font-normal text-charcoal mb-8">Gratitude and Thanks</h3>
             <div className="space-y-6 text-neutral leading-relaxed text-lg max-w-4xl mx-auto">
               <p>
                 We want to acknowledge the large number of church members from the past who have poured their lives into our Church to bring glory to God's name during their time here. Their commitment and dedication in seeking and pursuing God's will for this Church, ensures that their work will continue to thrive.

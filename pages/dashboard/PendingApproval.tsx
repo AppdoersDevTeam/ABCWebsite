@@ -100,7 +100,7 @@ export const PendingApproval = () => {
 
         {isRevoked ? (
           <>
-            <h1 className="text-5xl font-serif font-bold text-charcoal mb-4">Access Revoked</h1>
+            <h1 className="text-5xl font-serif font-normal text-charcoal mb-4">Access Revoked</h1>
             <p className="text-xl text-neutral font-light mb-6 leading-relaxed">
               Your access to this website has been revoked by an administrator.
             </p>
@@ -120,7 +120,7 @@ export const PendingApproval = () => {
           </>
         ) : (
           <>
-            <h1 className="text-5xl font-serif font-bold text-charcoal mb-4">Access Pending</h1>
+            <h1 className="text-5xl font-serif font-normal text-charcoal mb-4">Access Pending</h1>
             <p className="text-xl text-neutral font-light mb-10 leading-relaxed">
               Your account is currently under administrative review.<br/> 
               We ensure our community stays safe and secure.

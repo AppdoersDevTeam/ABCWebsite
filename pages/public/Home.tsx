@@ -1,62 +1,23 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Calendar, Heart, PlayCircle, Clock, MapPin, Users, Church, DollarSign, Video, Info, HandHeart, Gift } from 'lucide-react';
+import { ArrowRight, Calendar, Heart, PlayCircle, Clock, MapPin, Users, Church, DollarSign, Video, Info, HandHeart, Gift, ArrowDownToLine, MonitorPlay, Navigation, UserRound, RefreshCw, Settings, Handshake } from 'lucide-react';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { VibrantCard } from '../../components/UI/VibrantCard';
 import { ScrollReveal } from '../../components/UI/ScrollReveal';
 import { supabase } from '../../lib/supabase';
 import { Event } from '../../types';
 
-// Internal Typewriter Component for smooth sequencing without cursor
-interface TypewriterTextProps {
-  text: string;
-  delay: number;
-  className: string;
-}
-
-const TypewriterText: React.FC<TypewriterTextProps> = ({ text, delay, className }) => {
-  const [displayText, setDisplayText] = useState('');
-
-  useEffect(() => {
-    const startTimeout = setTimeout(() => {
-      let currentIndex = 0;
-      const interval = setInterval(() => {
-        if (currentIndex < text.length) {
-          setDisplayText(text.slice(0, currentIndex + 1));
-          currentIndex++;
-        } else {
-          clearInterval(interval);
-        }
-      }, 120); // Typing speed
-      return () => clearInterval(interval);
-    }, delay);
-    return () => clearTimeout(startTimeout);
-  }, [text, delay]);
-
-  return (
-    <span className={`${className} inline-block min-h-[1em]`}>
-      {displayText}
-    </span>
-  );
-};
-
 export const Home = () => {
   const heroRef = useRef<HTMLDivElement>(null);
-  const [cycle, setCycle] = useState(0);
   const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
   const [isLoadingEvents, setIsLoadingEvents] = useState(true);
-
-  // Restart animation loop every 2 minutes
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCycle(prev => prev + 1);
-    }, 120000); // 2 minutes
-    return () => clearInterval(interval);
-  }, []);
+  const [whatsOnEvents, setWhatsOnEvents] = useState<Event[]>([]);
+  const [isLoadingWhatsOn, setIsLoadingWhatsOn] = useState(true);
 
   // Fetch upcoming events
   useEffect(() => {
     fetchUpcomingEvents();
+    fetchWhatsOnEvents();
   }, []);
 
   const fetchUpcomingEvents = async () => {
@@ -83,6 +44,30 @@ export const Home = () => {
     }
   };
 
+  const fetchWhatsOnEvents = async () => {
+    setIsLoadingWhatsOn(true);
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      const { data, error } = await supabase
+        .from('events')
+        .select('*')
+        .eq('is_public', true)
+        .gte('date', today.toISOString().split('T')[0])
+        .order('date', { ascending: true })
+        .limit(2);
+
+      if (error) throw error;
+      setWhatsOnEvents(data || []);
+    } catch (error) {
+      console.error('Error fetching what\'s on events:', error);
+      setWhatsOnEvents([]);
+    } finally {
+      setIsLoadingWhatsOn(false);
+    }
+  };
+
   const formatEventDate = (dateString: string) => {
     const date = new Date(dateString);
     const day = date.getDate().toString().padStart(2, '0');
@@ -90,198 +75,185 @@ export const Home = () => {
     return { day, month };
   };
 
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!heroRef.current) return;
-      const { left, top, width, height } = heroRef.current.getBoundingClientRect();
-      const x = (e.clientX - left) / width;
-      const y = (e.clientY - top) / height;
-      
-      heroRef.current.style.setProperty('--mouse-x', x.toString());
-      heroRef.current.style.setProperty('--mouse-y', y.toString());
-      heroRef.current.style.setProperty('--spotlight-x', `${e.clientX - left}px`);
-      heroRef.current.style.setProperty('--spotlight-y', `${e.clientY - top}px`);
-    };
+  const formatEventTime = (date: string, time: string) => {
+    const eventDate = new Date(date);
+    const today = new Date();
+    const diffTime = eventDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
+    if (diffDays === 0) return `Today, ${time}`;
+    if (diffDays === 1) return `Tomorrow, ${time}`;
+    if (diffDays < 7) return `${diffDays} days, ${time}`;
+    
+    return `${eventDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}, ${time}`;
+  };
+
+  const getCategoryIcon = (category: string) => {
+    switch (category.toLowerCase()) {
+      case 'service':
+      case 'worship':
+        return <PlayCircle size={24} />;
+      case 'meeting':
+      case 'connect':
+        return <Users size={24} />;
+      case 'community':
+        return <Calendar size={24} />;
+      case 'ministry':
+        return <Users size={24} />;
+      case 'media':
+        return <Video size={24} />;
+      default:
+        return <Calendar size={24} />;
+    }
+  };
 
   return (
     <div className="space-y-0 overflow-hidden">
       
-      {/* Sun Drenched Hero with Interaction */}
+      {/* Hero Section */}
       <section 
         ref={heroRef}
-        className="relative min-h-[95vh] flex items-center justify-center pt-40 pb-12 lg:pt-32 group perspective-1000 overflow-hidden"
+        className="relative min-h-screen flex items-center justify-center overflow-hidden"
       >
-        {/* Background Image with Overlay */}
+        {/* Background Image */}
         <div className="absolute inset-0 z-0">
-            <img 
-              src="/ABC background01.png" 
-              alt="Ashburton Baptist Church" 
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-white/70 backdrop-blur-[2px]"></div>
+          <img 
+            src="/ABC background01.png" 
+            alt="Ashburton Baptist Church" 
+            className="w-full h-full object-cover brightness-110 saturate-125 contrast-105"
+          />
+          <div className="absolute inset-0 bg-black/20"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/10"></div>
+          <div className="absolute inset-0 bg-gray-700/45"></div>
         </div>
 
-        {/* Dynamic Spotlight Overlay */}
-        <div 
-            className="absolute inset-0 pointer-events-none z-0 transition-opacity duration-500 opacity-0 group-hover:opacity-100"
-            style={{
-                background: `radial-gradient(600px circle at var(--spotlight-x) var(--spotlight-y), rgba(251, 203, 5, 0.2), transparent 40%)`
-            }}
-        />
+        {/* Hero Content */}
+        <div className="container relative z-10 px-4 mx-auto pt-64 md:pt-72">
+          <div className="max-w-4xl mx-auto text-center">
+            <ScrollReveal direction="up" delay={200}>
+              <p className="text-[1.5625rem] leading-6 text-white text-center max-w-5xl mx-auto mb-6 transition-all duration-1000 delay-300 mt-[95px]">
+                <span className="block whitespace-nowrap font-raleway font-semibold">A place where faith meets community, and every person matters.</span>
+                <span className="block whitespace-nowrap mt-[12px] font-raleway font-semibold">Join us as we grow together in love, hope, and purpose.</span>
+              </p>
+            </ScrollReveal>
 
-        <div className="container relative z-10 px-4">
-           <div className="grid lg:grid-cols-12 gap-12 items-center">
-              
-              {/* Typography Impact - Typewriter */}
-              <div 
-                className="lg:col-span-7 flex flex-col justify-center text-center lg:text-left"
-              >
-                  <h1 className="flex flex-col leading-[0.85] tracking-tighter mb-8 min-h-[200px] lg:min-h-[280px] justify-center lg:justify-start pt-8 lg:pt-12">
-                      <TypewriterText 
-                        key={`enc-${cycle}`}
-                        text="ENCOUNTER" 
-                        delay={0} 
-                        className="text-[9vw] lg:text-[6rem] font-black text-gold drop-shadow-sm opacity-90 font-sans"
-                      />
-                      <div className="md:ml-20">
-                         <TypewriterText 
-                            key={`con-${cycle}`}
-                            text="CONNECT" 
-                            delay={1200} 
-                            className="text-[8vw] lg:text-[5.5rem] font-black text-charcoal font-serif"
-                        />
-                      </div>
-                      <div className="md:ml-40">
-                         <TypewriterText 
-                            key={`imp-${cycle}`}
-                            text="IMPACT" 
-                            delay={2200} 
-                            className="text-[8vw] lg:text-[5.5rem] font-black text-white drop-shadow-lg font-sans"
-                         />
-                      </div>
-                  </h1>
-                  
-                  <div 
-                    className="opacity-0 animate-fade-in-up" 
-                    style={{ animationDelay: '3000ms', animationFillMode: 'forwards' }}
-                  >
-                      <p className="text-lg md:text-2xl text-neutral font-light max-w-2xl mx-auto lg:ml-20 mb-10 leading-relaxed">
-                          We are a vibrant community in Ashburton, illuminated by the Gospel and sharing warmth with our city.
-                      </p>
-                      <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start lg:ml-20">
-                          <Link to="/im-new"><GlowingButton size="lg" fullWidth={false} className="w-full sm:w-auto shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-transform">I'm New</GlowingButton></Link>
-                          <Link to="/events"><GlowingButton variant="outline" size="lg" fullWidth={false} className="w-full sm:w-auto hover:-translate-y-1 transition-transform">What's On</GlowingButton></Link>
-                      </div>
-                  </div>
+            <ScrollReveal direction="up" delay={400}>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-24">
+                <Link to="/events" className="group">
+                  <GlowingButton variant="outline" size="md" className="!px-6 !py-[14px] !border-gold !bg-gold/20 !text-white hover:!bg-gold hover:!text-white !rounded-full transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:scale-110 hover:shadow-2xl hover:shadow-gold/60 hover:!border-gold active:scale-95 hover:-translate-y-1 !normal-case">
+                    <MonitorPlay size={18} className="mr-2 text-gold transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] group-hover:h-5 group-hover:w-5 group-hover:translate-x-1 group-hover:text-white" />
+                    <span className="text-white font-normal text-base leading-6 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] group-hover:font-semibold group-hover:tracking-wider">Watch Online</span>
+                  </GlowingButton>
+                </Link>
+                <Link to="/contact" className="group">
+                  <GlowingButton variant="outline" size="md" className="!px-6 !py-[14px] !border-white !bg-white/20 !text-white hover:!bg-white hover:!text-charcoal !rounded-full transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:scale-110 hover:shadow-2xl hover:shadow-white/60 hover:!border-white active:scale-95 hover:-translate-y-1 !normal-case">
+                    <Navigation size={18} className="mr-2 text-gold transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] group-hover:scale-125 group-hover:translate-y-[-2px] group-hover:text-charcoal" />
+                    <span className="text-white font-normal text-base leading-6 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] group-hover:font-semibold group-hover:tracking-wider group-hover:text-charcoal">Find Us</span>
+                  </GlowingButton>
+                </Link>
               </div>
+            </ScrollReveal>
 
-              {/* Action Area - Floating Glass - Inverse Parallax */}
-              <div 
-                className="lg:col-span-5 h-full flex flex-col gap-6 justify-center mt-8 lg:mt-0 transition-transform duration-100 ease-out animate-fade-in-up delay-700"
-                style={{
-                    transform: 'translate(calc(var(--mouse-x) * 10px), calc(var(--mouse-y) * 10px))'
-                }}
-              >
-                  <div className="glass-card rounded-[24px] p-6 md:p-8 hover:-translate-y-1 transition-all duration-500 shadow-2xl border-l-4 border-l-gold bg-white/60 backdrop-blur-xl">
-                      <h3 className="text-2xl md:text-3xl font-serif font-bold text-charcoal mb-4">Visit Us</h3>
-                      <div className="flex items-center gap-4 mb-4 text-neutral">
-                          <Clock className="text-gold flex-shrink-0 animate-pulse-slow" />
-                          <span className="font-bold">Sunday 10AM</span>
-                      </div>
-                      <div className="flex items-center gap-4 text-neutral">
-                          <MapPin className="text-gold flex-shrink-0" />
-                          <span>284 Havelock Street, Ashburton 7700</span>
-                      </div>
+            {/* Service Info Cards */}
+            <ScrollReveal direction="up" delay={600}>
+              <div className="flex justify-center max-w-4xl mx-auto mb-32">
+                <div className="rounded-2xl border-2 border-white bg-white/20 backdrop-blur-sm py-[13px] px-[16.5px] scale-105 shadow-lg shadow-white/40 flex items-center justify-center gap-4">
+                  <Clock className="text-gold flex-shrink-0" size={32} />
+                  <div className="text-center">
+                    <h3 className="font-serif font-normal text-xl text-white mb-1">Sundays</h3>
+                    <p className="text-white font-sans font-normal text-base leading-6">Service @ 10:00 am</p>
                   </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                      <Link to="/events" className="glass-card rounded-[24px] p-6 flex flex-col items-center justify-center text-center hover:-translate-y-2 hover:shadow-xl transition-all duration-300 cursor-pointer group bg-white/60">
-                          <div className="p-3 bg-gray-50 rounded-full group-hover:bg-gold group-hover:text-charcoal transition-colors mb-3">
-                            <Calendar size={28} className="text-charcoal" />
-                          </div>
-                          <span className="font-bold text-sm uppercase tracking-wider text-neutral group-hover:text-charcoal">Events</span>
-                      </Link>
-                      <Link to="/events/sermons" className="bg-gold rounded-[24px] p-6 flex flex-col items-center justify-center text-center hover:bg-yellow-400 hover:-translate-y-2 transition-all duration-300 cursor-pointer shadow-lg shadow-gold/30 group">
-                          <div className="p-3 bg-white/20 rounded-full mb-3">
-                            <PlayCircle size={28} className="text-charcoal" />
-                          </div>
-                          <span className="font-bold text-sm uppercase tracking-wider text-charcoal">Latest Sermon</span>
-                      </Link>
-                  </div>
+                </div>
               </div>
-           </div>
+            </ScrollReveal>
+          </div>
+          
+          {/* Pulsing Down Arrow */}
+          <div className="absolute bottom-[5px] left-1/2 z-20 pulse-arrow">
+            <ArrowDownToLine size={32} className="text-gold" />
+          </div>
         </div>
       </section>
 
       {/* Info Strip */}
-      <section className="py-12 md:py-20 relative z-10">
+      <section className="py-12 md:py-20 relative z-10" style={{ backgroundColor: '#EEF2F3' }}>
          <div className="container mx-auto px-4">
-             <div className="glass-card rounded-[16px] p-8 md:p-12 flex flex-col md:flex-row justify-between items-center gap-8 md:gap-10 hover:shadow-2xl transition-shadow duration-500 border-t border-white/50 animate-scale-in">
+             <div className="glass-card rounded-[16px] p-8 md:p-12 flex flex-col md:flex-row justify-between items-center gap-8 md:gap-10 border-t border-white/50 animate-scale-in group hover-lift">
                  <div className="flex items-center gap-6 w-full md:w-auto justify-center md:justify-start">
-                     <div className="p-4 bg-gold rounded-full text-charcoal flex-shrink-0 shadow-lg shadow-gold/30 animate-pulse-slow"><Clock size={32} strokeWidth={2}/></div>
+                     <div className="p-4 bg-[#fbcb05] rounded-full text-charcoal flex-shrink-0 shadow-lg shadow-gold/30"><Clock size={32} strokeWidth={2}/></div>
                      <div>
-                         <h3 className="font-serif font-bold text-2xl text-charcoal">Sundays 10AM</h3>
-                         <p className="text-neutral font-medium">In-Person & Online</p>
+                         <h3 className="font-serif font-normal text-2xl text-charcoal group-hover:text-gold transition-colors duration-300">Sundays 10AM</h3>
+                         <p className="text-neutral font-medium group-hover:text-charcoal transition-colors">In-Person & Online</p>
                      </div>
                  </div>
                  <div className="hidden md:block w-px h-24 bg-charcoal/10"></div>
                  <div className="text-center md:text-left max-w-lg">
-                     <h3 className="font-serif font-bold text-2xl text-charcoal mb-2">A Place to Belong</h3>
-                     <p className="text-neutral leading-relaxed">Whether you are exploring faith or looking for a home, you are welcome here.</p>
+                     <h3 className="font-serif font-normal text-2xl text-charcoal mb-2 group-hover:text-gold transition-colors duration-300">A Place to Belong</h3>
+                     <p className="text-neutral leading-relaxed group-hover:text-charcoal transition-colors">Whether you are exploring faith or looking for a home, you are welcome here.</p>
                  </div>
                  <div className="hidden md:block w-px h-24 bg-charcoal/10"></div>
-                 <Link to="/im-new" className="w-full md:w-auto"><GlowingButton variant="outline" fullWidth className="hover:bg-charcoal hover:text-white hover:border-charcoal">Plan Your Visit</GlowingButton></Link>
+                 <Link to="/im-new" className="w-full md:w-auto group"><GlowingButton variant="outline" fullWidth className="!rounded-full transition-all duration-500 ease-out hover:scale-110 hover:shadow-2xl hover:shadow-gold/60 hover:!bg-gold hover:!text-white active:scale-95 hover:-translate-y-1">
+                   <span className="transition-all duration-300 group-hover:tracking-wider">Plan Your Visit</span>
+                   <ArrowRight size={18} className="ml-2 transition-all duration-500 group-hover:translate-x-2 group-hover:scale-125"/>
+                 </GlowingButton></Link>
              </div>
          </div>
       </section>
 
       {/* Grid Features */}
-      <section className="py-12 md:py-20 container mx-auto px-4 relative z-10">
-          <ScrollReveal direction="down" delay={0}>
-            <div className="text-center mb-12 md:mb-16">
-                <span className="text-gold font-bold tracking-[0.3em] uppercase mb-4 block">Get Involved</span>
-                <h2 className="text-4xl md:text-5xl md:text-6xl font-serif font-bold text-charcoal">Life at Ashburton</h2>
-            </div>
-          </ScrollReveal>
+      <section className="section-gradient py-12 md:py-20 relative z-10 w-full">
+          <div className="container mx-auto px-4">
+            <ScrollReveal direction="down" delay={0}>
+              <div className="text-center mb-12 md:mb-16">
+                  <Handshake className="text-gold mx-auto mb-6 animate-pulse" size={64} />
+                  <h2 className="text-4xl md:text-5xl md:text-6xl font-serif font-normal text-charcoal mb-4">Life at Ashburton</h2>
+                  <span className="text-gold font-bold tracking-[0.3em] block text-base">Get Involved</span>
+              </div>
+            </ScrollReveal>
 
-          <div className="grid md:grid-cols-3 gap-8">
-              {[
-                  { title: "Ministries", icon: <Church size={40} />, desc: "Connect with your people.", link: "/events" },
-                  { title: "Giving", icon: <DollarSign size={40} />, desc: "Fuel the mission.", link: "/giving" },
-                  { title: "Sermons", icon: <Video size={40} />, desc: "Catch up on the latest.", link: "/events/sermons" },
-              ].map((item, i) => (
-                  <ScrollReveal key={i} direction="up" delay={i * 100}>
-                    <VibrantCard className={`group hover-lift`} glow={i===1}>
-                      <div className="mb-6 text-charcoal p-4 bg-gold/10 rounded-full w-fit group-hover:bg-gold transition-all duration-300 shadow-sm group-hover:scale-110 group-hover:rotate-6 icon-bounce">{item.icon}</div>
-                      <h3 className="text-2xl md:text-3xl font-serif font-bold text-charcoal mb-3 group-hover:text-gold transition-colors duration-300">{item.title}</h3>
-                      <p className="text-neutral mb-8 leading-relaxed group-hover:text-charcoal transition-colors">{item.desc}</p>
-                      <Link to={item.link} className="flex items-center text-charcoal font-bold uppercase tracking-widest text-xs group-hover:text-gold transition-colors">
-                          Learn More <ArrowRight size={16} className="ml-2 group-hover:translate-x-2 transition-transform"/>
-                      </Link>
-                    </VibrantCard>
-                  </ScrollReveal>
-              ))}
+            <div className="flex justify-center">
+              <div className="grid md:grid-cols-3 gap-8 w-full max-w-[70%]">
+                  {[
+                      { title: "Ministries", icon: <img src="/Ministry.png" alt="Ministries" style={{ width: '50px', height: '50px', objectFit: 'contain' }} />, desc: "Connect with your people.", link: "/events" },
+                      { title: "Giving", icon: <img src="/Giving.png" alt="Giving" style={{ width: '50px', height: '50px', objectFit: 'contain' }} />, desc: "Fuel the mission.", link: "/giving" },
+                      { title: "Sermons", icon: <img src="/Sermon.png" alt="Sermons" style={{ width: '50px', height: '50px', objectFit: 'contain' }} />, desc: "Catch up on the latest.", link: "/events/sermons" },
+                  ].map((item, i) => (
+                      <ScrollReveal key={i} direction="up" delay={i * 100}>
+                        <VibrantCard className={`group hover-lift text-center flex flex-col items-center justify-center h-full`} glow={i===1}>
+                          <div className="flex items-center justify-center gap-4 mb-[14px]">
+                            <div 
+                              className="text-charcoal p-4 rounded-full w-fit transition-all duration-300 shadow-sm flex-shrink-0"
+                            >{item.icon}</div>
+                            <h3 className="text-2xl md:text-3xl font-serif font-normal text-charcoal group-hover:text-gold transition-colors duration-300 text-center">{item.title}</h3>
+                          </div>
+                          <p className="text-white mb-[26px] leading-relaxed group-hover:text-black transition-colors text-center">{item.desc}</p>
+                          <Link to={item.link} className="flex items-center justify-center text-charcoal font-bold uppercase tracking-widest text-[15px] group-hover:text-gold transition-colors">
+                              EXPLORER <ArrowRight size={16} className="ml-2 group-hover:translate-x-2 transition-transform"/>
+                          </Link>
+                        </VibrantCard>
+                      </ScrollReveal>
+                  ))}
+              </div>
+            </div>
           </div>
       </section>
 
       {/* Upcoming Events */}
-      <section className="py-12 md:py-20 relative z-10">
+      <section className="py-12 md:py-20 relative z-10" style={{ backgroundColor: '#EEF2F3' }}>
           <div className="container mx-auto px-4">
                <ScrollReveal direction="down" delay={0}>
-                 <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-4">
-                     <div>
-                       <h2 className="text-4xl md:text-5xl font-serif font-bold text-charcoal">Upcoming</h2>
-                       <p className="text-neutral mt-2">Join us this week.</p>
-                     </div>
+                 <div className="text-center mb-12">
+                     <Calendar className="text-gold mx-auto mb-6 animate-pulse" size={64} />
+                     <h2 className="text-4xl md:text-5xl font-serif font-normal text-charcoal">Upcoming</h2>
+                     <p className="text-gold mt-2 text-base font-bold">Join us this week.</p>
+                 </div>
+                 <div className="flex justify-center mb-12">
                      <Link to="/events" className="text-charcoal font-bold border-b-2 border-gold pb-1 hover:text-gold transition-colors">View Calendar</Link>
                  </div>
                </ScrollReveal>
 
-               <div className="grid md:grid-cols-3 gap-6">
+               <div className="flex justify-center">
+                 <div className="grid md:grid-cols-3 gap-6 w-full max-w-[82%]">
                    {isLoadingEvents ? (
                      // Loading skeleton
                      Array.from({ length: 3 }).map((_, i) => (
@@ -313,15 +285,27 @@ export const Home = () => {
                          <ScrollReveal key={evt.id} direction="up" delay={i * 100}>
                            <Link to="/events">
                              <div className="glass-card border border-white/50 shadow-sm p-0 flex rounded-[8px] overflow-hidden group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 bg-white/70 hover-lift cursor-pointer">
-                               <div className="bg-gold/10 group-hover:bg-gold transition-all duration-300 w-24 flex flex-col items-center justify-center p-4 text-charcoal group-hover:scale-105">
+                               <div className="bg-gold/35 group-hover:bg-gold transition-all duration-300 w-24 flex flex-col items-center justify-center p-4 text-charcoal group-hover:scale-105">
                                  <span className="text-2xl md:text-3xl font-black group-hover:scale-110 transition-transform duration-300">{day}</span>
                                  <span className="text-xs md:text-sm font-bold tracking-wider">{month}</span>
                                </div>
                                <div className="p-6 flex-1 flex flex-col justify-center">
                                  <h4 className="text-lg md:text-xl font-bold text-charcoal mb-1 group-hover:text-gold transition-colors duration-300">{evt.title}</h4>
-                                 <span className="text-neutral text-sm flex items-center group-hover:text-charcoal transition-colors">
-                                   <Clock size={14} className="mr-2 text-gold animate-pulse-slow"/> {evt.time}
+                                 <span className="text-neutral text-sm flex items-center group-hover:text-charcoal transition-colors mb-1">
+                                   <div className="w-8 h-8 bg-gold/10 rounded-full flex items-center justify-center mr-2 group-hover:bg-gold transition-all duration-300 group-hover:scale-110 group-hover:rotate-6 icon-bounce">
+                                     <Clock size={16} className="text-gold group-hover:text-charcoal animate-pulse"/>
+                                   </div>
+                                   {formatEventTime(evt.date, evt.time)}
                                  </span>
+                                 {evt.location && (
+                                   <span className="text-neutral text-xs flex items-center mt-1">
+                                     <MapPin size={12} className="mr-1 text-gold" />
+                                     {evt.location}
+                                   </span>
+                                 )}
+                                 {evt.category && (
+                                   <span className="text-gold text-xs uppercase tracking-widest mt-2 font-bold">{evt.category}</span>
+                                 )}
                                </div>
                              </div>
                            </Link>
@@ -329,39 +313,44 @@ export const Home = () => {
                        );
                      })
                    )}
+                 </div>
                </div>
           </div>
       </section>
 
       {/* About Preview */}
-      <section className="py-12 md:py-20 relative z-10 bg-gray-50">
+      <section className="section-gradient py-12 md:py-20 relative z-10 w-full">
           <div className="container mx-auto px-4">
               <div className="grid md:grid-cols-2 gap-8 items-center">
                   <ScrollReveal direction="right" delay={0}>
                     <div>
-                        <span className="text-gold font-bold tracking-[0.3em] uppercase mb-4 block text-sm">Who We Are</span>
-                        <h2 className="text-4xl md:text-5xl font-serif font-bold text-charcoal mb-6">Established 1882. <span className="text-gold">Reimagined Daily.</span></h2>
-                        <p className="text-neutral text-lg leading-relaxed mb-6">
+                        <div className="flex items-center gap-4 mb-6">
+                            <Church className="text-gold animate-pulse flex-shrink-0" size={64} />
+                            <h2 className="text-4xl md:text-5xl font-serif font-normal text-charcoal">Kia Ora. <span className="text-gold">Welcome to our Family.</span></h2>
+                        </div>
+                        <span className="text-gold font-bold tracking-[0.3em] mb-4 block text-base text-center">Who we are.</span>
+                        <p className="text-white text-lg leading-relaxed mb-6">
                             We aren't just a building. We are a movement of people passionate about Jesus and our city. 
-                            From humble beginnings to a vibrant community, our mission remains the same: <span className="text-charcoal font-bold">Impact.</span>
+                            From humble beginnings to a vibrant community, our mission remains the same: <span className="text-black font-bold">Impact.</span>
                         </p>
-                        <p className="text-neutral leading-relaxed mb-8">
+                        <p className="text-white leading-relaxed mb-8">
                             To see lives transformed by the gospel of Jesus Christ, equipping every generation to impact their community with hope, love, and service.
                         </p>
-                        <Link to="/about">
-                            <GlowingButton variant="outline" className="group">
-                                Read More <ArrowRight size={16} className="ml-2 group-hover:translate-x-2 transition-transform"/>
+                        <Link to="/about" className="group">
+                            <GlowingButton variant="outline" className="!rounded-full transition-all duration-500 ease-out hover:scale-110 hover:shadow-2xl hover:shadow-gold/60 hover:!bg-gold hover:!text-white active:scale-95 hover:-translate-y-1">
+                                <span className="transition-all duration-300 group-hover:tracking-wider">Read More</span>
+                                <ArrowRight size={16} className="ml-2 transition-all duration-500 group-hover:translate-x-2 group-hover:scale-125"/>
                             </GlowingButton>
                         </Link>
                     </div>
                   </ScrollReveal>
                   <ScrollReveal direction="left" delay={200}>
-                    <div className="glass-card rounded-[16px] p-8 md:p-12 bg-white/80 hover-lift">
+                    <div className="glass-card rounded-[16px] p-8 md:p-12 bg-white/80">
                         <div className="grid grid-cols-2 gap-4">
                             {['One God', 'Jesus Savior', 'Spirit Power', 'Bible Authority'].map((item, i) => (
                                 <ScrollReveal key={i} direction="scale" delay={i * 50}>
                                   <div className="bg-white shadow-sm p-6 rounded-[8px] border border-gray-100 flex flex-col justify-center items-center text-center hover:shadow-md hover:border-gold transition-all duration-300 group">
-                                      <span className="text-xl md:text-2xl font-serif font-bold mb-2 text-charcoal">{item.split(' ')[0]}</span>
+                                      <span className="text-xl md:text-2xl font-serif font-normal mb-2 text-charcoal">{item.split(' ')[0]}</span>
                                       <span className="text-xs uppercase tracking-widest text-neutral group-hover:text-gold font-bold">{item.split(' ')[1]}</span>
                                   </div>
                                 </ScrollReveal>
@@ -374,40 +363,58 @@ export const Home = () => {
       </section>
 
       {/* Events Preview */}
-      <section className="py-12 md:py-20 relative z-10">
+      <section className="py-12 md:py-20 relative z-10" style={{ backgroundColor: '#EEF2F3' }}>
           <div className="container mx-auto px-4">
               <ScrollReveal direction="down" delay={0}>
                 <div className="text-center mb-12">
-                    <span className="text-gold font-bold tracking-[0.3em] uppercase mb-4 block text-sm">What's On</span>
-                    <h2 className="text-4xl md:text-5xl font-serif font-bold text-charcoal mb-4">Join Us This Week</h2>
-                    <p className="text-neutral text-lg max-w-2xl mx-auto">From Sunday services to community events, there's always something happening at Ashburton Baptist.</p>
+                    <Settings className="text-gold mx-auto mb-6 animate-pulse" size={64} />
+                    <h2 className="text-4xl md:text-5xl font-serif font-normal text-charcoal mb-4">Discover The Heart of A. B. C.</h2>
+                    <span className="text-gold font-bold tracking-[0.3em] mb-4 block text-base">Our Church on the Move</span>
+                    <p className="text-neutral text-lg max-w-2xl mx-auto">From Sunday services to community events,<br />There's always something happening at A.B.C.</p>
                 </div>
               </ScrollReveal>
               <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto mb-8">
-                  {[
-                      { title: "Sunday Service", time: "Every Sunday, 10:00 AM", category: "Service", icon: <PlayCircle size={24}/>, desc: "Join us for worship and teaching." },
-                      { title: "Young Adults", time: "Wednesdays, 7:00 PM", category: "Connect", icon: <Users size={24}/>, desc: "A space for 18-30s to connect." },
-                  ].map((evt, i) => (
-                      <ScrollReveal key={i} direction="up" delay={i * 150}>
-                        <div className="group relative bg-white border border-gray-100 shadow-sm p-6 rounded-[8px] hover:shadow-lg hover:border-gold/30 transition-all duration-300 hover-lift">
-                          <div className="bg-gold/10 p-4 rounded-full text-charcoal mb-4 w-fit group-hover:bg-gold transition-colors duration-300 group-hover:scale-110 group-hover:rotate-6 icon-bounce">
-                              {evt.icon}
-                          </div>
-                          <div className="flex items-center gap-3 mb-2">
-                              <span className="text-gold font-bold text-xs uppercase tracking-widest bg-gold/5 px-2 py-1 rounded-[4px] border border-gold/20">{evt.category}</span>
-                              <span className="text-neutral text-sm font-bold">{evt.time}</span>
-                          </div>
-                          <h3 className="text-2xl font-serif font-bold text-charcoal mb-2 group-hover:text-gold transition-colors duration-300">{evt.title}</h3>
-                          <p className="text-neutral">{evt.desc}</p>
-                        </div>
-                      </ScrollReveal>
-                  ))}
+                  {isLoadingWhatsOn ? (
+                      Array.from({ length: 2 }).map((_, i) => (
+                          <ScrollReveal key={i} direction="up" delay={i * 150}>
+                              <div className="group relative bg-white border border-gray-100 shadow-sm p-6 rounded-[8px] animate-pulse">
+                                  <div className="bg-gold/10 p-4 rounded-full text-charcoal mb-4 w-fit h-16 w-16"></div>
+                                  <div className="h-4 bg-gray-200 rounded mb-2 w-1/3"></div>
+                                  <div className="h-6 bg-gray-200 rounded mb-2 w-2/3"></div>
+                                  <div className="h-4 bg-gray-200 rounded w-full"></div>
+                              </div>
+                          </ScrollReveal>
+                      ))
+                  ) : whatsOnEvents.length > 0 ? (
+                      whatsOnEvents.map((evt, i) => (
+                          <ScrollReveal key={evt.id} direction="up" delay={i * 150}>
+                              <div className="glass-card rounded-[16px] p-8 md:p-12 border-t border-white/50 animate-scale-in group hover-lift">
+                                  <div className="flex items-center gap-4 mb-4">
+                                      <div className="p-4 bg-[#fbcb05] rounded-full text-charcoal flex-shrink-0 shadow-lg shadow-gold/30">
+                                          {getCategoryIcon(evt.category)}
+                                      </div>
+                                      <h3 className="text-2xl font-serif font-normal text-charcoal group-hover:text-gold transition-colors duration-300">{evt.title}</h3>
+                                  </div>
+                                  <div className="flex items-center gap-3 mb-2">
+                                      <span className="text-gold font-bold text-xs uppercase tracking-widest bg-gold/5 px-2 py-1 rounded-[4px] border border-gold/20">{evt.category}</span>
+                                      <span className="text-neutral text-sm font-bold">{formatEventTime(evt.date, evt.time)}</span>
+                                  </div>
+                                  <p className="text-neutral">{evt.description || ''}</p>
+                              </div>
+                          </ScrollReveal>
+                      ))
+                  ) : (
+                      <div className="col-span-2 text-center py-8">
+                          <p className="text-neutral">No upcoming events scheduled. Check back soon!</p>
+                      </div>
+                  )}
               </div>
               <ScrollReveal direction="up" delay={300}>
                 <div className="text-center">
-                    <Link to="/events">
-                        <GlowingButton variant="outline" className="group">
-                            View All Events <ArrowRight size={16} className="ml-2 group-hover:translate-x-2 transition-transform"/>
+                    <Link to="/events" className="group">
+                        <GlowingButton variant="outline" className="!rounded-full transition-all duration-500 ease-out hover:scale-110 hover:shadow-2xl hover:shadow-gold/60 hover:!bg-gold hover:!text-white active:scale-95 hover:-translate-y-1">
+                            <span className="transition-all duration-300 group-hover:tracking-wider">View All Events</span>
+                            <ArrowRight size={16} className="ml-2 transition-all duration-500 group-hover:translate-x-2 group-hover:scale-125"/>
                         </GlowingButton>
                     </Link>
                 </div>
@@ -416,13 +423,13 @@ export const Home = () => {
       </section>
 
       {/* I'm New Preview */}
-      <section className="py-12 md:py-20 relative z-10 bg-gray-50">
+      <section className="section-gradient py-12 md:py-20 relative z-10 w-full">
           <div className="container mx-auto px-4">
               <div className="grid md:grid-cols-2 gap-8 items-center max-w-6xl mx-auto">
                   <ScrollReveal direction="right" delay={0}>
                     <div className="glass-card rounded-[16px] p-8 md:p-12 bg-white/80 hover-lift">
-                          <Info className="text-gold mb-6" size={48} />
-                          <h2 className="text-4xl md:text-5xl font-serif font-bold text-charcoal mb-6">We're glad you're here</h2>
+                          <Info className="text-gold mb-6 animate-pulse" size={64} />
+                          <h2 className="text-4xl md:text-5xl font-serif font-normal text-charcoal mb-6">We're glad you're here</h2>
                           <p className="text-neutral text-lg leading-relaxed mb-6">
                               Visiting a new church can be intimidating. We want to make your first experience at Ashburton Baptist as welcoming as possible. 
                               Whether you're just visiting or looking for a place to call home, you belong here.
@@ -443,23 +450,24 @@ export const Home = () => {
                                   </div>
                               </div>
                           </div>
-                          <Link to="/im-new">
-                              <GlowingButton variant="outline" className="group">
-                                  Learn More <ArrowRight size={16} className="ml-2 group-hover:translate-x-2 transition-transform"/>
+                          <Link to="/im-new" className="group">
+                              <GlowingButton variant="outline" className="!rounded-full transition-all duration-500 ease-out hover:scale-110 hover:shadow-2xl hover:shadow-gold/60 hover:!bg-gold hover:!text-white active:scale-95 hover:-translate-y-1">
+                                  <span className="transition-all duration-300 group-hover:tracking-wider">Learn More</span>
+                                  <ArrowRight size={16} className="ml-2 transition-all duration-500 group-hover:translate-x-2 group-hover:scale-125"/>
                               </GlowingButton>
                           </Link>
                       </div>
                   </ScrollReveal>
                   <ScrollReveal direction="left" delay={200}>
                     <div className="space-y-4">
-                        <h3 className="text-2xl font-serif font-bold text-charcoal mb-6">Frequently Asked Questions</h3>
+                        <h3 className="text-2xl font-serif font-normal text-charcoal mb-6">Frequently Asked Questions</h3>
                         {[
                             { q: "What to expect at your 1st Service", a: "We recommend arriving 15 minutes early. You'll be welcomed by our team who will help you find a seat." },
                             { q: "How long are the Services?", a: "Our services are 90 minutes long, followed by time to connect in our Connect Café." },
                         ].map((item, i) => (
                             <ScrollReveal key={i} direction="up" delay={i * 100}>
                               <div className="bg-white border border-gray-200 p-6 rounded-[8px] hover:border-gold transition-all duration-300 group shadow-sm hover-lift">
-                                  <h4 className="font-serif text-lg text-charcoal font-bold mb-2 group-hover:text-gold transition-colors duration-300">{item.q}</h4>
+                                  <h4 className="font-serif text-lg text-charcoal font-normal mb-2 group-hover:text-gold transition-colors duration-300">{item.q}</h4>
                                   <p className="text-neutral text-sm">{item.a}</p>
                               </div>
                             </ScrollReveal>
@@ -471,13 +479,13 @@ export const Home = () => {
       </section>
 
       {/* Prayer Preview */}
-      <section className="py-12 md:py-20 relative z-10">
+      <section className="py-12 md:py-20 relative z-10" style={{ backgroundColor: '#EEF2F3' }}>
           <div className="container mx-auto px-4">
               <ScrollReveal direction="down" delay={0}>
                 <div className="max-w-3xl mx-auto text-center">
-                    <HandHeart className="text-gold mx-auto mb-6 animate-float" size={64} />
+                    <HandHeart className="text-gold mx-auto mb-6 animate-pulse" size={64} />
                     <span className="text-gold font-bold tracking-[0.3em] uppercase mb-4 block text-sm">Prayer</span>
-                    <h2 className="text-4xl md:text-5xl font-serif font-bold text-charcoal mb-6">We are here for you</h2>
+                    <h2 className="text-4xl md:text-5xl font-serif font-normal text-charcoal mb-6">We are here for you</h2>
                     <p className="text-neutral text-lg leading-relaxed mb-8 max-w-2xl mx-auto">
                         Your request is handled with confidentiality and care. Whether you need prayer for yourself, a loved one, or a situation, 
                         our community is ready to stand with you in prayer.
@@ -493,9 +501,10 @@ export const Home = () => {
                       </div>
                     </ScrollReveal>
                     <ScrollReveal direction="up" delay={400}>
-                      <Link to="/need-prayer">
-                          <GlowingButton size="lg" className="group">
-                              Share a Prayer Request <ArrowRight size={18} className="ml-2 group-hover:translate-x-2 transition-transform"/>
+                      <Link to="/need-prayer" className="group">
+                          <GlowingButton variant="gold" size="lg" className="!rounded-full transition-all duration-500 ease-out hover:scale-110 hover:shadow-2xl hover:shadow-gold/60 active:scale-95 hover:-translate-y-1">
+                              <span className="transition-all duration-300 group-hover:tracking-wider">Share a Prayer Request</span>
+                              <ArrowRight size={18} className="ml-2 transition-all duration-500 group-hover:translate-x-2 group-hover:scale-125"/>
                           </GlowingButton>
                       </Link>
                     </ScrollReveal>
@@ -505,15 +514,15 @@ export const Home = () => {
       </section>
 
       {/* Giving Preview */}
-      <section className="py-12 md:py-20 relative z-10 bg-gray-50">
+      <section className="section-gradient py-12 md:py-20 relative z-10 w-full">
           <div className="container mx-auto px-4">
               <div className="max-w-4xl mx-auto">
                   <ScrollReveal direction="down" delay={0}>
                     <div className="text-center mb-12">
-                        <Gift className="text-gold mx-auto mb-6 animate-float" size={64} />
+                        <Gift className="text-gold mx-auto mb-6 animate-pulse" size={64} />
                         <span className="text-gold font-bold tracking-[0.3em] uppercase mb-4 block text-sm">Generosity</span>
-                        <h2 className="text-4xl md:text-5xl font-serif font-bold text-charcoal mb-6">Fuel the Mission</h2>
-                        <p className="text-neutral text-lg leading-relaxed max-w-2xl mx-auto mb-8">
+                        <h2 className="text-4xl md:text-5xl font-serif font-normal text-charcoal mb-6">Fuel the Mission</h2>
+                        <p className="text-white text-lg leading-relaxed max-w-2xl mx-auto mb-8">
                             "Each of you should give what you have decided in your heart to give, not reluctantly or under compulsion, for God loves a cheerful giver."
                         </p>
                         <p className="text-gold text-sm uppercase tracking-widest font-bold">- 2 Corinthians 9:7</p>
@@ -525,11 +534,12 @@ export const Home = () => {
                           <div className="w-16 h-16 bg-gold/10 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-gold transition-colors duration-300">
                               <Heart className="text-gold group-hover:text-charcoal" size={32} />
                           </div>
-                          <h3 className="text-2xl font-serif font-bold text-charcoal mb-4">Direct Deposit</h3>
+                          <h3 className="text-2xl font-serif font-normal text-charcoal mb-4">Direct Deposit</h3>
                           <p className="text-neutral mb-6">Give directly through bank transfer. Simple and secure.</p>
-                          <Link to="/giving">
-                              <GlowingButton variant="outline" size="sm" className="group">
-                                  Learn More <ArrowRight size={14} className="ml-2 group-hover:translate-x-2 transition-transform"/>
+                          <Link to="/giving" className="group">
+                              <GlowingButton variant="outline" size="sm" className="!rounded-full transition-all duration-500 ease-out hover:scale-110 hover:shadow-2xl hover:shadow-gold/60 hover:!bg-gold hover:!text-white active:scale-95 hover:-translate-y-1">
+                                  <span className="transition-all duration-300 group-hover:tracking-wider">Learn More</span>
+                                  <ArrowRight size={14} className="ml-2 transition-all duration-500 group-hover:translate-x-2 group-hover:scale-125"/>
                               </GlowingButton>
                           </Link>
                         </div>
@@ -539,11 +549,12 @@ export const Home = () => {
                           <div className="w-16 h-16 bg-gold rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
                               <DollarSign className="text-charcoal" size={32} />
                           </div>
-                          <h3 className="text-2xl font-serif font-bold text-charcoal mb-4">Credit Card</h3>
+                          <h3 className="text-2xl font-serif font-normal text-charcoal mb-4">Credit Card</h3>
                           <p className="text-neutral mb-6">Secure online giving via Stripe. Set up recurring giving or make a one-time impact.</p>
-                          <Link to="/giving">
-                              <GlowingButton variant="outline" size="sm" className="group">
-                                  Learn More <ArrowRight size={14} className="ml-2 group-hover:translate-x-2 transition-transform"/>
+                          <Link to="/giving" className="group">
+                              <GlowingButton variant="outline" size="sm" className="!rounded-full transition-all duration-500 ease-out hover:scale-110 hover:shadow-2xl hover:shadow-gold/60 hover:!bg-gold hover:!text-white active:scale-95 hover:-translate-y-1">
+                                  <span className="transition-all duration-300 group-hover:tracking-wider">Learn More</span>
+                                  <ArrowRight size={14} className="ml-2 transition-all duration-500 group-hover:translate-x-2 group-hover:scale-125"/>
                               </GlowingButton>
                           </Link>
                         </div>
@@ -551,9 +562,10 @@ export const Home = () => {
                   </div>
                   <ScrollReveal direction="up" delay={400}>
                     <div className="text-center mt-8">
-                        <Link to="/giving">
-                            <GlowingButton variant="outline" size="lg" className="group">
-                                Learn More About Giving <ArrowRight size={18} className="ml-2 group-hover:translate-x-2 transition-transform"/>
+                        <Link to="/giving" className="group">
+                            <GlowingButton variant="outline" size="lg" className="!rounded-full transition-all duration-500 ease-out hover:scale-110 hover:shadow-2xl hover:shadow-gold/60 hover:!bg-gold hover:!text-white active:scale-95 hover:-translate-y-1">
+                                <span className="transition-all duration-300 group-hover:tracking-wider">Learn More About Giving</span>
+                                <ArrowRight size={18} className="ml-2 transition-all duration-500 group-hover:translate-x-2 group-hover:scale-125"/>
                             </GlowingButton>
                         </Link>
                     </div>

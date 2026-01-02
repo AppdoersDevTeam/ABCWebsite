@@ -38,7 +38,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children, title }
       >
         {title && (
           <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between z-10">
-            <h2 className="text-2xl font-serif font-bold text-charcoal">{title}</h2>
+            <h2 className="text-2xl font-serif font-normal text-charcoal">{title}</h2>
             <button
               onClick={onClose}
               className="text-neutral hover:text-charcoal transition-colors p-2 hover:bg-gray-100 rounded-full"

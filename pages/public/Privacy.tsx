@@ -12,14 +12,14 @@ export const Privacy = () => {
             <p className="text-neutral text-sm mb-8">Last updated: {new Date().toLocaleDateString('en-NZ', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
             
             <section className="mb-12">
-              <h2 className="text-3xl font-serif font-bold text-charcoal mb-6">1. Introduction</h2>
+              <h2 className="text-3xl font-serif font-normal text-charcoal mb-6">1. Introduction</h2>
               <p className="text-neutral leading-relaxed mb-4">
                 Ashburton Baptist Church ("we", "our", or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website and use our member portal.
               </p>
             </section>
 
             <section className="mb-12">
-              <h2 className="text-3xl font-serif font-bold text-charcoal mb-6">2. Information We Collect</h2>
+              <h2 className="text-3xl font-serif font-normal text-charcoal mb-6">2. Information We Collect</h2>
               <h3 className="text-xl font-bold text-charcoal mb-4 mt-6">2.1 Personal Information</h3>
               <p className="text-neutral leading-relaxed mb-4">
                 We may collect personal information that you voluntarily provide to us when you:
@@ -42,7 +42,7 @@ export const Privacy = () => {
             </section>
 
             <section className="mb-12">
-              <h2 className="text-3xl font-serif font-bold text-charcoal mb-6">3. How We Use Your Information</h2>
+              <h2 className="text-3xl font-serif font-normal text-charcoal mb-6">3. How We Use Your Information</h2>
               <p className="text-neutral leading-relaxed mb-4">
                 We use the information we collect to:
               </p>
@@ -57,7 +57,7 @@ export const Privacy = () => {
             </section>
 
             <section className="mb-12">
-              <h2 className="text-3xl font-serif font-bold text-charcoal mb-6">4. Information Sharing and Disclosure</h2>
+              <h2 className="text-3xl font-serif font-normal text-charcoal mb-6">4. Information Sharing and Disclosure</h2>
               <p className="text-neutral leading-relaxed mb-4">
                 We do not sell, trade, or rent your personal information to third parties. We may share your information only in the following circumstances:
               </p>
@@ -70,21 +70,21 @@ export const Privacy = () => {
             </section>
 
             <section className="mb-12">
-              <h2 className="text-3xl font-serif font-bold text-charcoal mb-6">5. Prayer Requests</h2>
+              <h2 className="text-3xl font-serif font-normal text-charcoal mb-6">5. Prayer Requests</h2>
               <p className="text-neutral leading-relaxed mb-4">
                 Prayer requests submitted through our website may be shared with church leadership and, if you consent, with the broader church community through the prayer wall. You may request that your prayer request remain confidential and only be shared with pastors.
               </p>
             </section>
 
             <section className="mb-12">
-              <h2 className="text-3xl font-serif font-bold text-charcoal mb-6">6. Data Security</h2>
+              <h2 className="text-3xl font-serif font-normal text-charcoal mb-6">6. Data Security</h2>
               <p className="text-neutral leading-relaxed mb-4">
                 We implement appropriate technical and organizational security measures to protect your personal information. However, no method of transmission over the Internet or electronic storage is 100% secure, and we cannot guarantee absolute security.
               </p>
             </section>
 
             <section className="mb-12">
-              <h2 className="text-3xl font-serif font-bold text-charcoal mb-6">7. Your Rights</h2>
+              <h2 className="text-3xl font-serif font-normal text-charcoal mb-6">7. Your Rights</h2>
               <p className="text-neutral leading-relaxed mb-4">
                 Under New Zealand privacy law, you have the right to:
               </p>
@@ -98,28 +98,28 @@ export const Privacy = () => {
             </section>
 
             <section className="mb-12">
-              <h2 className="text-3xl font-serif font-bold text-charcoal mb-6">8. Cookies and Tracking Technologies</h2>
+              <h2 className="text-3xl font-serif font-normal text-charcoal mb-6">8. Cookies and Tracking Technologies</h2>
               <p className="text-neutral leading-relaxed mb-4">
                 We use cookies and similar tracking technologies to track activity on our website and hold certain information. You can instruct your browser to refuse all cookies or to indicate when a cookie is being sent.
               </p>
             </section>
 
             <section className="mb-12">
-              <h2 className="text-3xl font-serif font-bold text-charcoal mb-6">9. Children's Privacy</h2>
+              <h2 className="text-3xl font-serif font-normal text-charcoal mb-6">9. Children's Privacy</h2>
               <p className="text-neutral leading-relaxed mb-4">
                 Our website is not intended for children under the age of 13. We do not knowingly collect personal information from children under 13. If you are a parent or guardian and believe your child has provided us with personal information, please contact us.
               </p>
             </section>
 
             <section className="mb-12">
-              <h2 className="text-3xl font-serif font-bold text-charcoal mb-6">10. Changes to This Privacy Policy</h2>
+              <h2 className="text-3xl font-serif font-normal text-charcoal mb-6">10. Changes to This Privacy Policy</h2>
               <p className="text-neutral leading-relaxed mb-4">
                 We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the "Last updated" date.
               </p>
             </section>
 
             <section className="mb-12">
-              <h2 className="text-3xl font-serif font-bold text-charcoal mb-6">11. Contact Us</h2>
+              <h2 className="text-3xl font-serif font-normal text-charcoal mb-6">11. Contact Us</h2>
               <p className="text-neutral leading-relaxed mb-4">
                 If you have any questions about this Privacy Policy or wish to exercise your rights, please contact us at:
               </p>

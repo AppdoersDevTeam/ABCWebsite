@@ -145,7 +145,7 @@ export const AdminNewsletter = () => {
     <div className="space-y-8">
       <div className="flex justify-between items-center border-b border-gray-200 pb-6">
         <div>
-          <h1 className="text-4xl font-serif font-bold text-charcoal">Newsletter Management</h1>
+          <h1 className="text-4xl font-serif font-normal text-charcoal">Newsletter Management</h1>
           <p className="text-neutral mt-1">Upload and manage church newsletters.</p>
         </div>
         <GlowingButton size="sm" onClick={() => setIsUploadModalOpen(true)}>
@@ -162,7 +162,7 @@ export const AdminNewsletter = () => {
           </div>
           <div className="glass-card p-8 md:p-16 text-center rounded-[8px] rounded-tl-none border-t-0 bg-white shadow-lg">
             <FileText size={64} className="text-gold mx-auto mb-6" />
-            <h2 className="text-3xl md:text-4xl font-serif text-charcoal mb-2 font-bold">
+            <h2 className="text-3xl md:text-4xl font-serif text-charcoal mb-2 font-normal">
               {latestNewsletter?.title || 'No Newsletter'}
             </h2>
             {latestNewsletter && (

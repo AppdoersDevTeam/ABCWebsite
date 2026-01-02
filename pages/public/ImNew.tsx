@@ -23,7 +23,7 @@ export const ImNew = () => {
         {/* Welcome Pack Download */}
         <div id="welcome-pack" className="glass-card bg-white/60 p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8 rounded-[8px] scroll-mt-24 animate-fade-in-up delay-300 hover-lift">
             <div className="text-center md:text-left">
-                <h3 className="text-3xl font-serif text-charcoal mb-2 font-bold">Welcome Pack</h3>
+                <h3 className="text-3xl font-serif text-charcoal mb-2 font-normal">Welcome Pack</h3>
                 <p className="text-neutral">Everything you need to know about our community.</p>
             </div>
             <GlowingButton variant="dark" className="flex items-center whitespace-nowrap shadow-none w-full md:w-auto group">
@@ -67,7 +67,7 @@ export const ImNew = () => {
                             onClick={() => setOpenFaq(isOpen ? null : i)}
                             className="w-full p-6 flex justify-between items-center text-left cursor-pointer group"
                         >
-                            <h4 className="font-serif text-lg md:text-xl text-charcoal font-bold pr-4 group-hover:text-gold transition-colors duration-300">{item.q}</h4>
+                            <h4 className="font-serif text-lg md:text-xl text-charcoal font-normal pr-4 group-hover:text-gold transition-colors duration-300">{item.q}</h4>
                             <ChevronDown 
                                 className={`text-gold flex-shrink-0 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} 
                                 size={20} 

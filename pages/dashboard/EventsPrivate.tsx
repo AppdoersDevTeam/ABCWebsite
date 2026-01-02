@@ -50,7 +50,7 @@ export const EventsPrivate = () => {
   return (
     <div className="space-y-8">
       <div className="border-b border-gray-200 pb-6">
-        <h1 className="text-4xl font-serif font-bold text-charcoal">Internal Calendar</h1>
+        <h1 className="text-4xl font-serif font-normal text-charcoal">Internal Calendar</h1>
         <p className="text-neutral mt-1">Meetings & Rehearsals.</p>
       </div>
 
@@ -70,7 +70,7 @@ export const EventsPrivate = () => {
               >
                 <div className="flex-shrink-0 w-20 text-center border-r border-gray-100 pr-6 mr-6">
                   <span className="block text-xs text-gold uppercase font-bold tracking-widest">{dateParts[0]}</span>
-                  <span className="block text-3xl font-serif text-charcoal font-bold">{dateParts[1]}</span>
+                  <span className="block text-3xl font-serif text-charcoal font-normal">{dateParts[1]}</span>
                 </div>
                 <div className="flex-1">
                   <h3 className="text-xl font-bold text-charcoal group-hover:text-gold transition-colors">

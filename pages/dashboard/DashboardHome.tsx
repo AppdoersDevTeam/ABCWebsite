@@ -87,7 +87,7 @@ export const DashboardHome = () => {
     <div className="space-y-8">
         <div className="flex justify-between items-end border-b border-gray-200 pb-6">
              <div>
-                <h1 className="text-4xl font-serif font-bold text-charcoal">Welcome, {user?.name}</h1>
+                <h1 className="text-4xl font-serif font-normal text-charcoal">Welcome, {user?.name}</h1>
                 <p className="text-neutral mt-2">Here is what is happening in your community.</p>
              </div>
              <div className="hidden md:block">
@@ -105,7 +105,7 @@ export const DashboardHome = () => {
                     <Calendar size={32} />
                 </div>
                 <h3 className="font-bold text-xl mb-2 text-charcoal">Next Service</h3>
-                <p className="text-4xl font-serif font-bold mb-1 text-charcoal">
+                <p className="text-4xl font-serif font-normal mb-1 text-charcoal">
                   {isLoadingStats ? '...' : (nextService || 'Sunday')}
                 </p>
                 <p className="text-neutral mb-4">
@@ -124,7 +124,7 @@ export const DashboardHome = () => {
                     <MessageSquare size={32} />
                 </div>
                 <h3 className="font-bold text-xl mb-2 text-charcoal">Prayer Wall</h3>
-                <p className="text-4xl font-serif font-bold mb-1 text-charcoal">
+                <p className="text-4xl font-serif font-normal mb-1 text-charcoal">
                   {isLoadingStats ? '...' : prayerRequests24h}
                 </p>
                 <p className="text-neutral mb-4">
@@ -143,7 +143,7 @@ export const DashboardHome = () => {
                     <BookOpen size={32} />
                 </div>
                 <h3 className="font-bold text-xl mb-2 text-charcoal">Newsletter</h3>
-                <p className="text-4xl font-serif font-bold mb-1 text-charcoal">
+                <p className="text-4xl font-serif font-normal mb-1 text-charcoal">
                   {isLoadingStats ? '...' : (lastNewsletterDate || 'None')}
                 </p>
                 <p className="text-neutral mb-4">
@@ -158,7 +158,7 @@ export const DashboardHome = () => {
 
         <div className="glass-card bg-white/60 p-10 rounded-[8px] relative overflow-hidden">
              <div className="relative z-10">
-                <h3 className="font-serif text-3xl mb-4 text-charcoal font-bold">Verse of the Day</h3>
+                <h3 className="font-serif text-3xl mb-4 text-charcoal font-normal">Verse of the Day</h3>
                 <p className="text-2xl text-charcoal/80 italic font-serif leading-relaxed max-w-3xl">
                     "For I know the plans I have for you," declares the Lord, "plans to prosper you and not to harm you, plans to give you hope and a future."
                 </p>

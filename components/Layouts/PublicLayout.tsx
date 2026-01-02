@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, Instagram, Facebook, Youtube, ChevronDown } from 'lucide-react';
+import { Menu, X, Instagram, Facebook, Youtube, ChevronDown, LogIn } from 'lucide-react';
 import { GlowingButton } from '../UI/GlowingButton';
 import { useAuth } from '../../context/AuthContext';
 import { BackgroundBlobs } from '../UI/BackgroundBlobs';
@@ -177,12 +177,12 @@ export const PublicLayout = () => {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-base text-charcoal font-sans relative overflow-x-hidden selection:bg-gold selection:text-charcoal">
+    <div className="min-h-screen flex flex-col bg-transparent text-charcoal font-sans relative overflow-x-hidden selection:bg-gold selection:text-charcoal">
       <ScrollToTop />
       <BackgroundBlobs />
       
       {/* Header */}
-      <header className={`fixed w-full z-50 transition-all duration-300 ${scrolled ? 'bg-white/90 backdrop-blur-md shadow-sm py-4' : 'bg-transparent py-6'}`}>
+      <header className={`fixed w-full z-50 transition-all duration-300 ${scrolled ? 'footer-gradient backdrop-blur-md shadow-sm py-4' : 'bg-transparent py-6'}`}>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center">
             {/* Logo */}
@@ -195,7 +195,7 @@ export const PublicLayout = () => {
             </Link>
 
             {/* Desktop Nav */}
-            <nav className="hidden lg:flex items-center space-x-8">
+            <nav className="hidden lg:flex items-center space-x-[42px]">
               {navItems.map((item) => (
                 <div
                   key={item.path}
@@ -218,13 +218,11 @@ export const PublicLayout = () => {
                 >
                   <Link
                     to={item.path}
-                    className={`text-sm font-bold uppercase tracking-widest hover:text-gold transition-all duration-300 relative group flex items-center gap-1 ${
-                      location.pathname === item.path ? 'text-gold' : 'text-charcoal'
-                    }`}
+                    className="text-base font-sans font-semibold uppercase text-white hover:text-gold transition-all duration-300 relative group flex items-center gap-1"
                   >
                     {item.label}
                     {item.submenu && item.submenu.length > 0 && (
-                      <ChevronDown size={14} className={`transition-transform duration-300 ${openDropdown === item.path ? 'rotate-180' : ''}`} />
+                      <ChevronDown size={14} className={`text-white transition-transform duration-300 ${openDropdown === item.path ? 'rotate-180' : ''}`} />
                     )}
                     <span className={`absolute -bottom-2 left-0 w-0 h-0.5 bg-gold transition-all duration-300 group-hover:w-full ${location.pathname === item.path ? 'w-full' : ''}`}></span>
                   </Link>
@@ -265,14 +263,18 @@ export const PublicLayout = () => {
                   )}
                 </div>
               ))}
-              <div className="pl-6 border-l border-gray-200">
+              <div className={`pl-6 border-l ${scrolled ? 'border-gray-600' : 'border-white'}`}>
                  {isAuthenticated ? (
                    <Link to="/dashboard">
                      <GlowingButton size="sm" variant="gold">Dashboard</GlowingButton>
                    </Link>
                  ) : (
-                   <Link to="/login">
-                    <GlowingButton variant="outline" size="sm">Log In</GlowingButton>
+                   <Link 
+                     to="/login"
+                     className="bg-gradient-to-r from-gold to-[#d4a904] px-[9px] py-[8px] lg:px-[17px] lg:py-[12px] xl:px-[25px] xl:py-[12px] rounded-[10px] font-sans font-normal text-xs lg:text-sm xl:text-base hover:from-[#e98d07] hover:via-[#db7a07] hover:to-[#c96a05] transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl inline-flex items-center justify-center whitespace-nowrap"
+                   >
+                     <LogIn size={18} className="mr-2 text-white" />
+                     <span className="shine-text relative z-10 font-sans font-normal normal-case">Log in</span>
                    </Link>
                  )}
               </div>
@@ -297,7 +299,7 @@ export const PublicLayout = () => {
                 {item.submenu && item.submenu.length > 0 ? (
                   <>
                     <div 
-                      className="flex items-center justify-between text-4xl font-serif font-bold text-charcoal hover:text-gold transition-all duration-300 cursor-pointer"
+                      className="flex items-center justify-between text-4xl font-serif font-normal text-white hover:text-gold transition-all duration-300 cursor-pointer"
                       onClick={() => setOpenMobileSubmenu(openMobileSubmenu === item.path ? null : item.path)}
                     >
                       <Link
@@ -330,7 +332,7 @@ export const PublicLayout = () => {
                               setOpenMobileSubmenu(null);
                               handleSubmenuClick(subItem.path, subItem.hash);
                             }}
-                            className="block text-2xl font-serif text-neutral hover:text-gold transition-colors cursor-pointer"
+                            className="block text-2xl font-serif text-white hover:text-gold transition-colors cursor-pointer"
                           >
                             {subItem.label}
                           </a>
@@ -342,7 +344,7 @@ export const PublicLayout = () => {
                   <Link
                     to={item.path}
                     onClick={() => setIsMenuOpen(false)}
-                    className="text-4xl font-serif font-bold text-charcoal hover:text-gold transition-all duration-300 block"
+                    className="text-4xl font-serif font-normal text-white hover:text-gold transition-all duration-300 block"
                   >
                     {item.label}
                   </Link>
@@ -355,8 +357,13 @@ export const PublicLayout = () => {
                      <GlowingButton fullWidth>Dashboard</GlowingButton>
                    </Link>
                  ) : (
-                   <Link to="/login" onClick={() => setIsMenuOpen(false)}>
-                    <GlowingButton fullWidth variant="gold">Log In</GlowingButton>
+                   <Link 
+                     to="/login" 
+                     onClick={() => setIsMenuOpen(false)}
+                     className="bg-gradient-to-r from-gold to-[#d4a904] px-[9px] py-[8px] lg:px-[17px] lg:py-[12px] xl:px-[25px] xl:py-[12px] rounded-[10px] font-sans font-normal text-xs lg:text-sm xl:text-base hover:from-[#e98d07] hover:via-[#db7a07] hover:to-[#c96a05] transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl w-full inline-flex items-center justify-center whitespace-nowrap"
+                   >
+                     <LogIn size={18} className="mr-2 text-white" />
+                     <span className="shine-text relative z-10 font-sans font-normal normal-case">Log in</span>
                    </Link>
                  )}
             </div>
@@ -370,7 +377,7 @@ export const PublicLayout = () => {
       </main>
 
       {/* Footer */}
-      <footer className="bg-white text-charcoal pt-24 pb-12 border-t border-gray-100 relative z-10">
+      <footer className="footer-gradient text-white pt-24 pb-12 border-t border-transparent relative z-10 w-full">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           {/* Main Footer Content */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12 border-b border-gray-100 pb-12 mb-12">
@@ -378,23 +385,25 @@ export const PublicLayout = () => {
             <div className="lg:col-span-2">
               <h3 className="font-serif text-3xl md:text-5xl mb-6 leading-tight">Encounter. Connect.<br /><span className="text-gold">Equip. Impact.</span></h3>
               <div className="flex space-x-6 mt-8 mb-8">
-                <a href="#" className="w-12 h-12 rounded-full border border-gray-200 flex items-center justify-center text-charcoal hover:bg-gold hover:border-gold hover:text-charcoal transition-all"><Facebook size={20} /></a>
-                <a href="#" className="w-12 h-12 rounded-full border border-gray-200 flex items-center justify-center text-charcoal hover:bg-gold hover:border-gold hover:text-charcoal transition-all"><Instagram size={20} /></a>
-                <a href="#" className="w-12 h-12 rounded-full border border-gray-200 flex items-center justify-center text-charcoal hover:bg-gold hover:border-gold hover:text-charcoal transition-all"><Youtube size={20} /></a>
+                <a href="#" className="w-12 h-12 rounded-full border border-gray-200 flex items-center justify-center text-gold hover:bg-gold hover:border-gold hover:text-charcoal transition-all"><Facebook size={20} /></a>
+                <a href="#" className="w-12 h-12 rounded-full border border-gray-200 flex items-center justify-center text-gold hover:bg-gold hover:border-gold hover:text-charcoal transition-all"><Instagram size={20} /></a>
+                <a href="#" className="w-12 h-12 rounded-full border border-gray-200 flex items-center justify-center text-gold hover:bg-gold hover:border-gold hover:text-charcoal transition-all"><Youtube size={20} /></a>
               </div>
-              <div className="space-y-2">
-                <h4 className="font-bold text-charcoal mb-2 uppercase tracking-widest text-xs">Visit</h4>
-                <p className="text-neutral leading-loose text-sm">
-                  284 Havelock Street,<br />
-                  Ashburton 7700
-                </p>
-              </div>
-              <div className="space-y-2 mt-6">
-                <h4 className="font-bold text-charcoal mb-2 uppercase tracking-widest text-xs">Service Times</h4>
-                <p className="text-neutral leading-loose text-sm">
-                  Sundays: 10:00 AM<br />
-                  Online: 10:00 AM
-                </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <h4 className="font-bold text-gold mb-2 uppercase tracking-widest text-xs">Visit</h4>
+                  <p className="text-white leading-loose text-sm">
+                    284 Havelock Street,<br />
+                    Ashburton 7700
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <h4 className="font-bold text-gold mb-2 uppercase tracking-widest text-xs">Service Times</h4>
+                  <p className="text-white leading-loose text-sm">
+                    Sundays: 10:00 AM<br />
+                    Online: 10:00 AM
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -402,23 +411,19 @@ export const PublicLayout = () => {
             <div>
               <button
                 onClick={() => setOpenFooterSection(openFooterSection === 'explore' ? null : 'explore')}
-                className="md:pointer-events-none flex items-center justify-between w-full md:w-auto mb-6 uppercase tracking-widest text-xs font-bold text-charcoal"
+                className="md:pointer-events-none flex items-center justify-between w-full md:w-auto mb-6 uppercase tracking-widest text-xs font-bold text-gold"
               >
                 <span>Explore</span>
                 <ChevronDown size={16} className={`md:hidden transition-transform duration-300 ${openFooterSection === 'explore' ? 'rotate-180' : ''}`} />
               </button>
               <ul className={`space-y-3 ${openFooterSection === 'explore' ? 'block' : 'hidden'} md:block`}>
-                <li><Link to="/" className="text-neutral hover:text-gold transition-colors text-sm">Home</Link></li>
-                <li><Link to="/about" className="text-neutral hover:text-gold transition-colors text-sm">About</Link></li>
-                <li><Link to="/about#vision" className="text-neutral hover:text-gold transition-colors text-sm pl-4">Our Vision</Link></li>
-                <li><Link to="/about#beliefs" className="text-neutral hover:text-gold transition-colors text-sm pl-4">Our Beliefs</Link></li>
-                <li><Link to="/about#leadership" className="text-neutral hover:text-gold transition-colors text-sm pl-4">Leadership</Link></li>
-                <li><Link to="/about/history" className="text-neutral hover:text-gold transition-colors text-sm pl-4">History</Link></li>
-                <li><Link to="/events" className="text-neutral hover:text-gold transition-colors text-sm">Events</Link></li>
-                <li><Link to="/im-new" className="text-neutral hover:text-gold transition-colors text-sm">I'm New</Link></li>
-                <li><Link to="/need-prayer" className="text-neutral hover:text-gold transition-colors text-sm">Prayer</Link></li>
-                <li><Link to="/giving" className="text-neutral hover:text-gold transition-colors text-sm">Giving</Link></li>
-                <li><Link to="/contact" className="text-neutral hover:text-gold transition-colors text-sm">Contact</Link></li>
+                <li><Link to="/" className="text-white hover:text-gold transition-colors text-sm">Home</Link></li>
+                <li><Link to="/about" className="text-white hover:text-gold transition-colors text-sm">About</Link></li>
+                <li><Link to="/events" className="text-white hover:text-gold transition-colors text-sm">Events</Link></li>
+                <li><Link to="/im-new" className="text-white hover:text-gold transition-colors text-sm">I'm New</Link></li>
+                <li><Link to="/need-prayer" className="text-white hover:text-gold transition-colors text-sm">Prayer</Link></li>
+                <li><Link to="/giving" className="text-white hover:text-gold transition-colors text-sm">Giving</Link></li>
+                <li><Link to="/contact" className="text-white hover:text-gold transition-colors text-sm">Contact</Link></li>
               </ul>
             </div>
 
@@ -426,20 +431,20 @@ export const PublicLayout = () => {
             <div>
               <button
                 onClick={() => setOpenFooterSection(openFooterSection === 'resources' ? null : 'resources')}
-                className="md:pointer-events-none flex items-center justify-between w-full md:w-auto mb-6 uppercase tracking-widest text-xs font-bold text-charcoal"
+                className="md:pointer-events-none flex items-center justify-between w-full md:w-auto mb-6 uppercase tracking-widest text-xs font-bold text-gold"
               >
                 <span>Resources</span>
                 <ChevronDown size={16} className={`md:hidden transition-transform duration-300 ${openFooterSection === 'resources' ? 'rotate-180' : ''}`} />
               </button>
               <ul className={`space-y-3 ${openFooterSection === 'resources' ? 'block' : 'hidden'} md:block`}>
-                <li><Link to="/im-new#welcome-pack" className="text-neutral hover:text-gold transition-colors text-sm">Welcome Pack</Link></li>
-                <li><Link to="/im-new#faq" className="text-neutral hover:text-gold transition-colors text-sm">FAQ</Link></li>
-                <li><Link to="/giving#direct-deposit" className="text-neutral hover:text-gold transition-colors text-sm">Direct Deposit</Link></li>
-                <li><Link to="/giving#credit-card" className="text-neutral hover:text-gold transition-colors text-sm">Credit Card</Link></li>
-                <li><Link to="/events#sunday-service" className="text-neutral hover:text-gold transition-colors text-sm">Sunday Service</Link></li>
-                <li><Link to="/events#young-adults" className="text-neutral hover:text-gold transition-colors text-sm">Young Adults</Link></li>
-                <li><Link to="/events#community-lunch" className="text-neutral hover:text-gold transition-colors text-sm">Community Lunch</Link></li>
-                <li><Link to="/events#kids-program" className="text-neutral hover:text-gold transition-colors text-sm">Kids Program</Link></li>
+                <li><Link to="/im-new#welcome-pack" className="text-white hover:text-gold transition-colors text-sm">Welcome Pack</Link></li>
+                <li><Link to="/im-new#faq" className="text-white hover:text-gold transition-colors text-sm">FAQ</Link></li>
+                <li><Link to="/giving#direct-deposit" className="text-white hover:text-gold transition-colors text-sm">Direct Deposit</Link></li>
+                <li><Link to="/giving#credit-card" className="text-white hover:text-gold transition-colors text-sm">Credit Card</Link></li>
+                <li><Link to="/events#sunday-service" className="text-white hover:text-gold transition-colors text-sm">Sunday Service</Link></li>
+                <li><Link to="/events#young-adults" className="text-white hover:text-gold transition-colors text-sm">Young Adults</Link></li>
+                <li><Link to="/events#community-lunch" className="text-white hover:text-gold transition-colors text-sm">Community Lunch</Link></li>
+                <li><Link to="/events#kids-program" className="text-white hover:text-gold transition-colors text-sm">Kids Program</Link></li>
               </ul>
             </div>
 
@@ -447,35 +452,35 @@ export const PublicLayout = () => {
             <div>
               <button
                 onClick={() => setOpenFooterSection(openFooterSection === 'contact' ? null : 'contact')}
-                className="md:pointer-events-none flex items-center justify-between w-full md:w-auto mb-6 uppercase tracking-widest text-xs font-bold text-charcoal"
+                className="md:pointer-events-none flex items-center justify-between w-full md:w-auto mb-6 uppercase tracking-widest text-xs font-bold text-gold"
               >
                 <span>Get In Touch</span>
                 <ChevronDown size={16} className={`md:hidden transition-transform duration-300 ${openFooterSection === 'contact' ? 'rotate-180' : ''}`} />
               </button>
               <div className={`${openFooterSection === 'contact' ? 'block' : 'hidden'} md:block`}>
                 <ul className="space-y-3">
-                  <li><Link to="/contact#visit" className="text-neutral hover:text-gold transition-colors text-sm">Visit Us</Link></li>
-                  <li><Link to="/contact#call" className="text-neutral hover:text-gold transition-colors text-sm">Call Us</Link></li>
-                  <li><Link to="/contact#email" className="text-neutral hover:text-gold transition-colors text-sm">Email Us</Link></li>
-                  <li><Link to="/contact#message" className="text-neutral hover:text-gold transition-colors text-sm">Send Message</Link></li>
+                  <li><Link to="/contact#visit" className="text-white hover:text-gold transition-colors text-sm">Visit Us</Link></li>
+                  <li><Link to="/contact#call" className="text-white hover:text-gold transition-colors text-sm">Call Us</Link></li>
+                  <li><Link to="/contact#email" className="text-white hover:text-gold transition-colors text-sm">Email Us</Link></li>
+                  <li><Link to="/contact#message" className="text-white hover:text-gold transition-colors text-sm">Send Message</Link></li>
                 </ul>
                 <div className="mt-6 space-y-2">
-                  <p className="text-neutral text-sm">Phone: <a href="tel:03-308-5409" className="hover:text-gold transition-colors">03-308 5409</a></p>
-                  <p className="text-neutral text-sm">Email: <a href="mailto:office@ashburtonbaptist.co.nz" className="hover:text-gold transition-colors break-all">office@ashburtonbaptist.co.nz</a></p>
+                  <p className="text-white text-sm">Phone: <a href="tel:03-308-5409" className="hover:text-gold transition-colors">03-308 5409</a></p>
+                  <p className="text-white text-sm">Email: <a href="mailto:office@ashburtonbaptist.co.nz" className="hover:text-gold transition-colors break-all">office@ashburtonbaptist.co.nz</a></p>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Bottom Bar */}
-          <div className="flex flex-col md:flex-row justify-between items-center text-neutral text-sm gap-4">
+          <div className="flex flex-col md:flex-row justify-between items-center text-white text-sm gap-4">
             <p>&copy; {new Date().getFullYear()} Ashburton Baptist Church.</p>
             <div className="flex flex-col items-end gap-2">
               <div className="flex space-x-6">
                 <Link to="/privacy" className="hover:text-gold transition-colors">Privacy Policy</Link>
                 <Link to="/terms" className="hover:text-gold transition-colors">Terms & Conditions</Link>
               </div>
-              <p className="text-xs text-neutral">
+              <p className="text-xs text-white">
                 Website developed by{' '}
                 <a href="https://appdoers.co.nz/" target="_blank" rel="noopener noreferrer" className="text-gold hover:underline transition-colors">Appdoers</a>
                 {' '}in partnership with{' '}

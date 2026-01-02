@@ -31,7 +31,7 @@ export const DavidMiller = () => {
           
           <ScrollReveal direction="left" delay={200}>
             <VibrantCard className="p-8 bg-white/80 hover-lift">
-              <h3 className="text-3xl font-serif font-bold text-charcoal mb-4">Senior Pastor</h3>
+              <h3 className="text-3xl font-serif font-normal text-charcoal mb-4">Senior Pastor</h3>
               <div className="space-y-4 text-neutral leading-relaxed">
                 <p>
                   Rev. David Miller has been serving as Senior Pastor at Ashburton Baptist Church since 2015. 
@@ -56,7 +56,7 @@ export const DavidMiller = () => {
 
         <ScrollReveal direction="up" delay={300}>
           <VibrantCard className="p-8 md:p-12 bg-white/80 hover-lift">
-            <h3 className="text-2xl font-serif font-bold text-charcoal mb-6">Ministry Focus</h3>
+            <h3 className="text-2xl font-serif font-normal text-charcoal mb-6">Ministry Focus</h3>
             <div className="grid md:grid-cols-2 gap-6">
               <div>
                 <h4 className="font-bold text-charcoal mb-2">Preaching & Teaching</h4>

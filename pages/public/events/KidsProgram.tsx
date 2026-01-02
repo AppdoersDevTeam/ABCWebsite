@@ -26,7 +26,7 @@ export const KidsProgram = () => {
               <div className="bg-gold/10 p-6 rounded-full w-24 h-24 mx-auto mb-6 flex items-center justify-center">
                 <Users size={48} className="text-gold" />
               </div>
-              <h2 className="text-4xl md:text-5xl font-serif font-bold text-charcoal mb-4">Kids Program</h2>
+              <h2 className="text-4xl md:text-5xl font-serif font-normal text-charcoal mb-4">Kids Program</h2>
               <p className="text-xl text-neutral leading-relaxed">
                 Fun and faith for K-6. We create engaging, age-appropriate programs where children 
                 can learn about Jesus, build friendships, and grow in their faith in a safe and 
@@ -42,7 +42,7 @@ export const KidsProgram = () => {
                 <div className="flex items-start gap-4">
                   <Clock className="text-gold flex-shrink-0 mt-1" size={24} />
                   <div>
-                    <h3 className="font-serif text-2xl font-bold text-charcoal mb-2">When We Meet</h3>
+                    <h3 className="font-serif text-2xl font-normal text-charcoal mb-2">When We Meet</h3>
                     <p className="text-neutral mb-2"><strong className="text-charcoal">Every Sunday</strong></p>
                     <p className="text-neutral text-lg font-bold text-gold">10:30 AM</p>
                     <p className="text-neutral text-sm mt-2">During the morning service (school term)</p>
@@ -56,7 +56,7 @@ export const KidsProgram = () => {
                 <div className="flex items-start gap-4">
                   <MapPin className="text-gold flex-shrink-0 mt-1" size={24} />
                   <div>
-                    <h3 className="font-serif text-2xl font-bold text-charcoal mb-2">Location</h3>
+                    <h3 className="font-serif text-2xl font-normal text-charcoal mb-2">Location</h3>
                     <p className="text-neutral mb-2">284 Havelock Street</p>
                     <p className="text-neutral">Ashburton 7700</p>
                   </div>
@@ -68,7 +68,7 @@ export const KidsProgram = () => {
           {/* What We Do */}
           <ScrollReveal direction="up" delay={300}>
             <VibrantCard className="p-8 md:p-12 bg-white/80 hover-lift">
-              <h3 className="font-serif text-3xl font-bold text-charcoal mb-6">What We Do</h3>
+              <h3 className="font-serif text-3xl font-normal text-charcoal mb-6">What We Do</h3>
               <div className="space-y-4 text-neutral leading-relaxed">
                 <p>
                   Our Kids Program is designed to make learning about Jesus fun and engaging. 
@@ -89,7 +89,7 @@ export const KidsProgram = () => {
             <VibrantCard className="p-8 md:p-12 bg-white/80 hover-lift">
               <div className="flex items-start gap-4 mb-6">
                 <Sparkles className="text-gold flex-shrink-0 mt-1" size={32} />
-                <h3 className="font-serif text-3xl font-bold text-charcoal">Age Groups</h3>
+                <h3 className="font-serif text-3xl font-normal text-charcoal">Age Groups</h3>
               </div>
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
@@ -117,7 +117,7 @@ export const KidsProgram = () => {
             <VibrantCard className="p-8 md:p-12 bg-white/80 hover-lift">
               <div className="flex items-start gap-4 mb-6">
                 <Heart className="text-gold flex-shrink-0 mt-1" size={32} />
-                <h3 className="font-serif text-3xl font-bold text-charcoal">Safety & Care</h3>
+                <h3 className="font-serif text-3xl font-normal text-charcoal">Safety & Care</h3>
               </div>
               <div className="space-y-4 text-neutral leading-relaxed">
                 <p>

@@ -24,7 +24,7 @@ export const SundayService = () => {
             <div className="bg-gold/10 p-6 rounded-full w-24 h-24 mx-auto mb-6 flex items-center justify-center">
               <Music size={48} className="text-gold" />
             </div>
-            <h2 className="text-4xl md:text-5xl font-serif font-bold text-charcoal mb-4">Sunday Service</h2>
+            <h2 className="text-4xl md:text-5xl font-serif font-normal text-charcoal mb-4">Sunday Service</h2>
             <p className="text-xl text-neutral leading-relaxed">
               Join us every Sunday for a time of worship, teaching, and community. 
               We gather together to encounter God, connect with each other, and be equipped to impact our world.
@@ -37,7 +37,7 @@ export const SundayService = () => {
               <div className="flex items-start gap-4">
                 <Clock className="text-gold flex-shrink-0 mt-1" size={24} />
                 <div>
-                  <h3 className="font-serif text-2xl font-bold text-charcoal mb-2">Service Times</h3>
+                  <h3 className="font-serif text-2xl font-normal text-charcoal mb-2">Service Times</h3>
                   <p className="text-neutral mb-2"><strong className="text-charcoal">Every Sunday</strong></p>
                   <p className="text-neutral text-lg font-bold text-gold">10:00 AM</p>
                   <p className="text-neutral text-sm mt-2">Service duration: 90 minutes</p>
@@ -49,7 +49,7 @@ export const SundayService = () => {
               <div className="flex items-start gap-4">
                 <MapPin className="text-gold flex-shrink-0 mt-1" size={24} />
                 <div>
-                  <h3 className="font-serif text-2xl font-bold text-charcoal mb-2">Location</h3>
+                  <h3 className="font-serif text-2xl font-normal text-charcoal mb-2">Location</h3>
                   <p className="text-neutral mb-2">284 Havelock Street</p>
                   <p className="text-neutral mb-4">Ashburton 7700</p>
                   <a 
@@ -67,7 +67,7 @@ export const SundayService = () => {
 
           {/* What to Expect */}
           <VibrantCard className="p-8 md:p-12 bg-white/80 animate-fade-in-up delay-600">
-            <h3 className="font-serif text-3xl font-bold text-charcoal mb-6">What to Expect</h3>
+            <h3 className="font-serif text-3xl font-normal text-charcoal mb-6">What to Expect</h3>
             <div className="space-y-4 text-neutral leading-relaxed">
               <p>
                 Our Sunday service is a vibrant gathering where people of all ages come together to worship God. 
@@ -86,7 +86,7 @@ export const SundayService = () => {
 
           {/* Music & Worship */}
           <VibrantCard className="p-8 md:p-12 bg-white/80 animate-fade-in-up delay-700">
-            <h3 className="font-serif text-3xl font-bold text-charcoal mb-6">Music & Worship</h3>
+            <h3 className="font-serif text-3xl font-normal text-charcoal mb-6">Music & Worship</h3>
             <div className="space-y-4 text-neutral leading-relaxed">
               <p>
                 We enjoy a wide range of praise and worship music, from traditional hymns to contemporary songs. 
@@ -105,7 +105,7 @@ export const SundayService = () => {
           <VibrantCard className="p-8 md:p-12 bg-white/80 animate-fade-in-up delay-800">
             <div className="flex items-start gap-4 mb-6">
               <Users className="text-gold flex-shrink-0 mt-1" size={32} />
-              <h3 className="font-serif text-3xl font-bold text-charcoal">Children's Programs</h3>
+              <h3 className="font-serif text-3xl font-normal text-charcoal">Children's Programs</h3>
             </div>
             <div className="space-y-4 text-neutral leading-relaxed">
               <p>
@@ -125,7 +125,7 @@ export const SundayService = () => {
 
           {/* Parking */}
           <VibrantCard className="p-8 md:p-12 bg-white/80 animate-fade-in-up delay-900">
-            <h3 className="font-serif text-3xl font-bold text-charcoal mb-6">Parking</h3>
+            <h3 className="font-serif text-3xl font-normal text-charcoal mb-6">Parking</h3>
             <div className="space-y-4 text-neutral leading-relaxed">
               <p>
                 We have a dedicated car park on church grounds on Havelock Street. There is also ample 

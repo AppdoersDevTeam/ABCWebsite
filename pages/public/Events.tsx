@@ -11,15 +11,6 @@ export const Events = () => {
   const [publicEvents, setPublicEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Static events for special pages
-  const staticEvents = [
-    { title: "Sunday Service", time: "Every Sunday, 10:00 AM", category: "Service", icon: <Music size={24}/>, desc: "Join us for worship and teaching.", link: "/events/sunday-service" },
-    { title: "Young Adults", time: "Wednesdays, 7:00 PM", category: "Connect", icon: <Users size={24}/>, desc: "A space for 18-30s to connect.", link: "/events/young-adults" },
-    { title: "Community Lunch", time: "First Sunday, 12:00 PM", category: "Community", icon: <Calendar size={24}/>, desc: "Free lunch for our neighbors.", link: "/events/community-lunch" },
-    { title: "Kids Program", time: "Sundays, 10:30 AM", category: "Ministry", icon: <Users size={24}/>, desc: "Fun and faith for K-6.", link: "/events/kids-program" },
-    { title: "Sermons", time: "Watch Anytime", category: "Media", icon: <Video size={24}/>, desc: "Catch up on the latest messages.", link: "/events/sermons" },
-  ];
-
   useEffect(() => {
     fetchPublicEvents();
   }, []);
@@ -64,22 +55,23 @@ export const Events = () => {
         return <Users size={24} />;
       case 'community':
         return <Calendar size={24} />;
+      case 'ministry':
+        return <Users size={24} />;
+      case 'media':
+        return <Video size={24} />;
       default:
         return <Calendar size={24} />;
     }
   };
 
-  const allEvents = [
-    ...staticEvents,
-    ...publicEvents.map(evt => ({
-      title: evt.title,
-      time: formatEventTime(evt.date, evt.time),
-      category: evt.category,
-      icon: getCategoryIcon(evt.category),
-      desc: evt.description || '',
-      link: undefined,
-    })),
-  ];
+  const allEvents = publicEvents.map(evt => ({
+    title: evt.title,
+    time: formatEventTime(evt.date, evt.time),
+    category: evt.category,
+    icon: getCategoryIcon(evt.category),
+    desc: evt.description || '',
+    link: undefined,
+  }));
 
   return (
     <div className="pb-32">
@@ -108,7 +100,7 @@ export const Events = () => {
                              <span className="text-gold font-bold text-xs uppercase tracking-widest bg-gold/5 px-2 py-1 rounded-[4px] border border-gold/20 group-hover:bg-gold group-hover:text-charcoal transition-colors duration-300">{evt.category}</span>
                              <span className="text-neutral text-sm font-bold">{evt.time}</span>
                         </div>
-                        <h3 className="text-3xl font-serif font-bold text-charcoal mb-2 group-hover:text-gold transition-colors duration-300">{evt.title}</h3>
+                        <h3 className="text-3xl font-serif font-normal text-charcoal mb-2 group-hover:text-gold transition-colors duration-300">{evt.title}</h3>
                         <p className="text-neutral group-hover:text-charcoal transition-colors duration-300">{evt.desc}</p>
                     </div>
 

@@ -52,7 +52,7 @@ export const Newsletter = () => {
   return (
     <div className="space-y-8">
       <div className="border-b border-gray-200 pb-6">
-        <h1 className="text-4xl font-serif font-bold text-charcoal">Newsletters</h1>
+        <h1 className="text-4xl font-serif font-normal text-charcoal">Newsletters</h1>
         <p className="text-neutral mt-1">Church life updates.</p>
       </div>
 
@@ -66,7 +66,7 @@ export const Newsletter = () => {
             <FileText size={64} className="text-gold mx-auto mb-6" />
             {latestNewsletter ? (
               <>
-                <h2 className="text-3xl md:text-4xl font-serif text-charcoal mb-2 font-bold">
+                <h2 className="text-3xl md:text-4xl font-serif text-charcoal mb-2 font-normal">
                   {latestNewsletter.title}
                 </h2>
                 <p className="text-neutral mb-8 font-medium">

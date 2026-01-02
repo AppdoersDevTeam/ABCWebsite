@@ -40,7 +40,7 @@ export const LoginError = () => {
           <AlertCircle size={40} className="text-red-500" />
         </div>
 
-        <h1 className="text-5xl font-serif font-bold text-charcoal mb-4">Login Error</h1>
+        <h1 className="text-5xl font-serif font-normal text-charcoal mb-4">Login Error</h1>
         <p className="text-xl text-neutral font-light mb-10 leading-relaxed">
           {getErrorMessage()}
         </p>

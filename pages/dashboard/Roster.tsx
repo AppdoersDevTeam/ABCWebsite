@@ -82,7 +82,7 @@ export const Roster = () => {
     return (
       <div className="space-y-8">
         <div className="border-b border-gray-200 pb-6">
-          <h1 className="text-4xl font-serif font-bold text-charcoal">Roster</h1>
+          <h1 className="text-4xl font-serif font-normal text-charcoal">Roster</h1>
           <p className="text-neutral mt-1">View roster schedules.</p>
         </div>
         <div className="text-center py-12 bg-white border border-gray-100 rounded-[8px]">
@@ -99,7 +99,7 @@ export const Roster = () => {
   return (
     <div className="space-y-8">
       <div className="border-b border-gray-200 pb-6">
-        <h1 className="text-4xl font-serif font-bold text-charcoal">Roster</h1>
+        <h1 className="text-4xl font-serif font-normal text-charcoal">Roster</h1>
         <p className="text-neutral mt-1">View roster schedules.</p>
       </div>
 

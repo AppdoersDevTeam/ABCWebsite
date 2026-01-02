@@ -21,6 +21,7 @@
               neutral: '#808080',     // Muted Grey (Borders)
               base: '#ffffff',        // Pure White (Background)
               amber: '#f59e0b',       // Deep Amber for depth
+              teal: '#4a6b7a',        // Dark desaturated teal-blue-green
             },
             fontFamily: {
               serif: ['"Naira"', 'cursive'],
@@ -119,7 +120,9 @@
     <style>
       body {
         font-family: 'Open Sans', sans-serif;
-        background-color: #ffffff;
+        background: #4568DC; /* fallback for old browsers */
+        background: -webkit-linear-gradient(to bottom, #B06AB3, #4568DC); /* Chrome 10-25, Safari 5.1-6 */
+        background: linear-gradient(to bottom, #B06AB3, #4568DC); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
         color: #222222;
         -webkit-font-smoothing: antialiased;
         overflow-x: hidden;
@@ -225,6 +228,20 @@
       }
       ::-webkit-scrollbar-thumb:hover {
         background: #fbcb05; 
+      }
+
+      /* Footer Gradient Background */
+      .footer-gradient {
+        background: #232526; /* fallback for old browsers */
+        background: -webkit-linear-gradient(to bottom, #414345, #232526); /* Chrome 10-25, Safari 5.1-6 */
+        background: linear-gradient(to bottom, #414345, #232526); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+      }
+
+      /* Section Gradient Background */
+      .section-gradient {
+        background: #4568DC; /* fallback for old browsers */
+        background: -webkit-linear-gradient(to bottom, #B06AB3, #4568DC); /* Chrome 10-25, Safari 5.1-6 */
+        background: linear-gradient(to bottom, #B06AB3, #4568DC); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
       }
     </style>
   <script type="importmap">

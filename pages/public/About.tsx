@@ -49,7 +49,7 @@ export const About = () => {
         
         {/* Intro - Glass Card on White */}
         <section className="glass-card rounded-[8px] p-6 md:p-12 lg:p-20 text-center max-w-5xl mx-auto mb-20 md:mb-32 border-t-4 border-t-gold animate-fade-in-up hover-lift">
-            <h2 className="text-3xl md:text-5xl font-serif font-bold text-charcoal mb-6 md:mb-8">Established 1882. <span className="text-gold animate-pulse-slow">Reimagined Daily.</span></h2>
+            <h2 className="text-3xl md:text-5xl font-serif font-normal text-charcoal mb-6 md:mb-8">Established 1882. <span className="text-gold animate-pulse-slow">Reimagined Daily.</span></h2>
             <p className="text-lg md:text-2xl text-neutral leading-relaxed font-light mb-8">
                 We aren't just a building. We are a movement of people passionate about Jesus and our city. 
                 From humble beginnings to a vibrant community, our mission remains the same: <span className="text-charcoal font-bold underline decoration-gold decoration-4 underline-offset-4">Impact.</span>
@@ -75,7 +75,7 @@ export const About = () => {
                   {['One God', 'Jesus Savior', 'Spirit Power', 'Bible Authority'].map((item, i) => (
                       <ScrollReveal key={i} direction="scale" delay={i * 100}>
                         <div className="bg-white shadow-sm p-8 rounded-[8px] border border-gray-100 flex flex-col justify-center items-center text-center hover:shadow-md hover:border-gold transition-all duration-300 group hover-lift">
-                            <span className="text-2xl md:text-3xl font-serif font-bold mb-2 text-charcoal group-hover:scale-110 transition-transform duration-300">{item.split(' ')[0]}</span>
+                            <span className="text-2xl md:text-3xl font-serif font-normal mb-2 text-charcoal group-hover:scale-110 transition-transform duration-300">{item.split(' ')[0]}</span>
                             <span className="text-xs uppercase tracking-widest text-neutral group-hover:text-gold font-bold">{item.split(' ')[1]}</span>
                         </div>
                       </ScrollReveal>
@@ -87,7 +87,7 @@ export const About = () => {
             <section id="leadership" className="scroll-mt-24">
               <ScrollReveal direction="down" delay={0}>
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 border-b border-gray-200 pb-8 gap-4">
-                  <h2 className="text-4xl md:text-5xl font-serif font-bold text-charcoal">Leadership</h2>
+                  <h2 className="text-4xl md:text-5xl font-serif font-normal text-charcoal">Leadership</h2>
                   <p className="text-neutral uppercase tracking-widest font-bold">Meet the Team</p>
                 </div>
               </ScrollReveal>
@@ -103,7 +103,7 @@ export const About = () => {
                         <img src={leader.img} alt={leader.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                       </div>
                       <div className="mt-6 bg-white p-4 -mt-10 mx-4 relative rounded-[4px] shadow-lg text-center transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-1">
-                        <h4 className="text-xl font-serif text-charcoal font-bold group-hover:text-gold transition-colors">{leader.name}</h4>
+                        <h4 className="text-xl font-serif text-charcoal font-normal group-hover:text-gold transition-colors">{leader.name}</h4>
                         <p className="text-gold text-xs uppercase tracking-wider font-bold">{leader.role}</p>
                       </div>
                     </div>
@@ -129,7 +129,7 @@ export const About = () => {
                       />
                     </div>
                     <div>
-                      <h3 className="text-2xl font-serif font-bold text-charcoal">{leadership[selectedLeader].name}</h3>
+                      <h3 className="text-2xl font-serif font-normal text-charcoal">{leadership[selectedLeader].name}</h3>
                       <p className="text-gold text-sm uppercase tracking-wider font-bold">{leadership[selectedLeader].role}</p>
                     </div>
                   </div>

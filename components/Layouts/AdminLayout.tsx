@@ -128,7 +128,7 @@ export const AdminLayout = () => {
           <button onClick={() => setIsSidebarOpen(true)} className="text-charcoal p-2">
             <Menu size={24} />
           </button>
-          <span className="font-serif font-bold text-lg text-charcoal">Admin Dashboard</span>
+          <span className="font-serif font-normal text-lg text-charcoal">Admin Dashboard</span>
           <div className="w-8" />
         </header>
 

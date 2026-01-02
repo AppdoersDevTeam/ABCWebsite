@@ -24,7 +24,7 @@ export const YoungAdults = () => {
             <div className="bg-gold/10 p-6 rounded-full w-24 h-24 mx-auto mb-6 flex items-center justify-center">
               <Users size={48} className="text-gold" />
             </div>
-            <h2 className="text-4xl md:text-5xl font-serif font-bold text-charcoal mb-4">Young Adults</h2>
+            <h2 className="text-4xl md:text-5xl font-serif font-normal text-charcoal mb-4">Young Adults</h2>
             <p className="text-xl text-neutral leading-relaxed">
               A space for 18-30 year olds to connect, grow in faith, and build meaningful relationships. 
               Whether you're studying, working, or figuring out life, you're welcome here.
@@ -37,7 +37,7 @@ export const YoungAdults = () => {
               <div className="flex items-start gap-4">
                 <Clock className="text-gold flex-shrink-0 mt-1" size={24} />
                 <div>
-                  <h3 className="font-serif text-2xl font-bold text-charcoal mb-2">When We Meet</h3>
+                  <h3 className="font-serif text-2xl font-normal text-charcoal mb-2">When We Meet</h3>
                   <p className="text-neutral mb-2"><strong className="text-charcoal">Every Wednesday</strong></p>
                   <p className="text-neutral text-lg font-bold text-gold">7:00 PM</p>
                 </div>
@@ -48,7 +48,7 @@ export const YoungAdults = () => {
               <div className="flex items-start gap-4">
                 <MapPin className="text-gold flex-shrink-0 mt-1" size={24} />
                 <div>
-                  <h3 className="font-serif text-2xl font-bold text-charcoal mb-2">Location</h3>
+                  <h3 className="font-serif text-2xl font-normal text-charcoal mb-2">Location</h3>
                   <p className="text-neutral mb-2">284 Havelock Street</p>
                   <p className="text-neutral">Ashburton 7700</p>
                 </div>
@@ -58,7 +58,7 @@ export const YoungAdults = () => {
 
           {/* What We Do */}
           <VibrantCard className="p-8 md:p-12 bg-white/80 animate-fade-in-up delay-600">
-            <h3 className="font-serif text-3xl font-bold text-charcoal mb-6">What We Do</h3>
+            <h3 className="font-serif text-3xl font-normal text-charcoal mb-6">What We Do</h3>
             <div className="space-y-4 text-neutral leading-relaxed">
               <p>
                 Our Young Adults group is a vibrant community where you can be yourself, ask questions, 
@@ -78,7 +78,7 @@ export const YoungAdults = () => {
           <VibrantCard className="p-8 md:p-12 bg-white/80 animate-fade-in-up delay-700">
             <div className="flex items-start gap-4 mb-6">
               <Heart className="text-gold flex-shrink-0 mt-1" size={32} />
-              <h3 className="font-serif text-3xl font-bold text-charcoal">Community & Connection</h3>
+              <h3 className="font-serif text-3xl font-normal text-charcoal">Community & Connection</h3>
             </div>
             <div className="space-y-4 text-neutral leading-relaxed">
               <p>
@@ -98,7 +98,7 @@ export const YoungAdults = () => {
           <VibrantCard className="p-8 md:p-12 bg-white/80 animate-fade-in-up delay-800">
             <div className="flex items-start gap-4 mb-6">
               <Coffee className="text-gold flex-shrink-0 mt-1" size={32} />
-              <h3 className="font-serif text-3xl font-bold text-charcoal">Social Events</h3>
+              <h3 className="font-serif text-3xl font-normal text-charcoal">Social Events</h3>
             </div>
             <div className="space-y-4 text-neutral leading-relaxed">
               <p>

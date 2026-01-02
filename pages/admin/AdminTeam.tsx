@@ -12,7 +12,7 @@ export const AdminTeam = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
-  const [formData, setFormData] = useState({ name: '', role: '', email: '', phone: '', img: '' });
+  const [formData, setFormData] = useState({ name: '', role: '', email: '', phone: '', img: '', description: '' });
 
   useEffect(() => {
     fetchMembers();
@@ -50,6 +50,7 @@ export const AdminTeam = () => {
             email: formData.email || null,
             phone: formData.phone || null,
             img: formData.img || null,
+            description: formData.description || null,
           },
         ])
         .select()
@@ -58,7 +59,7 @@ export const AdminTeam = () => {
       if (error) throw error;
 
       setMembers([...members, data]);
-      setFormData({ name: '', role: '', email: '', phone: '', img: '' });
+      setFormData({ name: '', role: '', email: '', phone: '', img: '', description: '' });
       setIsModalOpen(false);
     } catch (error: any) {
       console.error('Error creating team member:', error);
@@ -74,6 +75,7 @@ export const AdminTeam = () => {
       email: member.email || '',
       phone: member.phone || '',
       img: member.img || '',
+      description: member.description || '',
     });
     setIsModalOpen(true);
   };
@@ -90,13 +92,14 @@ export const AdminTeam = () => {
           email: formData.email || null,
           phone: formData.phone || null,
           img: formData.img || null,
+          description: formData.description || null,
         })
         .eq('id', editingMember.id);
 
       if (error) throw error;
 
       fetchMembers();
-      setFormData({ name: '', role: '', email: '', phone: '', img: '' });
+      setFormData({ name: '', role: '', email: '', phone: '', img: '', description: '' });
       setEditingMember(null);
       setIsModalOpen(false);
     } catch (error: any) {
@@ -124,7 +127,7 @@ export const AdminTeam = () => {
 
   const openCreateModal = () => {
     setEditingMember(null);
-    setFormData({ name: '', role: '', email: '', phone: '', img: '' });
+    setFormData({ name: '', role: '', email: '', phone: '', img: '', description: '' });
     setIsModalOpen(true);
   };
 
@@ -145,7 +148,7 @@ export const AdminTeam = () => {
     <div className="space-y-8">
       <div className="flex justify-between items-center border-b border-gray-200 pb-6">
         <div>
-          <h1 className="text-4xl font-serif font-bold text-charcoal">Team Management</h1>
+          <h1 className="text-4xl font-serif font-normal text-charcoal">Team Management</h1>
           <p className="text-neutral mt-1">Manage staff and leadership team members.</p>
         </div>
         <GlowingButton size="sm" onClick={openCreateModal}>
@@ -203,6 +206,9 @@ export const AdminTeam = () => {
                     </a>
                   )}
                 </div>
+                {member.description && (
+                  <p className="text-sm text-neutral mt-4 line-clamp-3">{member.description}</p>
+                )}
               </div>
             </div>
           </VibrantCard>
@@ -216,7 +222,7 @@ export const AdminTeam = () => {
         onClose={() => {
           setIsModalOpen(false);
           setEditingMember(null);
-          setFormData({ name: '', role: '', email: '', phone: '', img: '' });
+          setFormData({ name: '', role: '', email: '', phone: '', img: '', description: '' });
         }}
         title={editingMember ? 'Edit Team Member' : 'Add Team Member'}
       >
@@ -271,12 +277,29 @@ export const AdminTeam = () => {
               placeholder="https://..."
             />
           </div>
+          <div>
+            <label className="block text-sm font-bold text-charcoal mb-2">Description (Optional, max 300 characters)</label>
+            <textarea
+              value={formData.description}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (value.length <= 300) {
+                  setFormData({ ...formData, description: value });
+                }
+              }}
+              className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none resize-none"
+              placeholder="Enter description (max 300 characters)"
+              rows={4}
+              maxLength={300}
+            />
+            <p className="text-xs text-neutral mt-1">{formData.description.length}/300 characters</p>
+          </div>
           <div className="flex gap-3 justify-end pt-4">
             <button
               onClick={() => {
                 setIsModalOpen(false);
                 setEditingMember(null);
-                setFormData({ name: '', role: '', email: '', phone: '', img: '' });
+                setFormData({ name: '', role: '', email: '', phone: '', img: '', description: '' });
               }}
               className="px-6 py-2 border border-gray-200 rounded-[4px] text-charcoal hover:bg-gray-50 transition-colors"
             >

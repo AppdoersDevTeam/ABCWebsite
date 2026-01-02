@@ -31,7 +31,7 @@ export const EmilyWhite = () => {
           
           <ScrollReveal direction="left" delay={200}>
             <VibrantCard className="p-8 bg-white/80 hover-lift">
-              <h3 className="text-3xl font-serif font-bold text-charcoal mb-4">Kids & Families Director</h3>
+              <h3 className="text-3xl font-serif font-normal text-charcoal mb-4">Kids & Families Director</h3>
               <div className="space-y-4 text-neutral leading-relaxed">
                 <p>
                   Emily White leads our Kids & Families ministry, creating safe and engaging spaces 
@@ -55,7 +55,7 @@ export const EmilyWhite = () => {
 
         <ScrollReveal direction="up" delay={300}>
           <VibrantCard className="p-8 md:p-12 bg-white/80 hover-lift">
-            <h3 className="text-2xl font-serif font-bold text-charcoal mb-6">Ministry Focus</h3>
+            <h3 className="text-2xl font-serif font-normal text-charcoal mb-6">Ministry Focus</h3>
             <div className="grid md:grid-cols-2 gap-6">
               <div>
                 <h4 className="font-bold text-charcoal mb-2">Kids Church</h4>

@@ -369,7 +369,7 @@ export const AdminPhotos = () => {
     <div className="space-y-8">
       <div className="flex justify-between items-center border-b border-gray-200 pb-6">
         <div>
-          <h1 className="text-4xl font-serif font-bold text-charcoal">Photo Gallery Management</h1>
+          <h1 className="text-4xl font-serif font-normal text-charcoal">Photo Gallery Management</h1>
           <p className="text-neutral mt-1">Manage photo folders and upload images.</p>
         </div>
         <GlowingButton size="sm" onClick={openCreateFolderModal}>
@@ -454,7 +454,7 @@ export const AdminPhotos = () => {
       {selectedFolder && (
         <div className="mt-8 bg-white border border-gray-100 rounded-[8px] p-6">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-serif font-bold text-charcoal">{selectedFolder.name}</h2>
+            <h2 className="text-2xl font-serif font-normal text-charcoal">{selectedFolder.name}</h2>
             <button
               onClick={() => setSelectedFolder(null)}
               className="text-neutral hover:text-charcoal"

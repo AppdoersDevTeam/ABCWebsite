@@ -144,7 +144,7 @@ export const AdminUsers = () => {
     <div className="space-y-8">
       <div className="flex justify-between items-center border-b border-gray-200 pb-6">
         <div>
-          <h1 className="text-4xl font-serif font-bold text-charcoal">User Management</h1>
+          <h1 className="text-4xl font-serif font-normal text-charcoal">User Management</h1>
           <p className="text-neutral mt-1">Manage user permissions and approvals</p>
         </div>
         <button

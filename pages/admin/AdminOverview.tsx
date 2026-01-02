@@ -493,7 +493,7 @@ export const AdminOverview = () => {
     <div className="space-y-8">
       <div className="flex justify-between items-end border-b border-gray-200 pb-6">
         <div>
-          <h1 className="text-4xl font-serif font-bold text-charcoal">Admin Dashboard</h1>
+          <h1 className="text-4xl font-serif font-normal text-charcoal">Admin Dashboard</h1>
           <p className="text-neutral mt-2">Welcome back, {user?.name || 'Admin'}. Manage your church community.</p>
         </div>
         <div className="hidden md:block">
@@ -513,7 +513,7 @@ export const AdminOverview = () => {
                 {stat.icon}
               </div>
               <h3 className="font-bold text-xl mb-2 text-charcoal">{stat.label}</h3>
-              <p className={`text-4xl font-serif font-bold mb-1 ${stat.highlight ? 'text-gold' : 'text-charcoal'}`}>{stat.value}</p>
+              <p className={`text-4xl font-serif font-normal mb-1 ${stat.highlight ? 'text-gold' : 'text-charcoal'}`}>{stat.value}</p>
               {stat.subtitle && (
                 <p className="text-sm text-neutral mb-2">{stat.subtitle}</p>
               )}
@@ -564,7 +564,7 @@ export const AdminOverview = () => {
               <UserCheck size={24} className="text-gold" />
             </div>
             <div>
-              <h2 className="font-serif text-3xl text-charcoal font-bold">User Approval Requests</h2>
+              <h2 className="font-serif text-3xl text-charcoal font-normal">User Approval Requests</h2>
               <p className="text-neutral mt-1">Review and approve new user signups</p>
             </div>
           </div>
@@ -678,7 +678,7 @@ export const AdminOverview = () => {
         {/* Debug: Show All Users */}
         {showAllUsers && allUsers.length > 0 && (
           <div className="mt-8 pt-8 border-t border-gray-200">
-            <h3 className="font-serif text-xl text-charcoal font-bold mb-4">All Users (Debug View)</h3>
+            <h3 className="font-serif text-xl text-charcoal font-normal mb-4">All Users (Debug View)</h3>
             <div className="space-y-3">
               {allUsers.map((u) => (
                 <div
@@ -713,7 +713,7 @@ export const AdminOverview = () => {
       {/* Quick Actions */}
       <div className="grid md:grid-cols-2 gap-6">
         <div className="glass-card bg-white/60 p-8 rounded-[8px] border border-gray-100">
-          <h3 className="font-serif text-2xl mb-4 text-charcoal font-bold">Quick Actions</h3>
+          <h3 className="font-serif text-2xl mb-4 text-charcoal font-normal">Quick Actions</h3>
           <div className="space-y-3">
             {pendingCount > 0 && (
               <a
@@ -748,7 +748,7 @@ export const AdminOverview = () => {
         </div>
 
         <div className="glass-card bg-white/60 p-8 rounded-[8px] border border-gray-100">
-          <h3 className="font-serif text-2xl mb-4 text-charcoal font-bold">Recent Activity</h3>
+          <h3 className="font-serif text-2xl mb-4 text-charcoal font-normal">Recent Activity</h3>
           {isLoadingActivities ? (
             <div className="space-y-4">
               {Array.from({ length: 3 }).map((_, i) => (

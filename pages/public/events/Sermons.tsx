@@ -153,7 +153,7 @@ export const Sermons = () => {
                   <Youtube className="text-gold" size={32} />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-serif font-bold text-charcoal mb-1">Subscribe to Our Channel</h3>
+                  <h3 className="text-2xl font-serif font-normal text-charcoal mb-1">Subscribe to Our Channel</h3>
                   <p className="text-neutral">Never miss a sermon. Watch live and catch up on past messages.</p>
                 </div>
               </div>
@@ -172,7 +172,7 @@ export const Sermons = () => {
         {/* Sermons Grid */}
         <div className="mb-8">
           <ScrollReveal direction="down" delay={200}>
-            <h2 className="text-3xl md:text-4xl font-serif font-bold text-charcoal mb-2">Recent Sermons</h2>
+            <h2 className="text-3xl md:text-4xl font-serif font-normal text-charcoal mb-2">Recent Sermons</h2>
             <p className="text-neutral mb-8">Watch our latest messages and catch up on past sermons.</p>
           </ScrollReveal>
         </div>
@@ -214,7 +214,7 @@ export const Sermons = () => {
                     
                     {/* Video Info */}
                     <div className="p-6">
-                      <h3 className="text-xl font-serif font-bold text-charcoal mb-2 line-clamp-2 hover:text-gold transition-colors">
+                      <h3 className="text-xl font-serif font-normal text-charcoal mb-2 line-clamp-2 hover:text-gold transition-colors">
                         {video.title}
                       </h3>
                       <div className="space-y-1 text-sm text-neutral">
