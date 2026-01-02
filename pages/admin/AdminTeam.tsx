@@ -104,12 +104,51 @@ export const AdminTeam = () => {
     const trimmedPhone = formData.phone.trim();
     const trimmedDescription = formData.description.trim();
 
-    if (!trimmedName || !trimmedRole || !trimmedEmail || !trimmedPhone || !trimmedDescription) {
-      alert('Please fill in all required fields: Name, Role, Email, Phone, and Description');
+    // Validate name - must not be empty
+    if (!trimmedName) {
+      alert('Name is required. Please type the name.');
       return;
     }
 
-    // Validate description length (200-350 characters)
+    // Validate role
+    if (!trimmedRole) {
+      alert('Role is required.');
+      return;
+    }
+
+    // Validate email - must be valid email format
+    if (!trimmedEmail) {
+      alert('Email is required. Please type a valid email address.');
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmedEmail)) {
+      alert('Please enter a valid email address.');
+      return;
+    }
+
+    // Validate phone - only numbers allowed
+    if (!trimmedPhone) {
+      alert('Phone is required.');
+      return;
+    }
+    const phoneRegex = /^[0-9\s\-\(\)]+$/;
+    if (!phoneRegex.test(trimmedPhone)) {
+      alert('Phone number can only contain numbers, spaces, hyphens, and parentheses.');
+      return;
+    }
+
+    // Validate photo - must be uploaded
+    if (!selectedFile && !formData.img) {
+      alert('Photo is required. Please upload a photo.');
+      return;
+    }
+
+    // Validate description - cannot be empty and must be 200-350 characters
+    if (!trimmedDescription) {
+      alert('Description is required. Please type at least 200 characters of information.');
+      return;
+    }
     if (trimmedDescription.length < 200) {
       alert('Description must be at least 200 characters long. Current length: ' + trimmedDescription.length);
       return;
@@ -351,13 +390,59 @@ export const AdminTeam = () => {
       const trimmedPhone = formData.phone.trim();
       const trimmedDescription = formData.description.trim();
 
-      if (!trimmedName || !trimmedRole || !trimmedEmail || !trimmedPhone || !trimmedDescription) {
-        alert('Please fill in all required fields: Name, Role, Email, Phone, and Description');
+      // Validate name - must not be empty
+      if (!trimmedName) {
+        alert('Name is required. Please type the name.');
         setIsUploading(false);
         return;
       }
 
-      // Validate description length (200-350 characters)
+      // Validate role
+      if (!trimmedRole) {
+        alert('Role is required.');
+        setIsUploading(false);
+        return;
+      }
+
+      // Validate email - must be valid email format
+      if (!trimmedEmail) {
+        alert('Email is required. Please type a valid email address.');
+        setIsUploading(false);
+        return;
+      }
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(trimmedEmail)) {
+        alert('Please enter a valid email address.');
+        setIsUploading(false);
+        return;
+      }
+
+      // Validate phone - only numbers allowed
+      if (!trimmedPhone) {
+        alert('Phone is required.');
+        setIsUploading(false);
+        return;
+      }
+      const phoneRegex = /^[0-9\s\-\(\)]+$/;
+      if (!phoneRegex.test(trimmedPhone)) {
+        alert('Phone number can only contain numbers, spaces, hyphens, and parentheses.');
+        setIsUploading(false);
+        return;
+      }
+
+      // Validate photo - must be uploaded (for update, check if there's existing image or new file)
+      if (!selectedFile && !imageUrl && !editingMember?.img) {
+        alert('Photo is required. Please upload a photo.');
+        setIsUploading(false);
+        return;
+      }
+
+      // Validate description - cannot be empty and must be 200-350 characters
+      if (!trimmedDescription) {
+        alert('Description is required. Please type at least 200 characters of information.');
+        setIsUploading(false);
+        return;
+      }
       if (trimmedDescription.length < 200) {
         alert('Description must be at least 200 characters long. Current length: ' + trimmedDescription.length);
         setIsUploading(false);
@@ -587,7 +672,7 @@ export const AdminTeam = () => {
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none"
-              placeholder="email@church.com"
+              placeholder="type a valid email address"
               required
             />
           </div>
@@ -596,14 +681,20 @@ export const AdminTeam = () => {
             <input
               type="tel"
               value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              onChange={(e) => {
+                // Only allow numbers, spaces, hyphens, and parentheses
+                const value = e.target.value;
+                if (/^[0-9\s\-\(\)]*$/.test(value)) {
+                  setFormData({ ...formData, phone: value });
+                }
+              }}
               className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none"
               placeholder="03-308 5409"
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-bold text-charcoal mb-2">Image * (max 300KB)</label>
+            <label className="block text-sm font-bold text-charcoal mb-2">Photo * (max 300KB, required)</label>
             <div className="flex items-center gap-4">
               {/* Photo Preview - Circular like team management view */}
               <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-gray-200 flex-shrink-0">
@@ -700,7 +791,7 @@ export const AdminTeam = () => {
                   ? 'border-red-300 focus:border-red-500'
                   : 'border-gray-200 focus:border-gold'
               }`}
-              placeholder="Enter description (minimum 200 characters, maximum 350 characters)"
+              placeholder="type at least 200 characters of information here"
               rows={6}
               maxLength={350}
               required
