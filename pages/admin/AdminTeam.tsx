@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { VibrantCard } from '../../components/UI/VibrantCard';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { Modal } from '../../components/UI/Modal';
-import { Mail, Phone, Edit, Trash2, Plus, User, Upload, X, Image as ImageIcon } from 'lucide-react';
+import { Mail, Phone, Edit, Trash2, Plus, User, Upload, X, Image as ImageIcon, UserPlus } from 'lucide-react';
 import { TeamMember } from '../../types';
 import { supabase } from '../../lib/supabase';
 import { SkeletonPageHeader } from '../../components/UI/Skeleton';
@@ -563,10 +563,13 @@ export const AdminTeam = () => {
           <h1 className="text-4xl font-serif font-normal text-charcoal">Team Management</h1>
           <p className="text-neutral mt-1">Manage staff and leadership team members.</p>
         </div>
-        <GlowingButton size="sm" onClick={openCreateModal}>
-          <Plus size={16} className="mr-2" />
-          Add Member
-        </GlowingButton>
+        <button
+          onClick={openCreateModal}
+          className="bg-gradient-to-r from-gold to-[#d4a904] px-[9px] py-[8px] lg:px-[17px] lg:py-[12px] xl:px-[25px] xl:py-[12px] rounded-[10px] font-sans font-normal text-xs lg:text-sm xl:text-base hover:from-[#e98d07] hover:via-[#db7a07] hover:to-[#c96a05] transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl inline-flex items-center justify-center whitespace-nowrap"
+        >
+          <UserPlus size={18} className="mr-2 text-white" />
+          <span className="shine-text relative z-10 font-sans font-normal normal-case">Add Member</span>
+        </button>
       </div>
 
       {members.length === 0 ? (
