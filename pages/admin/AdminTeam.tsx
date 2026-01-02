@@ -184,10 +184,37 @@ export const AdminTeam = () => {
         .single();
 
       if (error) {
-        // If error is about missing description column, show error and don't save
-        if (error.message && error.message.includes('description')) {
-          alert('Error: Description column not found in database. Please run the SQL migration first:\n\nALTER TABLE team_members ADD COLUMN IF NOT EXISTS description VARCHAR(350) NOT NULL;');
-          setIsUploading(false);
+        // If error is about missing description column, try saving without it
+        if (error.message && (error.message.includes('description') || error.message.includes('column') && error.message.includes('team_members'))) {
+          console.warn('Description column not found, attempting to save without description field');
+          
+          // Try to save without description
+          const insertDataWithoutDescription = {
+            name: trimmedName,
+            role: trimmedRole,
+            email: trimmedEmail,
+            phone: trimmedPhone,
+            img: imageUrl || '',
+          };
+          
+          const { data: retryData, error: retryError } = await supabase
+            .from('team_members')
+            .insert([insertDataWithoutDescription])
+            .select()
+            .single();
+          
+          if (retryError) {
+            console.error('Error saving without description:', retryError);
+            alert('Error saving team member: ' + retryError.message + '\n\nPlease run this SQL in Supabase SQL Editor:\n\nALTER TABLE team_members ADD COLUMN IF NOT EXISTS description VARCHAR(350) NOT NULL DEFAULT \'\';\n\nThen update existing records:\nUPDATE team_members SET description = \'\' WHERE description IS NULL;\n\nThen make it required:\nALTER TABLE team_members ALTER COLUMN description SET NOT NULL;\nALTER TABLE team_members ALTER COLUMN description DROP DEFAULT;');
+            setIsUploading(false);
+            return;
+          }
+          
+          setMembers([...members, retryData]);
+          setFormData({ name: '', role: '', email: '', phone: '', img: '', description: '' });
+          handleRemoveFile();
+          setIsModalOpen(false);
+          alert('Team member saved successfully!\n\nNote: Description was not saved because the description column does not exist in the database yet.\n\nTo enable description field, please run this SQL in Supabase SQL Editor:\n\nALTER TABLE team_members ADD COLUMN IF NOT EXISTS description VARCHAR(350) NOT NULL DEFAULT \'\';\nUPDATE team_members SET description = \'\' WHERE description IS NULL;\nALTER TABLE team_members ALTER COLUMN description SET NOT NULL;\nALTER TABLE team_members ALTER COLUMN description DROP DEFAULT;');
           return;
         }
         throw error;
@@ -343,10 +370,37 @@ export const AdminTeam = () => {
         .eq('id', editingMember.id);
 
       if (error) {
-        // If error is about missing description column, show error and don't update
-        if (error.message && error.message.includes('description')) {
-          alert('Error: Description column not found in database. Please run the SQL migration first:\n\nALTER TABLE team_members ADD COLUMN IF NOT EXISTS description VARCHAR(350) NOT NULL;');
-          setIsUploading(false);
+        // If error is about missing description column, try updating without it
+        if (error.message && (error.message.includes('description') || error.message.includes('column') && error.message.includes('team_members'))) {
+          console.warn('Description column not found, attempting to update without description field');
+          
+          // Try to update without description
+          const updateDataWithoutDescription = {
+            name: trimmedName,
+            role: trimmedRole,
+            email: trimmedEmail,
+            phone: trimmedPhone,
+            img: imageUrl || '',
+          };
+          
+          const { error: retryError } = await supabase
+            .from('team_members')
+            .update(updateDataWithoutDescription)
+            .eq('id', editingMember.id);
+          
+          if (retryError) {
+            console.error('Error updating without description:', retryError);
+            alert('Error updating team member: ' + retryError.message + '\n\nPlease run this SQL in Supabase SQL Editor:\n\nALTER TABLE team_members ADD COLUMN IF NOT EXISTS description VARCHAR(350) NOT NULL DEFAULT \'\';\n\nThen update existing records:\nUPDATE team_members SET description = \'\' WHERE description IS NULL;\n\nThen make it required:\nALTER TABLE team_members ALTER COLUMN description SET NOT NULL;\nALTER TABLE team_members ALTER COLUMN description DROP DEFAULT;');
+            setIsUploading(false);
+            return;
+          }
+          
+          fetchMembers();
+          setFormData({ name: '', role: '', email: '', phone: '', img: '', description: '' });
+          handleRemoveFile();
+          setEditingMember(null);
+          setIsModalOpen(false);
+          alert('Team member updated successfully!\n\nNote: Description was not saved because the description column does not exist in the database yet.\n\nTo enable description field, please run this SQL in Supabase SQL Editor:\n\nALTER TABLE team_members ADD COLUMN IF NOT EXISTS description VARCHAR(350) NOT NULL DEFAULT \'\';\nUPDATE team_members SET description = \'\' WHERE description IS NULL;\nALTER TABLE team_members ALTER COLUMN description SET NOT NULL;\nALTER TABLE team_members ALTER COLUMN description DROP DEFAULT;');
           return;
         }
         throw error;
