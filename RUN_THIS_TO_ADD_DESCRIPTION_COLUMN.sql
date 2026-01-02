@@ -1,51 +1,26 @@
 -- ============================================
--- QUICK FIX: Add Description Column to team_members
+-- ADD DESCRIPTION COLUMN - RUN THIS IN SUPABASE SQL EDITOR
 -- ============================================
--- Copy and paste this ENTIRE SQL into your Supabase SQL Editor and run it
--- This will safely add the description column (350 characters, required)
+-- Copy this ENTIRE block and paste into Supabase SQL Editor, then click RUN
 
--- Method: Safe approach that handles all cases
-DO $$ 
-BEGIN
-    IF NOT EXISTS (
-        SELECT 1 
-        FROM information_schema.columns 
-        WHERE table_schema = 'public'
-        AND table_name = 'team_members' 
-        AND column_name = 'description'
-    ) THEN
-        -- Update existing NULL values first
-        UPDATE team_members SET email = COALESCE(email, '') WHERE email IS NULL;
-        UPDATE team_members SET phone = COALESCE(phone, '') WHERE phone IS NULL;
-        UPDATE team_members SET img = COALESCE(img, '') WHERE img IS NULL;
-        
-        -- Add the column
-        ALTER TABLE team_members 
-        ADD COLUMN description VARCHAR(350) NOT NULL DEFAULT '';
-        
-        -- Set all existing records
-        UPDATE team_members SET description = '' WHERE description IS NULL;
-        
-        -- Remove default
-        ALTER TABLE team_members ALTER COLUMN description DROP DEFAULT;
-        
-        RAISE NOTICE 'Description column added successfully!';
-    ELSE
-        -- Column exists, just ensure it's correct
-        UPDATE team_members SET description = COALESCE(description, '') WHERE description IS NULL;
-        
-        BEGIN
-            ALTER TABLE team_members ALTER COLUMN description TYPE VARCHAR(350);
-            ALTER TABLE team_members ALTER COLUMN description SET NOT NULL;
-        EXCEPTION WHEN OTHERS THEN
-            RAISE NOTICE 'Column already exists with correct settings';
-        END;
-        
-        RAISE NOTICE 'Description column already exists and is updated!';
-    END IF;
-END $$;
+-- Step 1: Add the column (if it doesn't exist) with a default value
+ALTER TABLE team_members 
+ADD COLUMN IF NOT EXISTS description VARCHAR(350) DEFAULT '';
 
--- Verify it worked
+-- Step 2: Update any existing NULL values to empty string
+UPDATE team_members 
+SET description = '' 
+WHERE description IS NULL;
+
+-- Step 3: Make the column NOT NULL (required)
+ALTER TABLE team_members 
+ALTER COLUMN description SET NOT NULL;
+
+-- Step 4: Remove the default value (since it's now required)
+ALTER TABLE team_members 
+ALTER COLUMN description DROP DEFAULT;
+
+-- Step 5: Verify it worked (you should see a row with description column)
 SELECT 
     column_name, 
     data_type, 
@@ -55,3 +30,10 @@ FROM information_schema.columns
 WHERE table_schema = 'public'
 AND table_name = 'team_members' 
 AND column_name = 'description';
+
+-- If the query above returns a row showing:
+-- - column_name: description
+-- - data_type: character varying  
+-- - character_maximum_length: 350
+-- - is_nullable: NO
+-- Then it worked! The description column is now ready to use.
