@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { GlowingButton } from '../../components/UI/GlowingButton';
-import { Mail, Phone, LogIn } from 'lucide-react';
+import { Mail, Phone } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 export const Login = () => {
@@ -361,19 +361,16 @@ export const Login = () => {
           )}
 
           <div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="bg-gradient-to-r from-gold to-[#d4a904] px-[9px] py-[8px] lg:px-[17px] lg:py-[12px] xl:px-[25px] xl:py-[12px] rounded-[10px] font-sans font-normal text-xs lg:text-sm xl:text-base hover:from-[#e98d07] hover:via-[#db7a07] hover:to-[#c96a05] transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl w-full inline-flex items-center justify-center whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+            <GlowingButton 
+                type="submit" 
+                fullWidth 
+                disabled={isLoading}
             >
-              <LogIn size={18} className="mr-2 text-white" />
-              <span className="shine-text relative z-10 font-sans font-normal normal-case">
-                {isLoading 
-                  ? (isSignUp ? 'Creating account...' : 'Signing in...') 
-                  : (isSignUp ? 'Sign up' : 'Sign in')
-                }
-              </span>
-            </button>
+              {isLoading 
+                ? (isSignUp ? 'Creating account...' : 'Signing in...') 
+                : (isSignUp ? 'Sign up' : 'Sign in')
+              }
+            </GlowingButton>
           </div>
           
           <div className="relative">
