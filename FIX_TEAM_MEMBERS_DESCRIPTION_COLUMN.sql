@@ -108,3 +108,4 @@ AND column_name = 'description';
 
 -- If the query above returns a row, the column exists and is ready to use!
 
+

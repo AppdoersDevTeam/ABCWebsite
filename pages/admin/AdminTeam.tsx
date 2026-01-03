@@ -144,15 +144,7 @@ export const AdminTeam = () => {
       return;
     }
 
-    // Validate description - cannot be empty and must be 200-350 characters
-    if (!trimmedDescription) {
-      alert('Description is required. Please type at least 200 characters of information.');
-      return;
-    }
-    if (trimmedDescription.length < 200) {
-      alert('Description must be at least 200 characters long. Current length: ' + trimmedDescription.length);
-      return;
-    }
+    // Validate description - optional, but if provided must not exceed 350 characters
     if (trimmedDescription.length > 350) {
       alert('Description must not exceed 350 characters. Current length: ' + trimmedDescription.length);
       return;
@@ -228,7 +220,7 @@ export const AdminTeam = () => {
         email: trimmedEmail,
         phone: trimmedPhone,
         img: imageUrl || '', // Empty string if no image uploaded
-        description: trimmedDescription,
+        description: trimmedDescription || '', // Allow empty description
       };
 
       const { data, error } = await supabase
@@ -437,17 +429,7 @@ export const AdminTeam = () => {
         return;
       }
 
-      // Validate description - cannot be empty and must be 200-350 characters
-      if (!trimmedDescription) {
-        alert('Description is required. Please type at least 200 characters of information.');
-        setIsUploading(false);
-        return;
-      }
-      if (trimmedDescription.length < 200) {
-        alert('Description must be at least 200 characters long. Current length: ' + trimmedDescription.length);
-        setIsUploading(false);
-        return;
-      }
+      // Validate description - optional, but if provided must not exceed 350 characters
       if (trimmedDescription.length > 350) {
         alert('Description must not exceed 350 characters. Current length: ' + trimmedDescription.length);
         setIsUploading(false);
@@ -461,7 +443,7 @@ export const AdminTeam = () => {
         email: trimmedEmail,
         phone: trimmedPhone,
         img: imageUrl || '', // Empty string if no image uploaded
-        description: trimmedDescription,
+        description: trimmedDescription || '', // Allow empty description
       };
 
       const { error } = await supabase
@@ -780,7 +762,7 @@ export const AdminTeam = () => {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-bold text-charcoal mb-2">Description * (200-350 characters)</label>
+            <label className="block text-sm font-bold text-charcoal mb-2">Description (Optional, max 350 characters)</label>
             <textarea
               value={formData.description}
               onChange={(e) => {
@@ -790,27 +772,20 @@ export const AdminTeam = () => {
                 }
               }}
               className={`w-full p-3 rounded-[4px] border focus:outline-none resize-none ${
-                formData.description.length > 0 && formData.description.length < 200
-                  ? 'border-red-300 focus:border-red-500'
-                  : formData.description.length > 350
+                formData.description.length > 350
                   ? 'border-red-300 focus:border-red-500'
                   : 'border-gray-200 focus:border-gold'
               }`}
-              placeholder="type at least 200 characters of information here"
+              placeholder="Enter description (optional, max 350 characters)"
               rows={3}
               maxLength={350}
-              required
             />
             <p className={`text-xs mt-1 ${
-              formData.description.length > 0 && formData.description.length < 200
+              formData.description.length > 350
                 ? 'text-red-500'
-                : formData.description.length > 350
-                ? 'text-red-500'
-                : formData.description.length >= 200 && formData.description.length <= 350
-                ? 'text-green-600'
                 : 'text-neutral'
             }`}>
-              {formData.description.length}/350 characters {formData.description.length > 0 && formData.description.length < 200 && `(minimum 200 required)`}
+              {formData.description.length}/350 characters
             </p>
           </div>
           <div className="flex gap-3 justify-end pt-4">
@@ -832,8 +807,6 @@ export const AdminTeam = () => {
                 !formData.role.trim() || 
                 !formData.email.trim() || 
                 !formData.phone.trim() || 
-                !formData.description.trim() || 
-                formData.description.trim().length < 200 || 
                 formData.description.trim().length > 350 || 
                 isUploading
               }

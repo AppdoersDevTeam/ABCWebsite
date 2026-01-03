@@ -26,3 +26,4 @@ FROM information_schema.columns
 WHERE table_name = 'team_members' 
 AND column_name = 'description';
 
+

@@ -79,3 +79,4 @@ AND column_name = 'description';
 -- is_nullable: NO
 -- Then the column was added successfully!
 
+
