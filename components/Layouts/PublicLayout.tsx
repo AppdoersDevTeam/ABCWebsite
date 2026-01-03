@@ -133,6 +133,12 @@ export const PublicLayout = () => {
       ]
     },
     { 
+      label: 'Watch Sermons', 
+      path: 'https://www.youtube.com',
+      submenu: [],
+      external: true
+    },
+    { 
       label: 'Events', 
       path: '/events',
       submenu: [
@@ -216,16 +222,28 @@ export const PublicLayout = () => {
                     }, 150);
                   }}
                 >
-                  <Link
-                    to={item.path}
-                    className="text-base font-sans font-semibold uppercase text-white hover:text-gold transition-all duration-300 relative group flex items-center gap-1"
-                  >
-                    {item.label}
-                    {item.submenu && item.submenu.length > 0 && (
-                      <ChevronDown size={14} className={`text-white transition-transform duration-300 ${openDropdown === item.path ? 'rotate-180' : ''}`} />
-                    )}
-                    <span className={`absolute -bottom-2 left-0 w-0 h-0.5 bg-gold transition-all duration-300 group-hover:w-full ${location.pathname === item.path ? 'w-full' : ''}`}></span>
-                  </Link>
+                  {item.external ? (
+                    <a
+                      href={item.path}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-base font-sans font-semibold text-white hover:text-gold transition-all duration-300 relative group flex items-center gap-1"
+                    >
+                      {item.label}
+                      <span className={`absolute -bottom-2 left-0 w-0 h-0.5 bg-gold transition-all duration-300 group-hover:w-full`}></span>
+                    </a>
+                  ) : (
+                    <Link
+                      to={item.path}
+                      className="text-base font-sans font-semibold text-white hover:text-gold transition-all duration-300 relative group flex items-center gap-1"
+                    >
+                      {item.label}
+                      {item.submenu && item.submenu.length > 0 && (
+                        <ChevronDown size={14} className={`text-white transition-transform duration-300 ${openDropdown === item.path ? 'rotate-180' : ''}`} />
+                      )}
+                      <span className={`absolute -bottom-2 left-0 w-0 h-0.5 bg-gold transition-all duration-300 group-hover:w-full ${location.pathname === item.path ? 'w-full' : ''}`}></span>
+                    </Link>
+                  )}
                   
                   {/* Dropdown Submenu */}
                   {item.submenu && item.submenu.length > 0 && openDropdown === item.path && (
@@ -302,19 +320,33 @@ export const PublicLayout = () => {
                       className="flex items-center justify-between text-4xl font-serif font-normal text-white hover:text-gold transition-all duration-300 cursor-pointer"
                       onClick={() => setOpenMobileSubmenu(openMobileSubmenu === item.path ? null : item.path)}
                     >
-                      <Link
-                        to={item.path}
-                        onClick={(e) => {
-                          if (item.submenu && item.submenu.length > 0) {
-                            e.preventDefault();
-                            setOpenMobileSubmenu(openMobileSubmenu === item.path ? null : item.path);
-                          } else {
+                      {item.external ? (
+                        <a
+                          href={item.path}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => {
+                            e.stopPropagation();
                             setIsMenuOpen(false);
-                          }
-                        }}
-                      >
-                        {item.label}
-                      </Link>
+                          }}
+                        >
+                          {item.label}
+                        </a>
+                      ) : (
+                        <Link
+                          to={item.path}
+                          onClick={(e) => {
+                            if (item.submenu && item.submenu.length > 0) {
+                              e.preventDefault();
+                              setOpenMobileSubmenu(openMobileSubmenu === item.path ? null : item.path);
+                            } else {
+                              setIsMenuOpen(false);
+                            }
+                          }}
+                        >
+                          {item.label}
+                        </Link>
+                      )}
                       <ChevronDown 
                         size={24} 
                         className={`transition-transform duration-300 ${openMobileSubmenu === item.path ? 'rotate-180' : ''}`} 
@@ -341,13 +373,25 @@ export const PublicLayout = () => {
                     )}
                   </>
                 ) : (
-                  <Link
-                    to={item.path}
-                    onClick={() => setIsMenuOpen(false)}
-                    className="text-4xl font-serif font-normal text-white hover:text-gold transition-all duration-300 block"
-                  >
-                    {item.label}
-                  </Link>
+                  item.external ? (
+                    <a
+                      href={item.path}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="text-4xl font-serif font-normal text-white hover:text-gold transition-all duration-300 block"
+                    >
+                      {item.label}
+                    </a>
+                  ) : (
+                    <Link
+                      to={item.path}
+                      onClick={() => setIsMenuOpen(false)}
+                      className="text-4xl font-serif font-normal text-white hover:text-gold transition-all duration-300 block"
+                    >
+                      {item.label}
+                    </Link>
+                  )
                 )}
               </div>
             ))}

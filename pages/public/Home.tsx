@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Calendar, Heart, PlayCircle, Clock, MapPin, Users, Church, DollarSign, Video, Info, HandHeart, Gift, ArrowDownToLine, MonitorPlay, Navigation, UserRound, RefreshCw, Settings, Handshake } from 'lucide-react';
+import { ArrowRight, Calendar, Heart, PlayCircle, Clock, MapPin, Users, Church, DollarSign, Video, Info, HandHeart, Gift, ArrowDownToLine, MonitorPlay, Navigation, UserRound, RefreshCw, Settings, Handshake, Globe2, Network, HandCoins, BookOpen } from 'lucide-react';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { VibrantCard } from '../../components/UI/VibrantCard';
 import { ScrollReveal } from '../../components/UI/ScrollReveal';
@@ -214,15 +214,15 @@ export const Home = () => {
             <div className="flex justify-center">
               <div className="grid md:grid-cols-3 gap-8 w-full max-w-[70%]">
                   {[
-                      { title: "Ministries", icon: <img src="/Ministry.png" alt="Ministries" style={{ width: '50px', height: '50px', objectFit: 'contain' }} />, desc: "Connect with your people.", link: "/events" },
-                      { title: "Giving", icon: <img src="/Giving.png" alt="Giving" style={{ width: '50px', height: '50px', objectFit: 'contain' }} />, desc: "Fuel the mission.", link: "/giving" },
-                      { title: "Sermons", icon: <img src="/Sermon.png" alt="Sermons" style={{ width: '50px', height: '50px', objectFit: 'contain' }} />, desc: "Catch up on the latest.", link: "/events/sermons" },
+                      { title: "Ministries", icon: <Network size={24} />, desc: "Connect with your people.", link: "/events" },
+                      { title: "Giving", icon: <HandCoins size={24} />, desc: "Fuel the mission.", link: "/giving" },
+                      { title: "Sermons", icon: <BookOpen size={24} />, desc: "Catch up on the latest.", link: "/events/sermons" },
                   ].map((item, i) => (
                       <ScrollReveal key={i} direction="up" delay={i * 100}>
                         <VibrantCard className={`group hover-lift text-center flex flex-col items-center justify-center h-full`} glow={i===1}>
                           <div className="flex items-center justify-center gap-4 mb-[14px]">
                             <div 
-                              className="text-charcoal p-4 rounded-full w-fit transition-all duration-300 shadow-sm flex-shrink-0"
+                              className="p-4 bg-[#fbcb05] rounded-full text-charcoal flex-shrink-0 shadow-lg shadow-gold/30"
                             >{item.icon}</div>
                             <h3 className="text-2xl md:text-3xl font-serif font-normal text-charcoal group-hover:text-gold transition-colors duration-300 text-center">{item.title}</h3>
                           </div>
@@ -253,7 +253,7 @@ export const Home = () => {
                </ScrollReveal>
 
                <div className="flex justify-center">
-                 <div className="grid md:grid-cols-3 gap-6 w-full max-w-[82%]">
+                 <div className="grid md:grid-cols-3 gap-8 w-full max-w-[80.5%]">
                    {isLoadingEvents ? (
                      // Loading skeleton
                      Array.from({ length: 3 }).map((_, i) => (
@@ -291,7 +291,7 @@ export const Home = () => {
                                </div>
                                <div className="p-6 flex-1 flex flex-col justify-center">
                                  <h4 className="text-lg md:text-xl font-bold text-charcoal mb-1 group-hover:text-gold transition-colors duration-300">{evt.title}</h4>
-                                 <span className="text-neutral text-sm flex items-center group-hover:text-charcoal transition-colors mb-1">
+                                 <span className="text-neutral text-sm flex items-center group-hover:text-black transition-colors mb-1">
                                    <div className="w-8 h-8 bg-gold/10 rounded-full flex items-center justify-center mr-2 group-hover:bg-gold transition-all duration-300 group-hover:scale-110 group-hover:rotate-6 icon-bounce">
                                      <Clock size={16} className="text-gold group-hover:text-charcoal animate-pulse"/>
                                    </div>
@@ -299,7 +299,9 @@ export const Home = () => {
                                  </span>
                                  {evt.location && (
                                    <span className="text-neutral text-xs flex items-center mt-1">
-                                     <MapPin size={12} className="mr-1 text-gold" />
+                                     <div className="w-8 h-8 bg-gold/10 rounded-full flex items-center justify-center mr-2 group-hover:bg-gold transition-all duration-300 group-hover:scale-110 group-hover:rotate-6 icon-bounce">
+                                       <MapPin size={16} className="text-gold group-hover:text-charcoal animate-pulse"/>
+                                     </div>
                                      {evt.location}
                                    </span>
                                  )}
@@ -373,52 +375,57 @@ export const Home = () => {
                     <p className="text-neutral text-lg max-w-2xl mx-auto">From Sunday services to community events,<br />There's always something happening at A.B.C.</p>
                 </div>
               </ScrollReveal>
-              <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto mb-8">
-                  {isLoadingWhatsOn ? (
-                      Array.from({ length: 2 }).map((_, i) => (
-                          <ScrollReveal key={i} direction="up" delay={i * 150}>
-                              <div className="group relative bg-white border border-gray-100 shadow-sm p-6 rounded-[8px] animate-pulse">
-                                  <div className="bg-gold/10 p-4 rounded-full text-charcoal mb-4 w-fit h-16 w-16"></div>
-                                  <div className="h-4 bg-gray-200 rounded mb-2 w-1/3"></div>
-                                  <div className="h-6 bg-gray-200 rounded mb-2 w-2/3"></div>
-                                  <div className="h-4 bg-gray-200 rounded w-full"></div>
-                              </div>
-                          </ScrollReveal>
-                      ))
-                  ) : whatsOnEvents.length > 0 ? (
-                      whatsOnEvents.map((evt, i) => (
-                          <ScrollReveal key={evt.id} direction="up" delay={i * 150}>
-                              <div className="glass-card rounded-[16px] p-8 md:p-12 border-t border-white/50 animate-scale-in group hover-lift">
-                                  <div className="flex items-center gap-4 mb-4">
-                                      <div className="p-4 bg-[#fbcb05] rounded-full text-charcoal flex-shrink-0 shadow-lg shadow-gold/30">
-                                          {getCategoryIcon(evt.category)}
-                                      </div>
-                                      <h3 className="text-2xl font-serif font-normal text-charcoal group-hover:text-gold transition-colors duration-300">{evt.title}</h3>
+              <div className="flex justify-center">
+                  <div className="grid md:grid-cols-3 gap-8 w-full max-w-[70%]">
+                      {/* Static About Us Card - First Card */}
+                      <ScrollReveal direction="up" delay={0}>
+                          <div className="glass-card rounded-[16px] px-6 py-[3px] md:px-8 md:py-[11px] border-t border-white/50 animate-scale-in group hover-lift text-center flex flex-col items-center justify-center h-full">
+                              <div className="flex items-center justify-center gap-4 mb-[14px]">
+                                  <div className="p-4 bg-[#fbcb05] rounded-full text-charcoal flex-shrink-0 shadow-lg shadow-gold/30">
+                                      <Info size={24} />
                                   </div>
-                                  <div className="flex items-center gap-3 mb-2">
-                                      <span className="text-gold font-bold text-xs uppercase tracking-widest bg-gold/5 px-2 py-1 rounded-[4px] border border-gold/20">{evt.category}</span>
-                                      <span className="text-neutral text-sm font-bold">{formatEventTime(evt.date, evt.time)}</span>
-                                  </div>
-                                  <p className="text-neutral">{evt.description || ''}</p>
+                                  <h3 className="text-2xl font-serif font-normal text-charcoal group-hover:text-gold transition-colors duration-300 text-center">About Us</h3>
                               </div>
-                          </ScrollReveal>
-                      ))
-                  ) : (
-                      <div className="col-span-2 text-center py-8">
-                          <p className="text-neutral">No upcoming events scheduled. Check back soon!</p>
-                      </div>
-                  )}
+                              <p className="text-gray-600 mb-[26px] leading-relaxed group-hover:text-black transition-colors text-center">Get to know A. B. C.</p>
+                              <Link to="/about" className="flex items-center justify-center text-charcoal font-bold uppercase tracking-widest text-[15px] group-hover:text-gold transition-colors">
+                                  EXPLORER <ArrowRight size={16} className="ml-2 group-hover:translate-x-2 transition-transform"/>
+                              </Link>
+                          </div>
+                      </ScrollReveal>
+                      
+                      {/* Static Card 2 */}
+                      <ScrollReveal direction="up" delay={100}>
+                          <div className="glass-card rounded-[16px] px-6 py-[3px] md:px-8 md:py-[11px] border-t border-white/50 animate-scale-in group hover-lift text-center flex flex-col items-center justify-center h-full">
+                              <div className="flex items-center justify-center gap-4 mb-[14px]">
+                                  <div className="p-4 bg-[#fbcb05] rounded-full text-charcoal flex-shrink-0 shadow-lg shadow-gold/30">
+                                      <Handshake size={24} />
+                                  </div>
+                                  <h3 className="text-2xl font-serif font-normal text-charcoal group-hover:text-gold transition-colors duration-300 text-center">Our Team</h3>
+                              </div>
+                              <p className="text-gray-600 mb-[26px] leading-relaxed group-hover:text-black transition-colors text-center">Get to know Our Staff.</p>
+                              <Link to="/about#leadership" className="flex items-center justify-center text-charcoal font-bold uppercase tracking-widest text-[15px] group-hover:text-gold transition-colors">
+                                  EXPLORER <ArrowRight size={16} className="ml-2 group-hover:translate-x-2 transition-transform"/>
+                              </Link>
+                          </div>
+                      </ScrollReveal>
+                      
+                      {/* Static Card 3 */}
+                      <ScrollReveal direction="up" delay={200}>
+                          <div className="glass-card rounded-[16px] px-6 py-[3px] md:px-8 md:py-[11px] border-t border-white/50 animate-scale-in group hover-lift text-center flex flex-col items-center justify-center h-full">
+                              <div className="flex items-center justify-center gap-4 mb-[14px]">
+                                  <div className="p-4 bg-[#fbcb05] rounded-full text-charcoal flex-shrink-0 shadow-lg shadow-gold/30">
+                                      <Globe2 size={24} />
+                                  </div>
+                                  <h3 className="text-2xl font-serif font-normal text-charcoal group-hover:text-gold transition-colors duration-300 text-center">Our Mission</h3>
+                              </div>
+                              <p className="text-gray-600 mb-[26px] leading-relaxed group-hover:text-black transition-colors text-center">Get to Know Our Missionaries.</p>
+                              <Link to="/im-new" className="flex items-center justify-center text-charcoal font-bold uppercase tracking-widest text-[15px] group-hover:text-gold transition-colors">
+                                  EXPLORER <ArrowRight size={16} className="ml-2 group-hover:translate-x-2 transition-transform"/>
+                              </Link>
+                          </div>
+                      </ScrollReveal>
+                  </div>
               </div>
-              <ScrollReveal direction="up" delay={300}>
-                <div className="text-center">
-                    <Link to="/events" className="group">
-                        <GlowingButton variant="outline" className="!rounded-full transition-all duration-500 ease-out hover:scale-110 hover:shadow-2xl hover:shadow-gold/60 hover:!bg-gold hover:!text-white active:scale-95 hover:-translate-y-1">
-                            <span className="transition-all duration-300 group-hover:tracking-wider">View All Events</span>
-                            <ArrowRight size={16} className="ml-2 transition-all duration-500 group-hover:translate-x-2 group-hover:scale-125"/>
-                        </GlowingButton>
-                    </Link>
-                </div>
-              </ScrollReveal>
           </div>
       </section>
 
