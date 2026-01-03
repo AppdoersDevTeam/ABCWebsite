@@ -42,6 +42,7 @@
               'glow': 'glow 2s ease-in-out infinite alternate',
               'shimmer': 'shimmer 2s linear infinite',
               'falling-heart': 'fallingHeart 3s ease-in forwards',
+              'ping-pong': 'pingPong 1.25s ease-in-out infinite',
             },
             keyframes: {
               blob: {
@@ -111,6 +112,10 @@
               shimmer: {
                 '0%': { backgroundPosition: '-1000px 0' },
                 '100%': { backgroundPosition: '1000px 0' },
+              },
+              pingPong: {
+                '0%, 100%': { transform: 'translateY(0px)' },
+                '50%': { transform: 'translateY(-10px)' },
               }
             }
           },
@@ -138,6 +143,24 @@
         font-family: 'Naira';
         src: url('/Naira.ttf') format('truetype');
         font-weight: normal;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      /* Kepler Font Face */
+      @font-face {
+        font-family: 'Kepler';
+        src: url('/Kepler-Std-Subh-Medium.otf') format('opentype');
+        font-weight: 500;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      /* Kepler SCN Font Face */
+      @font-face {
+        font-family: 'KeplerSCN';
+        src: url('/Kepler-Std-Scn-Subh-Medium.otf') format('opentype');
+        font-weight: 500;
         font-style: normal;
         font-display: swap;
       }

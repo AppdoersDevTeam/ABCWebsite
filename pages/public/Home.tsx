@@ -128,12 +128,22 @@ export const Home = () => {
         </div>
 
         {/* Hero Content */}
-        <div className="container relative z-10 px-4 mx-auto pt-64 md:pt-72">
+        <div className="container relative z-10 px-4 mx-auto pt-[224px] md:pt-[256px]">
           <div className="max-w-4xl mx-auto text-center">
+            <ScrollReveal direction="up" delay={100}>
+              <h1 className="text-white text-center max-w-5xl mx-auto mb-4 transition-all duration-1000 delay-200" style={{ fontFamily: 'Kepler', fontSize: '2.5rem', lineHeight: '1.2', marginTop: '63px' }}>
+                Welcome to
+              </h1>
+            </ScrollReveal>
+            <ScrollReveal direction="up" delay={150}>
+              <h1 className="text-white text-center max-w-5xl mx-auto mb-4 transition-all duration-1000 delay-250" style={{ fontFamily: 'Naira', fontSize: '4.25rem', lineHeight: '1.2' }}>
+                Ashburton      Baptist      Church
+              </h1>
+            </ScrollReveal>
             <ScrollReveal direction="up" delay={200}>
-              <p className="text-[1.5625rem] leading-6 text-white text-center max-w-5xl mx-auto mb-6 transition-all duration-1000 delay-300 mt-[95px]">
-                <span className="block whitespace-nowrap font-raleway font-semibold">A place where faith meets community, and every person matters.</span>
-                <span className="block whitespace-nowrap mt-[12px] font-raleway font-semibold">Join us as we grow together in love, hope, and purpose.</span>
+              <p className="text-[1.5625rem] leading-6 text-white text-center max-w-5xl mx-auto mb-6 transition-all duration-1000 delay-300">
+                <span className="block whitespace-nowrap font-raleway font-semibold text-center">A place where faith meets community, and every person matters.</span>
+                <span className="block whitespace-nowrap mt-[12px] font-raleway font-semibold text-center">Join us as we grow together in love, hope, and purpose.</span>
               </p>
             </ScrollReveal>
 
@@ -169,7 +179,7 @@ export const Home = () => {
           </div>
           
           {/* Pulsing Down Arrow */}
-          <div className="absolute bottom-[5px] left-1/2 z-20 pulse-arrow">
+          <div className="absolute bottom-[29px] left-1/2 -translate-x-1/2 z-20 pulse-arrow animate-ping-pong">
             <ArrowDownToLine size={32} className="text-gold" />
           </div>
         </div>
