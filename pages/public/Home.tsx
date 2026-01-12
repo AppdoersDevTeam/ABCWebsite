@@ -136,7 +136,7 @@ export const Home = () => {
               </h1>
             </ScrollReveal>
             <ScrollReveal direction="up" delay={150}>
-              <h1 className="text-white text-center max-w-5xl mx-auto mb-4 transition-all duration-1000 delay-250" style={{ fontFamily: 'Naira', fontSize: '4.25rem', lineHeight: '1.2' }}>
+              <h1 className="text-white text-center max-w-5xl mx-auto mb-4 transition-all duration-1000 delay-250" style={{ fontFamily: 'Payball', fontSize: '4.25rem', lineHeight: '1.2' }}>
                 Ashburton      Baptist      Church
               </h1>
             </ScrollReveal>
