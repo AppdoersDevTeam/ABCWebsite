@@ -7,7 +7,7 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,600;0,700;0,800;1,400&family=Kaushan+Script&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Kaushan+Script&display=swap" rel="stylesheet">
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -124,36 +124,16 @@
     </script>
     <style>
       body {
-        font-family: 'Open Sans', sans-serif;
-        background: #4568DC; /* fallback for old browsers */
-        background: -webkit-linear-gradient(to bottom, #B06AB3, #4568DC); /* Chrome 10-25, Safari 5.1-6 */
-        background: linear-gradient(to bottom, #B06AB3, #4568DC); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+        font-family: 'Inter', sans-serif;
+        background: #ffffff;
         color: #222222;
         -webkit-font-smoothing: antialiased;
         overflow-x: hidden;
       }
       
-      /* Headings default to Open Sans, use font-serif class for Kaushan Script */
+      /* Headings default to Inter, use font-serif class for Kaushan Script */
       h1, h2, h3, h4, h5, h6 {
-        font-family: 'Open Sans', sans-serif;
-      }
-
-      /* Kepler Font Face */
-      @font-face {
-        font-family: 'Kepler';
-        src: url('/Kepler-Std-Subh-Medium.otf') format('opentype');
-        font-weight: 500;
-        font-style: normal;
-        font-display: swap;
-      }
-
-      /* Kepler SCN Font Face */
-      @font-face {
-        font-family: 'KeplerSCN';
-        src: url('/Kepler-Std-Scn-Subh-Medium.otf') format('opentype');
-        font-weight: 500;
-        font-style: normal;
-        font-display: swap;
+        font-family: 'Inter', sans-serif;
       }
 
       /* Sun-Drenched Glass Card */
@@ -193,12 +173,20 @@
       /* Scroll-triggered animations */
       .animate-on-scroll {
         opacity: 0;
-        transform: translateY(30px);
-        transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        transform: translateY(18px);
+        transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1), transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+        will-change: opacity, transform;
       }
       .animate-on-scroll.visible {
         opacity: 1;
         transform: translateY(0);
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .animate-on-scroll {
+          opacity: 1;
+          transform: none;
+          transition: none;
+        }
       }
       
       /* Hover animations */
@@ -246,16 +234,22 @@
 
       /* Footer Gradient Background */
       .footer-gradient {
-        background: #232526; /* fallback for old browsers */
-        background: -webkit-linear-gradient(to bottom, #414345, #232526); /* Chrome 10-25, Safari 5.1-6 */
-        background: linear-gradient(to bottom, #414345, #232526); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+        background: #2A2F18;
       }
 
       /* Section Gradient Background */
       .section-gradient {
-        background: #4568DC; /* fallback for old browsers */
-        background: -webkit-linear-gradient(to bottom, #B06AB3, #4568DC); /* Chrome 10-25, Safari 5.1-6 */
-        background: linear-gradient(to bottom, #B06AB3, #4568DC); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+        background: #A8B774;
+      }
+
+      /* Section Plain Background */
+      .section-plain {
+        background-color: #EEF2F3;
+      }
+
+      /* Section Light Gradient Background */
+      .section-gradient-soft {
+        background: #f8fafc;
       }
     </style>
   <script type="importmap">

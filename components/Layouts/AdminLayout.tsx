@@ -16,13 +16,14 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { ScrollToTop } from '../ScrollToTop';
-import { BackgroundBlobs } from '../UI/BackgroundBlobs';
+import { useAutoSectionReveal } from '../UI/useAutoSectionReveal';
 
 export const AdminLayout = () => {
   const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  useAutoSectionReveal();
 
   const handleLogout = () => {
     logout();
@@ -41,9 +42,8 @@ export const AdminLayout = () => {
   ];
 
   return (
-    <div className="flex h-screen bg-base font-sans text-charcoal relative overflow-hidden">
+    <div className="flex h-screen font-sans text-charcoal relative overflow-hidden section-plain selection:bg-gold selection:text-charcoal">
       <ScrollToTop />
-      <BackgroundBlobs />
       
       {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (

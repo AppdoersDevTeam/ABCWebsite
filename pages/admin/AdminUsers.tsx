@@ -6,6 +6,8 @@ import { User } from '../../types';
 import { CreateUserProfile } from './CreateUserProfile';
 import { SkeletonPageHeader, SkeletonStatsCard, SkeletonUserCard } from '../../components/UI/Skeleton';
 import { formatRelativeDateInTimezone } from '../../lib/dateUtils';
+import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
+import { GlowingButton } from '../../components/UI/GlowingButton';
 
 export const AdminUsers = () => {
   const { user } = useAuth();
@@ -142,19 +144,17 @@ export const AdminUsers = () => {
 
   return (
     <div className="space-y-8">
-      <div className="flex justify-between items-center border-b border-gray-200 pb-6">
-        <div>
-          <h1 className="text-4xl font-serif font-normal text-charcoal">User Management</h1>
-          <p className="text-neutral mt-1">Manage user permissions and approvals</p>
-        </div>
-        <button
-          onClick={() => setIsCreateModalOpen(true)}
-          className="bg-gold text-charcoal px-6 py-3 rounded-[4px] font-bold hover:bg-gold/80 transition-colors shadow-sm flex items-center gap-2"
-        >
-          <Plus size={18} />
-          Create User Profile
-        </button>
-      </div>
+      <AdminPageHeader
+        title="User Management"
+        subtitle="Manage user permissions and approvals"
+        icon={<Users size={28} />}
+        rightSlot={
+          <GlowingButton size="sm" onClick={() => setIsCreateModalOpen(true)}>
+            <Plus size={16} className="mr-2" />
+            Create User Profile
+          </GlowingButton>
+        }
+      />
 
       {/* Stats Cards */}
       {isLoadingUsers ? (
@@ -165,7 +165,7 @@ export const AdminUsers = () => {
         </div>
       ) : (
         <div className="grid md:grid-cols-3 gap-4">
-          <div className="bg-white border border-gray-200 p-6 rounded-[8px] shadow-sm">
+          <div className="glass-card bg-white/80 border border-white/60 p-6 rounded-[12px] shadow-sm">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-neutral font-bold">Total Users</p>
@@ -176,7 +176,7 @@ export const AdminUsers = () => {
               </div>
             </div>
           </div>
-          <div className="bg-white border border-gray-200 p-6 rounded-[8px] shadow-sm">
+          <div className="glass-card bg-white/80 border border-white/60 p-6 rounded-[12px] shadow-sm">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-neutral font-bold">Pending Approval</p>
@@ -187,7 +187,7 @@ export const AdminUsers = () => {
               </div>
             </div>
           </div>
-          <div className="bg-white border border-gray-200 p-6 rounded-[8px] shadow-sm">
+          <div className="glass-card bg-white/80 border border-white/60 p-6 rounded-[12px] shadow-sm">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-neutral font-bold">Approved Users</p>
@@ -243,7 +243,7 @@ export const AdminUsers = () => {
           ))}
         </div>
       ) : filteredUsers().length === 0 ? (
-        <div className="text-center py-12 bg-white rounded-[8px] border border-gray-200">
+        <div className="text-center py-12 glass-card bg-white/80 rounded-[12px] border border-white/60">
           <Users size={48} className="text-gray-300 mx-auto mb-4" />
           <p className="text-neutral text-lg font-medium">No users found</p>
         </div>
@@ -252,7 +252,7 @@ export const AdminUsers = () => {
           {filteredUsers().map((u) => (
             <div
               key={u.id}
-              className="bg-white border-2 border-gray-200 p-6 rounded-[8px] hover:border-blue-300 transition-all shadow-sm"
+              className="glass-card bg-white/80 border border-white/60 p-6 rounded-[12px] hover:border-gold transition-all shadow-sm"
             >
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div className="flex-1">

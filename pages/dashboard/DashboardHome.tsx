@@ -101,7 +101,7 @@ export const DashboardHome = () => {
             <Link to="/dashboard/events" className="block">
               <VibrantCard className="group cursor-pointer bg-white hover:shadow-lg hover:border-gold transition-all">
                 <div className="absolute top-4 right-4 text-gray-400 group-hover:text-gold transition-colors"><ArrowUpRight /></div>
-                <div className="mb-4 text-charcoal p-4 bg-gray-50 rounded-full w-16 h-16 flex items-center justify-center group-hover:bg-gold transition-colors">
+                <div className="mb-4 text-charcoal p-4 bg-gray-50 rounded-full w-16 h-16 flex items-center justify-center group-hover:bg-gold group-hover:text-white transition-colors">
                     <Calendar size={32} />
                 </div>
                 <h3 className="font-bold text-xl mb-2 text-charcoal">Next Service</h3>
@@ -120,7 +120,7 @@ export const DashboardHome = () => {
             <Link to="/dashboard/prayer" className="block">
               <VibrantCard className="group cursor-pointer bg-white hover:shadow-lg hover:border-gold transition-all">
                  <div className="absolute top-4 right-4 text-gray-400 group-hover:text-gold transition-colors"><ArrowUpRight /></div>
-                 <div className="mb-4 text-charcoal p-4 bg-gray-50 rounded-full w-16 h-16 flex items-center justify-center group-hover:bg-gold transition-colors">
+                 <div className="mb-4 text-charcoal p-4 bg-gray-50 rounded-full w-16 h-16 flex items-center justify-center group-hover:bg-gold group-hover:text-white transition-colors">
                     <MessageSquare size={32} />
                 </div>
                 <h3 className="font-bold text-xl mb-2 text-charcoal">Prayer Wall</h3>
@@ -139,7 +139,7 @@ export const DashboardHome = () => {
             <Link to="/dashboard/newsletter" className="block">
               <VibrantCard className="group cursor-pointer bg-white hover:shadow-lg hover:border-gold transition-all">
                  <div className="absolute top-4 right-4 text-gray-400 group-hover:text-gold transition-colors"><ArrowUpRight /></div>
-                 <div className="mb-4 text-charcoal p-4 bg-gray-50 rounded-full w-16 h-16 flex items-center justify-center group-hover:bg-gold transition-colors">
+                 <div className="mb-4 text-charcoal p-4 bg-gray-50 rounded-full w-16 h-16 flex items-center justify-center group-hover:bg-gold group-hover:text-white transition-colors">
                     <BookOpen size={32} />
                 </div>
                 <h3 className="font-bold text-xl mb-2 text-charcoal">Newsletter</h3>

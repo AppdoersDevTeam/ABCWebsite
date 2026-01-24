@@ -5,6 +5,7 @@ import { Modal } from '../../components/UI/Modal';
 import { supabase } from '../../lib/supabase';
 import { Newsletter as NewsletterType } from '../../types';
 import { SkeletonPageHeader, SkeletonCard } from '../../components/UI/Skeleton';
+import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 
 export const AdminNewsletter = () => {
   const [newsletters, setNewsletters] = useState<NewsletterType[]>([]);
@@ -143,16 +144,17 @@ export const AdminNewsletter = () => {
 
   return (
     <div className="space-y-8">
-      <div className="flex justify-between items-center border-b border-gray-200 pb-6">
-        <div>
-          <h1 className="text-4xl font-serif font-normal text-charcoal">Newsletter Management</h1>
-          <p className="text-neutral mt-1">Upload and manage church newsletters.</p>
-        </div>
-        <GlowingButton size="sm" onClick={() => setIsUploadModalOpen(true)}>
-          <Upload size={16} className="mr-2" />
-          Upload Newsletter
-        </GlowingButton>
-      </div>
+      <AdminPageHeader
+        title="Newsletter Management"
+        subtitle="Upload and manage church newsletters."
+        icon={<FileText size={28} />}
+        rightSlot={
+          <GlowingButton size="sm" onClick={() => setIsUploadModalOpen(true)}>
+            <Upload size={16} className="mr-2" />
+            Upload Newsletter
+          </GlowingButton>
+        }
+      />
 
       <div className="grid md:grid-cols-3 gap-6">
         {/* Latest Newsletter */}
@@ -200,7 +202,7 @@ export const AdminNewsletter = () => {
             {newsletters.map((newsletter) => (
               <div
                 key={newsletter.id}
-                className="bg-white border border-gray-200 p-4 flex justify-between items-center hover:shadow-md hover:border-gold cursor-pointer rounded-[4px] transition-all group"
+                className="glass-card bg-white/80 border border-white/60 p-4 flex justify-between items-center hover:shadow-md hover:border-gold cursor-pointer rounded-[10px] transition-all group"
               >
                 <span className="text-neutral font-medium">{newsletter.title}</span>
                 <div className="flex items-center gap-2">

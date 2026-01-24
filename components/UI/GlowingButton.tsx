@@ -14,13 +14,13 @@ export const GlowingButton: React.FC<GlowingButtonProps> = ({
   className = '',
   ...props 
 }) => {
-  const baseStyles = "relative inline-flex items-center justify-center font-sans font-bold uppercase tracking-wider transition-all duration-300 rounded-[4px] overflow-hidden focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed active:scale-95";
+  const baseStyles = "relative inline-flex items-center justify-center font-sans font-bold uppercase tracking-wider transition-all duration-300 rounded-[4px] overflow-hidden focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 !shadow-none !hover:shadow-none";
   
   const variants = {
     // Solid Yellow - High Pop on White
-    gold: "bg-gold text-charcoal hover:bg-yellow-400 shadow-md hover:shadow-lg hover:shadow-gold/30 border border-transparent",
+    gold: "bg-gold text-charcoal hover:bg-yellow-400 border border-transparent",
     // Dark Charcoal - High Contrast on White
-    dark: "bg-charcoal text-white hover:bg-black border border-transparent shadow-md hover:shadow-lg",
+    dark: "bg-charcoal text-white hover:bg-black border border-transparent",
     // Outline - Visible on White
     outline: "bg-transparent border-2 border-charcoal text-charcoal hover:bg-charcoal hover:text-white",
     // Ghost - Subtle

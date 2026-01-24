@@ -32,6 +32,7 @@ import { DavidMiller } from './pages/public/leadership/DavidMiller';
 import { SarahJenkins } from './pages/public/leadership/SarahJenkins';
 import { MichaelChen } from './pages/public/leadership/MichaelChen';
 import { EmilyWhite } from './pages/public/leadership/EmilyWhite';
+import { LeadershipBio } from './pages/public/leadership/LeadershipBio';
 
 // Dashboard Pages
 import { DashboardHome } from './pages/dashboard/DashboardHome';
@@ -146,6 +147,7 @@ const AppRoutes = () => {
               <Route path="about/leadership/sarah-jenkins" element={<SarahJenkins />} />
               <Route path="about/leadership/michael-chen" element={<MichaelChen />} />
               <Route path="about/leadership/emily-white" element={<EmilyWhite />} />
+              <Route path="about/leadership/:slug" element={<LeadershipBio />} />
               <Route path="events" element={<Events />} />
               <Route path="events/sermons" element={<Sermons />} />
               <Route path="events/sunday-service" element={<SundayService />} />

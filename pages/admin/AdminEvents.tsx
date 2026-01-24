@@ -5,6 +5,7 @@ import { Calendar as CalIcon, Edit, Trash2, Plus } from 'lucide-react';
 import { Event } from '../../types';
 import { supabase } from '../../lib/supabase';
 import { SkeletonPageHeader, SkeletonEventCard } from '../../components/UI/Skeleton';
+import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 
 export const AdminEvents = () => {
   const [events, setEvents] = useState<Event[]>([]);
@@ -161,19 +162,20 @@ export const AdminEvents = () => {
 
   return (
     <div className="space-y-8">
-      <div className="flex justify-between items-center border-b border-gray-200 pb-6">
-        <div>
-          <h1 className="text-4xl font-serif font-normal text-charcoal">Events Management</h1>
-          <p className="text-neutral mt-1">Create and manage church events and meetings.</p>
-        </div>
-        <GlowingButton size="sm" onClick={openCreateModal}>
-          <Plus size={16} className="mr-2" />
-          Add Event
-        </GlowingButton>
-      </div>
+      <AdminPageHeader
+        title="Events Management"
+        subtitle="Create and manage church events and meetings."
+        icon={<CalIcon size={28} />}
+        rightSlot={
+          <GlowingButton size="sm" onClick={openCreateModal}>
+            <Plus size={16} className="mr-2" />
+            Add Event
+          </GlowingButton>
+        }
+      />
 
       {events.length === 0 ? (
-        <div className="text-center py-12">
+        <div className="text-center py-12 glass-card bg-white/80 border border-white/60 rounded-[12px]">
           <p className="text-neutral">No events yet. Create your first event!</p>
         </div>
       ) : (
@@ -182,7 +184,7 @@ export const AdminEvents = () => {
             const formattedDate = formatDate(evt.date);
             const dateParts = formattedDate.split(' ');
             return (
-          <div key={evt.id} className="flex items-center p-6 bg-white border border-gray-100 shadow-sm rounded-[8px] hover:border-gold hover:shadow-md transition-all group relative">
+          <div key={evt.id} className="flex items-center p-6 glass-card bg-white/80 border border-white/60 shadow-sm rounded-[12px] hover:border-gold hover:shadow-md transition-all group relative">
             <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
               <button
                 onClick={() => handleEdit(evt)}

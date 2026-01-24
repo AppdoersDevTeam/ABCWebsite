@@ -5,6 +5,7 @@ import { Modal } from '../../components/UI/Modal';
 import { RosterImage } from '../../types';
 import { supabase } from '../../lib/supabase';
 import { SkeletonPageHeader } from '../../components/UI/Skeleton';
+import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 
 export const AdminRoster = () => {
   const [rosterImages, setRosterImages] = useState<RosterImage[]>([]);
@@ -211,19 +212,20 @@ export const AdminRoster = () => {
 
   return (
     <div className="space-y-8">
-      <div className="flex justify-between items-center border-b border-gray-200 pb-6">
-        <div>
-          <h1 className="text-4xl font-serif font-normal text-charcoal">Roster Management</h1>
-          <p className="text-neutral mt-1">Upload roster PDFs for specific dates.</p>
-        </div>
-        <GlowingButton size="sm" onClick={() => setIsUploadModalOpen(true)}>
-          <Upload size={16} className="mr-2" />
-          Upload Roster PDF
-        </GlowingButton>
-      </div>
+      <AdminPageHeader
+        title="Roster Management"
+        subtitle="Upload roster PDFs for specific dates."
+        icon={<Calendar size={28} />}
+        rightSlot={
+          <GlowingButton size="sm" onClick={() => setIsUploadModalOpen(true)}>
+            <Upload size={16} className="mr-2" />
+            Upload Roster PDF
+          </GlowingButton>
+        }
+      />
 
       {rosterImages.length === 0 ? (
-        <div className="text-center py-12 bg-white border border-gray-100 rounded-[8px]">
+        <div className="text-center py-12 glass-card bg-white/80 border border-white/60 rounded-[12px]">
           <FileText size={48} className="mx-auto text-neutral mb-4" />
           <p className="text-neutral text-lg mb-2">No roster PDFs uploaded yet</p>
           <p className="text-neutral text-sm">Upload your first roster PDF to get started</p>
@@ -233,7 +235,7 @@ export const AdminRoster = () => {
           {rosterImages.map((rosterImage) => (
             <div
               key={rosterImage.id}
-              className="bg-white border border-gray-100 rounded-[8px] p-6 hover:border-gold hover:shadow-md transition-all group relative overflow-hidden"
+              className="glass-card bg-white/80 border border-white/60 rounded-[12px] p-6 hover:border-gold hover:shadow-md transition-all group relative overflow-hidden"
             >
               <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                 <button

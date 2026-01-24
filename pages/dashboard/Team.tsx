@@ -62,7 +62,7 @@ export const Team = () => {
                   <img src={member.img} alt={member.name} className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full bg-gold/10 flex items-center justify-center">
-                    <User size={32} className="text-gold" />
+                    <User size={32} className="text-white" />
                   </div>
                 )}
               </div>

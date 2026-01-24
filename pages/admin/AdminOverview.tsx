@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { VibrantCard } from '../../components/UI/VibrantCard';
-import { Calendar, MessageSquare, BookOpen, Users, Image, ClipboardList, ArrowUpRight, UserCheck, X, Plus } from 'lucide-react';
+import { Calendar, MessageSquare, BookOpen, Users, Image, ClipboardList, ArrowUpRight, UserCheck, X, Plus, Shield } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { User } from '../../types';
 import { SkeletonPageHeader, SkeletonCard, SkeletonUserCard, SkeletonStatsCard } from '../../components/UI/Skeleton';
 import { formatRelativeDateInTimezone, formatFullDateTimeInTimezone } from '../../lib/dateUtils';
+import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 
 export const AdminOverview = () => {
   const { user } = useAuth();
@@ -491,15 +492,16 @@ export const AdminOverview = () => {
   console.log('AdminOverview - User exists, rendering main content');
   return (
     <div className="space-y-8">
-      <div className="flex justify-between items-end border-b border-gray-200 pb-6">
-        <div>
-          <h1 className="text-4xl font-serif font-normal text-charcoal">Admin Dashboard</h1>
-          <p className="text-neutral mt-2">Welcome back, {user?.name || 'Admin'}. Manage your church community.</p>
-        </div>
-        <div className="hidden md:block">
-          <span className="text-xs font-bold text-charcoal bg-gold px-4 py-2 rounded-full border border-gold uppercase tracking-widest shadow-sm">Admin Access</span>
-        </div>
-      </div>
+      <AdminPageHeader
+        title="Admin Dashboard"
+        subtitle={`Welcome back, ${user?.name || 'Admin'}. Manage your church community.`}
+        icon={<Shield size={28} />}
+        rightSlot={
+          <span className="text-xs font-bold text-charcoal bg-gold px-4 py-2 rounded-full border border-gold uppercase tracking-widest shadow-sm">
+            Admin Access
+          </span>
+        }
+      />
 
       {/* Stats Grid */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -621,7 +623,7 @@ export const AdminOverview = () => {
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-start gap-4">
-                      <div className="w-12 h-12 rounded-full bg-gold/10 text-charcoal flex items-center justify-center font-bold text-lg flex-shrink-0">
+                      <div className="w-12 h-12 rounded-full bg-gold/10 text-white flex items-center justify-center font-bold text-lg flex-shrink-0">
                         {pendingUser.name.charAt(0).toUpperCase()}
                       </div>
                       <div className="flex-1">

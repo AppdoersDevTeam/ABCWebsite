@@ -1,36 +1,102 @@
-import React, { useState } from 'react';
-import { PageHeader } from '../../components/UI/PageHeader';
-import { VibrantCard } from '../../components/UI/VibrantCard';
+import React, { useState, useRef } from 'react';
 import { GlowingButton } from '../../components/UI/GlowingButton';
-import { Download, ChevronDown, MapPin } from 'lucide-react';
+import { ScrollReveal } from '../../components/UI/ScrollReveal';
+import { Download, ChevronDown, MapPin, Heart, ArrowDownToLine, Clock } from 'lucide-react';
 
 export const ImNew = () => {
+  const heroRef = useRef<HTMLDivElement>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  
   return (
-    <div className="pb-32">
-      <PageHeader title="WELCOME HOME" subtitle="I'm New" />
+    <div className="space-y-0 overflow-hidden">
+      {/* Hero Section */}
+      <section 
+        ref={heroRef}
+        className="relative min-h-screen flex items-center justify-center overflow-hidden"
+      >
+        {/* Background Image */}
+        <div className="absolute inset-0 z-0">
+          <img 
+            src="/ABC background01.png" 
+            alt="Ashburton Baptist Church" 
+            className="w-full h-full object-cover brightness-110 saturate-125 contrast-105"
+          />
+          <div className="absolute inset-0 bg-black/20"></div>
+          <div className="absolute inset-0 bg-black/10"></div>
+          <div className="absolute inset-0 bg-gray-700/45"></div>
+        </div>
+
+        {/* Hero Content */}
+        <div className="container relative z-10 px-4 mx-auto pt-[224px] md:pt-[256px] pb-24 md:pb-28">
+          <div className="max-w-4xl mx-auto text-center">
+            <ScrollReveal direction="up" delay={100}>
+              <h1 className="text-white text-center max-w-5xl mx-auto mb-4 transition-all duration-1000 delay-200" style={{ fontFamily: 'Inter', fontSize: '2.5rem', lineHeight: '1.2', marginTop: '63px' }}>
+                I'm New
+              </h1>
+            </ScrollReveal>
+            <ScrollReveal direction="up" delay={150}>
+              <h1 className="text-white text-center max-w-5xl mx-auto mb-4 transition-all duration-1000 delay-250" style={{ fontFamily: 'Kaushan Script', fontSize: '4.25rem', lineHeight: '1.2' }}>
+                Welcome Home
+              </h1>
+            </ScrollReveal>
+            <ScrollReveal direction="up" delay={200}>
+              <p className="text-[1.5625rem] leading-6 text-white text-center max-w-5xl mx-auto mb-6 transition-all duration-1000 delay-300">
+                <span className="block whitespace-nowrap font-raleway font-normal text-center">We're glad you're here</span>
+                <span className="block whitespace-nowrap mt-[12px] font-raleway font-normal text-center">Welcome to our family.</span>
+              </p>
+            </ScrollReveal>
+          </div>
+          
+          {/* Pulsing Down Arrow */}
+          <div className="absolute bottom-[29px] left-1/2 -translate-x-1/2 z-20 pulse-arrow animate-ping-pong">
+            <ArrowDownToLine size={32} className="text-gold" />
+          </div>
+        </div>
+      </section>
       
-      <div className="container mx-auto px-4 -mt-10 relative z-10 max-w-4xl space-y-12">
-        {/* Welcome Text */}
-        <div id="welcome" className="bg-white p-8 md:p-12 rounded-[8px] text-center border-t-4 border-gold shadow-lg scroll-mt-24 animate-fade-in-up hover-lift">
-            <h2 className="text-3xl md:text-4xl font-serif text-charcoal mb-6">We're glad you're here</h2>
-            <p className="text-neutral leading-relaxed text-lg">
-                Visiting a new church can be intimidating. We want to make your first experience at Ashburton Baptist as welcoming as possible. 
-                Whether you're just visiting or looking for a place to call home, you belong here.
-            </p>
-        </div>
-
-        {/* Welcome Pack Download */}
-        <div id="welcome-pack" className="glass-card bg-white/60 p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8 rounded-[8px] scroll-mt-24 animate-fade-in-up delay-300 hover-lift">
-            <div className="text-center md:text-left">
-                <h3 className="text-3xl font-serif text-charcoal mb-2 font-normal">Welcome Pack</h3>
-                <p className="text-neutral">Everything you need to know about our community.</p>
+      <section className="section-plain py-12 md:py-20 relative z-10">
+        <div className="container mx-auto px-4 max-w-4xl space-y-12">
+          <ScrollReveal direction="down" delay={0}>
+            <div className="text-center mb-12">
+              <Heart className="text-gold mx-auto mb-6" size={64} />
+              <h2 className="text-4xl md:text-5xl font-serif font-normal text-charcoal mb-4">We're glad you're here</h2>
+              <p className="text-gold mt-2 text-base font-bold">Welcome to our family.</p>
             </div>
-            <GlowingButton variant="dark" className="flex items-center whitespace-nowrap shadow-none w-full md:w-auto group">
-                <Download size={18} className="mr-2 group-hover:animate-bounce" /> Download PDF
-            </GlowingButton>
+          </ScrollReveal>
+        {/* Welcome Text */}
+        <ScrollReveal direction="up" delay={0}>
+          <div id="welcome" className="glass-card bg-white/70 p-8 md:p-12 rounded-[16px] text-center border border-white/50 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 scroll-mt-24 hover-lift">
+            <h2 className="text-3xl md:text-4xl font-serif font-normal text-charcoal mb-6">We're glad you're here</h2>
+            <p className="text-neutral leading-relaxed text-lg">
+              Visiting a new church can be intimidating. We want to make your first experience at Ashburton Baptist as welcoming as possible. 
+              Whether you're just visiting or looking for a place to call home, you belong here.
+            </p>
+          </div>
+        </ScrollReveal>
         </div>
+      </section>
 
+      <section className="section-gradient py-12 md:py-20 relative z-10">
+        <div className="container mx-auto px-4 max-w-4xl">
+        {/* Welcome Pack Download */}
+        <ScrollReveal direction="up" delay={100}>
+          <div id="welcome-pack" className="glass-card bg-white/70 p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8 rounded-[16px] border border-white/50 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 scroll-mt-24 hover-lift">
+            <div className="text-center md:text-left">
+              <h3 className="text-3xl font-serif font-normal text-charcoal mb-2">Welcome Pack</h3>
+              <p className="text-neutral">Everything you need to know about our community.</p>
+              <p className="text-neutral mt-2">Service times, locations, ministries, and next steps to help you feel at home.</p>
+            </div>
+            <GlowingButton variant="outline" className="!rounded-full !bg-gold !text-white !border-gold transition-all duration-500 ease-out hover:scale-110 hover:shadow-2xl hover:shadow-gold/60 active:scale-95 hover:-translate-y-1 w-full md:w-auto group">
+              <Download size={18} className="mr-2 transition-all duration-300 group-hover:animate-bounce" />
+              <span className="transition-all duration-300 group-hover:tracking-wider">Download PDF</span>
+            </GlowingButton>
+          </div>
+        </ScrollReveal>
+        </div>
+      </section>
+
+      <section className="section-plain py-12 md:py-20 relative z-10">
+        <div className="container mx-auto px-4 max-w-4xl">
         {/* FAQ Accordion */}
         <div id="faq" className="space-y-4 scroll-mt-24">
             <h3 className="text-3xl font-serif text-charcoal text-center mb-8 animate-fade-in-up delay-500">Frequently Asked Questions</h3>
@@ -62,7 +128,8 @@ export const ImNew = () => {
             ].map((item, i) => {
                 const isOpen = openFaq === i;
                 return (
-                    <div key={i} className="bg-white border border-gray-200 rounded-[8px] shadow-sm animate-fade-in-up hover-lift overflow-hidden transition-all duration-300 hover:border-gold" style={{ animationDelay: `${600 + i * 100}ms` }}>
+                  <ScrollReveal key={i} direction="up" delay={300 + i * 100}>
+                    <div className="glass-card bg-white/70 border border-white/50 rounded-[16px] shadow-sm hover:shadow-xl hover:-translate-y-1 hover-lift overflow-hidden transition-all duration-300 hover:border-gold">
                         <button
                             onClick={() => setOpenFaq(isOpen ? null : i)}
                             className="w-full p-6 flex justify-between items-center text-left cursor-pointer group"
@@ -92,10 +159,12 @@ export const ImNew = () => {
                             </div>
                         </div>
                     </div>
+                  </ScrollReveal>
                 );
             })}
+          </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 };

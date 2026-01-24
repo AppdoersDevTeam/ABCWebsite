@@ -3,8 +3,8 @@ import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, Instagram, Facebook, Youtube, ChevronDown, LogIn } from 'lucide-react';
 import { GlowingButton } from '../UI/GlowingButton';
 import { useAuth } from '../../context/AuthContext';
-import { BackgroundBlobs } from '../UI/BackgroundBlobs';
 import { ScrollToTop } from '../ScrollToTop';
+import { useAutoSectionReveal } from '../UI/useAutoSectionReveal';
 
 export const PublicLayout = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -17,6 +17,8 @@ export const PublicLayout = () => {
   const { isAuthenticated, user, refreshUserProfile } = useAuth();
   const dropdownRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const dropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isLoginPage = location.pathname === '/login';
+  useAutoSectionReveal();
 
   // Refresh user profile when component mounts if user is logged in
   // This ensures we have the latest approval status for the header button
@@ -185,10 +187,9 @@ export const PublicLayout = () => {
   return (
     <div className="min-h-screen flex flex-col bg-transparent text-charcoal font-sans relative overflow-x-hidden selection:bg-gold selection:text-charcoal">
       <ScrollToTop />
-      <BackgroundBlobs />
       
       {/* Header */}
-      <header className={`fixed w-full z-50 transition-all duration-300 ${scrolled ? 'footer-gradient backdrop-blur-md shadow-sm py-4' : 'bg-transparent py-6'}`}>
+      <header className={`fixed w-full z-50 transition-all duration-300 ${isLoginPage || scrolled ? 'bg-white backdrop-blur-md shadow-sm py-4' : 'bg-transparent py-6'}`}>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center">
             {/* Logo */}
@@ -227,21 +228,21 @@ export const PublicLayout = () => {
                       href={item.path}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-base font-sans font-semibold text-white hover:text-gold transition-all duration-300 relative group flex items-center gap-1"
+                      className={`text-base font-sans font-normal ${isLoginPage || scrolled ? '!text-[#A8B774]' : 'text-white'} hover:text-gold transition-all duration-300 relative group flex items-center gap-1`}
                     >
                       {item.label}
-                      <span className={`absolute -bottom-2 left-0 w-0 h-0.5 bg-gold transition-all duration-300 group-hover:w-full`}></span>
+                      <span className={`absolute -bottom-2 left-0 w-0 h-0.5 ${isLoginPage || scrolled ? 'bg-[#A8B774]' : 'bg-gold'} transition-all duration-300 group-hover:w-full`}></span>
                     </a>
                   ) : (
                     <Link
                       to={item.path}
-                      className="text-base font-sans font-semibold text-white hover:text-gold transition-all duration-300 relative group flex items-center gap-1"
+                      className={`text-base font-sans font-normal ${isLoginPage || scrolled ? '!text-[#A8B774]' : 'text-white'} hover:text-gold transition-all duration-300 relative group flex items-center gap-1`}
                     >
                       {item.label}
                       {item.submenu && item.submenu.length > 0 && (
-                        <ChevronDown size={14} className={`text-white transition-transform duration-300 ${openDropdown === item.path ? 'rotate-180' : ''}`} />
+                        <ChevronDown size={14} className={`${isLoginPage || scrolled ? '!text-[#A8B774]' : 'text-white'} transition-transform duration-300 ${openDropdown === item.path ? 'rotate-180' : ''}`} />
                       )}
-                      <span className={`absolute -bottom-2 left-0 w-0 h-0.5 bg-gold transition-all duration-300 group-hover:w-full ${location.pathname === item.path ? 'w-full' : ''}`}></span>
+                      <span className={`absolute -bottom-2 left-0 w-0 h-0.5 ${isLoginPage || scrolled ? 'bg-[#A8B774]' : 'bg-gold'} transition-all duration-300 group-hover:w-full ${location.pathname === item.path ? 'w-full' : ''}`}></span>
                     </Link>
                   )}
                   
@@ -281,7 +282,7 @@ export const PublicLayout = () => {
                   )}
                 </div>
               ))}
-              <div className={`pl-6 border-l ${scrolled ? 'border-gray-600' : 'border-white'}`}>
+              <div className={`pl-6 border-l ${scrolled ? 'border-gray-200' : 'border-gray-200'}`}>
                  {isAuthenticated ? (
                    <Link to="/dashboard">
                      <GlowingButton size="sm" variant="gold">Dashboard</GlowingButton>
@@ -289,7 +290,7 @@ export const PublicLayout = () => {
                  ) : (
                    <Link 
                      to="/login"
-                     className="bg-gradient-to-r from-gold to-[#d4a904] px-[9px] py-[8px] lg:px-[17px] lg:py-[12px] xl:px-[25px] xl:py-[12px] rounded-[10px] font-sans font-normal text-xs lg:text-sm xl:text-base hover:from-[#e98d07] hover:via-[#db7a07] hover:to-[#c96a05] transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl inline-flex items-center justify-center whitespace-nowrap"
+                     className="bg-gold px-[9px] py-[8px] lg:px-[17px] lg:py-[12px] xl:px-[25px] xl:py-[12px] rounded-[10px] font-sans font-normal text-xs lg:text-sm xl:text-base hover:bg-[#A8B774] transform hover:scale-105 transition-all duration-300 inline-flex items-center justify-center whitespace-nowrap"
                    >
                      <LogIn size={18} className="mr-2 text-white" />
                      <span className="shine-text relative z-10 font-sans font-normal normal-case">Log in</span>
@@ -317,7 +318,7 @@ export const PublicLayout = () => {
                 {item.submenu && item.submenu.length > 0 ? (
                   <>
                     <div 
-                      className="flex items-center justify-between text-4xl font-serif font-normal text-white hover:text-gold transition-all duration-300 cursor-pointer"
+                      className="flex items-center justify-between text-4xl font-serif font-normal text-[#A8B774] hover:text-gold transition-all duration-300 cursor-pointer"
                       onClick={() => setOpenMobileSubmenu(openMobileSubmenu === item.path ? null : item.path)}
                     >
                       {item.external ? (
@@ -349,7 +350,7 @@ export const PublicLayout = () => {
                       )}
                       <ChevronDown 
                         size={24} 
-                        className={`transition-transform duration-300 ${openMobileSubmenu === item.path ? 'rotate-180' : ''}`} 
+                        className={`text-[#A8B774] transition-transform duration-300 ${openMobileSubmenu === item.path ? 'rotate-180' : ''}`} 
                       />
                     </div>
                     {openMobileSubmenu === item.path && (
@@ -364,7 +365,7 @@ export const PublicLayout = () => {
                               setOpenMobileSubmenu(null);
                               handleSubmenuClick(subItem.path, subItem.hash);
                             }}
-                            className="block text-2xl font-serif text-white hover:text-gold transition-colors cursor-pointer"
+                            className="block text-2xl font-serif text-[#A8B774] hover:text-gold transition-colors cursor-pointer"
                           >
                             {subItem.label}
                           </a>
@@ -379,7 +380,7 @@ export const PublicLayout = () => {
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={() => setIsMenuOpen(false)}
-                      className="text-4xl font-serif font-normal text-white hover:text-gold transition-all duration-300 block"
+                      className="text-4xl font-serif font-normal text-[#A8B774] hover:text-gold transition-all duration-300 block"
                     >
                       {item.label}
                     </a>
@@ -387,7 +388,7 @@ export const PublicLayout = () => {
                     <Link
                       to={item.path}
                       onClick={() => setIsMenuOpen(false)}
-                      className="text-4xl font-serif font-normal text-white hover:text-gold transition-all duration-300 block"
+                      className="text-4xl font-serif font-normal text-[#A8B774] hover:text-gold transition-all duration-300 block"
                     >
                       {item.label}
                     </Link>
@@ -404,7 +405,7 @@ export const PublicLayout = () => {
                    <Link 
                      to="/login" 
                      onClick={() => setIsMenuOpen(false)}
-                     className="bg-gradient-to-r from-gold to-[#d4a904] px-[9px] py-[8px] lg:px-[17px] lg:py-[12px] xl:px-[25px] xl:py-[12px] rounded-[10px] font-sans font-normal text-xs lg:text-sm xl:text-base hover:from-[#e98d07] hover:via-[#db7a07] hover:to-[#c96a05] transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl w-full inline-flex items-center justify-center whitespace-nowrap"
+                     className="bg-gold px-[9px] py-[8px] lg:px-[17px] lg:py-[12px] xl:px-[25px] xl:py-[12px] rounded-[10px] font-sans font-normal text-xs lg:text-sm xl:text-base hover:bg-[#A8B774] transform hover:scale-105 transition-all duration-300 w-full inline-flex items-center justify-center whitespace-nowrap"
                    >
                      <LogIn size={18} className="mr-2 text-white" />
                      <span className="shine-text relative z-10 font-sans font-normal normal-case">Log in</span>

@@ -6,6 +6,7 @@ import { Mail, Phone, Edit, Trash2, Plus, User, Upload, X, Image as ImageIcon, U
 import { TeamMember } from '../../types';
 import { supabase } from '../../lib/supabase';
 import { SkeletonPageHeader } from '../../components/UI/Skeleton';
+import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 
 export const AdminTeam = () => {
   const [members, setMembers] = useState<TeamMember[]>([]);
@@ -540,22 +541,20 @@ export const AdminTeam = () => {
 
   return (
     <div className="space-y-8">
-      <div className="flex justify-between items-center border-b border-gray-200 pb-6">
-        <div>
-          <h1 className="text-4xl font-serif font-normal text-charcoal">Team Management</h1>
-          <p className="text-neutral mt-1">Manage staff and leadership team members.</p>
-        </div>
-        <button
-          onClick={openCreateModal}
-          className="bg-gradient-to-r from-gold to-[#d4a904] px-[9px] py-[8px] lg:px-[17px] lg:py-[12px] xl:px-[25px] xl:py-[12px] rounded-[10px] font-sans font-normal text-xs lg:text-sm xl:text-base hover:from-[#e98d07] hover:via-[#db7a07] hover:to-[#c96a05] transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl inline-flex items-center justify-center whitespace-nowrap"
-        >
-          <UserPlus size={18} className="mr-2 text-white" />
-          <span className="shine-text relative z-10 font-sans font-normal normal-case">Add Member</span>
-        </button>
-      </div>
+      <AdminPageHeader
+        title="Team Management"
+        subtitle="Manage staff and leadership team members."
+        icon={<User size={28} />}
+        rightSlot={
+          <GlowingButton size="sm" onClick={openCreateModal}>
+            <UserPlus size={16} className="mr-2" />
+            Add Member
+          </GlowingButton>
+        }
+      />
 
       {members.length === 0 ? (
-        <div className="text-center py-12">
+        <div className="text-center py-12 glass-card bg-white/80 border border-white/60 rounded-[12px]">
           <p className="text-neutral">No team members yet. Add your first team member to get started.</p>
         </div>
       ) : (

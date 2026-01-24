@@ -5,6 +5,7 @@ import { FolderPlus, Image as ImageIcon, Upload, Edit, Trash2, X, Plus } from 'l
 import { supabase } from '../../lib/supabase';
 import { PhotoFolder, Photo } from '../../types';
 import { SkeletonPageHeader, SkeletonCard } from '../../components/UI/Skeleton';
+import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 
 interface PhotoFolderWithPhotos extends PhotoFolder {
   photos: Photo[];
@@ -367,23 +368,24 @@ export const AdminPhotos = () => {
 
   return (
     <div className="space-y-8">
-      <div className="flex justify-between items-center border-b border-gray-200 pb-6">
-        <div>
-          <h1 className="text-4xl font-serif font-normal text-charcoal">Photo Gallery Management</h1>
-          <p className="text-neutral mt-1">Manage photo folders and upload images.</p>
-        </div>
-        <GlowingButton size="sm" onClick={openCreateFolderModal}>
-          <FolderPlus size={16} className="mr-2" />
-          Create Folder
-        </GlowingButton>
-      </div>
+      <AdminPageHeader
+        title="Photo Gallery Management"
+        subtitle="Manage photo folders and upload images."
+        icon={<ImageIcon size={28} />}
+        rightSlot={
+          <GlowingButton size="sm" onClick={openCreateFolderModal}>
+            <FolderPlus size={16} className="mr-2" />
+            Create Folder
+          </GlowingButton>
+        }
+      />
 
       {/* Folders Grid */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {folders.map((folder) => (
           <div
             key={folder.id}
-            className="bg-white border border-gray-100 rounded-[8px] p-6 hover:border-gold hover:shadow-md transition-all group relative"
+            className="glass-card bg-white/80 border border-white/60 rounded-[12px] p-6 hover:border-gold hover:shadow-md transition-all group relative"
           >
             <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
               <button

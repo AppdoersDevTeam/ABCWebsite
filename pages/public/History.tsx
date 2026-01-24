@@ -1,9 +1,12 @@
-import React from 'react';
-import { PageHeader } from '../../components/UI/PageHeader';
+import React, { useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { VibrantCard } from '../../components/UI/VibrantCard';
-import { Calendar, Building, Flame, Heart } from 'lucide-react';
+import { GlowingButton } from '../../components/UI/GlowingButton';
+import { ScrollReveal } from '../../components/UI/ScrollReveal';
+import { Calendar, Building, Flame, Heart, BookOpen, ArrowRight, ArrowDownToLine } from 'lucide-react';
 
 export const History = () => {
+  const heroRef = useRef<HTMLDivElement>(null);
   const timeline = [
     {
       year: '1882',
@@ -44,72 +47,133 @@ export const History = () => {
   ];
 
   return (
-    <div className="pb-32">
-      <PageHeader title="HISTORY" subtitle="Our Story" />
-      
-      <div className="container mx-auto px-4 -mt-10 relative z-10 max-w-5xl">
-        {/* Header Section */}
-        <div className="text-center mb-16 animate-fade-in-up">
-          <h2 className="text-4xl md:text-6xl font-serif font-normal text-charcoal mb-6">
-            Ashburton Baptist Church
-          </h2>
-          <p className="text-2xl md:text-3xl text-gold font-bold mb-4">Est. 1882</p>
-          <p className="text-lg text-neutral max-w-3xl mx-auto leading-relaxed">
-            Over 140 years of faithful service to our community, built on the foundation of Jesus Christ.
-          </p>
+    <div className="space-y-0 overflow-hidden">
+      {/* Hero Section */}
+      <section 
+        ref={heroRef}
+        className="relative min-h-screen flex items-center justify-center overflow-hidden"
+      >
+        {/* Background Image */}
+        <div className="absolute inset-0 z-0">
+          <img 
+            src="/ABC background01.png" 
+            alt="Ashburton Baptist Church" 
+            className="w-full h-full object-cover brightness-110 saturate-125 contrast-105"
+          />
+          <div className="absolute inset-0 bg-black/20"></div>
+          <div className="absolute inset-0 bg-black/10"></div>
+          <div className="absolute inset-0 bg-gray-700/45"></div>
         </div>
+
+        {/* Hero Content */}
+        <div className="container relative z-10 px-4 mx-auto pt-[224px] md:pt-[256px]">
+          <div className="max-w-4xl mx-auto text-center">
+            <ScrollReveal direction="up" delay={100}>
+              <h1 className="text-white text-center max-w-5xl mx-auto mb-4 transition-all duration-1000 delay-200" style={{ fontFamily: 'Inter', fontSize: '2.5rem', lineHeight: '1.2', marginTop: '63px' }}>
+                Our Story
+              </h1>
+            </ScrollReveal>
+            <ScrollReveal direction="up" delay={150}>
+              <h1 className="text-white text-center max-w-5xl mx-auto mb-4 transition-all duration-1000 delay-250" style={{ fontFamily: 'Kaushan Script', fontSize: '4.25rem', lineHeight: '1.2' }}>
+                History
+              </h1>
+            </ScrollReveal>
+            <ScrollReveal direction="up" delay={200}>
+              <p className="text-[1.5625rem] leading-6 text-white text-center max-w-5xl mx-auto mb-6 transition-all duration-1000 delay-300">
+                <span className="block whitespace-nowrap font-raleway font-normal text-center">Established 1882</span>
+                <span className="block whitespace-nowrap mt-[12px] font-raleway font-normal text-center">Over 140 years of faithful service to our community</span>
+              </p>
+            </ScrollReveal>
+
+            <ScrollReveal direction="up" delay={400}>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-24">
+                <Link to="/about" className="group">
+                  <GlowingButton variant="outline" size="md" className="!px-6 !py-[14px] !border-gold !bg-gold/20 !text-white hover:!bg-gold hover:!text-white !rounded-full transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:scale-110 hover:!border-gold active:scale-95 hover:-translate-y-1 !normal-case">
+                    <span className="text-white font-normal text-base leading-6 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] group-hover:font-semibold group-hover:tracking-wider">Back to About</span>
+                    <ArrowRight size={18} className="ml-2 text-gold transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] group-hover:h-5 group-hover:w-5 group-hover:translate-x-1 group-hover:text-white" />
+                  </GlowingButton>
+                </Link>
+              </div>
+            </ScrollReveal>
+          </div>
+          
+          {/* Pulsing Down Arrow */}
+          <div className="absolute bottom-[29px] left-1/2 -translate-x-1/2 z-20 pulse-arrow animate-ping-pong">
+            <ArrowDownToLine size={32} className="text-gold" />
+          </div>
+        </div>
+      </section>
+      
+      <section className="section-gradient-soft py-12 md:py-20 relative z-10">
+        <div className="container mx-auto px-4 max-w-5xl">
+        {/* Header Section */}
+        <ScrollReveal direction="down" delay={0}>
+          <div className="text-center mb-16">
+            <BookOpen className="text-gold mx-auto mb-6" size={64} />
+            <h2 className="text-4xl md:text-5xl font-serif font-normal text-charcoal mb-4">Ashburton Baptist Church</h2>
+            <p className="text-gold mt-2 text-base font-bold">Est. 1882</p>
+            <p className="text-lg text-neutral max-w-3xl mx-auto leading-relaxed mt-4">
+              Over 140 years of faithful service to our community, built on the foundation of Jesus Christ.
+            </p>
+          </div>
+        </ScrollReveal>
 
         {/* Timeline */}
         <div className="space-y-12">
           {timeline.map((item, i) => (
-            <div key={i} className="relative animate-fade-in-up hover-lift" style={{ animationDelay: `${200 + i * 150}ms` }}>
-              <div className="flex flex-col md:flex-row gap-8 items-start">
-                <div className="md:w-32 flex-shrink-0">
-                  <div className="flex items-center gap-4 md:flex-col md:items-start">
-                    <div className="w-16 h-16 bg-gold/10 rounded-full flex items-center justify-center text-gold group-hover:bg-gold group-hover:text-charcoal transition-all duration-300">
-                      {item.icon}
+            <ScrollReveal key={i} direction="up" delay={i * 100}>
+              <div className="relative hover-lift">
+                <div className="flex flex-col md:flex-row gap-8 items-start">
+                  <div className="md:w-32 flex-shrink-0">
+                    <div className="flex items-center gap-4 md:flex-col md:items-start">
+                      <div className="w-16 h-16 bg-gold/10 rounded-full flex items-center justify-center text-white group-hover:bg-gold group-hover:text-white transition-all duration-300">
+                        {item.icon}
+                      </div>
+                      <div className="md:mt-4">
+                        <span className="text-2xl md:text-3xl font-serif font-normal text-charcoal block">{item.year}</span>
+                      </div>
                     </div>
-                    <div className="md:mt-4">
-                      <span className="text-2xl md:text-3xl font-serif font-normal text-charcoal block">{item.year}</span>
+                  </div>
+                  <div className="flex-1">
+                    <div className="glass-card rounded-[16px] p-8 md:p-10 bg-white/70 border border-white/50 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                      <h3 className="text-2xl md:text-3xl font-serif font-normal text-charcoal mb-4">{item.title}</h3>
+                      <p className="text-neutral leading-relaxed text-lg">{item.content}</p>
                     </div>
                   </div>
                 </div>
-                <div className="flex-1">
-                  <VibrantCard className="p-8 md:p-10 bg-white/80">
-                    <h3 className="text-2xl md:text-3xl font-serif font-normal text-charcoal mb-4">{item.title}</h3>
-                    <p className="text-neutral leading-relaxed text-lg">{item.content}</p>
-                  </VibrantCard>
-                </div>
+                {i < timeline.length - 1 && (
+                  <div className="hidden md:block absolute left-8 top-24 w-0.5 h-12 bg-gold/30"></div>
+                )}
               </div>
-              {i < timeline.length - 1 && (
-                <div className="hidden md:block absolute left-8 top-24 w-0.5 h-12 bg-gold/30"></div>
-              )}
-            </div>
+            </ScrollReveal>
           ))}
         </div>
 
         {/* Gratitude Section */}
-        <section className="mt-20 md:mt-32 animate-fade-in-up delay-1100">
-          <VibrantCard className="p-8 md:p-12 text-center bg-white/80 border-l-4 border-l-gold">
-            <Heart className="text-gold mx-auto mb-6 animate-float" size={48} />
-            <h3 className="text-3xl md:text-4xl font-serif font-normal text-charcoal mb-8">Gratitude and Thanks</h3>
-            <div className="space-y-6 text-neutral leading-relaxed text-lg max-w-4xl mx-auto">
-              <p>
-                We want to acknowledge the large number of church members from the past who have poured their lives into our Church to bring glory to God's name during their time here. Their commitment and dedication in seeking and pursuing God's will for this Church, ensures that their work will continue to thrive.
-              </p>
-              <p>
-                The Church has always been a family with many unofficial church "Grandparents" in our congregation. These are those wonderful people that show abundant love and support to the children within the Church family. We are so proud in knowing that genuine love and compassion have always been a hallmark of this Church.
-              </p>
-              <p>
-                We are grateful for the faithful prayers of so many of God's people in our Church. All of those faithful members from past generations who diligently prayed with vision for the future of our Church, through to the faithfulness of the prayer warriors of today.
-              </p>
-              <p className="text-charcoal font-bold text-xl mt-8">
-                We have, by the grace of God, built a building, but God reminds us that we are the living stones of His temple. Built on the everlasting foundation stone, Jesus Christ. Let us live our lives as his Chosen, proclaiming His wonderful acts to the community around us.
-              </p>
+        <ScrollReveal direction="up" delay={600}>
+          <div className="mt-20 md:mt-32">
+            <div className="glass-card rounded-[16px] p-8 md:p-12 text-center bg-white/70 border border-white/50 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 hover-lift">
+              <Heart className="text-gold mx-auto mb-6" size={48} />
+              <h3 className="text-3xl md:text-4xl font-serif font-normal text-charcoal mb-8">Gratitude and Thanks</h3>
+              <div className="space-y-6 text-neutral leading-relaxed text-lg max-w-4xl mx-auto">
+                <p>
+                  We want to acknowledge the large number of church members from the past who have poured their lives into our Church to bring glory to God's name during their time here. Their commitment and dedication in seeking and pursuing God's will for this Church, ensures that their work will continue to thrive.
+                </p>
+                <p>
+                  The Church has always been a family with many unofficial church "Grandparents" in our congregation. These are those wonderful people that show abundant love and support to the children within the Church family. We are so proud in knowing that genuine love and compassion have always been a hallmark of this Church.
+                </p>
+                <p>
+                  We are grateful for the faithful prayers of so many of God's people in our Church. All of those faithful members from past generations who diligently prayed with vision for the future of our Church, through to the faithfulness of the prayer warriors of today.
+                </p>
+                <p className="text-charcoal font-bold text-xl mt-8">
+                  We have, by the grace of God, built a building, but God reminds us that we are the living stones of His temple. Built on the everlasting foundation stone, Jesus Christ. Let us live our lives as his Chosen, proclaiming His wonderful acts to the community around us.
+                </p>
+              </div>
             </div>
-          </VibrantCard>
-        </section>
-      </div>
+          </div>
+        </ScrollReveal>
+        </div>
+      </section>
     </div>
   );
 };

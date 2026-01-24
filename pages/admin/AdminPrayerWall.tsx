@@ -7,6 +7,7 @@ import { supabase } from '../../lib/supabase';
 import { PrayerRequest } from '../../types';
 import { SkeletonPageHeader, SkeletonPrayerCard } from '../../components/UI/Skeleton';
 import { getUserTimezone, formatRelativeDateInTimezone } from '../../lib/dateUtils';
+import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 
 export const AdminPrayerWall = () => {
   const [requests, setRequests] = useState<PrayerRequest[]>([]);
@@ -163,19 +164,20 @@ export const AdminPrayerWall = () => {
 
   return (
     <div className="space-y-8">
-      <div className="flex justify-between items-center border-b border-gray-200 pb-6">
-        <div>
-          <h1 className="text-4xl font-serif font-normal text-charcoal">Prayer Wall Management</h1>
-          <p className="text-neutral mt-1">Manage all prayer requests from the community.</p>
-        </div>
-        <GlowingButton size="sm" onClick={() => setIsCreateModalOpen(true)}>
-          <Plus size={16} className="mr-2" />
-          Create Request
-        </GlowingButton>
-      </div>
+      <AdminPageHeader
+        title="Prayer Wall Management"
+        subtitle="Manage all prayer requests from the community."
+        icon={<Heart size={28} />}
+        rightSlot={
+          <GlowingButton size="sm" onClick={() => setIsCreateModalOpen(true)}>
+            <Plus size={16} className="mr-2" />
+            Create Request
+          </GlowingButton>
+        }
+      />
 
       {requests.length === 0 ? (
-        <div className="text-center py-12">
+        <div className="text-center py-12 glass-card bg-white/80 border border-white/60 rounded-[12px]">
           <p className="text-neutral">No prayer requests yet.</p>
         </div>
       ) : (
@@ -183,11 +185,11 @@ export const AdminPrayerWall = () => {
           {requests.map((req) => (
             <div
               key={req.id}
-              className="bg-white border border-gray-100 shadow-sm p-6 rounded-[8px] hover:shadow-md hover:border-gold transition-all duration-300"
+              className="glass-card bg-white/80 border border-white/60 shadow-sm p-6 rounded-[12px] hover:shadow-md hover:border-gold transition-all duration-300"
             >
               <div className="flex justify-between items-start mb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gold/10 text-charcoal flex items-center justify-center font-bold">
+                  <div className="w-10 h-10 rounded-full bg-gold/10 text-white flex items-center justify-center font-bold">
                     {req.name.charAt(0)}
                   </div>
                   <div>

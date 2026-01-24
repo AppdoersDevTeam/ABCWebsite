@@ -1,59 +1,112 @@
-import React from 'react';
-import { PageHeader } from '../../components/UI/PageHeader';
-import { VibrantCard } from '../../components/UI/VibrantCard';
+import React, { useRef } from 'react';
 import { GlowingButton } from '../../components/UI/GlowingButton';
-import { CreditCard, Landmark } from 'lucide-react';
+import { ScrollReveal } from '../../components/UI/ScrollReveal';
+import { CreditCard, Landmark, Gift, ArrowDownToLine } from 'lucide-react';
 
 export const Giving = () => {
+  const heroRef = useRef<HTMLDivElement>(null);
+  
   return (
-    <div className="pb-32">
-      <PageHeader title="GENEROSITY" subtitle="Giving" />
+    <div className="space-y-0 overflow-hidden">
+      {/* Hero Section */}
+      <section 
+        ref={heroRef}
+        className="relative min-h-screen flex items-center justify-center overflow-hidden"
+      >
+        {/* Background Image */}
+        <div className="absolute inset-0 z-0">
+          <img 
+            src="/ABC background01.png" 
+            alt="Ashburton Baptist Church" 
+            className="w-full h-full object-cover brightness-110 saturate-125 contrast-105"
+          />
+          <div className="absolute inset-0 bg-black/20"></div>
+          <div className="absolute inset-0 bg-black/10"></div>
+          <div className="absolute inset-0 bg-gray-700/45"></div>
+        </div>
+
+        {/* Hero Content */}
+        <div className="container relative z-10 px-4 mx-auto pt-[224px] md:pt-[256px] pb-24 md:pb-28">
+          <div className="max-w-4xl mx-auto text-center">
+            <ScrollReveal direction="up" delay={100}>
+              <h1 className="text-white text-center max-w-5xl mx-auto mb-4 transition-all duration-1000 delay-200" style={{ fontFamily: 'Inter', fontSize: '2.5rem', lineHeight: '1.2', marginTop: '63px' }}>
+                Generosity
+              </h1>
+            </ScrollReveal>
+            <ScrollReveal direction="up" delay={150}>
+              <h1 className="text-white text-center max-w-5xl mx-auto mb-4 transition-all duration-1000 delay-250" style={{ fontFamily: 'Kaushan Script', fontSize: '4.25rem', lineHeight: '1.2' }}>
+                Fuel the Mission
+              </h1>
+            </ScrollReveal>
+            <ScrollReveal direction="up" delay={200}>
+              <p className="text-[1.5625rem] leading-6 text-white text-center max-w-5xl mx-auto mb-6 transition-all duration-1000 delay-300">
+                <span className="block whitespace-nowrap font-raleway font-normal text-center">Each of you should give what you have decided</span>
+                <span className="block whitespace-nowrap mt-[12px] font-raleway font-normal text-center">in your heart to give, not reluctantly or under compulsion.</span>
+              </p>
+            </ScrollReveal>
+          
+          {/* Pulsing Down Arrow */}
+          <div className="absolute bottom-[29px] left-1/2 -translate-x-1/2 z-20 pulse-arrow animate-ping-pong">
+            <ArrowDownToLine size={32} className="text-gold" />
+          </div>
+        </div>
+        </div>
+      </section>
       
-      <div className="container mx-auto px-4 -mt-10 relative z-10 max-w-4xl space-y-12">
-        
-        <div className="glass-card p-8 md:p-12 text-center rounded-[8px] shadow-lg animate-fade-in-up hover-lift">
-            <p className="text-2xl md:text-3xl font-serif text-charcoal mb-6 italic leading-relaxed">
-                "Each of you should give what you have decided in your heart to give, not reluctantly or under compulsion, for God loves a cheerful giver."
+      <section className="section-plain py-12 md:py-20 relative z-10 w-full">
+        <div className="container mx-auto px-4 max-w-4xl space-y-12">
+        <ScrollReveal direction="down" delay={0}>
+          <div className="text-center mb-12">
+            <Gift className="text-gold mx-auto mb-6" size={64} />
+            <span className="text-gold font-bold tracking-[0.3em] uppercase mb-4 block text-sm">Generosity</span>
+            <h2 className="text-4xl md:text-5xl font-serif font-normal text-charcoal mb-6">Fuel the Mission</h2>
+            <p className="text-charcoal text-lg leading-relaxed max-w-2xl mx-auto mb-8">
+              "Each of you should give what you have decided in your heart to give, not reluctantly or under compulsion, for God loves a cheerful giver."
             </p>
-            <p className="text-gold text-sm uppercase tracking-widest font-bold animate-pulse-slow">- 2 Corinthians 9:7</p>
-        </div>
-
+            <p className="text-gold text-sm uppercase tracking-widest font-bold">- 2 Corinthians 9:7</p>
+          </div>
+        </ScrollReveal>
+        
         <div className="grid md:grid-cols-2 gap-8">
-            <VibrantCard id="direct-deposit" className="text-center group bg-white scroll-mt-24 animate-fade-in-left delay-200 hover-lift">
-                <div className="w-20 h-20 bg-gray-50 border border-gray-200 rounded-full flex items-center justify-center text-charcoal mx-auto mb-8 group-hover:border-gold group-hover:text-gold transition-all duration-300 group-hover:scale-110 group-hover:rotate-6 icon-bounce">
-                    <Landmark size={32} />
+          <ScrollReveal direction="right" delay={0}>
+            <div id="direct-deposit" className="glass-card rounded-[16px] p-8 bg-white/80 text-center hover-lift scroll-mt-24 border border-white/50 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+              <div className="w-20 h-20 bg-gold/10 rounded-full flex items-center justify-center text-white mx-auto mb-6 group-hover:bg-gold transition-colors duration-300">
+                <Landmark size={32} />
+              </div>
+              <h3 className="text-2xl font-serif font-normal text-charcoal mb-4">Direct Deposit</h3>
+              <p className="text-neutral mb-6">Give directly through bank transfer. Simple and secure.</p>
+              <div className="space-y-4 text-neutral text-base bg-gray-50 p-6 rounded-[8px] border border-gray-100">
+                <div className="flex justify-between border-b border-gray-200 pb-3">
+                  <span>Account:</span>
+                  <span className="font-bold text-charcoal text-right">Ashburton Baptist</span>
                 </div>
-                <h3 className="text-2xl font-serif text-charcoal mb-6 group-hover:text-gold transition-colors duration-300">Direct Deposit</h3>
-                <div className="space-y-4 text-neutral text-base bg-gray-50 p-6 rounded-[4px] border border-gray-100">
-                    <div className="flex justify-between border-b border-gray-200 pb-3">
-                        <span>Account:</span>
-                        <span className="font-bold text-charcoal text-right">Ashburton Baptist</span>
-                    </div>
-                    <div className="flex justify-between border-b border-gray-200 pb-3">
-                        <span>BSB:</span>
-                        <span className="font-bold text-charcoal text-right">000-000</span>
-                    </div>
-                    <div className="flex justify-between">
-                        <span>Number:</span>
-                        <span className="font-bold text-charcoal text-right">1234 5678</span>
-                    </div>
+                <div className="flex justify-between border-b border-gray-200 pb-3">
+                  <span>BSB:</span>
+                  <span className="font-bold text-charcoal text-right">000-000</span>
                 </div>
-            </VibrantCard>
+                <div className="flex justify-between">
+                  <span>Number:</span>
+                  <span className="font-bold text-charcoal text-right">1234 5678</span>
+                </div>
+              </div>
+            </div>
+          </ScrollReveal>
 
-            <VibrantCard id="credit-card" className="flex flex-col justify-between text-center group bg-white scroll-mt-24 animate-fade-in-right delay-400 hover-lift" glow>
-                <div>
-                    <div className="w-20 h-20 bg-gold text-charcoal rounded-full flex items-center justify-center mx-auto mb-8 shadow-lg shadow-gold/20 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 icon-bounce animate-float">
-                        <CreditCard size={32} />
-                    </div>
-                    <h3 className="text-2xl font-serif text-charcoal mb-6 group-hover:text-gold transition-colors duration-300">Credit Card</h3>
-                    <p className="text-neutral text-base mb-8 leading-relaxed">
-                        Secure online giving via Stripe. Set up recurring giving or make a one-time impact.
-                    </p>
-                </div>
-                <GlowingButton fullWidth size="lg">Give Securely</GlowingButton>
-            </VibrantCard>
+          <ScrollReveal direction="left" delay={200}>
+            <div id="credit-card" className="glass-card rounded-[16px] p-8 bg-white/80 text-center hover-lift scroll-mt-24 border border-white/50 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+              <div className="w-20 h-20 bg-gold/10 rounded-full flex items-center justify-center text-white mx-auto mb-6 group-hover:bg-gold transition-colors duration-300">
+                <CreditCard size={32} />
+              </div>
+              <h3 className="text-2xl font-serif font-normal text-charcoal mb-4">Credit Card</h3>
+              <p className="text-neutral mb-6">Secure online giving via Stripe. Set up recurring giving or make a one-time impact.</p>
+              <GlowingButton fullWidth size="sm" className="!rounded-full !bg-gold !text-white !border-gold transition-all duration-500 ease-out hover:scale-110 hover:shadow-2xl hover:shadow-gold/60 active:scale-95 hover:-translate-y-1">
+                Give Securely
+              </GlowingButton>
+            </div>
+          </ScrollReveal>
         </div>
-      </div>
+        </div>
+      </section>
     </div>
   );
 };
