@@ -21,7 +21,11 @@ export const AdminPageHeader = ({ title, subtitle, icon, rightSlot }: AdminPageH
           {subtitle && <p className="text-neutral mt-1">{subtitle}</p>}
         </div>
       </div>
-      {rightSlot && <div className="flex items-center gap-4">{rightSlot}</div>}
+      {rightSlot && (
+        <div className="w-full md:w-auto flex flex-col sm:flex-row gap-3 sm:items-center">
+          {rightSlot}
+        </div>
+      )}
     </div>
   );
 };

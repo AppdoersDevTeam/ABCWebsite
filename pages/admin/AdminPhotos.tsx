@@ -373,7 +373,7 @@ export const AdminPhotos = () => {
         subtitle="Manage photo folders and upload images."
         icon={<ImageIcon size={28} />}
         rightSlot={
-          <GlowingButton size="sm" onClick={openCreateFolderModal}>
+          <GlowingButton size="sm" fullWidth className="md:w-auto" onClick={openCreateFolderModal}>
             <FolderPlus size={16} className="mr-2" />
             Create Folder
           </GlowingButton>

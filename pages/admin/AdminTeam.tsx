@@ -546,7 +546,7 @@ export const AdminTeam = () => {
         subtitle="Manage staff and leadership team members."
         icon={<User size={28} />}
         rightSlot={
-          <GlowingButton size="sm" onClick={openCreateModal}>
+          <GlowingButton size="sm" fullWidth className="md:w-auto" onClick={openCreateModal}>
             <UserPlus size={16} className="mr-2" />
             Add Member
           </GlowingButton>

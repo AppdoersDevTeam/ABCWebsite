@@ -457,11 +457,13 @@ export const PublicLayout = () => {
               <button
                 onClick={() => setOpenFooterSection(openFooterSection === 'explore' ? null : 'explore')}
                 className="md:pointer-events-none flex items-center justify-between w-full md:w-auto mb-6 uppercase tracking-widest text-xs font-bold text-gold"
+                aria-expanded={openFooterSection === 'explore'}
+                aria-controls="footer-explore-links"
               >
                 <span>Explore</span>
                 <ChevronDown size={16} className={`md:hidden transition-transform duration-300 ${openFooterSection === 'explore' ? 'rotate-180' : ''}`} />
               </button>
-              <ul className={`space-y-3 ${openFooterSection === 'explore' ? 'block' : 'hidden'} md:block`}>
+              <ul id="footer-explore-links" className={`space-y-3 ${openFooterSection === 'explore' ? 'block' : 'hidden'} md:block`}>
                 <li><Link to="/" className="text-white hover:text-gold transition-colors text-sm">Home</Link></li>
                 <li><Link to="/about" className="text-white hover:text-gold transition-colors text-sm">About</Link></li>
                 <li><Link to="/events" className="text-white hover:text-gold transition-colors text-sm">Events</Link></li>
@@ -477,11 +479,13 @@ export const PublicLayout = () => {
               <button
                 onClick={() => setOpenFooterSection(openFooterSection === 'resources' ? null : 'resources')}
                 className="md:pointer-events-none flex items-center justify-between w-full md:w-auto mb-6 uppercase tracking-widest text-xs font-bold text-gold"
+                aria-expanded={openFooterSection === 'resources'}
+                aria-controls="footer-resources-links"
               >
                 <span>Resources</span>
                 <ChevronDown size={16} className={`md:hidden transition-transform duration-300 ${openFooterSection === 'resources' ? 'rotate-180' : ''}`} />
               </button>
-              <ul className={`space-y-3 ${openFooterSection === 'resources' ? 'block' : 'hidden'} md:block`}>
+              <ul id="footer-resources-links" className={`space-y-3 ${openFooterSection === 'resources' ? 'block' : 'hidden'} md:block`}>
                 <li><Link to="/im-new#welcome-pack" className="text-white hover:text-gold transition-colors text-sm">Welcome Pack</Link></li>
                 <li><Link to="/im-new#faq" className="text-white hover:text-gold transition-colors text-sm">FAQ</Link></li>
                 <li><Link to="/giving#direct-deposit" className="text-white hover:text-gold transition-colors text-sm">Direct Deposit</Link></li>
@@ -498,11 +502,13 @@ export const PublicLayout = () => {
               <button
                 onClick={() => setOpenFooterSection(openFooterSection === 'contact' ? null : 'contact')}
                 className="md:pointer-events-none flex items-center justify-between w-full md:w-auto mb-6 uppercase tracking-widest text-xs font-bold text-gold"
+                aria-expanded={openFooterSection === 'contact'}
+                aria-controls="footer-contact-links"
               >
                 <span>Get In Touch</span>
                 <ChevronDown size={16} className={`md:hidden transition-transform duration-300 ${openFooterSection === 'contact' ? 'rotate-180' : ''}`} />
               </button>
-              <div className={`${openFooterSection === 'contact' ? 'block' : 'hidden'} md:block`}>
+              <div id="footer-contact-links" className={`${openFooterSection === 'contact' ? 'block' : 'hidden'} md:block`}>
                 <ul className="space-y-3">
                   <li><Link to="/contact#visit" className="text-white hover:text-gold transition-colors text-sm">Visit Us</Link></li>
                   <li><Link to="/contact#call" className="text-white hover:text-gold transition-colors text-sm">Call Us</Link></li>
@@ -521,7 +527,16 @@ export const PublicLayout = () => {
           <div className="flex flex-col md:flex-row justify-between items-center text-white text-sm gap-4">
             <p>&copy; {new Date().getFullYear()} Ashburton Baptist Church.</p>
             <div className="flex flex-col items-end gap-2">
-              <div className="flex space-x-6">
+              <button
+                onClick={() => setOpenFooterSection(openFooterSection === 'legal' ? null : 'legal')}
+                className="md:pointer-events-none flex items-center justify-between w-full md:w-auto uppercase tracking-widest text-xs font-bold text-gold"
+                aria-expanded={openFooterSection === 'legal'}
+                aria-controls="footer-legal-links"
+              >
+                <span>Legal</span>
+                <ChevronDown size={16} className={`md:hidden transition-transform duration-300 ${openFooterSection === 'legal' ? 'rotate-180' : ''}`} />
+              </button>
+              <div id="footer-legal-links" className={`flex flex-col md:flex-row md:space-x-6 ${openFooterSection === 'legal' ? 'gap-2' : 'hidden'} md:flex`}>
                 <Link to="/privacy" className="hover:text-gold transition-colors">Privacy Policy</Link>
                 <Link to="/terms" className="hover:text-gold transition-colors">Terms & Conditions</Link>
               </div>

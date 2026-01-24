@@ -167,7 +167,7 @@ export const AdminEvents = () => {
         subtitle="Create and manage church events and meetings."
         icon={<CalIcon size={28} />}
         rightSlot={
-          <GlowingButton size="sm" onClick={openCreateModal}>
+          <GlowingButton size="sm" fullWidth className="md:w-auto" onClick={openCreateModal}>
             <Plus size={16} className="mr-2" />
             Add Event
           </GlowingButton>
@@ -184,7 +184,7 @@ export const AdminEvents = () => {
             const formattedDate = formatDate(evt.date);
             const dateParts = formattedDate.split(' ');
             return (
-          <div key={evt.id} className="flex items-center p-6 glass-card bg-white/80 border border-white/60 shadow-sm rounded-[12px] hover:border-gold hover:shadow-md transition-all group relative">
+          <div key={evt.id} className="flex flex-col sm:flex-row sm:items-center p-6 glass-card bg-white/80 border border-white/60 shadow-sm rounded-[12px] hover:border-gold hover:shadow-md transition-all group relative">
             <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
               <button
                 onClick={() => handleEdit(evt)}
@@ -201,7 +201,7 @@ export const AdminEvents = () => {
                 <Trash2 size={16} />
               </button>
             </div>
-            <div className="flex-shrink-0 w-20 text-center border-r border-gray-100 pr-6 mr-6">
+            <div className="flex-shrink-0 w-full sm:w-20 text-left sm:text-center border-b sm:border-b-0 sm:border-r border-gray-100 pb-4 sm:pb-0 sm:pr-6 sm:mr-6 mb-4 sm:mb-0">
               <span className="block text-xs text-gold uppercase font-bold tracking-widest">{dateParts[0]}</span>
               <span className="block text-3xl font-serif text-charcoal font-normal">{dateParts[1]}</span>
             </div>

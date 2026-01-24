@@ -169,7 +169,7 @@ export const AdminPrayerWall = () => {
         subtitle="Manage all prayer requests from the community."
         icon={<Heart size={28} />}
         rightSlot={
-          <GlowingButton size="sm" onClick={() => setIsCreateModalOpen(true)}>
+          <GlowingButton size="sm" fullWidth className="md:w-auto" onClick={() => setIsCreateModalOpen(true)}>
             <Plus size={16} className="mr-2" />
             Create Request
           </GlowingButton>
@@ -187,7 +187,7 @@ export const AdminPrayerWall = () => {
               key={req.id}
               className="glass-card bg-white/80 border border-white/60 shadow-sm p-6 rounded-[12px] hover:shadow-md hover:border-gold transition-all duration-300"
             >
-              <div className="flex justify-between items-start mb-4">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-gold/10 text-white flex items-center justify-center font-bold">
                     {req.name.charAt(0)}

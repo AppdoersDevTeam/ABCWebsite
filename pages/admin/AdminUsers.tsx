@@ -149,7 +149,7 @@ export const AdminUsers = () => {
         subtitle="Manage user permissions and approvals"
         icon={<Users size={28} />}
         rightSlot={
-          <GlowingButton size="sm" onClick={() => setIsCreateModalOpen(true)}>
+          <GlowingButton size="sm" fullWidth className="md:w-auto" onClick={() => setIsCreateModalOpen(true)}>
             <Plus size={16} className="mr-2" />
             Create User Profile
           </GlowingButton>

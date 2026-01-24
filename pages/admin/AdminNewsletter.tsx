@@ -149,7 +149,7 @@ export const AdminNewsletter = () => {
         subtitle="Upload and manage church newsletters."
         icon={<FileText size={28} />}
         rightSlot={
-          <GlowingButton size="sm" onClick={() => setIsUploadModalOpen(true)}>
+          <GlowingButton size="sm" fullWidth className="md:w-auto" onClick={() => setIsUploadModalOpen(true)}>
             <Upload size={16} className="mr-2" />
             Upload Newsletter
           </GlowingButton>
