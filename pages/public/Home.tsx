@@ -355,7 +355,7 @@ export const Home = () => {
                         <span className="text-gold font-bold tracking-[0.3em] mb-4 block text-base text-center">Who we are.</span>
                         <p className="text-white text-lg leading-relaxed mb-6">
                             We aren't just a building. We are a movement of people passionate about Jesus and our city. 
-                            From humble beginnings to a vibrant community, our mission remains the same: <span className="text-black font-bold">Be intention and Missional</span>
+                            From humble beginnings to a vibrant community, our mission remains the same: <span className="text-black font-bold">Be intentional and Missional.</span>
                         </p>
                         <p className="text-white leading-relaxed mb-8">
                             To see lives transformed by the gospel of Jesus Christ, equipping every generation to impact their community with hope, love, and service.
