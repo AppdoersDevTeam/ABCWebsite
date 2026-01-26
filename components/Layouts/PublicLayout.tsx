@@ -334,7 +334,7 @@ export const PublicLayout = () => {
                 {item.submenu && item.submenu.length > 0 ? (
                   <>
                     <div 
-                      className="flex items-center justify-between text-[26px] font-serif font-normal text-[#A8B774] hover:text-gold transition-all duration-300 cursor-pointer"
+                      className="flex items-center justify-between text-[22px] sm:text-[24px] md:text-[26px] font-serif font-normal text-[#A8B774] hover:text-gold transition-all duration-300 cursor-pointer"
                       onClick={() => setOpenMobileSubmenu(openMobileSubmenu === item.path ? null : item.path)}
                     >
                       {item.external ? (
@@ -381,7 +381,7 @@ export const PublicLayout = () => {
                               setOpenMobileSubmenu(null);
                               handleSubmenuClick(subItem.path, subItem.hash);
                             }}
-                            className="block text-[22px] font-serif text-[#A8B774] hover:text-gold transition-colors cursor-pointer"
+                            className="block text-[18px] sm:text-[20px] md:text-[22px] font-serif text-[#A8B774] hover:text-gold transition-colors cursor-pointer"
                           >
                             {subItem.label}
                           </a>
@@ -396,7 +396,7 @@ export const PublicLayout = () => {
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={() => setIsMenuOpen(false)}
-                      className="text-[26px] font-serif font-normal text-[#A8B774] hover:text-gold transition-all duration-300 block"
+                      className="text-[22px] sm:text-[24px] md:text-[26px] font-serif font-normal text-[#A8B774] hover:text-gold transition-all duration-300 block"
                     >
                       {item.label}
                     </a>
@@ -404,7 +404,7 @@ export const PublicLayout = () => {
                     <Link
                       to={item.path}
                       onClick={() => setIsMenuOpen(false)}
-                      className="text-[26px] font-serif font-normal text-[#A8B774] hover:text-gold transition-all duration-300 block"
+                      className="text-[22px] sm:text-[24px] md:text-[26px] font-serif font-normal text-[#A8B774] hover:text-gold transition-all duration-300 block"
                     >
                       {item.label}
                     </Link>
