@@ -231,8 +231,9 @@ export const PublicLayout = () => {
                       className={`text-base font-sans font-bold transition-all duration-300 relative group flex items-center gap-1 rounded-[6px] px-2 py-1 -mx-2 -my-1 ${
                         isLoginPage || scrolled
                           ? 'text-[#738242] hover:text-[#738242] hover:bg-[#fdefb4]'
-                          : 'text-white hover:text-gold'
+                          : 'text-white hover:text-white'
                       }`}
+                      style={isLoginPage || scrolled ? { color: '#738242' } : undefined}
                     >
                       {item.label}
                       <span className={`absolute -bottom-2 left-0 w-0 h-0.5 transition-all duration-300 group-hover:w-full ${
@@ -245,12 +246,17 @@ export const PublicLayout = () => {
                       className={`text-base font-sans font-bold transition-all duration-300 relative group flex items-center gap-1 rounded-[6px] px-2 py-1 -mx-2 -my-1 ${
                         isLoginPage || scrolled
                           ? 'text-[#738242] hover:text-[#738242] hover:bg-[#fdefb4]'
-                          : 'text-white hover:text-gold'
+                          : 'text-white hover:text-white'
                       }`}
+                      style={isLoginPage || scrolled ? { color: '#738242' } : undefined}
                     >
                       {item.label}
                       {item.submenu && item.submenu.length > 0 && (
-                        <ChevronDown size={14} className={`${isLoginPage || scrolled ? 'text-[#738242]' : 'text-white'} transition-transform duration-300 ${openDropdown === item.path ? 'rotate-180' : ''}`} />
+                        <ChevronDown
+                          size={14}
+                          className={`${isLoginPage || scrolled ? 'text-[#738242]' : 'text-white'} transition-transform duration-300 ${openDropdown === item.path ? 'rotate-180' : ''}`}
+                          style={isLoginPage || scrolled ? { color: '#738242' } : undefined}
+                        />
                       )}
                       <span className={`absolute -bottom-2 left-0 w-0 h-0.5 transition-all duration-300 group-hover:w-full ${
                         isLoginPage || scrolled ? 'bg-[#738242]' : 'bg-gold'
@@ -334,7 +340,9 @@ export const PublicLayout = () => {
                 {item.submenu && item.submenu.length > 0 ? (
                   <>
                     <div 
-                      className="flex items-center justify-between text-[22px] sm:text-[24px] md:text-[26px] font-serif font-normal text-[#A8B774] hover:text-gold transition-all duration-300 cursor-pointer"
+                      className={`flex items-center justify-between text-[22px] sm:text-[24px] md:text-[26px] font-serif font-normal transition-all duration-300 cursor-pointer ${
+                        scrolled ? 'text-[#738242] hover:text-[#738242]' : 'text-[#A8B774] hover:text-gold'
+                      }`}
                       onClick={() => setOpenMobileSubmenu(openMobileSubmenu === item.path ? null : item.path)}
                     >
                       {item.external ? (
@@ -366,7 +374,9 @@ export const PublicLayout = () => {
                       )}
                       <ChevronDown 
                         size={24} 
-                        className={`text-[#A8B774] transition-transform duration-300 ${openMobileSubmenu === item.path ? 'rotate-180' : ''}`} 
+                        className={`transition-transform duration-300 ${openMobileSubmenu === item.path ? 'rotate-180' : ''} ${
+                          scrolled ? 'text-[#738242]' : 'text-[#A8B774]'
+                        }`} 
                       />
                     </div>
                     {openMobileSubmenu === item.path && (
@@ -381,7 +391,9 @@ export const PublicLayout = () => {
                               setOpenMobileSubmenu(null);
                               handleSubmenuClick(subItem.path, subItem.hash);
                             }}
-                            className="block text-[18px] sm:text-[20px] md:text-[22px] font-serif text-[#A8B774] hover:text-gold transition-colors cursor-pointer"
+                            className={`block text-[18px] sm:text-[20px] md:text-[22px] font-serif transition-colors cursor-pointer ${
+                              scrolled ? 'text-[#738242] hover:text-[#738242]' : 'text-[#A8B774] hover:text-gold'
+                            }`}
                           >
                             {subItem.label}
                           </a>
@@ -396,7 +408,9 @@ export const PublicLayout = () => {
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={() => setIsMenuOpen(false)}
-                      className="text-[22px] sm:text-[24px] md:text-[26px] font-serif font-normal text-[#A8B774] hover:text-gold transition-all duration-300 block"
+                      className={`text-[22px] sm:text-[24px] md:text-[26px] font-serif font-normal transition-all duration-300 block ${
+                        scrolled ? 'text-[#738242] hover:text-[#738242]' : 'text-[#A8B774] hover:text-gold'
+                      }`}
                     >
                       {item.label}
                     </a>
@@ -404,7 +418,9 @@ export const PublicLayout = () => {
                     <Link
                       to={item.path}
                       onClick={() => setIsMenuOpen(false)}
-                      className="text-[22px] sm:text-[24px] md:text-[26px] font-serif font-normal text-[#A8B774] hover:text-gold transition-all duration-300 block"
+                      className={`text-[22px] sm:text-[24px] md:text-[26px] font-serif font-normal transition-all duration-300 block ${
+                        scrolled ? 'text-[#738242] hover:text-[#738242]' : 'text-[#A8B774] hover:text-gold'
+                      }`}
                     >
                       {item.label}
                     </Link>
