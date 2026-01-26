@@ -334,7 +334,7 @@ export const PublicLayout = () => {
                 {item.submenu && item.submenu.length > 0 ? (
                   <>
                     <div 
-                      className="flex items-center justify-between text-4xl font-serif font-normal text-[#A8B774] hover:text-gold transition-all duration-300 cursor-pointer"
+                      className="flex items-center justify-between text-[26px] font-serif font-normal text-[#A8B774] hover:text-gold transition-all duration-300 cursor-pointer"
                       onClick={() => setOpenMobileSubmenu(openMobileSubmenu === item.path ? null : item.path)}
                     >
                       {item.external ? (
@@ -381,7 +381,7 @@ export const PublicLayout = () => {
                               setOpenMobileSubmenu(null);
                               handleSubmenuClick(subItem.path, subItem.hash);
                             }}
-                            className="block text-2xl font-serif text-[#A8B774] hover:text-gold transition-colors cursor-pointer"
+                            className="block text-[22px] font-serif text-[#A8B774] hover:text-gold transition-colors cursor-pointer"
                           >
                             {subItem.label}
                           </a>
@@ -396,7 +396,7 @@ export const PublicLayout = () => {
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={() => setIsMenuOpen(false)}
-                      className="text-4xl font-serif font-normal text-[#A8B774] hover:text-gold transition-all duration-300 block"
+                      className="text-[26px] font-serif font-normal text-[#A8B774] hover:text-gold transition-all duration-300 block"
                     >
                       {item.label}
                     </a>
@@ -404,7 +404,7 @@ export const PublicLayout = () => {
                     <Link
                       to={item.path}
                       onClick={() => setIsMenuOpen(false)}
-                      className="text-4xl font-serif font-normal text-[#A8B774] hover:text-gold transition-all duration-300 block"
+                      className="text-[26px] font-serif font-normal text-[#A8B774] hover:text-gold transition-all duration-300 block"
                     >
                       {item.label}
                     </Link>
@@ -421,7 +421,7 @@ export const PublicLayout = () => {
                    <Link 
                      to="/login" 
                      onClick={() => setIsMenuOpen(false)}
-                     className="bg-gold px-[9px] py-[8px] lg:px-[17px] lg:py-[12px] xl:px-[25px] xl:py-[12px] rounded-[10px] font-sans font-normal text-xs lg:text-sm xl:text-base hover:bg-[#A8B774] transform hover:scale-105 transition-all duration-300 w-full inline-flex items-center justify-center whitespace-nowrap"
+                     className="bg-gold px-[9px] py-[8px] lg:px-[17px] lg:py-[12px] xl:px-[25px] xl:py-[12px] rounded-[10px] font-sans font-normal text-base lg:text-sm xl:text-base hover:bg-[#A8B774] transform hover:scale-105 transition-all duration-300 w-full inline-flex items-center justify-center whitespace-nowrap"
                    >
                      <LogIn size={18} className="mr-2 text-white" />
                      <span className="shine-text relative z-10 font-sans font-normal normal-case">Log in</span>
