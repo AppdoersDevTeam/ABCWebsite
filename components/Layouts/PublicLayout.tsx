@@ -441,7 +441,7 @@ export const PublicLayout = () => {
       <footer className="footer-gradient text-white pt-24 pb-12 border-t border-transparent relative z-10 w-full">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           {/* Main Footer Content */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12 border-b border-gray-100 pb-12 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12 border-b border-gray-100 pb-6 mb-6">
             {/* Brand Section */}
             <div className="lg:col-span-2">
               <h3 className="font-serif text-3xl md:text-5xl mb-6 leading-tight">Encounter. Connect.<br /><span className="text-gold">Equip. Impact.</span></h3>
@@ -461,8 +461,8 @@ export const PublicLayout = () => {
                 <div className="space-y-2">
                   <h4 className="font-bold text-gold mb-2 uppercase tracking-widest text-xs">Service Times</h4>
                   <p className="text-white leading-loose text-sm">
-                    Sundays: 10:00 AM<br />
-                    Online: 10:00 AM
+                    Sundays: 10:00 am<br />
+                    Prayer Meeting: 5:00 pm
                   </p>
                 </div>
               </div>
@@ -508,7 +508,6 @@ export const PublicLayout = () => {
                 <li><Link to="/giving#credit-card" className="text-white hover:text-gold transition-colors text-sm">Credit Card</Link></li>
                 <li><Link to="/events#sunday-service" className="text-white hover:text-gold transition-colors text-sm">Sunday Service</Link></li>
                 <li><Link to="/events#young-adults" className="text-white hover:text-gold transition-colors text-sm">Young Adults</Link></li>
-                <li><Link to="/events#community-lunch" className="text-white hover:text-gold transition-colors text-sm">Community Lunch</Link></li>
                 <li><Link to="/events#kids-program" className="text-white hover:text-gold transition-colors text-sm">Kids Program</Link></li>
               </ul>
             </div>
@@ -528,12 +527,18 @@ export const PublicLayout = () => {
                 <ul className="space-y-3">
                   <li><Link to="/contact#visit" className="text-white hover:text-gold transition-colors text-sm">Visit Us</Link></li>
                   <li><Link to="/contact#call" className="text-white hover:text-gold transition-colors text-sm">Call Us</Link></li>
-                  <li><Link to="/contact#email" className="text-white hover:text-gold transition-colors text-sm">Email Us</Link></li>
                   <li><Link to="/contact#message" className="text-white hover:text-gold transition-colors text-sm">Send Message</Link></li>
                 </ul>
-                <div className="mt-6 space-y-2">
-                  <p className="text-white text-sm">Phone: <a href="tel:03-308-5409" className="hover:text-gold transition-colors">03-308 5409</a></p>
-                  <p className="text-white text-sm">Email: <a href="mailto:office@ashburtonbaptist.co.nz" className="hover:text-gold transition-colors break-all">office@ashburtonbaptist.co.nz</a></p>
+                <div className="h-14" aria-hidden="true"></div>
+                <div className="mt-9 space-y-2">
+                  <p className="text-white text-sm hover:text-gold transition-colors">
+                    <span className="text-gold">Phone:</span>{' '}
+                    <a href="tel:03-308-5409" className="hover:text-gold transition-colors">03-308 5409</a>
+                  </p>
+                  <p className="text-white text-sm hover:text-gold transition-colors">
+                    <span className="text-gold">Email:</span>{' '}
+                    <a href="mailto:office@ashburtonbaptist.co.nz" className="hover:text-gold transition-colors break-all">office@ashburtonbaptist.co.nz</a>
+                  </p>
                 </div>
               </div>
             </div>
@@ -541,7 +546,10 @@ export const PublicLayout = () => {
 
           {/* Bottom Bar */}
           <div className="flex flex-col md:flex-row justify-between items-center text-white text-sm gap-4">
-            <p>&copy; {new Date().getFullYear()} Ashburton Baptist Church.</p>
+            <p>
+              <span className="text-gold">&copy; 2026 Ashburton Baptist Church.</span>
+              <span className="text-white"> | Develeped by APPDOERS.</span>
+            </p>
             <div className="flex flex-col items-end gap-2">
               <button
                 onClick={() => setOpenFooterSection(openFooterSection === 'legal' ? null : 'legal')}
@@ -556,12 +564,6 @@ export const PublicLayout = () => {
                 <Link to="/privacy" className="hover:text-gold transition-colors">Privacy Policy</Link>
                 <Link to="/terms" className="hover:text-gold transition-colors">Terms & Conditions</Link>
               </div>
-              <p className="text-xs text-white">
-                Website developed by{' '}
-                <a href="https://appdoers.co.nz/" target="_blank" rel="noopener noreferrer" className="text-gold hover:underline transition-colors">Appdoers</a>
-                {' '}in partnership with{' '}
-                <a href="https://buildwithsds.com/" target="_blank" rel="noopener noreferrer" className="text-gold hover:underline transition-colors">Build With SDS</a>
-              </p>
             </div>
           </div>
         </div>

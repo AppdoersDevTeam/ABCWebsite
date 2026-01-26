@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Calendar, Heart, PlayCircle, Clock, MapPin, Users, Church, DollarSign, Video, Info, HandHeart, Gift, ArrowDownToLine, MonitorPlay, Navigation, UserRound, RefreshCw, Settings, Handshake, Globe2, Network, HandCoins, BookOpen } from 'lucide-react';
+import { ArrowRight, Calendar, Heart, PlayCircle, Clock, MapPin, Users, Church, DollarSign, Video, Info, HandHeart, Gift, ArrowDownToLine, MonitorPlay, Navigation, UserRound, RefreshCw, Settings, Handshake, Globe2, Network, HandCoins, BookOpen, Plus, Minus } from 'lucide-react';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { VibrantCard } from '../../components/UI/VibrantCard';
 import { ScrollReveal } from '../../components/UI/ScrollReveal';
@@ -13,6 +13,7 @@ export const Home = () => {
   const [isLoadingEvents, setIsLoadingEvents] = useState(true);
   const [whatsOnEvents, setWhatsOnEvents] = useState<Event[]>([]);
   const [isLoadingWhatsOn, setIsLoadingWhatsOn] = useState(true);
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
 
   // Fetch upcoming events
   useEffect(() => {
@@ -107,6 +108,17 @@ export const Home = () => {
     }
   };
 
+  const faqItems = [
+    { q: "What can I expect at my first service?", a: "From the moment you arrive, you’ll be greeted by friendly people who are genuinely glad you’re here. Our services include worship, prayers, communion, birthdays and aniversaries celebrations, announcements and a Bible-based message that’s practical, intentional and relevant to everyday life. There’s no pressure to participate in anything you’re not comfortable with — simply come as you are and take it at your own pace." },
+    { q: "How long is the service?", a: "Our services usually last about 1h30 - 2hrs. This allows time for worship, prayers, communion, birthdays and aniversaries celebrations, announcements and a Bible-based message without feeling rushed or overly long." },
+    { q: "Does the church have a kids’ service?", a: "Yes! We offer a safe, fun, and engaging kids’ program during the service. Our trained and caring team creates an age-appropriate environment where children can learn about God while making friends. You’re welcome to check it out or keep your children with you — whatever feels best for your family." },
+    { q: "Do I need to be a member or have a church background to attend?", a: "Not at all. You don’t need to be a member, and you don’t need to have any church experience. Whether you’re exploring faith, returning to church, or have followed Jesus for years, you are welcome here." },
+    { q: "What if I don’t know anyone?", a: "You’re not alone — many people come for the first time without knowing anyone. Our community is friendly and welcoming, and there are simple ways to connect if you’d like, but no pressure if you prefer to remain anonymous at first." },
+    { q: "How can I get connected beyond Sunday services?", a: "There are opportunities to connect through small groups, events, and serving teams. These are great ways to build friendships, grow spiritually, and feel at home in the church — but again, participation is always optional and volunteer." },
+    { q: "What does the church believe?", a: "A.B.C. is a Bible-based Christian church focused on loving God, loving people, and serving our community. If you’d like to learn more about what we believe, we’d be happy to talk with you or point you to helpful resources @ About\\Our Beliefs." },
+    { q: "Where can I Park?", a: "We have a dedicated car park on Church grounds on Havelock Street. There is also ample free off-street parking available close to and in the vicinity of the Church auditorium. Please Note: that there are roadworks happening around the Church and all over the Town Centre, so please plan your time to allow for extra time to find parking." },
+  ];
+
   return (
     <div className="space-y-0 overflow-hidden">
       
@@ -181,13 +193,12 @@ export const Home = () => {
                      <div className="p-4 bg-[#fbcb05] rounded-full text-white flex-shrink-0 shadow-lg shadow-gold/30"><Clock size={32} strokeWidth={2}/></div>
                      <div>
                          <h3 className="font-serif font-normal text-2xl text-charcoal group-hover:text-gold transition-colors duration-300">Sundays 10AM</h3>
-                         <p className="text-neutral font-medium group-hover:text-charcoal transition-colors">In-Person & Online</p>
                      </div>
                  </div>
                  <div className="hidden md:block w-px h-24 bg-charcoal/10"></div>
                  <div className="text-center md:text-left max-w-lg">
                      <h3 className="font-serif font-normal text-2xl text-charcoal mb-2 group-hover:text-gold transition-colors duration-300">A Place to Belong</h3>
-                     <p className="text-neutral leading-relaxed group-hover:text-charcoal transition-colors">Whether you are exploring faith or looking for a home, you are welcome here.</p>
+                     <p className="text-neutral leading-relaxed group-hover:text-charcoal transition-colors">Where Faith and Family Grow Together like a Family.</p>
                  </div>
                  <div className="hidden md:block w-px h-24 bg-charcoal/10"></div>
                 <Link to="/im-new" className="w-full md:w-auto group"><GlowingButton variant="outline" fullWidth className="!rounded-full !bg-gold !text-white !border-gold transition-all duration-500 ease-out hover:scale-110 hover:shadow-2xl hover:shadow-gold/60 active:scale-95 hover:-translate-y-1">
@@ -199,8 +210,17 @@ export const Home = () => {
       </section>
 
       {/* Grid Features */}
-      <section className="section-gradient py-12 md:py-20 relative z-10 w-full">
-          <div className="container mx-auto px-4">
+      <section className="section-gradient py-12 md:py-20 relative z-10 w-full overflow-hidden">
+          <div
+            className="absolute inset-0 pointer-events-none opacity-20"
+            style={{
+              backgroundImage:
+                'url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2740%27 height=%2740%27 viewBox=%270 0 40 40%27%3E%3Cpath d=%27M20 6v28M6 20h28%27 stroke=%27%23cbd5e1%27 stroke-width=%271%27/%3E%3C/svg%3E")',
+              backgroundRepeat: 'repeat',
+              backgroundSize: '40px 40px',
+            }}
+          ></div>
+          <div className="container mx-auto px-4 relative z-10">
             <ScrollReveal direction="down" delay={0}>
               <div className="text-center mb-12 md:mb-16">
                   <Handshake className="text-gold mx-auto mb-6" size={64} />
@@ -319,26 +339,35 @@ export const Home = () => {
       </section>
 
       {/* About Preview */}
-      <section className="section-gradient py-12 md:py-20 relative z-10 w-full">
-          <div className="container mx-auto px-4">
+      <section className="section-gradient py-12 md:py-20 relative z-10 w-full overflow-hidden">
+          <div
+            className="absolute inset-0 pointer-events-none opacity-20"
+            style={{
+              backgroundImage:
+                'url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2740%27 height=%2740%27 viewBox=%270 0 40 40%27%3E%3Cpath d=%27M20 6v28M6 20h28%27 stroke=%27%23cbd5e1%27 stroke-width=%271%27/%3E%3C/svg%3E")',
+              backgroundRepeat: 'repeat',
+              backgroundSize: '40px 40px',
+            }}
+          ></div>
+          <div className="container mx-auto px-4 relative z-10">
               <div className="grid md:grid-cols-2 gap-8 items-center">
                   <ScrollReveal direction="right" delay={0}>
                     <div>
                         <div className="flex items-center gap-4 mb-6">
                             <Church className="text-gold flex-shrink-0" size={64} />
-                            <h2 className="text-4xl md:text-5xl font-serif font-normal text-white">Kia Ora. <span className="text-gold">Welcome to our Family.</span></h2>
+                            <h2 className="text-4xl md:text-5xl font-serif font-normal text-white">Welcome <span className="text-gold">to our Family.</span></h2>
                         </div>
                         <span className="text-gold font-bold tracking-[0.3em] mb-4 block text-base text-center">Who we are.</span>
                         <p className="text-white text-lg leading-relaxed mb-6">
                             We aren't just a building. We are a movement of people passionate about Jesus and our city. 
-                            From humble beginnings to a vibrant community, our mission remains the same: <span className="text-gold font-bold">Impact.</span>
+                            From humble beginnings to a vibrant community, our mission remains the same: <span className="text-black font-bold">Be intention and Missional</span>
                         </p>
                         <p className="text-white leading-relaxed mb-8">
                             To see lives transformed by the gospel of Jesus Christ, equipping every generation to impact their community with hope, love, and service.
                         </p>
                         <Link to="/about" className="group">
                             <GlowingButton variant="outline" className="!rounded-full !bg-gold !text-white !border-gold transition-all duration-500 ease-out hover:scale-110 hover:shadow-2xl hover:shadow-gold/60 active:scale-95 hover:-translate-y-1">
-                                <span className="transition-all duration-300 group-hover:tracking-wider">Read More</span>
+                                <span className="transition-all duration-300 group-hover:tracking-wider">EXPLORE</span>
                                 <ArrowRight size={16} className="ml-2 transition-all duration-500 group-hover:translate-x-2 group-hover:scale-125"/>
                             </GlowingButton>
                         </Link>
@@ -428,27 +457,58 @@ export const Home = () => {
       </section>
 
       {/* I'm New Preview */}
-      <section className="section-gradient py-12 md:py-20 relative z-10 w-full">
-          <div className="container mx-auto px-4">
+      <section className="section-gradient py-12 md:py-20 relative z-10 w-full overflow-hidden">
+          <div
+            className="absolute inset-0 pointer-events-none opacity-20"
+            style={{
+              backgroundImage:
+                'url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2740%27 height=%2740%27 viewBox=%270 0 40 40%27%3E%3Cpath d=%27M20 6v28M6 20h28%27 stroke=%27%23cbd5e1%27 stroke-width=%271%27/%3E%3C/svg%3E")',
+              backgroundRepeat: 'repeat',
+              backgroundSize: '40px 40px',
+            }}
+          ></div>
+          <div className="container mx-auto px-4 relative z-10">
               <div className="grid md:grid-cols-2 gap-8 items-center max-w-6xl mx-auto">
                   <ScrollReveal direction="right" delay={0}>
                     <div className="glass-card rounded-[16px] p-8 md:p-12 bg-white/80 hover-lift">
-                          <Info className="text-gold mb-6" size={64} />
-                          <h2 className="text-4xl md:text-5xl font-serif font-normal text-charcoal mb-6">We're glad you're here</h2>
+                          <div className="flex items-center gap-4 mb-6">
+                              <Info className="text-gold" size={64} />
+                              <h2 className="text-4xl md:text-5xl font-serif font-normal text-charcoal">Visitins US...</h2>
+                          </div>
                           <p className="text-neutral text-lg leading-relaxed mb-6">
                               Visiting a new church can be intimidating. We want to make your first experience at Ashburton Baptist as welcoming as possible. 
-                              Whether you're just visiting or looking for a place to call home, you belong here.
+                              Whether you’re visiting for the first time or prayerfully considering a church to call home, you are warmly welcome here.
                           </p>
                           <div className="space-y-3 mb-8">
                               <div className="flex items-start gap-3">
-                                  <Clock className="text-gold flex-shrink-0 mt-1" size={20} />
+                                  <Clock className="text-gold flex-shrink-0 mt-1" size={26} />
                                   <div>
-                                      <p className="font-bold text-charcoal">Service Times</p>
-                                      <p className="text-neutral text-sm">Sundays at 10:00 AM</p>
+                                      <p className="font-bold text-charcoal">Service Time</p>
+                                      <p className="text-neutral text-sm">Sunday at 10:00 am</p>
                                   </div>
                               </div>
                               <div className="flex items-start gap-3">
-                                  <MapPin className="text-gold flex-shrink-0 mt-1" size={20} />
+                                  <svg
+                                    className="h-[26px] w-[26px] flex-shrink-0 mt-1 text-gold"
+                                    viewBox="0 0 103.4 122.88"
+                                    aria-hidden="true"
+                                    focusable="false"
+                                  >
+                                    <path
+                                      fill="currentColor"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                      strokeLinejoin="round"
+                                      d="M56.76,37.15c-0.09,0.04-0.17,0.09-0.26,0.14c-0.3,0.18-0.55,0.41-0.74,0.7c-0.2,0.32-0.35,0.72-0.44,1.23 c-0.49,2.95-0.2,7.71,0.14,13.21c0.17,2.86,0.36,5.92,0.46,9.27c0.11,3.63-0.08,7.05-0.26,10.45c-0.17,3.18-0.34,6.34-0.27,9.47 c0.01,0.33,0.02,0.72,0.04,1.16c0.01,0.31,0.03,0.69,0.06,1.16c0.25,4.4,0.64,8.24,1.72,11.71c1.04,3.35,2.76,6.43,5.68,9.48 c0.77,0.81,3.66,3.11,6.83,5.55c4.04,3.11,8.45,6.36,9.6,7.07c1.22,0.75,1.6,2.35,0.84,3.57s-2.35,1.6-3.57,0.84 c-1.3-0.8-5.91-4.19-10.05-7.38c-3.34-2.57-6.44-5.06-7.4-6.06c-3.54-3.7-5.63-7.45-6.9-11.54c-0.18-0.57-0.34-1.15-0.49-1.74 c-1.25,4.03-3.35,8.04-6.74,12.14c-0.81,0.98-3.75,3.76-6.92,6.65c-3.85,3.51-8.1,7.26-9.24,8.12c-1.15,0.86-2.78,0.64-3.64-0.51 c-0.86-1.15-0.64-2.78,0.51-3.64c1.03-0.78,5.12-4.39,8.88-7.81c3.05-2.78,5.81-5.37,6.41-6.1c8.41-10.19,7.56-20.32,6.58-32.01 c-0.7-8.4-1.47-17.55,0.78-28.26c0.44-2.1,0.59-3.79,0.08-4.81c-0.33-0.65-1.09-1.13-2.47-1.42c-1.43,1.72-2.78,4.34-4.04,7.56 c-1.57,4.02-2.98,8.94-4.25,14.28c-0.33,1.4-1.73,2.26-3.13,1.93c-1.4-0.33-2.26-1.73-1.93-3.13c1.32-5.52,2.79-10.67,4.48-14.97 c1.61-4.12,3.44-7.49,5.54-9.73L48.68,7c-1.09-1.12-2.03-1.67-2.78-1.54c-1.09,0.2-2.33,1.62-3.75,4.51L31.43,37.74 c-2.73,7.07-4.3,11.75-5.03,16.52c-0.74,4.76-0.68,9.81-0.16,17.66l0.63,9.57c0.06,0.97-0.42,1.85-1.18,2.34L4.1,99.17 c-1.17,0.83-2.79,0.56-3.62-0.61c-0.83-1.17-0.56-2.79,0.61-3.62l20.49-14.57l-0.53-8.13c-0.54-8.19-0.59-13.53,0.22-18.78 c0.81-5.24,2.46-10.19,5.32-17.59L37.33,8.08c0.03-0.1,0.07-0.2,0.12-0.3c2.22-4.57,4.75-6.92,7.54-7.42 c2.25-0.4,4.41,0.38,6.49,2.17c1.56-1.34,3.18-2.26,4.9-2.48c2.75-0.35,5.29,0.91,7.52,4.69c0.11,0.16,0.2,0.34,0.28,0.54 l9.13,24.1c0.66,1.74,1.13,2.95,1.59,4.14c3.92,10.15,7.13,18.45,7.38,30.4c0.07,3,0.12,6.09,0.03,9.22 c-0.08,2.72-0.28,5.45-0.67,8.16l20.8,16.73c1.12,0.9,1.29,2.53,0.4,3.65c-0.9,1.12-2.53,1.29-3.65,0.4L77.2,84.4 c-0.76-0.61-1.09-1.57-0.93-2.47l0,0c0.53-3.01,0.77-5.99,0.86-8.93c0.09-3.03,0.03-6.05-0.03-8.98 C76.85,53,73.79,45.09,70.05,35.4c-0.58-1.51-1.18-3.06-1.61-4.18L59.38,7.3c-0.95-1.6-1.71-2.18-2.35-2.1 c-0.77,0.1-1.71,0.78-2.75,1.8l5.95,26.18c0.35,0.44,0.7,0.9,1.04,1.39c0.47,0.66,0.91,1.34,1.33,2.03 c1.75,2.88,3.24,6.23,4.57,10.08c1.32,3.8,2.48,8.06,3.58,12.82c0.32,1.4-0.55,2.79-1.95,3.11c-1.4,0.32-2.79-0.55-3.11-1.95 c-1.07-4.65-2.18-8.74-3.41-12.29c-1.22-3.51-2.56-6.53-4.11-9.08c-0.37-0.61-0.75-1.19-1.13-1.73 C56.95,37.42,56.85,37.29,56.76,37.15L56.76,37.15z M48.14,32.99c1.45,0.44,2.59,1.08,3.47,1.9c0.62-0.86,1.37-1.54,2.21-2.05 c0.29-0.18,0.6-0.33,0.91-0.47l-3.24-14.23L48.14,32.99L48.14,32.99z"
+                                    />
+                                  </svg>
+                                  <div>
+                                      <p className="font-bold text-charcoal">Prayer Meeting</p>
+                                      <p className="text-neutral text-sm">Sundays at 5:00 pm</p>
+                                  </div>
+                              </div>
+                              <div className="flex items-start gap-3">
+                                  <MapPin className="text-gold flex-shrink-0 mt-1" size={26} />
                                   <div>
                                       <p className="font-bold text-charcoal">Location</p>
                                       <p className="text-neutral text-sm">284 Havelock Street, Ashburton 7700</p>
@@ -457,7 +517,7 @@ export const Home = () => {
                           </div>
                           <Link to="/im-new" className="group">
                               <GlowingButton variant="outline" className="!rounded-full !bg-gold !text-white !border-gold transition-all duration-500 ease-out hover:scale-110 hover:shadow-2xl hover:shadow-gold/60 active:scale-95 hover:-translate-y-1">
-                                  <span className="transition-all duration-300 group-hover:tracking-wider">Learn More</span>
+                                  <span className="transition-all duration-300 group-hover:tracking-wider">Plan Your Visit</span>
                                   <ArrowRight size={16} className="ml-2 transition-all duration-500 group-hover:translate-x-2 group-hover:scale-125"/>
                               </GlowingButton>
                           </Link>
@@ -465,18 +525,32 @@ export const Home = () => {
                   </ScrollReveal>
                   <ScrollReveal direction="left" delay={200}>
                     <div className="space-y-4">
-                        <h3 className="text-2xl font-serif font-normal text-white mb-6">Frequently Asked Questions</h3>
-                        {[
-                            { q: "What to expect at your 1st Service", a: "We recommend arriving 15 minutes early. You'll be welcomed by our team who will help you find a seat." },
-                            { q: "How long are the Services?", a: "Our services are 90 minutes long, followed by time to connect in our Connect Café." },
-                        ].map((item, i) => (
+                        <h3 className="text-[28px] font-serif font-normal text-white mb-6">Frequently Asked Questions</h3>
+                        {faqItems.map((item, i) => {
+                          const isOpen = openFaqIndex === i;
+                          return (
                             <ScrollReveal key={i} direction="up" delay={i * 100}>
-                              <div className="bg-white border border-gray-200 p-6 rounded-[8px] hover:border-gold transition-all duration-300 group shadow-sm hover-lift">
-                                  <h4 className="font-serif text-lg text-charcoal font-normal mb-2 group-hover:text-gold transition-colors duration-300">{item.q}</h4>
-                                  <p className="text-neutral text-sm">{item.a}</p>
+                              <div className="bg-white border border-gray-200 px-6 py-[7px] rounded-[8px] hover:border-gold transition-all duration-300 group shadow-sm hover-lift">
+                                  <button
+                                    type="button"
+                                    className="w-full flex items-start gap-3 text-left"
+                                    onClick={() => setOpenFaqIndex(isOpen ? null : i)}
+                                    aria-expanded={isOpen}
+                                  >
+                                    <span className="mt-1 inline-flex h-7 w-7 items-center justify-center rounded-full border border-[#738242] text-[#738242] flex-shrink-0 group-hover:bg-[#fbcb05] group-hover:border-[#fbcb05] group-hover:text-charcoal">
+                                      {isOpen ? <Minus size={16} /> : <Plus size={16} />}
+                                    </span>
+                                    <div className="flex-1">
+                                      <h4 className="font-serif text-lg text-charcoal font-normal group-hover:text-gold transition-colors duration-300">
+                                        {item.q}
+                                      </h4>
+                                      {isOpen && <p className="text-neutral text-sm mt-2">{item.a}</p>}
+                                    </div>
+                                  </button>
                               </div>
                             </ScrollReveal>
-                        ))}
+                          );
+                        })}
                     </div>
                   </ScrollReveal>
               </div>
@@ -489,8 +563,8 @@ export const Home = () => {
               <ScrollReveal direction="down" delay={0}>
                 <div className="max-w-3xl mx-auto text-center">
                     <HandHeart className="text-gold mx-auto mb-6" size={64} />
-                    <span className="text-gold font-bold tracking-[0.3em] uppercase mb-4 block text-sm">Prayer</span>
-                    <h2 className="text-4xl md:text-5xl font-serif font-normal text-charcoal mb-6">We are here for you</h2>
+                    <span className="text-gold font-bold tracking-[0.3em] uppercase mb-4 block text-sm">Prayers</span>
+                    <h2 className="text-4xl md:text-5xl font-serif font-normal text-charcoal mb-6">We do support you...</h2>
                     <p className="text-neutral text-lg leading-relaxed mb-8 max-w-2xl mx-auto">
                         Your request is handled with confidentiality and care. Whether you need prayer for yourself, a loved one, or a situation, 
                         our community is ready to stand with you in prayer.
@@ -501,7 +575,7 @@ export const Home = () => {
                               "Bear one another's burdens, and so fulfill the law of Christ." - Galatians 6:2
                           </p>
                           <p className="text-neutral">
-                              Share your prayer request with us, and know that you're being lifted up in prayer by our church family.
+                              Prayer matters — Let us pray with you and for you.
                           </p>
                       </div>
                     </ScrollReveal>
@@ -519,8 +593,17 @@ export const Home = () => {
       </section>
 
       {/* Giving Preview */}
-      <section className="section-gradient py-12 md:py-20 relative z-10 w-full">
-          <div className="container mx-auto px-4">
+      <section className="section-gradient py-12 md:py-20 relative z-10 w-full overflow-hidden">
+          <div
+            className="absolute inset-0 pointer-events-none opacity-20"
+            style={{
+              backgroundImage:
+                'url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2740%27 height=%2740%27 viewBox=%270 0 40 40%27%3E%3Cpath d=%27M20 6v28M6 20h28%27 stroke=%27%23cbd5e1%27 stroke-width=%271%27/%3E%3C/svg%3E")',
+              backgroundRepeat: 'repeat',
+              backgroundSize: '40px 40px',
+            }}
+          ></div>
+          <div className="container mx-auto px-4 relative z-10">
               <div className="max-w-4xl mx-auto">
                   <ScrollReveal direction="down" delay={0}>
                     <div className="text-center mb-12">
@@ -528,9 +611,9 @@ export const Home = () => {
                         <span className="text-gold font-bold tracking-[0.3em] uppercase mb-4 block text-sm">Generosity</span>
                         <h2 className="text-4xl md:text-5xl font-serif font-normal text-white mb-6">Fuel the Mission</h2>
                         <p className="text-white text-lg leading-relaxed max-w-2xl mx-auto mb-8">
-                            "Each of you should give what you have decided in your heart to give, not reluctantly or under compulsion, for God loves a cheerful giver."
+                            Each of you should give what you have decided in your heart to give, not reluctantly or under compulsion, for God loves a cheerful giver.
+                            <span className="text-gold font-bold text-[15px]"> 2Cor 9:7</span>
                         </p>
-                        <p className="text-gold text-sm uppercase tracking-widest font-bold">- 2 Corinthians 9:7</p>
                     </div>
                   </ScrollReveal>
                   <div className="grid md:grid-cols-2 gap-8">
