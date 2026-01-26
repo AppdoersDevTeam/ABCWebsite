@@ -148,9 +148,9 @@ export const Home = () => {
               </h1>
             </ScrollReveal>
             <ScrollReveal direction="up" delay={200}>
-              <p className="text-[1.5625rem] leading-6 text-white text-center max-w-5xl mx-auto mb-6 transition-all duration-1000 delay-300">
-                <span className="block whitespace-nowrap font-raleway font-normal text-center">A place where faith meets community, and every person matters.</span>
-                <span className="block whitespace-nowrap mt-[12px] font-raleway font-normal text-center">Join us as we grow together in love, hope, and purpose.</span>
+              <p className="text-base sm:text-lg md:text-[1.375rem] lg:text-[1.5625rem] leading-relaxed text-white text-center max-w-5xl mx-auto mb-6 transition-all duration-1000 delay-300 px-2 sm:px-0">
+                <span className="block font-raleway font-normal text-center">A place where faith meets community, and every person matters.</span>
+                <span className="block mt-3 sm:mt-4 font-raleway font-normal text-center">Join us as we grow together in love, hope, and purpose.</span>
               </p>
             </ScrollReveal>
 
