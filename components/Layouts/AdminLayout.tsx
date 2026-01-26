@@ -85,8 +85,8 @@ export const AdminLayout = () => {
                   className={`
                     flex items-center space-x-4 px-4 py-3 rounded-[4px] transition-all duration-300 group relative overflow-hidden
                     ${isActive 
-                      ? 'bg-gold/10 text-[#738242] font-bold' 
-                      : 'text-[#738242] font-bold hover:bg-gray-50'}
+                      ? 'bg-gold/10 text-charcoal font-bold' 
+                      : 'text-neutral hover:text-charcoal hover:bg-gray-50'}
                   `}
                 >
                   {isActive && <div className="absolute left-0 top-0 bottom-0 w-1 bg-gold"></div>}

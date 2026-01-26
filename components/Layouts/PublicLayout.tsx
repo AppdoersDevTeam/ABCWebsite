@@ -228,21 +228,21 @@ export const PublicLayout = () => {
                       href={item.path}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-base font-sans font-bold text-[#738242] hover:text-[#738242] hover:bg-[#fdefb4] transition-all duration-300 relative group flex items-center gap-1 rounded-[6px] px-2 py-1 -mx-2 -my-1"
+                      className={`text-base font-sans font-normal ${isLoginPage || scrolled ? '!text-[#A8B774]' : 'text-white'} hover:text-gold transition-all duration-300 relative group flex items-center gap-1`}
                     >
                       {item.label}
-                      <span className="absolute -bottom-2 left-0 w-0 h-0.5 bg-[#738242] transition-all duration-300 group-hover:w-full"></span>
+                      <span className={`absolute -bottom-2 left-0 w-0 h-0.5 ${isLoginPage || scrolled ? 'bg-[#A8B774]' : 'bg-gold'} transition-all duration-300 group-hover:w-full`}></span>
                     </a>
                   ) : (
                     <Link
                       to={item.path}
-                      className="text-base font-sans font-bold text-[#738242] hover:text-[#738242] hover:bg-[#fdefb4] transition-all duration-300 relative group flex items-center gap-1 rounded-[6px] px-2 py-1 -mx-2 -my-1"
+                      className={`text-base font-sans font-normal ${isLoginPage || scrolled ? '!text-[#A8B774]' : 'text-white'} hover:text-gold transition-all duration-300 relative group flex items-center gap-1`}
                     >
                       {item.label}
                       {item.submenu && item.submenu.length > 0 && (
-                        <ChevronDown size={14} className={`text-[#738242] transition-transform duration-300 ${openDropdown === item.path ? 'rotate-180' : ''}`} />
+                        <ChevronDown size={14} className={`${isLoginPage || scrolled ? '!text-[#A8B774]' : 'text-white'} transition-transform duration-300 ${openDropdown === item.path ? 'rotate-180' : ''}`} />
                       )}
-                      <span className={`absolute -bottom-2 left-0 w-0 h-0.5 bg-[#738242] transition-all duration-300 group-hover:w-full ${location.pathname === item.path ? 'w-full' : ''}`}></span>
+                      <span className={`absolute -bottom-2 left-0 w-0 h-0.5 ${isLoginPage || scrolled ? 'bg-[#A8B774]' : 'bg-gold'} transition-all duration-300 group-hover:w-full ${location.pathname === item.path ? 'w-full' : ''}`}></span>
                     </Link>
                   )}
                   
@@ -272,7 +272,7 @@ export const PublicLayout = () => {
                               e.preventDefault();
                               handleSubmenuClick(subItem.path, subItem.hash);
                             }}
-                            className="block px-6 py-3 text-sm text-[#738242] hover:bg-[#fdefb4] hover:text-[#738242] transition-colors font-bold cursor-pointer"
+                            className="block px-6 py-3 text-sm text-charcoal hover:bg-gold/10 hover:text-gold transition-colors font-medium cursor-pointer"
                           >
                             {subItem.label}
                           </a>
@@ -318,7 +318,7 @@ export const PublicLayout = () => {
                 {item.submenu && item.submenu.length > 0 ? (
                   <>
                     <div 
-                      className="flex items-center justify-between text-4xl font-serif font-bold text-[#738242] hover:text-[#738242] hover:bg-[#fdefb4] transition-all duration-300 cursor-pointer rounded-[8px] px-4 py-3 -mx-4"
+                      className="flex items-center justify-between text-4xl font-serif font-normal text-[#A8B774] hover:text-gold transition-all duration-300 cursor-pointer"
                       onClick={() => setOpenMobileSubmenu(openMobileSubmenu === item.path ? null : item.path)}
                     >
                       {item.external ? (
@@ -350,7 +350,7 @@ export const PublicLayout = () => {
                       )}
                       <ChevronDown 
                         size={24} 
-                        className={`text-[#738242] transition-transform duration-300 ${openMobileSubmenu === item.path ? 'rotate-180' : ''}`} 
+                        className={`text-[#A8B774] transition-transform duration-300 ${openMobileSubmenu === item.path ? 'rotate-180' : ''}`} 
                       />
                     </div>
                     {openMobileSubmenu === item.path && (
@@ -365,7 +365,7 @@ export const PublicLayout = () => {
                               setOpenMobileSubmenu(null);
                               handleSubmenuClick(subItem.path, subItem.hash);
                             }}
-                            className="block text-2xl font-serif text-[#738242] hover:text-[#738242] hover:bg-[#fdefb4] transition-colors font-bold cursor-pointer rounded-[8px] px-3 py-2 -mx-3"
+                            className="block text-2xl font-serif text-[#A8B774] hover:text-gold transition-colors cursor-pointer"
                           >
                             {subItem.label}
                           </a>
@@ -380,7 +380,7 @@ export const PublicLayout = () => {
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={() => setIsMenuOpen(false)}
-                      className="text-4xl font-serif font-bold text-[#738242] hover:text-[#738242] hover:bg-[#fdefb4] transition-all duration-300 block rounded-[8px] px-4 py-3 -mx-4"
+                      className="text-4xl font-serif font-normal text-[#A8B774] hover:text-gold transition-all duration-300 block"
                     >
                       {item.label}
                     </a>
@@ -388,7 +388,7 @@ export const PublicLayout = () => {
                     <Link
                       to={item.path}
                       onClick={() => setIsMenuOpen(false)}
-                      className="text-4xl font-serif font-bold text-[#738242] hover:text-[#738242] hover:bg-[#fdefb4] transition-all duration-300 block rounded-[8px] px-4 py-3 -mx-4"
+                      className="text-4xl font-serif font-normal text-[#A8B774] hover:text-gold transition-all duration-300 block"
                     >
                       {item.label}
                     </Link>
