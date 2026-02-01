@@ -108,14 +108,16 @@ export const LeadershipBio = () => {
             <ScrollReveal direction="up" delay={200}>
               <p className="text-base sm:text-lg md:text-[1.375rem] lg:text-[1.5625rem] leading-relaxed text-white text-center max-w-5xl mx-auto mb-6 transition-all duration-1000 delay-300 px-2 sm:px-0">
                 {member.description ? (
-                  <span className="block font-raleway font-normal text-center">
-                    {member.role}.
-                  </span>
-                  <span className="block mt-3 sm:mt-4 font-raleway font-normal text-center">
-                    {member.description.length > 100 
-                      ? `${member.description.substring(0, 100)}...` 
-                      : member.description}
-                  </span>
+                  <>
+                    <span className="block font-raleway font-normal text-center">
+                      {member.role}.
+                    </span>
+                    <span className="block mt-3 sm:mt-4 font-raleway font-normal text-center">
+                      {member.description.length > 100 
+                        ? `${member.description.substring(0, 100)}...` 
+                        : member.description}
+                    </span>
+                  </>
                 ) : (
                   <>
                     <span className="block font-raleway font-normal text-center">{member.role}.</span>
