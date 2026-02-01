@@ -31,13 +31,13 @@ export const KidsProgram = () => {
           <div className="max-w-4xl mx-auto text-center">
             <ScrollReveal direction="up" delay={150}>
               <h1 className="text-white text-center max-w-5xl mx-auto mb-4 transition-all duration-1000 delay-250" style={{ fontFamily: 'Kaushan Script', fontSize: '4.25rem', lineHeight: '1.2' }}>
-                Kids Program
+                Kids Programme
               </h1>
             </ScrollReveal>
             <ScrollReveal direction="up" delay={200}>
               <p className="text-base sm:text-lg md:text-[1.375rem] lg:text-[1.5625rem] leading-relaxed text-white text-center max-w-5xl mx-auto mb-6 transition-all duration-1000 delay-300 px-2 sm:px-0">
                 <span className="block font-raleway font-normal text-center">Fun & Faith for Kids.</span>
-                <span className="block mt-3 sm:mt-4 font-raleway font-normal text-center">Safe, engaging programs for K-6.</span>
+                <span className="block mt-3 sm:mt-4 font-raleway font-normal text-center">Safe, engaging programmes for K-6.</span>
               </p>
             </ScrollReveal>
 
@@ -53,10 +53,11 @@ export const KidsProgram = () => {
             </ScrollReveal>
           </div>
           
-          {/* Pulsing Down Arrow */}
-          <div className="absolute bottom-[29px] left-1/2 -translate-x-1/2 z-20 pulse-arrow animate-ping-pong">
-            <ArrowDownToLine size={32} className="text-gold" />
-          </div>
+        </div>
+        
+        {/* Pulsing Down Arrow - positioned relative to section for proper centering */}
+        <div className="absolute bottom-6 left-0 right-0 flex justify-center z-20 pulse-arrow animate-ping-pong">
+          <ArrowDownToLine size={32} className="text-gold" />
         </div>
       </section>
 
@@ -70,9 +71,9 @@ export const KidsProgram = () => {
                   <div className="p-4 bg-[#fbcb05] rounded-full w-24 h-24 mx-auto mb-6 flex items-center justify-center text-white flex-shrink-0 shadow-lg shadow-gold/30">
                     <Users size={48} />
                   </div>
-                  <h2 className="text-4xl md:text-5xl font-serif font-normal text-charcoal mb-4 group-hover:text-gold transition-colors duration-300">Kids Program</h2>
+                  <h2 className="text-4xl md:text-5xl font-serif font-normal text-charcoal mb-4 group-hover:text-gold transition-colors duration-300">Kids Programme</h2>
                   <p className="text-xl text-neutral leading-relaxed group-hover:text-charcoal transition-colors">
-                    Fun and faith for K-6. We create engaging, age-appropriate programs where children 
+                    Fun and faith for K-6. We create engaging, age-appropriate programmes where children 
                     can learn about Jesus, build friendships, and grow in their faith in a safe and 
                     welcoming environment.
                   </p>
@@ -119,7 +120,7 @@ export const KidsProgram = () => {
                   <h3 className="font-serif text-3xl font-normal text-charcoal mb-6 group-hover:text-gold transition-colors duration-300">What We Do</h3>
                   <div className="space-y-4 text-neutral leading-relaxed group-hover:text-charcoal transition-colors">
                     <p>
-                      Our Kids Program is designed to make learning about Jesus fun and engaging. 
+                      Our Kids Programme is designed to make learning about Jesus fun and engaging. 
                       We use age-appropriate activities, games, music, and Bible stories to help 
                       children understand God's love for them.
                     </p>

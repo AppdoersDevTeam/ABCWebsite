@@ -37,7 +37,7 @@ export const SarahJenkins = () => {
             <ScrollReveal direction="up" delay={200}>
               <p className="text-base sm:text-lg md:text-[1.375rem] lg:text-[1.5625rem] leading-relaxed text-white text-center max-w-5xl mx-auto mb-6 transition-all duration-1000 delay-300 px-2 sm:px-0">
                 <span className="block font-raleway font-normal text-center">Executive Pastor.</span>
-                <span className="block mt-3 sm:mt-4 font-raleway font-normal text-center">Organizational excellence</span>
+                <span className="block mt-3 sm:mt-4 font-raleway font-normal text-center">Organisational excellence</span>
                 <span className="block mt-3 sm:mt-4 font-raleway font-normal text-center">and a heart for service.</span>
               </p>
             </ScrollReveal>
@@ -54,10 +54,11 @@ export const SarahJenkins = () => {
             </ScrollReveal>
           </div>
           
-          {/* Pulsing Down Arrow */}
-          <div className="absolute bottom-[29px] left-1/2 -translate-x-1/2 z-20 pulse-arrow animate-ping-pong">
-            <ArrowDownToLine size={32} className="text-gold" />
-          </div>
+        </div>
+        
+        {/* Pulsing Down Arrow - positioned relative to section for proper centering */}
+        <div className="absolute bottom-6 left-0 right-0 flex justify-center z-20 pulse-arrow animate-ping-pong">
+          <ArrowDownToLine size={32} className="text-gold" />
         </div>
       </section>
       
@@ -81,7 +82,7 @@ export const SarahJenkins = () => {
                   <p>
                     Sarah Jenkins serves as Executive Pastor, overseeing the day-to-day operations and 
                     strategic planning of the church. With a background in business administration and 
-                    ministry, Sarah brings organizational excellence and a heart for service.
+                    ministry, Sarah brings organisational excellence and a heart for service.
                   </p>
                   <p>
                     Sarah joined the team in 2018 and has been instrumental in developing our community 

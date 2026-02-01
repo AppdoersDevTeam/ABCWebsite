@@ -228,24 +228,22 @@ export const PublicLayout = () => {
                       href={item.path}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={`text-base font-sans font-bold transition-all duration-300 relative group flex items-center gap-1 rounded-[6px] px-2 py-1 -mx-2 -my-1 ${
+                      className={`text-base font-sans font-bold transition-all duration-300 relative group flex items-center gap-1 ${
                         isLoginPage || scrolled
-                          ? 'text-[#738242] hover:text-[#738242] hover:bg-[#fdefb4]'
+                          ? 'text-[#738242] hover:text-[#738242]'
                           : 'text-white hover:text-white'
                       }`}
                       style={isLoginPage || scrolled ? { color: '#738242' } : undefined}
                     >
                       {item.label}
-                      <span className={`absolute -bottom-2 left-0 w-0 h-0.5 transition-all duration-300 group-hover:w-full ${
-                        isLoginPage || scrolled ? 'bg-[#738242]' : 'bg-gold'
-                      }`}></span>
+                      <span className={`absolute -bottom-2 left-0 w-0 h-0.5 transition-all duration-300 group-hover:w-full bg-gold`}></span>
                     </a>
                   ) : (
                     <Link
                       to={item.path}
-                      className={`text-base font-sans font-bold transition-all duration-300 relative group flex items-center gap-1 rounded-[6px] px-2 py-1 -mx-2 -my-1 ${
+                      className={`text-base font-sans font-bold transition-all duration-300 relative group flex items-center gap-1 ${
                         isLoginPage || scrolled
-                          ? 'text-[#738242] hover:text-[#738242] hover:bg-[#fdefb4]'
+                          ? 'text-[#738242] hover:text-[#738242]'
                           : 'text-white hover:text-white'
                       }`}
                       style={isLoginPage || scrolled ? { color: '#738242' } : undefined}
@@ -258,9 +256,7 @@ export const PublicLayout = () => {
                           style={isLoginPage || scrolled ? { color: '#738242' } : undefined}
                         />
                       )}
-                      <span className={`absolute -bottom-2 left-0 w-0 h-0.5 transition-all duration-300 group-hover:w-full ${
-                        isLoginPage || scrolled ? 'bg-[#738242]' : 'bg-gold'
-                      } ${location.pathname === item.path ? 'w-full' : ''}`}></span>
+                      <span className={`absolute -bottom-2 left-0 w-0 h-0.5 transition-all duration-300 group-hover:w-full bg-gold ${location.pathname === item.path ? 'w-full' : ''}`}></span>
                     </Link>
                   )}
                   
@@ -323,7 +319,11 @@ export const PublicLayout = () => {
 
             {/* Mobile Menu Button */}
             <button
-              className="lg:hidden p-2 text-charcoal hover:text-gold transition-colors"
+              className={`lg:hidden p-2 transition-colors ${
+                isLoginPage || scrolled
+                  ? 'text-[#738242] hover:text-gold'
+                  : 'text-white hover:text-gold'
+              }`}
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
               {isMenuOpen ? <X size={28} /> : <Menu size={28} />}

@@ -94,12 +94,12 @@ export const NeedPrayer = () => {
                 <span className="block mt-3 sm:mt-4 font-raleway font-normal text-center">and care. We are ready to stand with you in prayer.</span>
               </p>
             </ScrollReveal>
-          
-          {/* Pulsing Down Arrow */}
-          <div className="absolute bottom-[29px] left-1/2 -translate-x-1/2 z-20 pulse-arrow animate-ping-pong">
-            <ArrowDownToLine size={32} className="text-gold" />
           </div>
         </div>
+        
+        {/* Pulsing Down Arrow - positioned relative to section for proper centering */}
+        <div className="absolute bottom-6 left-0 right-0 flex justify-center z-20 pulse-arrow animate-ping-pong">
+          <ArrowDownToLine size={32} className="text-gold" />
         </div>
       </section>
       

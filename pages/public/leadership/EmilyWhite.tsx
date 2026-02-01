@@ -54,10 +54,11 @@ export const EmilyWhite = () => {
             </ScrollReveal>
           </div>
           
-          {/* Pulsing Down Arrow */}
-          <div className="absolute bottom-[29px] left-1/2 -translate-x-1/2 z-20 pulse-arrow animate-ping-pong">
-            <ArrowDownToLine size={32} className="text-gold" />
-          </div>
+        </div>
+        
+        {/* Pulsing Down Arrow - positioned relative to section for proper centering */}
+        <div className="absolute bottom-6 left-0 right-0 flex justify-center z-20 pulse-arrow animate-ping-pong">
+          <ArrowDownToLine size={32} className="text-gold" />
         </div>
       </section>
       
@@ -81,7 +82,7 @@ export const EmilyWhite = () => {
                   <p>
                     Emily White leads our Kids & Families ministry, creating safe and engaging spaces 
                     where children can learn about Jesus and grow in their faith. With a background 
-                    in early childhood education, Emily brings creativity and care to every program.
+                    in early childhood education, Emily brings creativity and care to every programme.
                   </p>
                   <p>
                     Emily joined the team in 2020 and has transformed our children's programs, making 

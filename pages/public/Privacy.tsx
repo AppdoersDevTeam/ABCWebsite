@@ -79,7 +79,7 @@ export const Privacy = () => {
             <section className="mb-12">
               <h2 className="text-3xl font-serif font-normal text-charcoal mb-6">6. Data Security</h2>
               <p className="text-neutral leading-relaxed mb-4">
-                We implement appropriate technical and organizational security measures to protect your personal information. However, no method of transmission over the Internet or electronic storage is 100% secure, and we cannot guarantee absolute security.
+                We implement appropriate technical and organisational security measures to protect your personal information. However, no method of transmission over the Internet or electronic storage is 100% secure, and we cannot guarantee absolute security.
               </p>
             </section>
 

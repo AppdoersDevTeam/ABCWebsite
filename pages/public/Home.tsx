@@ -109,14 +109,14 @@ export const Home = () => {
   };
 
   const faqItems = [
-    { q: "What can I expect at my first service?", a: "From the moment you arrive, you’ll be greeted by friendly people who are genuinely glad you’re here. Our services include worship, prayers, communion, birthdays and aniversaries celebrations, announcements and a Bible-based message that’s practical, intentional and relevant to everyday life. There’s no pressure to participate in anything you’re not comfortable with — simply come as you are and take it at your own pace." },
-    { q: "How long is the service?", a: "Our services usually last about 1h30 - 2hrs. This allows time for worship, prayers, communion, birthdays and aniversaries celebrations, announcements and a Bible-based message without feeling rushed or overly long." },
-    { q: "Does the church have a kids’ service?", a: "Yes! We offer a safe, fun, and engaging kids’ program during the service. Our trained and caring team creates an age-appropriate environment where children can learn about God while making friends. You’re welcome to check it out or keep your children with you — whatever feels best for your family." },
+    { q: "What can I expect at my first service?", a: "From the moment you arrive, you’ll be greeted by friendly people who are genuinely glad you’re here. Our services include worship, prayers, communion, birthday and anniversary celebrations, announcements and a Bible-based message that’s practical, intentional and relevant to everyday life. There’s no pressure to participate in anything you’re not comfortable with — simply come as you are and take it at your own pace." },
+    { q: "How long is the service?", a: "Our services usually last about 1h30 - 2hrs. This allows time for worship, prayers, communion, birthday and anniversary celebrations, announcements and a Bible-based message without feeling rushed or overly long." },
+    { q: "Does the church have a kids’ service?", a: "Yes! We offer a safe, fun, and engaging kids’ programme during the service. Our trained and caring team creates an age-appropriate environment where children can learn about God while making friends. You’re welcome to check it out or keep your children with you — whatever feels best for your family." },
     { q: "Do I need to be a member or have a church background to attend?", a: "Not at all. You don’t need to be a member, and you don’t need to have any church experience. Whether you’re exploring faith, returning to church, or have followed Jesus for years, you are welcome here." },
     { q: "What if I don’t know anyone?", a: "You’re not alone — many people come for the first time without knowing anyone. Our community is friendly and welcoming, and there are simple ways to connect if you’d like, but no pressure if you prefer to remain anonymous at first." },
     { q: "How can I get connected beyond Sunday services?", a: "There are opportunities to connect through small groups, events, and serving teams. These are great ways to build friendships, grow spiritually, and feel at home in the church — but again, participation is always optional and volunteer." },
     { q: "What does the church believe?", a: "A.B.C. is a Bible-based Christian church focused on loving God, loving people, and serving our community. If you’d like to learn more about what we believe, we’d be happy to talk with you or point you to helpful resources @ About\\Our Beliefs." },
-    { q: "Where can I Park?", a: "We have a dedicated car park on Church grounds on Havelock Street. There is also ample free off-street parking available close to and in the vicinity of the Church auditorium. Please Note: that there are roadworks happening around the Church and all over the Town Centre, so please plan your time to allow for extra time to find parking." },
+    { q: "Where can I park?", a: "We have a dedicated car park on church grounds on Havelock Street. There is also ample free off-street parking available close to and in the vicinity of the church auditorium. Please note that there are roadworks happening around the church and all over the town centre, so please plan your time to allow for extra time to find parking." },
   ];
 
   return (
@@ -532,14 +532,20 @@ export const Home = () => {
                                     onClick={() => setOpenFaqIndex(isOpen ? null : i)}
                                     aria-expanded={isOpen}
                                   >
-                                    <span className="mt-1 inline-flex h-7 w-7 items-center justify-center rounded-full border border-[#738242] text-[#738242] flex-shrink-0 group-hover:bg-[#fbcb05] group-hover:border-[#fbcb05] group-hover:text-charcoal">
+                                    <span className="mt-1 inline-flex h-7 w-7 items-center justify-center rounded-full border border-[#738242] text-[#738242] flex-shrink-0 group-hover:bg-[#fbcb05] group-hover:border-[#fbcb05] group-hover:text-charcoal transition-transform duration-300">
                                       {isOpen ? <Minus size={16} /> : <Plus size={16} />}
                                     </span>
                                     <div className="flex-1">
                                       <h4 className="font-serif text-lg text-charcoal font-normal group-hover:text-gold transition-colors duration-300">
                                         {item.q}
                                       </h4>
-                                      {isOpen && <p className="text-neutral text-sm mt-2">{item.a}</p>}
+                                      <div 
+                                        className={`grid transition-all duration-300 ease-in-out ${isOpen ? 'grid-rows-[1fr] opacity-100 mt-2' : 'grid-rows-[0fr] opacity-0'}`}
+                                      >
+                                        <div className="overflow-hidden">
+                                          <p className="text-neutral text-sm">{item.a}</p>
+                                        </div>
+                                      </div>
                                     </div>
                                   </button>
                               </div>

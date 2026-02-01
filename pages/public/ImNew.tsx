@@ -43,10 +43,11 @@ export const ImNew = () => {
             </ScrollReveal>
           </div>
           
-          {/* Pulsing Down Arrow */}
-          <div className="absolute bottom-[29px] left-1/2 -translate-x-1/2 z-20 pulse-arrow animate-ping-pong">
-            <ArrowDownToLine size={32} className="text-gold" />
-          </div>
+        </div>
+        
+        {/* Pulsing Down Arrow - positioned relative to section for proper centering */}
+        <div className="absolute bottom-6 left-0 right-0 flex justify-center z-20 pulse-arrow animate-ping-pong">
+          <ArrowDownToLine size={32} className="text-gold" />
         </div>
       </section>
       
@@ -116,15 +117,15 @@ export const ImNew = () => {
                 },
                 { 
                     q: "Can I bring my children?", 
-                    a: "We are a family-friendly church and welcome babies and children of all ages. We have a dedicated Parents room for caregivers and parents and their little ones. As well as some fantastic kids church programs that run during the morning service in the school term. Find out all of the details about the Ashburton Baptist Church Kids programs and facilities here." 
+                    a: "We are a family-friendly church and welcome babies and children of all ages. We have a dedicated Parents room for caregivers and parents and their little ones. As well as some fantastic kids church programmes that run during the morning service in the school term. Find out all of the details about the Ashburton Baptist Church Kids programmes and facilities here." 
                 },
                 { 
                     q: "What is the music like?", 
                     a: "We enjoy a wide range of praise and worship music from hymns to contemporary songs and we cater for all ages. Our services are sensitive to the Holy Spirit and sometimes have free worship that flows on from our songs." 
                 },
                 { 
-                    q: "Where can I Park?", 
-                    a: "We have a dedicated car park on Church grounds on Havelock Street. There is also ample free off-street parking available close to and in the vicinity of the Church auditorium. Please Note: that there are roadworks happening around the Church and all over the Town Centre, so please plan your time to allow for extra time to find parking." 
+                    q: "Where can I park?", 
+                    a: "We have a dedicated car park on church grounds on Havelock Street. There is also ample free off-street parking available close to and in the vicinity of the church auditorium. Please note that there are roadworks happening around the church and all over the town centre, so please plan your time to allow for extra time to find parking." 
                 },
                 { 
                     q: "How to Find Us", 
@@ -145,22 +146,26 @@ export const ImNew = () => {
                                 size={20} 
                             />
                         </button>
-                        <div className={`overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'}`}>
-                            <div className="px-6 pb-6">
-                                <p className="text-neutral text-sm leading-relaxed">{item.a}</p>
-                                {item.q === "How to Find Us" && (
-                                    <div className="mt-4">
-                                        <a 
-                                            href="https://www.google.com/maps/search/?api=1&query=284+Havelock+Street+Ashburton+7700" 
-                                            target="_blank" 
-                                            rel="noopener noreferrer"
-                                            className="inline-flex items-center gap-2 text-gold hover:text-charcoal font-bold transition-colors duration-300 group/link"
-                                        >
-                                            <MapPin size={18} className="group-hover/link:scale-110 transition-transform" />
-                                            View Map & Directions
-                                        </a>
-                                    </div>
-                                )}
+                        <div 
+                          className={`grid transition-all duration-300 ease-in-out ${isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}
+                        >
+                            <div className="overflow-hidden">
+                                <div className="px-6 pb-6">
+                                    <p className="text-neutral text-sm leading-relaxed">{item.a}</p>
+                                    {item.q === "How to Find Us" && (
+                                        <div className="mt-4">
+                                            <a 
+                                                href="https://www.google.com/maps/search/?api=1&query=284+Havelock+Street+Ashburton+7700" 
+                                                target="_blank" 
+                                                rel="noopener noreferrer"
+                                                className="inline-flex items-center gap-2 text-gold hover:text-charcoal font-bold transition-colors duration-300 group/link"
+                                            >
+                                                <MapPin size={18} className="group-hover/link:scale-110 transition-transform" />
+                                                View Map & Directions
+                                            </a>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>

@@ -54,10 +54,11 @@ export const SundayService = () => {
             </ScrollReveal>
           </div>
           
-          {/* Pulsing Down Arrow */}
-          <div className="absolute bottom-[29px] left-1/2 -translate-x-1/2 z-20 pulse-arrow animate-ping-pong">
-            <ArrowDownToLine size={32} className="text-gold" />
-          </div>
+        </div>
+        
+        {/* Pulsing Down Arrow - positioned relative to section for proper centering */}
+        <div className="absolute bottom-6 left-0 right-0 flex justify-center z-20 pulse-arrow animate-ping-pong">
+          <ArrowDownToLine size={32} className="text-gold" />
         </div>
       </section>
       
@@ -163,14 +164,14 @@ export const SundayService = () => {
                 </div>
               </ScrollReveal>
 
-              {/* Children's Programs */}
+              {/* Children's Programmes */}
               <ScrollReveal direction="up" delay={500}>
                 <div className="glass-card rounded-[16px] p-8 md:p-12 border border-white/50 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group hover-lift bg-white/70">
                   <div className="flex items-start gap-4 mb-6">
                     <div className="p-4 bg-[#fbcb05] rounded-full text-white flex-shrink-0 shadow-lg shadow-gold/30">
                       <Users size={32} />
                     </div>
-                    <h3 className="font-serif text-3xl font-normal text-charcoal group-hover:text-gold transition-colors duration-300">Children's Programs</h3>
+                    <h3 className="font-serif text-3xl font-normal text-charcoal group-hover:text-gold transition-colors duration-300">Children's Programmes</h3>
                   </div>
                   <div className="space-y-4 text-neutral leading-relaxed group-hover:text-charcoal transition-colors">
                     <p>
@@ -200,7 +201,7 @@ export const SundayService = () => {
                     </p>
                     <p className="text-sm text-neutral/80">
                       <strong>Note:</strong> There may be roadworks happening around the church and in the 
-                      Town Centre, so please plan your time to allow for extra time to find parking.
+                      town centre, so please plan your time to allow for extra time to find parking.
                     </p>
                   </div>
                 </div>
