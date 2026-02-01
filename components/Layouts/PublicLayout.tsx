@@ -578,6 +578,7 @@ export const PublicLayout = () => {
               >
                 AppDoers
               </a>
+              <span className="text-white">.</span>
             </p>
             <div className="flex flex-col items-end gap-2">
               <button
