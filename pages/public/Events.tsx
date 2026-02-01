@@ -123,20 +123,16 @@ export const Events = () => {
         {/* Hero Content */}
         <div className="container relative z-10 px-4 mx-auto pt-[224px] md:pt-[256px] pb-24 md:pb-28">
           <div className="max-w-4xl mx-auto text-center">
-            <ScrollReveal direction="up" delay={100}>
-              <h1 className="text-white text-center max-w-5xl mx-auto mb-4 transition-all duration-1000 delay-200" style={{ fontFamily: 'Inter', fontSize: '2.5rem', lineHeight: '1.2', marginTop: '63px' }}>
-                What's On
-              </h1>
-            </ScrollReveal>
             <ScrollReveal direction="up" delay={150}>
               <h1 className="text-white text-center max-w-5xl mx-auto mb-4 transition-all duration-1000 delay-250" style={{ fontFamily: 'Kaushan Script', fontSize: '4.25rem', lineHeight: '1.2' }}>
                 Calendar
               </h1>
             </ScrollReveal>
             <ScrollReveal direction="up" delay={200}>
-              <p className="text-[1.5625rem] leading-6 text-white text-center max-w-5xl mx-auto mb-6 transition-all duration-1000 delay-300">
-                <span className="block whitespace-nowrap font-raleway font-normal text-center">Join us this week</span>
-                <span className="block whitespace-nowrap mt-[12px] font-raleway font-normal text-center">and be part of our community.</span>
+              <p className="text-base sm:text-lg md:text-[1.375rem] lg:text-[1.5625rem] leading-relaxed text-white text-center max-w-5xl mx-auto mb-6 transition-all duration-1000 delay-300 px-2 sm:px-0">
+                <span className="block font-raleway font-normal text-center">What's On.</span>
+                <span className="block mt-3 sm:mt-4 font-raleway font-normal text-center">Join us this week</span>
+                <span className="block mt-3 sm:mt-4 font-raleway font-normal text-center">and be part of our community.</span>
               </p>
             </ScrollReveal>
           </div>
@@ -148,7 +144,7 @@ export const Events = () => {
         </div>
       </section>
 
-      <section className="section-gradient-soft py-12 md:py-20 relative z-10">
+      <section className="section-plain py-12 md:py-20 relative z-10">
         <div className="container mx-auto px-4">
           <ScrollReveal direction="down" delay={0}>
             <div className="text-center mb-12 md:mb-16">
@@ -188,8 +184,17 @@ export const Events = () => {
         </div>
       </section>
       
-      <section className="section-gradient py-12 md:py-20 relative z-10">
-        <div className="container mx-auto px-4">
+      <section className="section-gradient py-12 md:py-20 relative z-10 overflow-hidden">
+        <div
+          className="absolute inset-0 pointer-events-none opacity-20"
+          style={{
+            backgroundImage:
+              'url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2740%27 height=%2740%27 viewBox=%270 0 40 40%27%3E%3Cpath d=%27M20 6v28M6 20h28%27 stroke=%27%23cbd5e1%27 stroke-width=%271%27/%3E%3C/svg%3E")',
+            backgroundRepeat: 'repeat',
+            backgroundSize: '40px 40px',
+          }}
+        ></div>
+        <div className="container mx-auto px-4 relative z-10">
           <ScrollReveal direction="down" delay={0}>
             <div className="text-center mb-12">
               <Calendar className="text-gold mx-auto mb-6" size={64} />

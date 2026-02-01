@@ -42,37 +42,38 @@ export const AdminLayout = () => {
   ];
 
   return (
-    <div className="flex h-screen font-sans text-charcoal relative overflow-hidden section-plain selection:bg-gold selection:text-charcoal">
-      <ScrollToTop />
-      
-      {/* Mobile Sidebar Overlay */}
-      {isSidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-charcoal/20 backdrop-blur-sm z-40 lg:hidden"
-          onClick={() => setIsSidebarOpen(false)}
-        />
-      )}
+    <div className="page-shell page-shell-image h-screen">
+      <div className="page-shell-content flex h-screen font-sans text-charcoal relative overflow-hidden selection:bg-gold selection:text-charcoal">
+        <ScrollToTop />
+        
+        {/* Mobile Sidebar Overlay */}
+        {isSidebarOpen && (
+          <div 
+            className="fixed inset-0 bg-charcoal/20 backdrop-blur-sm z-40 lg:hidden"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+        )}
 
-      {/* Sidebar */}
-      <aside className={`
-        fixed lg:static inset-y-0 left-0 z-50 w-72 bg-white/80 backdrop-blur-md border-r border-gray-100 transform transition-transform duration-300 ease-in-out shadow-sm h-screen
-        ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-      `}>
-        <div className="flex flex-col h-full relative">
-          <div className="p-8 border-b border-gray-100 flex justify-between items-center">
-            <Link to="/" className="block">
-                <img 
-                  src="/ABC Logo.png" 
-                  alt="Ashburton Baptist Church" 
-                  className="h-16 transition-opacity duration-300 hover:opacity-80"
-                />
-                <span className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-gold mt-1">
-                  <Shield size={12} />
-                  Admin Portal
-                </span>
-            </Link>
-            <button className="lg:hidden text-charcoal" onClick={() => setIsSidebarOpen(false)}><X /></button>
-          </div>
+        {/* Sidebar */}
+        <aside className={`
+          fixed lg:static inset-y-0 left-0 z-50 w-72 bg-white/80 backdrop-blur-md border-r border-gray-100 transform transition-transform duration-300 ease-in-out shadow-sm h-screen
+          ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        `}>
+          <div className="flex flex-col h-full relative">
+            <div className="p-8 border-b border-gray-100 flex justify-between items-center">
+              <Link to="/" className="block">
+                  <img 
+                    src="/ABC Logo.png" 
+                    alt="Ashburton Baptist Church" 
+                    className="h-16 transition-opacity duration-300 hover:opacity-80"
+                  />
+                  <span className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-gold mt-1">
+                    <Shield size={12} />
+                    Admin Portal
+                  </span>
+              </Link>
+              <button className="lg:hidden text-charcoal" onClick={() => setIsSidebarOpen(false)}><X /></button>
+            </div>
 
           <nav className="flex-1 overflow-y-auto py-6 px-4 space-y-2">
             {navItems.map((item) => {
@@ -119,22 +120,23 @@ export const AdminLayout = () => {
             </button>
           </div>
         </div>
-      </aside>
+        </aside>
 
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden relative z-10">
-        {/* Mobile Header */}
-        <header className="lg:hidden bg-white/80 backdrop-blur-md border-b border-gray-100 flex items-center justify-between px-4 h-16 relative z-20 flex-shrink-0">
-          <button onClick={() => setIsSidebarOpen(true)} className="text-charcoal p-2">
-            <Menu size={24} />
-          </button>
-          <span className="font-serif font-normal text-lg text-charcoal">Admin Dashboard</span>
-          <div className="w-8" />
-        </header>
+        {/* Main Content Area */}
+        <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden relative z-10">
+          {/* Mobile Header */}
+          <header className="lg:hidden bg-white/80 backdrop-blur-md border-b border-gray-100 flex items-center justify-between px-4 h-16 relative z-20 flex-shrink-0">
+            <button onClick={() => setIsSidebarOpen(true)} className="text-charcoal p-2">
+              <Menu size={24} />
+            </button>
+            <span className="font-serif font-normal text-lg text-charcoal">Admin Dashboard</span>
+            <div className="w-8" />
+          </header>
 
-        <main className="flex-1 overflow-y-auto p-4 sm:p-8 min-h-0">
-          <Outlet />
-        </main>
+          <main className="flex-1 overflow-y-auto p-4 sm:p-8 min-h-0">
+            <Outlet />
+          </main>
+        </div>
       </div>
     </div>
   );

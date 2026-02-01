@@ -61,8 +61,8 @@ const ProtectedRoute = () => {
   // Only show loading during initial auth check
   if (isLoading) {
     return (
-        <div className="min-h-screen flex items-center justify-center bg-base text-charcoal font-serif">
-            <div className="animate-pulse text-xl">Loading...</div>
+        <div className="min-h-screen page-shell page-shell-image flex items-center justify-center text-charcoal font-serif">
+            <div className="page-shell-content animate-pulse text-xl">Loading...</div>
         </div>
     );
   }
@@ -98,8 +98,8 @@ const AdminRoute = () => {
   // Only show loading during initial auth check
   if (isLoading) {
     return (
-        <div className="min-h-screen flex items-center justify-center bg-base text-charcoal font-serif">
-            <div className="animate-pulse text-xl">Loading...</div>
+        <div className="min-h-screen page-shell page-shell-image flex items-center justify-center text-charcoal font-serif">
+            <div className="page-shell-content animate-pulse text-xl">Loading...</div>
         </div>
     );
   }

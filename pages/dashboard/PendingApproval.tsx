@@ -84,10 +84,10 @@ export const PendingApproval = () => {
   };
 
   return (
-    <div className="min-h-screen bg-base flex flex-col items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen page-shell page-shell-image flex flex-col items-center justify-center p-4 relative overflow-hidden">
       <BackgroundBlobs />
       
-      <div className="relative z-10 max-w-lg w-full text-center glass-card bg-white/70 p-12 rounded-[16px] shadow-xl">
+      <div className="page-shell-content max-w-lg w-full text-center glass-card bg-white/70 p-12 rounded-[16px] shadow-xl">
         
         {/* Animated Icon */}
         <div className={`w-24 h-24 bg-white border border-gray-200 rounded-full flex items-center justify-center mx-auto mb-8 shadow-lg ${isRevoked ? 'shadow-red-200' : 'shadow-gold/20'} animate-pulse-slow`}>

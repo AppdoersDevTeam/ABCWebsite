@@ -28,20 +28,16 @@ export const Contact = () => {
         {/* Hero Content */}
         <div className="container relative z-10 px-4 mx-auto pt-[224px] md:pt-[256px] pb-24 md:pb-28">
           <div className="max-w-4xl mx-auto text-center">
-            <ScrollReveal direction="up" delay={100}>
-              <h1 className="text-white text-center max-w-5xl mx-auto mb-4 transition-all duration-1000 delay-200" style={{ fontFamily: 'Inter', fontSize: '2.5rem', lineHeight: '1.2', marginTop: '63px' }}>
-                Get in Touch
-              </h1>
-            </ScrollReveal>
             <ScrollReveal direction="up" delay={150}>
               <h1 className="text-white text-center max-w-5xl mx-auto mb-4 transition-all duration-1000 delay-250" style={{ fontFamily: 'Kaushan Script', fontSize: '4.25rem', lineHeight: '1.2' }}>
                 Connect
               </h1>
             </ScrollReveal>
             <ScrollReveal direction="up" delay={200}>
-              <p className="text-[1.5625rem] leading-6 text-white text-center max-w-5xl mx-auto mb-6 transition-all duration-1000 delay-300">
-                <span className="block whitespace-nowrap font-raleway font-normal text-center">We'd love to hear from you</span>
-                <span className="block whitespace-nowrap mt-[12px] font-raleway font-normal text-center">and answer any questions you may have.</span>
+              <p className="text-base sm:text-lg md:text-[1.375rem] lg:text-[1.5625rem] leading-relaxed text-white text-center max-w-5xl mx-auto mb-6 transition-all duration-1000 delay-300 px-2 sm:px-0">
+                <span className="block font-raleway font-normal text-center">Get in Touch.</span>
+                <span className="block mt-3 sm:mt-4 font-raleway font-normal text-center">We'd love to hear from you</span>
+                <span className="block mt-3 sm:mt-4 font-raleway font-normal text-center">and answer any questions you may have.</span>
               </p>
             </ScrollReveal>
           
@@ -53,7 +49,7 @@ export const Contact = () => {
         </div>
       </section>
       
-      <section className="section-gradient-soft py-12 md:py-20 relative z-10">
+      <section className="section-plain py-12 md:py-20 relative z-10">
         <div className="container mx-auto px-4 max-w-6xl">
           <ScrollReveal direction="down" delay={0}>
             <div className="text-center mb-12">
@@ -62,7 +58,7 @@ export const Contact = () => {
               <p className="text-gold mt-2 text-base font-bold">We'd love to hear from you.</p>
             </div>
           </ScrollReveal>
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid lg:grid-cols-2 gap-8">
             {/* Contact Info */}
             <div className="space-y-6">
                 {[
@@ -72,7 +68,7 @@ export const Contact = () => {
                 ].map((item, i) => (
                   <ScrollReveal key={i} direction="right" delay={i * 100}>
                     <div id={item.id} className="glass-card bg-white/70 border border-white/50 shadow-sm p-6 md:p-8 flex items-center gap-6 rounded-[16px] hover:border-gold transition-all duration-300 group hover:shadow-xl hover:-translate-y-1 scroll-mt-24 hover-lift">
-                        <div className="p-4 bg-gold/10 rounded-full text-white group-hover:bg-gold group-hover:text-white transition-all duration-300 flex-shrink-0 group-hover:scale-110 group-hover:rotate-6 icon-bounce">
+                        <div className="p-4 bg-gold/10 rounded-full text-gold group-hover:bg-gold group-hover:text-white transition-all duration-300 flex-shrink-0 group-hover:scale-110 group-hover:rotate-6 icon-bounce">
                             {React.cloneElement(item.icon, { size: 24 })}
                         </div>
                         <div>
@@ -86,7 +82,7 @@ export const Contact = () => {
 
             {/* Contact Form */}
             <ScrollReveal direction="left" delay={300}>
-              <div className="lg:col-span-2">
+              <div>
                 <div id="message" className="glass-card bg-white/70 p-6 md:p-12 rounded-[16px] h-full scroll-mt-24 border border-white/50 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 hover-lift">
                   <h3 className="text-3xl font-serif font-normal text-charcoal mb-8">Send a Message</h3>
                   <form className="space-y-6">

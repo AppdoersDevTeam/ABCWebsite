@@ -68,20 +68,16 @@ export const History = () => {
         {/* Hero Content */}
         <div className="container relative z-10 px-4 mx-auto pt-[224px] md:pt-[256px]">
           <div className="max-w-4xl mx-auto text-center">
-            <ScrollReveal direction="up" delay={100}>
-              <h1 className="text-white text-center max-w-5xl mx-auto mb-4 transition-all duration-1000 delay-200" style={{ fontFamily: 'Inter', fontSize: '2.5rem', lineHeight: '1.2', marginTop: '63px' }}>
-                Our Story
-              </h1>
-            </ScrollReveal>
             <ScrollReveal direction="up" delay={150}>
               <h1 className="text-white text-center max-w-5xl mx-auto mb-4 transition-all duration-1000 delay-250" style={{ fontFamily: 'Kaushan Script', fontSize: '4.25rem', lineHeight: '1.2' }}>
                 History
               </h1>
             </ScrollReveal>
             <ScrollReveal direction="up" delay={200}>
-              <p className="text-[1.5625rem] leading-6 text-white text-center max-w-5xl mx-auto mb-6 transition-all duration-1000 delay-300">
-                <span className="block whitespace-nowrap font-raleway font-normal text-center">Established 1882</span>
-                <span className="block whitespace-nowrap mt-[12px] font-raleway font-normal text-center">Over 140 years of faithful service to our community</span>
+              <p className="text-base sm:text-lg md:text-[1.375rem] lg:text-[1.5625rem] leading-relaxed text-white text-center max-w-5xl mx-auto mb-6 transition-all duration-1000 delay-300 px-2 sm:px-0">
+                <span className="block font-raleway font-normal text-center">Our Story.</span>
+                <span className="block mt-3 sm:mt-4 font-raleway font-normal text-center">Established 1882.</span>
+                <span className="block mt-3 sm:mt-4 font-raleway font-normal text-center">Over 140 years of faithful service to our community.</span>
               </p>
             </ScrollReveal>
 
@@ -104,7 +100,7 @@ export const History = () => {
         </div>
       </section>
       
-      <section className="section-gradient-soft py-12 md:py-20 relative z-10">
+      <section className="section-plain py-12 md:py-20 relative z-10">
         <div className="container mx-auto px-4 max-w-5xl">
         {/* Header Section */}
         <ScrollReveal direction="down" delay={0}>

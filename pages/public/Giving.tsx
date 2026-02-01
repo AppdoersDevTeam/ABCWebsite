@@ -28,20 +28,16 @@ export const Giving = () => {
         {/* Hero Content */}
         <div className="container relative z-10 px-4 mx-auto pt-[224px] md:pt-[256px] pb-24 md:pb-28">
           <div className="max-w-4xl mx-auto text-center">
-            <ScrollReveal direction="up" delay={100}>
-              <h1 className="text-white text-center max-w-5xl mx-auto mb-4 transition-all duration-1000 delay-200" style={{ fontFamily: 'Inter', fontSize: '2.5rem', lineHeight: '1.2', marginTop: '63px' }}>
-                Generosity
-              </h1>
-            </ScrollReveal>
             <ScrollReveal direction="up" delay={150}>
               <h1 className="text-white text-center max-w-5xl mx-auto mb-4 transition-all duration-1000 delay-250" style={{ fontFamily: 'Kaushan Script', fontSize: '4.25rem', lineHeight: '1.2' }}>
                 Fuel the Mission
               </h1>
             </ScrollReveal>
             <ScrollReveal direction="up" delay={200}>
-              <p className="text-[1.5625rem] leading-6 text-white text-center max-w-5xl mx-auto mb-6 transition-all duration-1000 delay-300">
-                <span className="block whitespace-nowrap font-raleway font-normal text-center">Each of you should give what you have decided</span>
-                <span className="block whitespace-nowrap mt-[12px] font-raleway font-normal text-center">in your heart to give, not reluctantly or under compulsion.</span>
+              <p className="text-base sm:text-lg md:text-[1.375rem] lg:text-[1.5625rem] leading-relaxed text-white text-center max-w-5xl mx-auto mb-6 transition-all duration-1000 delay-300 px-2 sm:px-0">
+                <span className="block font-raleway font-normal text-center">Generosity.</span>
+                <span className="block mt-3 sm:mt-4 font-raleway font-normal text-center">Each of you should give what you have decided</span>
+                <span className="block mt-3 sm:mt-4 font-raleway font-normal text-center">in your heart to give, not reluctantly or under compulsion.</span>
               </p>
             </ScrollReveal>
           
@@ -70,7 +66,7 @@ export const Giving = () => {
         <div className="grid md:grid-cols-2 gap-8">
           <ScrollReveal direction="right" delay={0}>
             <div id="direct-deposit" className="glass-card rounded-[16px] p-8 bg-white/80 text-center hover-lift scroll-mt-24 border border-white/50 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-              <div className="w-20 h-20 bg-gold/10 rounded-full flex items-center justify-center text-white mx-auto mb-6 group-hover:bg-gold transition-colors duration-300">
+              <div className="w-20 h-20 bg-gold/10 rounded-full flex items-center justify-center text-gold mx-auto mb-6 group-hover:bg-gold transition-colors duration-300">
                 <Landmark size={32} />
               </div>
               <h3 className="text-2xl font-serif font-normal text-charcoal mb-4">Direct Deposit</h3>
@@ -94,7 +90,7 @@ export const Giving = () => {
 
           <ScrollReveal direction="left" delay={200}>
             <div id="credit-card" className="glass-card rounded-[16px] p-8 bg-white/80 text-center hover-lift scroll-mt-24 border border-white/50 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-              <div className="w-20 h-20 bg-gold/10 rounded-full flex items-center justify-center text-white mx-auto mb-6 group-hover:bg-gold transition-colors duration-300">
+              <div className="w-20 h-20 bg-gold/10 rounded-full flex items-center justify-center text-gold mx-auto mb-6 group-hover:bg-gold transition-colors duration-300">
                 <CreditCard size={32} />
               </div>
               <h3 className="text-2xl font-serif font-normal text-charcoal mb-4">Credit Card</h3>

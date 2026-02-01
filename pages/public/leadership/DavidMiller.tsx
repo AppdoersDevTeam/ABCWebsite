@@ -30,20 +30,16 @@ export const DavidMiller = () => {
         {/* Hero Content */}
         <div className="container relative z-10 px-4 mx-auto pt-[224px] md:pt-[256px]">
           <div className="max-w-4xl mx-auto text-center">
-            <ScrollReveal direction="up" delay={100}>
-              <h1 className="text-white text-center max-w-5xl mx-auto mb-4 transition-all duration-1000 delay-200" style={{ fontFamily: 'Inter', fontSize: '2.5rem', lineHeight: '1.2', marginTop: '63px' }}>
-                Senior Pastor
-              </h1>
-            </ScrollReveal>
             <ScrollReveal direction="up" delay={150}>
               <h1 className="text-white text-center max-w-5xl mx-auto mb-4 transition-all duration-1000 delay-250" style={{ fontFamily: 'Kaushan Script', fontSize: '4.25rem', lineHeight: '1.2' }}>
                 Rev. David Miller
               </h1>
             </ScrollReveal>
             <ScrollReveal direction="up" delay={200}>
-              <p className="text-[1.5625rem] leading-6 text-white text-center max-w-5xl mx-auto mb-6 transition-all duration-1000 delay-300">
-                <span className="block whitespace-nowrap font-raleway font-normal text-center">Leading with passion for teaching God's Word</span>
-                <span className="block whitespace-nowrap mt-[12px] font-raleway font-normal text-center">and a heart for community transformation.</span>
+              <p className="text-base sm:text-lg md:text-[1.375rem] lg:text-[1.5625rem] leading-relaxed text-white text-center max-w-5xl mx-auto mb-6 transition-all duration-1000 delay-300 px-2 sm:px-0">
+                <span className="block font-raleway font-normal text-center">Senior Pastor.</span>
+                <span className="block mt-3 sm:mt-4 font-raleway font-normal text-center">Leading with passion for teaching God's Word</span>
+                <span className="block mt-3 sm:mt-4 font-raleway font-normal text-center">and a heart for community transformation.</span>
               </p>
             </ScrollReveal>
 
@@ -66,9 +62,8 @@ export const DavidMiller = () => {
         </div>
       </section>
       
-      <div className="container mx-auto px-4 relative z-10 max-w-4xl" style={{ backgroundColor: '#EEF2F3' }}>
-        <section className="py-12 md:py-20">
-
+      <section className="section-plain py-12 md:py-20 relative z-10">
+        <div className="container mx-auto px-4 max-w-4xl">
           <div className="grid md:grid-cols-2 gap-8 mb-12">
             <ScrollReveal direction="right" delay={100}>
               <div className="aspect-[3/4] overflow-hidden rounded-[8px] bg-gray-100">
@@ -128,8 +123,8 @@ export const DavidMiller = () => {
               </div>
             </div>
           </ScrollReveal>
-        </section>
-      </div>
+        </div>
+      </section>
     </div>
   );
 };

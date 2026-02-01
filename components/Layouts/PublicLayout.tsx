@@ -136,7 +136,7 @@ export const PublicLayout = () => {
     },
     { 
       label: 'Watch Sermons', 
-      path: 'https://www.youtube.com',
+      path: 'https://www.youtube.com/@AshburtonBaptistChurchNZ',
       submenu: [],
       external: true
     },
@@ -450,7 +450,11 @@ export const PublicLayout = () => {
 
       {/* Main Content */}
       <main className="flex-grow relative z-10">
-        <Outlet />
+        <div className="page-shell">
+          <div className="page-shell-content">
+            <Outlet />
+          </div>
+        </div>
       </main>
 
       {/* Footer */}
@@ -562,9 +566,18 @@ export const PublicLayout = () => {
 
           {/* Bottom Bar */}
           <div className="flex flex-col md:flex-row justify-between items-center text-white text-sm gap-4">
-            <p>
+            <p className="text-center md:text-left">
               <span className="text-gold">&copy; 2026 Ashburton Baptist Church.</span>
-              <span className="text-white"> | Develeped by APPDOERS.</span>
+              <br />
+              <span className="text-white">Developed by </span>
+              <a
+                href="https://appdoers.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-white hover:text-gold transition-colors"
+              >
+                AppDoers
+              </a>
             </p>
             <div className="flex flex-col items-end gap-2">
               <button
