@@ -172,11 +172,11 @@ export const Home = () => {
             </ScrollReveal>
 
           </div>
-          
-          {/* Pulsing Down Arrow */}
-          <div className="absolute bottom-[4px] left-1/2 -translate-x-1/2 z-20 pulse-arrow animate-ping-pong">
-            <ArrowDownToLine size={32} className="text-gold" />
-          </div>
+        </div>
+        
+        {/* Pulsing Down Arrow */}
+        <div className="absolute bottom-8 md:bottom-12 left-1/2 -translate-x-1/2 z-20 pulse-arrow animate-ping-pong">
+          <ArrowDownToLine size={32} className="text-gold" />
         </div>
       </section>
 
