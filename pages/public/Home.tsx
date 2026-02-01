@@ -468,7 +468,7 @@ export const Home = () => {
                     <div className="glass-card rounded-[16px] p-8 md:p-12 bg-white/80 hover-lift">
                           <div className="flex items-center gap-4 mb-6">
                               <Info className="text-gold" size={64} />
-                              <h2 className="text-4xl md:text-5xl font-serif font-normal text-charcoal">Visitins US...</h2>
+                              <h2 className="text-4xl md:text-5xl font-serif font-normal text-charcoal">Visiting Us...</h2>
                           </div>
                           <p className="text-neutral text-lg leading-relaxed mb-6">
                               Visiting a new church can be intimidating. We want to make your first experience at Ashburton Baptist as welcoming as possible. 
