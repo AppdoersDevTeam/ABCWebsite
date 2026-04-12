@@ -136,9 +136,8 @@ export const PublicLayout = () => {
     },
     { 
       label: 'Watch Sermons', 
-      path: 'https://www.youtube.com/@AshburtonBaptistChurchNZ',
-      submenu: [],
-      external: true
+      path: '/events/sermons',
+      submenu: []
     },
     { 
       label: 'Events', 

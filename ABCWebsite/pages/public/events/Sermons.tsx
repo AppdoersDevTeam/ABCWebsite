@@ -215,7 +215,7 @@ export const Sermons = () => {
                   </div>
                   <div>
                     <h3 className="text-2xl font-serif font-normal text-charcoal mb-1 group-hover:text-gold transition-colors duration-300">Subscribe to Our Channel</h3>
-                    <p className="text-neutral group-hover:text-charcoal transition-colors">Never miss a sermon. Subscribe for new messages every week.</p>
+                    <p className="text-neutral group-hover:text-charcoal transition-colors">Never miss a sermon. Watch live and catch up on past messages.</p>
                   </div>
                 </div>
                 <a
@@ -224,7 +224,7 @@ export const Sermons = () => {
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 bg-gold text-charcoal px-6 py-3 rounded-full font-bold hover:bg-gold/90 transition-all duration-300 hover:scale-110 active:scale-95 hover:-translate-y-1"
                 >
-                  Subscribe <ExternalLink size={18} />
+                  Visit Channel <ExternalLink size={18} />
                 </a>
               </div>
             </div>
@@ -246,69 +246,96 @@ export const Sermons = () => {
         )}
 
           {!loading && videos.length > 0 && (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {videos.map((video, i) => {
-                const isPlaceholder = video.id.startsWith('PLACEHOLDER');
-                const isActive = activeVideos.has(video.id);
-                const thumbnailUrl = !isPlaceholder ? getYouTubeThumbnail(video.id, video.thumbnail) : '';
+            <>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {videos.map((video, i) => {
+                  const isPlaceholder = video.id.startsWith('PLACEHOLDER');
+                  const isActive = activeVideos.has(video.id);
+                  const thumbnailUrl = !isPlaceholder ? getYouTubeThumbnail(video.id, video.thumbnail) : '';
 
-                return (
-                  <ScrollReveal key={video.id || i} direction="up" delay={i * 100}>
-                    <div className="glass-card rounded-[16px] border border-white/50 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group hover-lift bg-white/70 overflow-hidden">
-                      {/* Video Embed or Placeholder */}
-                      <div className="relative w-full pb-[56.25%] bg-gray-100">
-                        {isPlaceholder ? (
-                          <div className="absolute inset-0 flex flex-col items-center justify-center bg-gold/10 p-6 text-center">
-                            <Youtube className="text-gold mb-4" size={48} />
-                            <p className="text-charcoal font-bold mb-2">Video Coming Soon</p>
-                            <p className="text-neutral text-sm">Check back shortly for this sermon</p>
-                          </div>
-                        ) : isActive ? (
-                          // Inline iframe embed — loads after user clicks play
-                          <iframe
-                            className="absolute top-0 left-0 w-full h-full"
-                            src={`https://www.youtube.com/embed/${video.id}?autoplay=1`}
-                            title={video.title}
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowFullScreen
-                            loading="lazy"
-                          ></iframe>
-                        ) : (
-                          // Click-to-play thumbnail (avoids loading all iframes on page load)
-                          <button
-                            onClick={() => handlePlayVideo(video.id)}
-                            className="absolute inset-0 w-full h-full focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2 rounded-none"
-                            aria-label={`Play ${video.title}`}
-                          >
-                            <img
-                              src={thumbnailUrl}
-                              alt={video.title}
-                              className="w-full h-full object-cover"
-                            />
-                            {/* Play button overlay */}
-                            <div className="absolute inset-0 flex items-center justify-center bg-black/20 hover:bg-black/30 transition-colors duration-200">
-                              <div className="w-16 h-16 bg-gold rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform duration-200">
-                                <Play size={28} className="text-white ml-1" fill="white" />
-                              </div>
+                  return (
+                    <ScrollReveal key={video.id || i} direction="up" delay={i * 100}>
+                      <div className="glass-card rounded-[16px] border border-white/50 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group hover-lift bg-white/70 overflow-hidden">
+                        {/* Video Embed or Placeholder */}
+                        <div className="relative w-full pb-[56.25%] bg-gray-100">
+                          {isPlaceholder ? (
+                            <div className="absolute inset-0 flex flex-col items-center justify-center bg-gold/10 p-6 text-center">
+                              <Youtube className="text-gold mb-4" size={48} />
+                              <p className="text-charcoal font-bold mb-2">Video Coming Soon</p>
+                              <p className="text-neutral text-sm">Visit our YouTube channel to watch this sermon</p>
                             </div>
-                          </button>
-                        )}
-                      </div>
+                          ) : isActive ? (
+                            // Inline iframe embed — loads after user clicks play
+                            <iframe
+                              className="absolute top-0 left-0 w-full h-full"
+                              src={`https://www.youtube.com/embed/${video.id}?autoplay=1`}
+                              title={video.title}
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowFullScreen
+                              loading="lazy"
+                            ></iframe>
+                          ) : (
+                            // Click-to-play thumbnail (avoids loading all iframes on page load)
+                            <button
+                              onClick={() => handlePlayVideo(video.id)}
+                              className="absolute inset-0 w-full h-full focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2 rounded-none"
+                              aria-label={`Play ${video.title}`}
+                            >
+                              <img
+                                src={thumbnailUrl}
+                                alt={video.title}
+                                className="w-full h-full object-cover"
+                              />
+                              {/* Play button overlay */}
+                              <div className="absolute inset-0 flex items-center justify-center bg-black/20 hover:bg-black/30 transition-colors duration-200">
+                                <div className="w-16 h-16 bg-gold rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform duration-200">
+                                  <Play size={28} className="text-white ml-1" fill="white" />
+                                </div>
+                              </div>
+                            </button>
+                          )}
+                        </div>
 
-                      {/* Video Info */}
-                      <div className="p-6">
-                        <h3 className="text-xl font-serif font-normal text-charcoal mb-2 line-clamp-2 group-hover:text-gold transition-colors duration-300">
-                          {video.title}
-                        </h3>
-                        <div className="space-y-1 text-sm text-neutral group-hover:text-charcoal transition-colors">
-                          <p>{formatDate(video.publishedAt)}</p>
+                        {/* Video Info */}
+                        <div className="p-6">
+                          <h3 className="text-xl font-serif font-normal text-charcoal mb-2 line-clamp-2 group-hover:text-gold transition-colors duration-300">
+                            {video.title}
+                          </h3>
+                          <div className="space-y-1 text-sm text-neutral group-hover:text-charcoal transition-colors">
+                            <p>{formatDate(video.publishedAt)}</p>
+                          </div>
+                          {isPlaceholder && (
+                            <a
+                              href={youtubeChannelUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-2 text-gold hover:text-charcoal font-bold mt-4 transition-colors text-sm"
+                            >
+                              Visit Channel <ExternalLink size={14} />
+                            </a>
+                          )}
                         </div>
                       </div>
-                    </div>
-                  </ScrollReveal>
-                );
-              })}
-            </div>
+                    </ScrollReveal>
+                  );
+                })}
+              </div>
+
+              {/* Load More / View All */}
+              <ScrollReveal direction="up" delay={videos.length * 100}>
+                <div className="text-center mt-12">
+                  <a
+                    href={youtubeChannelUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 bg-white border-2 border-gold text-charcoal px-8 py-4 rounded-full font-bold hover:bg-gold hover:text-charcoal transition-all duration-300 hover:scale-110 active:scale-95 hover:-translate-y-1 group/link"
+                  >
+                    <span className="transition-all duration-300 group-hover/link:tracking-wider">View All Sermons on YouTube</span>
+                    <Youtube size={20} className="transition-all duration-500 group-hover/link:scale-125" />
+                  </a>
+                </div>
+              </ScrollReveal>
+            </>
           )}
         </div>
         </div>
