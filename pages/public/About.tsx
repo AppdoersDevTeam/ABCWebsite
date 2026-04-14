@@ -7,6 +7,7 @@ import { Modal } from '../../components/UI/Modal';
 import { ArrowRight, ArrowDownToLine, BookOpen, Church, Users } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { TeamMember } from '../../types';
+import { inferProfileType } from '../../lib/teamMemberUtils';
 
 interface LeadershipMember {
   name: string;
@@ -36,11 +37,8 @@ export const About = () => {
 
       if (error) throw error;
 
-      // Filter out Attendees and Members - only show leadership/ministry roles
-      const filteredMembers = (data || []).filter((member: TeamMember) => {
-        const role = member.role?.toLowerCase().trim();
-        return role !== 'attendee' && role !== 'member';
-      });
+      // Leadership / public site: only Staff (not attendees or members in directory)
+      const filteredMembers = (data || []).filter((member: TeamMember) => inferProfileType(member) === 'staff');
 
       // Map database team members to the format expected by the component
       const mappedLeadership: LeadershipMember[] = filteredMembers.map((member: TeamMember) => {
@@ -49,7 +47,7 @@ export const About = () => {
         
         return {
           name: member.name,
-          role: member.role,
+          role: member.staff_role || member.role,
           img: member.img || '',
           shortBio: member.description || '',
           bioPath: bioPath

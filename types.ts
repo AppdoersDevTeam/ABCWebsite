@@ -105,6 +105,14 @@ export interface TeamMember {
   phone: string;
   img: string;
   description: string;
+  /** staff | attendee | member — directory / registration role */
+  profile_type?: 'staff' | 'attendee' | 'member';
+  /** Job title when profile_type is staff */
+  staff_role?: string | null;
+  is_baptised?: boolean | null;
+  baptism_date?: string | null;
+  membership_start_date?: string | null;
+  has_membership_chip?: boolean;
   created_at?: string;
   updated_at?: string;
 }

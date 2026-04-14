@@ -3,6 +3,7 @@ import { VibrantCard } from '../../components/UI/VibrantCard';
 import { Mail, Phone, User } from 'lucide-react';
 import { TeamMember } from '../../types';
 import { supabase } from '../../lib/supabase';
+import { getDisplayRole, inferProfileType } from '../../lib/teamMemberUtils';
 import { SkeletonPageHeader } from '../../components/UI/Skeleton';
 
 export const Team = () => {
@@ -68,7 +69,17 @@ export const Team = () => {
               </div>
               <div>
                 <h4 className="font-bold text-xl text-charcoal">{member.name}</h4>
-                <p className="text-xs text-gold font-bold uppercase tracking-wider mb-4">{member.role}</p>
+                <p className="text-xs text-gold font-bold uppercase tracking-wider mb-1">{getDisplayRole(member)}</p>
+                {inferProfileType(member) === 'member' && member.has_membership_chip && (
+                  <span className="inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-gold/15 text-gold mb-2">
+                    Membership chip
+                  </span>
+                )}
+                {inferProfileType(member) === 'member' && member.membership_start_date && (
+                  <p className="text-xs text-neutral mb-2">
+                    Member since {String(member.membership_start_date).slice(0, 10)}
+                  </p>
+                )}
                 <div className="flex space-x-4 text-neutral">
                   {member.email && (
                     <a href={`mailto:${member.email}`} className="hover:text-gold transition-colors" title={member.email}>

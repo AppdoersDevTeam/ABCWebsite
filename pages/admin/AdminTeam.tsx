@@ -1,34 +1,94 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { VibrantCard } from '../../components/UI/VibrantCard';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { Modal } from '../../components/UI/Modal';
-import { Mail, Phone, Edit, Trash2, Plus, User, Upload, X, Image as ImageIcon, UserPlus } from 'lucide-react';
+import { Mail, Phone, Edit, Trash2, User, Upload, X, UserPlus } from 'lucide-react';
 import { TeamMember } from '../../types';
 import { supabase } from '../../lib/supabase';
 import { SkeletonPageHeader } from '../../components/UI/Skeleton';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
+import { buildStoredRole, getDisplayRole, inferProfileType } from '../../lib/teamMemberUtils';
+
+type ProfileType = 'staff' | 'attendee' | 'member';
+
+const PROFILE_LABEL: Record<ProfileType, string> = {
+  staff: 'Staff',
+  attendee: 'Attendee',
+  member: 'Member',
+};
+
+const STAFF_ROLE_OPTIONS = [
+  'Administrator',
+  'Associated Pastor',
+  'Children Pastor',
+  'Deacon',
+  'Elder',
+  'Ministry Leader',
+  'Receptionist',
+  'Senior Pastor',
+  'Youth Adult Pastor',
+  'Youth Pastor',
+];
+
+const emptyForm = (): FormState => ({
+  name: '',
+  profile_type: 'attendee',
+  staff_role: STAFF_ROLE_OPTIONS[0],
+  email: '',
+  phone: '',
+  img: '',
+  description: '',
+  is_baptised: null,
+  baptism_date: '',
+  membership_start_date: '',
+  has_membership_chip: false,
+});
+
+interface FormState {
+  name: string;
+  profile_type: ProfileType;
+  staff_role: string;
+  email: string;
+  phone: string;
+  img: string;
+  description: string;
+  is_baptised: boolean | null;
+  baptism_date: string;
+  membership_start_date: string;
+  has_membership_chip: boolean;
+}
+
+function memberToForm(m: TeamMember): FormState {
+  const pt = inferProfileType(m);
+  return {
+    name: m.name,
+    profile_type: pt,
+    staff_role: pt === 'staff' ? (m.staff_role || m.role || STAFF_ROLE_OPTIONS[0]).trim() : STAFF_ROLE_OPTIONS[0],
+    email: m.email || '',
+    phone: m.phone || '',
+    img: m.img || '',
+    description: m.description || '',
+    is_baptised: m.is_baptised ?? null,
+    baptism_date: m.baptism_date ? String(m.baptism_date).slice(0, 10) : '',
+    membership_start_date: m.membership_start_date ? String(m.membership_start_date).slice(0, 10) : '',
+    has_membership_chip: pt === 'member' ? (m.has_membership_chip ?? false) : false,
+  };
+}
 
 export const AdminTeam = () => {
   const [members, setMembers] = useState<TeamMember[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
-  const roleOptions = [
-    'Administrator',
-    'Associated Pastor',
-    'Attendee',
-    'Children Pastor',
-    'Deacon',
-    'Elder',
-    'Member',
-    'Ministry Leader',
-    'Receptionist',
-    'Senior Pastor',
-    'Youth Adult Pastor',
-    'Youth Pastor'
-  ];
+  const [formData, setFormData] = useState<FormState>(emptyForm);
 
-  const [formData, setFormData] = useState({ name: '', role: 'Attendee', email: '', phone: '', img: '', description: '' });
+  const staffRoleOptions = useMemo(() => {
+    const s = formData.staff_role;
+    if (s && !STAFF_ROLE_OPTIONS.includes(s)) {
+      return [s, ...STAFF_ROLE_OPTIONS];
+    }
+    return STAFF_ROLE_OPTIONS;
+  }, [formData.staff_role]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -57,24 +117,21 @@ export const AdminTeam = () => {
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      
-      // Validate file type
+
       const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'application/pdf'];
       if (!validTypes.includes(file.type)) {
         alert('Please select a PNG, JPEG, or PDF file');
         return;
       }
-      
-      // Validate file size (300KB = 300 * 1024 bytes)
+
       const maxSize = 300 * 1024;
       if (file.size > maxSize) {
         alert('File size must be less than 300KB');
         return;
       }
-      
+
       setSelectedFile(file);
-      
-      // Create preview URL
+
       if (file.type.startsWith('image/')) {
         const reader = new FileReader();
         reader.onloadend = () => {
@@ -82,7 +139,6 @@ export const AdminTeam = () => {
         };
         reader.readAsDataURL(file);
       } else {
-        // For PDF, show a placeholder
         setPreviewUrl(null);
       }
     }
@@ -94,186 +150,189 @@ export const AdminTeam = () => {
     }
     setSelectedFile(null);
     setPreviewUrl(null);
-    setFormData({ ...formData, img: '' });
+    setFormData((prev) => ({ ...prev, img: '' }));
   };
 
-  const handleCreate = async () => {
-    // Validate all required fields (trim whitespace)
-    const trimmedName = formData.name.trim();
-    const trimmedRole = formData.role.trim();
-    const trimmedEmail = formData.email.trim();
-    const trimmedPhone = formData.phone.trim();
-    const trimmedDescription = formData.description.trim();
+  const resetModal = () => {
+    handleRemoveFile();
+    setFormData(emptyForm());
+  };
 
-    // Validate name - must not be empty
-    if (!trimmedName) {
-      alert('Name is required. Please type the name.');
-      return;
-    }
-
-    // Validate role
-    if (!trimmedRole) {
-      alert('Role is required.');
-      return;
-    }
-
-    // Validate email - must be valid email format
-    if (!trimmedEmail) {
-      alert('Email is required. Please type a valid email address.');
-      return;
-    }
+  const validate = (trimmed: {
+    name: string;
+    staff_role: string;
+    email: string;
+    phone: string;
+    description: string;
+    profile_type: ProfileType;
+    membership_start_date: string;
+  }): string | null => {
+    if (!trimmed.name) return 'Name is required.';
+    if (!trimmed.email) return 'Email is required.';
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(trimmedEmail)) {
-      alert('Please enter a valid email address.');
+    if (!emailRegex.test(trimmed.email)) return 'Please enter a valid email address.';
+    if (!trimmed.phone) return 'Phone is required.';
+    const phoneRegex = /^[0-9\s\-()]+$/;
+    if (!phoneRegex.test(trimmed.phone)) return 'Phone number can only contain numbers, spaces, hyphens, and parentheses.';
+    if (trimmed.description.length > 350) return 'Description must not exceed 350 characters.';
+
+    if (trimmed.profile_type === 'staff' && !trimmed.staff_role) {
+      return 'Select a job / role for staff.';
+    }
+
+    // Baptism rules:
+    // - Staff & Member: must choose Yes/No. If Yes => date required
+    // - Attendee: optional Yes/No. If Yes => date optional
+    const baptismRequired = trimmed.profile_type === 'staff' || trimmed.profile_type === 'member';
+    if (baptismRequired && formData.is_baptised === null) {
+      return 'Please select Baptised: Yes or No.';
+    }
+    const baptismYes = formData.is_baptised === true;
+    if (baptismYes && baptismRequired && !formData.baptism_date.trim()) {
+      return 'Baptism date is required when Baptised is Yes.';
+    }
+
+    if (trimmed.profile_type === 'member') {
+      if (!trimmed.membership_start_date) {
+        return 'Membership start date is required for members.';
+      }
+    }
+
+    return null;
+  };
+
+  const photoRequired = formData.profile_type === 'staff';
+  const hasPhoto = !!(selectedFile || formData.img || editingMember?.img || previewUrl);
+
+  const runUpload = async (): Promise<string> => {
+    if (!selectedFile) return formData.img;
+
+    let imageUrl = formData.img;
+    try {
+      const fileExt = selectedFile.name.split('.').pop() || 'png';
+      const fileName = `team-images/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('team-images')
+        .upload(fileName, selectedFile, {
+          cacheControl: '3600',
+          upsert: false,
+        });
+
+      if (uploadError) {
+        console.warn('Storage upload failed, saving as base64:', uploadError.message);
+        const reader = new FileReader();
+        const base64Promise = new Promise<string>((resolve, reject) => {
+          reader.onloadend = () => {
+            if (reader.result) resolve(reader.result as string);
+            else reject(new Error('Failed to convert file to base64'));
+          };
+          reader.onerror = reject;
+        });
+        reader.readAsDataURL(selectedFile);
+        imageUrl = await base64Promise;
+      } else {
+        const { data: urlData } = supabase.storage.from('team-images').getPublicUrl(fileName);
+        imageUrl = urlData.publicUrl;
+      }
+    } catch (uploadError: unknown) {
+      console.warn('Storage upload failed, using base64 fallback:', uploadError);
+      const reader = new FileReader();
+      const base64Promise = new Promise<string>((resolve, reject) => {
+        reader.onloadend = () => {
+          if (reader.result) resolve(reader.result as string);
+          else reject(new Error('Failed to convert file to base64'));
+        };
+        reader.onerror = reject;
+      });
+      reader.readAsDataURL(selectedFile);
+      imageUrl = await base64Promise;
+    }
+    return imageUrl;
+  };
+
+  const buildRow = (imageUrl: string, trimmed: ReturnType<typeof trimForm>) => {
+    const pt = trimmed.profile_type;
+    const storedRole = buildStoredRole(pt, trimmed.staff_role);
+
+    const row: Record<string, unknown> = {
+      name: trimmed.name,
+      profile_type: pt,
+      staff_role: pt === 'staff' ? trimmed.staff_role : null,
+      role: storedRole,
+      email: trimmed.email,
+      phone: trimmed.phone,
+      img: imageUrl || '',
+      description: trimmed.description,
+    };
+
+    if (pt === 'member') {
+      row.is_baptised = formData.is_baptised;
+      row.baptism_date =
+        formData.is_baptised === true && formData.baptism_date.trim()
+          ? formData.baptism_date.trim()
+          : null;
+      row.membership_start_date = trimmed.membership_start_date.trim();
+      row.has_membership_chip = !!formData.has_membership_chip;
+    } else {
+      // Staff/Attendee may optionally store baptism info too
+      row.is_baptised = formData.is_baptised;
+      row.baptism_date =
+        formData.is_baptised === true && formData.baptism_date.trim()
+          ? formData.baptism_date.trim()
+          : null;
+      row.membership_start_date = null;
+      row.has_membership_chip = false;
+    }
+
+    return row;
+  };
+
+  function trimForm() {
+    return {
+      name: formData.name.trim(),
+      staff_role: formData.staff_role.trim(),
+      email: formData.email.trim(),
+      phone: formData.phone.trim(),
+      description: formData.description.trim(),
+      profile_type: formData.profile_type,
+      membership_start_date: formData.membership_start_date.trim(),
+    };
+  }
+
+  const handleCreate = async () => {
+    const trimmed = trimForm();
+    const err = validate(trimmed);
+    if (err) {
+      alert(err);
       return;
     }
 
-    // Validate phone - only numbers allowed
-    if (!trimmedPhone) {
-      alert('Phone is required.');
-      return;
-    }
-    const phoneRegex = /^[0-9\s\-\(\)]+$/;
-    if (!phoneRegex.test(trimmedPhone)) {
-      alert('Phone number can only contain numbers, spaces, hyphens, and parentheses.');
-      return;
-    }
-
-    // Validate photo - required for all roles except Attendee
-    if (trimmedRole !== 'Attendee' && !selectedFile && !formData.img) {
-      alert('Photo is required for this role. Please upload a photo.');
-      return;
-    }
-
-    // Validate description - optional, but if provided must not exceed 350 characters
-    if (trimmedDescription.length > 350) {
-      alert('Description must not exceed 350 characters. Current length: ' + trimmedDescription.length);
+    if (photoRequired && !selectedFile && !formData.img) {
+      alert('Photo is required for staff. Please upload a photo.');
       return;
     }
 
     setIsUploading(true);
 
     try {
-      let imageUrl = formData.img;
+      const imageUrl = await runUpload();
+      const insertData = buildRow(imageUrl, trimmed);
 
-      // Upload file if selected
-      if (selectedFile) {
-        try {
-          const fileExt = selectedFile.name.split('.').pop() || 'png';
-          const fileName = `team-images/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const { data, error } = await supabase.from('team_members').insert([insertData]).select().single();
 
-          const { error: uploadError } = await supabase.storage
-            .from('team-images')
-            .upload(fileName, selectedFile, {
-              cacheControl: '3600',
-              upsert: false,
-            });
+      if (error) throw error;
 
-          if (uploadError) {
-            // If bucket doesn't exist or upload fails, save as base64 in database
-            console.warn('Storage upload failed, saving as base64:', uploadError.message);
-            
-            // Convert file to base64
-            const reader = new FileReader();
-            const base64Promise = new Promise<string>((resolve, reject) => {
-              reader.onloadend = () => {
-                if (reader.result) {
-                  resolve(reader.result as string);
-                } else {
-                  reject(new Error('Failed to convert file to base64'));
-                }
-              };
-              reader.onerror = reject;
-            });
-            
-            reader.readAsDataURL(selectedFile);
-            imageUrl = await base64Promise;
-          } else {
-            // Get public URL
-            const { data: urlData } = supabase.storage.from('team-images').getPublicUrl(fileName);
-            imageUrl = urlData.publicUrl;
-          }
-        } catch (uploadError: any) {
-          // Fallback: convert to base64 if storage fails
-          console.warn('Storage upload failed, using base64 fallback:', uploadError.message);
-          
-          const reader = new FileReader();
-          const base64Promise = new Promise<string>((resolve, reject) => {
-            reader.onloadend = () => {
-              if (reader.result) {
-                resolve(reader.result as string);
-              } else {
-                reject(new Error('Failed to convert file to base64'));
-              }
-            };
-            reader.onerror = reject;
-          });
-          
-          reader.readAsDataURL(selectedFile);
-          imageUrl = await base64Promise;
-        }
-      }
-
-      // Build insert data object with all required fields
-      const insertData: any = {
-        name: trimmedName,
-        role: trimmedRole,
-        email: trimmedEmail,
-        phone: trimmedPhone,
-        img: imageUrl || '', // Empty string if no image uploaded
-        description: trimmedDescription || '', // Allow empty description
-      };
-
-      const { data, error } = await supabase
-        .from('team_members')
-        .insert([insertData])
-        .select()
-        .single();
-
-      if (error) {
-        // If error is about missing description column, try saving without it
-        if (error.message && (error.message.includes('description') || error.message.includes('column') && error.message.includes('team_members'))) {
-          console.warn('Description column not found, attempting to save without description field');
-          
-          // Try to save without description
-          const insertDataWithoutDescription = {
-            name: trimmedName,
-            role: trimmedRole,
-            email: trimmedEmail,
-            phone: trimmedPhone,
-            img: imageUrl || '',
-          };
-          
-          const { data: retryData, error: retryError } = await supabase
-            .from('team_members')
-            .insert([insertDataWithoutDescription])
-            .select()
-            .single();
-          
-          if (retryError) {
-            console.error('Error saving without description:', retryError);
-            alert('Error saving team member: ' + retryError.message + '\n\nPlease run this SQL in Supabase SQL Editor:\n\nALTER TABLE team_members ADD COLUMN IF NOT EXISTS description VARCHAR(350) NOT NULL DEFAULT \'\';\n\nThen update existing records:\nUPDATE team_members SET description = \'\' WHERE description IS NULL;\n\nThen make it required:\nALTER TABLE team_members ALTER COLUMN description SET NOT NULL;\nALTER TABLE team_members ALTER COLUMN description DROP DEFAULT;');
-            setIsUploading(false);
-            return;
-          }
-          
-          setMembers([...members, retryData]);
-          setFormData({ name: '', role: 'Attendee', email: '', phone: '', img: '', description: '' });
-          handleRemoveFile();
-          setIsModalOpen(false);
-          alert('Team member saved successfully!\n\nNote: Description was not saved because the description column does not exist in the database yet.\n\nTo enable description field, please run this SQL in Supabase SQL Editor:\n\nALTER TABLE team_members ADD COLUMN IF NOT EXISTS description VARCHAR(350) NOT NULL DEFAULT \'\';\nUPDATE team_members SET description = \'\' WHERE description IS NULL;\nALTER TABLE team_members ALTER COLUMN description SET NOT NULL;\nALTER TABLE team_members ALTER COLUMN description DROP DEFAULT;');
-          return;
-        }
-        throw error;
-      }
-
-      setMembers([...members, data]);
-      setFormData({ name: '', role: 'Attendee', email: '', phone: '', img: '', description: '' });
-      handleRemoveFile();
+      setMembers([...members, data as TeamMember]);
+      resetModal();
       setIsModalOpen(false);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error creating team member:', error);
-      alert(error.message || 'Failed to create team member');
+      const msg = error instanceof Error ? error.message : 'Failed to create team member';
+      alert(
+        msg +
+          '\n\nIf the database is missing new columns, run ADD_TEAM_MEMBER_PROFILE_FIELDS.sql in Supabase.'
+      );
     } finally {
       setIsUploading(false);
     }
@@ -281,14 +340,7 @@ export const AdminTeam = () => {
 
   const handleEdit = (member: TeamMember) => {
     setEditingMember(member);
-    setFormData({
-      name: member.name,
-      role: member.role,
-      email: member.email || '',
-      phone: member.phone || '',
-      img: member.img || '',
-      description: member.description || '',
-    });
+    setFormData(memberToForm(member));
     setSelectedFile(null);
     setPreviewUrl(member.img || null);
     setIsModalOpen(true);
@@ -297,73 +349,29 @@ export const AdminTeam = () => {
   const handleUpdate = async () => {
     if (!editingMember) return;
 
+    const trimmed = trimForm();
+    const err = validate(trimmed);
+    if (err) {
+      alert(err);
+      return;
+    }
+
+    if (photoRequired && !selectedFile && !formData.img && !editingMember.img) {
+      alert('Photo is required for staff. Please upload a photo.');
+      return;
+    }
+
     setIsUploading(true);
 
     try {
       let imageUrl = formData.img;
       let oldImageUrl = editingMember.img;
 
-      // Upload new file if selected
       if (selectedFile) {
-        try {
-          const fileExt = selectedFile.name.split('.').pop() || 'png';
-          const fileName = `team-images/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+        imageUrl = await runUpload();
 
-          const { error: uploadError } = await supabase.storage
-            .from('team-images')
-            .upload(fileName, selectedFile, {
-              cacheControl: '3600',
-              upsert: false,
-            });
-
-          if (uploadError) {
-            // If bucket doesn't exist or upload fails, save as base64 in database
-            console.warn('Storage upload failed, saving as base64:', uploadError.message);
-            
-            // Convert file to base64
-            const reader = new FileReader();
-            const base64Promise = new Promise<string>((resolve, reject) => {
-              reader.onloadend = () => {
-                if (reader.result) {
-                  resolve(reader.result as string);
-                } else {
-                  reject(new Error('Failed to convert file to base64'));
-                }
-              };
-              reader.onerror = reject;
-            });
-            
-            reader.readAsDataURL(selectedFile);
-            imageUrl = await base64Promise;
-          } else {
-            // Get public URL
-            const { data: urlData } = supabase.storage.from('team-images').getPublicUrl(fileName);
-            imageUrl = urlData.publicUrl;
-          }
-        } catch (uploadError: any) {
-          // Fallback: convert to base64 if storage fails
-          console.warn('Storage upload failed, using base64 fallback:', uploadError.message);
-          
-          const reader = new FileReader();
-          const base64Promise = new Promise<string>((resolve, reject) => {
-            reader.onloadend = () => {
-              if (reader.result) {
-                resolve(reader.result as string);
-              } else {
-                reject(new Error('Failed to convert file to base64'));
-              }
-            };
-            reader.onerror = reject;
-          });
-          
-          reader.readAsDataURL(selectedFile);
-          imageUrl = await base64Promise;
-        }
-
-        // Delete old image from storage if it exists and is from our storage (not base64)
         if (oldImageUrl && oldImageUrl.includes('team-images') && !oldImageUrl.startsWith('data:')) {
           try {
-            // Extract file path from URL
             const urlParts = oldImageUrl.split('/team-images/');
             if (urlParts.length > 1) {
               const filePath = `team-images/${urlParts[1]}`;
@@ -371,132 +379,27 @@ export const AdminTeam = () => {
             }
           } catch (deleteError) {
             console.warn('Error deleting old image:', deleteError);
-            // Continue even if deletion fails
           }
         }
       }
 
-      // Validate all required fields (trim whitespace)
-      const trimmedName = formData.name.trim();
-      const trimmedRole = formData.role.trim();
-      const trimmedEmail = formData.email.trim();
-      const trimmedPhone = formData.phone.trim();
-      const trimmedDescription = formData.description.trim();
+      const updateData = buildRow(imageUrl, trimmed);
 
-      // Validate name - must not be empty
-      if (!trimmedName) {
-        alert('Name is required. Please type the name.');
-        setIsUploading(false);
-        return;
-      }
+      const { error } = await supabase.from('team_members').update(updateData).eq('id', editingMember.id);
 
-      // Validate role
-      if (!trimmedRole) {
-        alert('Role is required.');
-        setIsUploading(false);
-        return;
-      }
+      if (error) throw error;
 
-      // Validate email - must be valid email format
-      if (!trimmedEmail) {
-        alert('Email is required. Please type a valid email address.');
-        setIsUploading(false);
-        return;
-      }
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(trimmedEmail)) {
-        alert('Please enter a valid email address.');
-        setIsUploading(false);
-        return;
-      }
-
-      // Validate phone - only numbers allowed
-      if (!trimmedPhone) {
-        alert('Phone is required.');
-        setIsUploading(false);
-        return;
-      }
-      const phoneRegex = /^[0-9\s\-\(\)]+$/;
-      if (!phoneRegex.test(trimmedPhone)) {
-        alert('Phone number can only contain numbers, spaces, hyphens, and parentheses.');
-        setIsUploading(false);
-        return;
-      }
-
-      // Validate photo - required for all roles except Attendee (for update, check if there's existing image or new file)
-      if (trimmedRole !== 'Attendee' && !selectedFile && !imageUrl && !editingMember?.img) {
-        alert('Photo is required for this role. Please upload a photo.');
-        setIsUploading(false);
-        return;
-      }
-
-      // Validate description - optional, but if provided must not exceed 350 characters
-      if (trimmedDescription.length > 350) {
-        alert('Description must not exceed 350 characters. Current length: ' + trimmedDescription.length);
-        setIsUploading(false);
-        return;
-      }
-
-      // Build update data object with all required fields
-      const updateData: any = {
-        name: trimmedName,
-        role: trimmedRole,
-        email: trimmedEmail,
-        phone: trimmedPhone,
-        img: imageUrl || '', // Empty string if no image uploaded
-        description: trimmedDescription || '', // Allow empty description
-      };
-
-      const { error } = await supabase
-        .from('team_members')
-        .update(updateData)
-        .eq('id', editingMember.id);
-
-      if (error) {
-        // If error is about missing description column, try updating without it
-        if (error.message && (error.message.includes('description') || error.message.includes('column') && error.message.includes('team_members'))) {
-          console.warn('Description column not found, attempting to update without description field');
-          
-          // Try to update without description
-          const updateDataWithoutDescription = {
-            name: trimmedName,
-            role: trimmedRole,
-            email: trimmedEmail,
-            phone: trimmedPhone,
-            img: imageUrl || '',
-          };
-          
-          const { error: retryError } = await supabase
-            .from('team_members')
-            .update(updateDataWithoutDescription)
-            .eq('id', editingMember.id);
-          
-          if (retryError) {
-            console.error('Error updating without description:', retryError);
-            alert('Error updating team member: ' + retryError.message + '\n\nPlease run this SQL in Supabase SQL Editor:\n\nALTER TABLE team_members ADD COLUMN IF NOT EXISTS description VARCHAR(350) NOT NULL DEFAULT \'\';\n\nThen update existing records:\nUPDATE team_members SET description = \'\' WHERE description IS NULL;\n\nThen make it required:\nALTER TABLE team_members ALTER COLUMN description SET NOT NULL;\nALTER TABLE team_members ALTER COLUMN description DROP DEFAULT;');
-            setIsUploading(false);
-            return;
-          }
-          
-          fetchMembers();
-          setFormData({ name: '', role: 'Attendee', email: '', phone: '', img: '', description: '' });
-          handleRemoveFile();
-          setEditingMember(null);
-          setIsModalOpen(false);
-          alert('Team member updated successfully!\n\nNote: Description was not saved because the description column does not exist in the database yet.\n\nTo enable description field, please run this SQL in Supabase SQL Editor:\n\nALTER TABLE team_members ADD COLUMN IF NOT EXISTS description VARCHAR(350) NOT NULL DEFAULT \'\';\nUPDATE team_members SET description = \'\' WHERE description IS NULL;\nALTER TABLE team_members ALTER COLUMN description SET NOT NULL;\nALTER TABLE team_members ALTER COLUMN description DROP DEFAULT;');
-          return;
-        }
-        throw error;
-      }
-
-      fetchMembers();
-      setFormData({ name: '', role: 'Attendee', email: '', phone: '', img: '', description: '' });
-      handleRemoveFile();
+      await fetchMembers();
+      resetModal();
       setEditingMember(null);
       setIsModalOpen(false);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error updating team member:', error);
-      alert(error.message || 'Failed to update team member');
+      const msg = error instanceof Error ? error.message : 'Failed to update team member';
+      alert(
+        msg +
+          '\n\nIf the database is missing new columns, run ADD_TEAM_MEMBER_PROFILE_FIELDS.sql in Supabase.'
+      );
     } finally {
       setIsUploading(false);
     }
@@ -512,18 +415,26 @@ export const AdminTeam = () => {
 
       if (error) throw error;
 
-      setMembers(members.filter(m => m.id !== id));
-    } catch (error: any) {
+      setMembers(members.filter((m) => m.id !== id));
+    } catch (error: unknown) {
       console.error('Error deleting team member:', error);
-      alert(error.message || 'Failed to delete team member');
+      alert(error instanceof Error ? error.message : 'Failed to delete team member');
     }
   };
 
   const openCreateModal = () => {
     setEditingMember(null);
-    setFormData({ name: '', role: 'Attendee', email: '', phone: '', img: '', description: '' });
-    handleRemoveFile();
+    resetModal();
     setIsModalOpen(true);
+  };
+
+  const setProfileType = (profile_type: ProfileType) => {
+    setFormData((prev) => ({
+      ...prev,
+      profile_type,
+      has_membership_chip: profile_type === 'member' ? prev.has_membership_chip : false,
+      membership_start_date: profile_type === 'member' ? prev.membership_start_date : '',
+    }));
   };
 
   if (isLoading) {
@@ -539,16 +450,26 @@ export const AdminTeam = () => {
     );
   }
 
+  const trimmed = trimForm();
+  const validationError = validate(trimmed);
+  const formInvalid =
+    !!validationError ||
+    (photoRequired && !hasPhoto) ||
+    isUploading ||
+    !trimmed.name ||
+    !trimmed.email ||
+    !trimmed.phone;
+
   return (
     <div className="space-y-8">
       <AdminPageHeader
-        title="Team Management"
-        subtitle="Manage staff and leadership team members."
+        title="Directory / People"
+        subtitle="Manage staff, attendees, and members in the directory."
         icon={<User size={28} />}
         rightSlot={
           <GlowingButton size="sm" fullWidth className="md:w-auto" onClick={openCreateModal}>
             <UserPlus size={16} className="mr-2" />
-            Add Member
+            Add Person
           </GlowingButton>
         }
       />
@@ -559,67 +480,68 @@ export const AdminTeam = () => {
         </div>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {members.map((member) => (
-          <VibrantCard key={member.id} className="group bg-white shadow-sm hover:shadow-md hover:border-gold relative">
-            <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-              <button
-                onClick={() => handleEdit(member)}
-                className="p-2 bg-white border border-gray-200 rounded-[4px] text-neutral hover:text-gold hover:border-gold transition-colors"
-                title="Edit"
-              >
-                <Edit size={16} />
-              </button>
-              <button
-                onClick={() => handleDelete(member.id)}
-                className="p-2 bg-white border border-gray-200 rounded-[4px] text-neutral hover:text-red-500 hover:border-red-200 transition-colors"
-                title="Delete"
-              >
-                <Trash2 size={16} />
-              </button>
-            </div>
-            <div className="flex items-center space-x-6">
-              <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-gray-100 group-hover:border-gold transition-colors flex-shrink-0">
-                {member.img ? (
-                  <img src={member.img} alt={member.name} className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full bg-gold/10 flex items-center justify-center">
-                    <User size={32} className="text-gold" />
-                  </div>
-                )}
+          {members.map((member) => (
+            <VibrantCard key={member.id} className="group bg-white shadow-sm hover:shadow-md hover:border-gold relative">
+              <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button
+                  onClick={() => handleEdit(member)}
+                  className="p-2 bg-white border border-gray-200 rounded-[4px] text-neutral hover:text-gold hover:border-gold transition-colors"
+                  title="Edit"
+                >
+                  <Edit size={16} />
+                </button>
+                <button
+                  onClick={() => handleDelete(member.id)}
+                  className="p-2 bg-white border border-gray-200 rounded-[4px] text-neutral hover:text-red-500 hover:border-red-200 transition-colors"
+                  title="Delete"
+                >
+                  <Trash2 size={16} />
+                </button>
               </div>
-              <div className="flex-1 min-w-0">
-                <h4 className="font-bold text-xl text-charcoal truncate">{member.name}</h4>
-                <p className="text-xs text-gold font-bold uppercase tracking-wider mb-4">{member.role}</p>
-                <div className="flex space-x-4 text-neutral">
-                  {member.email && (
-                    <a href={`mailto:${member.email}`} className="hover:text-gold transition-colors" title={member.email}>
-                      <Mail size={18} />
-                    </a>
-                  )}
-                  {member.phone && (
-                    <a href={`tel:${member.phone}`} className="hover:text-gold transition-colors" title={member.phone}>
-                      <Phone size={18} />
-                    </a>
+              <div className="flex items-center space-x-6">
+                <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-gray-100 group-hover:border-gold transition-colors flex-shrink-0">
+                  {member.img ? (
+                    <img src={member.img} alt={member.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full bg-gold/10 flex items-center justify-center">
+                      <User size={32} className="text-gold" />
+                    </div>
                   )}
                 </div>
-                {member.description && (
-                  <p className="text-sm text-neutral mt-4 line-clamp-3">{member.description}</p>
-                )}
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-bold text-xl text-charcoal truncate">{member.name}</h4>
+                  <p className="text-xs text-gold font-bold uppercase tracking-wider mb-1">{getDisplayRole(member)}</p>
+                  <p className="text-[10px] text-neutral uppercase tracking-wide mb-2">
+                    {PROFILE_LABEL[inferProfileType(member)]}
+                  </p>
+                  <div className="flex space-x-4 text-neutral">
+                    {member.email && (
+                      <a href={`mailto:${member.email}`} className="hover:text-gold transition-colors" title={member.email}>
+                        <Mail size={18} />
+                      </a>
+                    )}
+                    {member.phone && (
+                      <a href={`tel:${member.phone}`} className="hover:text-gold transition-colors" title={member.phone}>
+                        <Phone size={18} />
+                      </a>
+                    )}
+                  </div>
+                  {member.description && (
+                    <p className="text-sm text-neutral mt-4 line-clamp-3">{member.description}</p>
+                  )}
+                </div>
               </div>
-            </div>
-          </VibrantCard>
-        ))}
+            </VibrantCard>
+          ))}
         </div>
       )}
 
-      {/* Create/Edit Modal */}
       <Modal
         isOpen={isModalOpen}
         onClose={() => {
           setIsModalOpen(false);
           setEditingMember(null);
-          setFormData({ name: '', role: 'Attendee', email: '', phone: '', img: '', description: '' });
-          handleRemoveFile();
+          resetModal();
         }}
         title={editingMember ? 'Edit Team Member' : 'Add Team Member'}
       >
@@ -634,21 +556,40 @@ export const AdminTeam = () => {
               placeholder="Enter name"
             />
           </div>
+
           <div>
             <label className="block text-sm font-bold text-charcoal mb-2">Role *</label>
             <select
-              value={formData.role}
-              onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+              value={formData.profile_type}
+              onChange={(e) => setProfileType(e.target.value as ProfileType)}
               className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none bg-white"
-              required
             >
-              {roleOptions.map((role) => (
-                <option key={role} value={role}>
-                  {role}
+              {(Object.keys(PROFILE_LABEL) as ProfileType[]).map((key) => (
+                <option key={key} value={key}>
+                  {PROFILE_LABEL[key]}
                 </option>
               ))}
             </select>
+            <p className="text-xs text-neutral mt-1">Staff, Attendee, or Member (church directory).</p>
           </div>
+
+          {formData.profile_type === 'staff' && (
+            <div>
+              <label className="block text-sm font-bold text-charcoal mb-2">Job / role type *</label>
+              <select
+                value={formData.staff_role}
+                onChange={(e) => setFormData({ ...formData, staff_role: e.target.value })}
+                className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none bg-white"
+              >
+                {staffRoleOptions.map((role) => (
+                  <option key={role} value={role}>
+                    {role}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
           <div>
             <label className="block text-sm font-bold text-charcoal mb-2">Email *</label>
             <input
@@ -657,54 +598,130 @@ export const AdminTeam = () => {
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none"
               placeholder="type a valid email address"
-              required
             />
           </div>
+
           <div>
             <label className="block text-sm font-bold text-charcoal mb-2">Phone *</label>
             <input
               type="tel"
               value={formData.phone}
               onChange={(e) => {
-                // Only allow numbers, spaces, hyphens, and parentheses
                 const value = e.target.value;
-                if (/^[0-9\s\-\(\)]*$/.test(value)) {
+                if (/^[0-9\s\-()]*$/.test(value)) {
                   setFormData({ ...formData, phone: value });
                 }
               }}
               className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none"
               placeholder="03-308 5409"
-              required
             />
           </div>
+
+          {(formData.profile_type === 'member' || formData.profile_type === 'staff' || formData.profile_type === 'attendee') && (
+            <>
+              {formData.profile_type === 'member' && (
+                <div>
+                  <label className="block text-sm font-bold text-charcoal mb-2">Membership start date *</label>
+                  <input
+                    type="date"
+                    value={formData.membership_start_date}
+                    onChange={(e) => setFormData({ ...formData, membership_start_date: e.target.value })}
+                    className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none bg-white"
+                  />
+                </div>
+              )}
+
+              <div>
+                <span className="block text-sm font-bold text-charcoal mb-2">
+                  Baptised? {(formData.profile_type === 'staff' || formData.profile_type === 'member') ? '*' : '(optional)'}
+                </span>
+                <div className="flex gap-6 flex-wrap">
+                  {formData.profile_type === 'attendee' && (
+                    <label className="inline-flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="baptised"
+                        checked={formData.is_baptised === null}
+                        onChange={() => setFormData({ ...formData, is_baptised: null, baptism_date: '' })}
+                      />
+                      <span className="text-sm">Not set</span>
+                    </label>
+                  )}
+                  <label className="inline-flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="baptised"
+                      checked={formData.is_baptised === true}
+                      onChange={() => setFormData({ ...formData, is_baptised: true })}
+                    />
+                    <span className="text-sm">Yes</span>
+                  </label>
+                  <label className="inline-flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="baptised"
+                      checked={formData.is_baptised === false}
+                      onChange={() => setFormData({ ...formData, is_baptised: false, baptism_date: '' })}
+                    />
+                    <span className="text-sm">No</span>
+                  </label>
+                </div>
+              </div>
+
+              {formData.is_baptised === true && (
+                <div>
+                  <label className="block text-sm font-bold text-charcoal mb-2">
+                    Baptism date {(formData.profile_type === 'staff' || formData.profile_type === 'member') ? '*' : '(optional)'}
+                  </label>
+                  <input
+                    type="date"
+                    value={formData.baptism_date}
+                    onChange={(e) => setFormData({ ...formData, baptism_date: e.target.value })}
+                    className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none bg-white"
+                  />
+                </div>
+              )}
+
+              {formData.profile_type === 'member' && (
+                <div>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.has_membership_chip}
+                      onChange={(e) => setFormData({ ...formData, has_membership_chip: e.target.checked })}
+                    />
+                    <span className="text-sm font-bold text-charcoal">Assign membership chip</span>
+                  </label>
+                  <p className="text-xs text-neutral mt-1">Only applies to members. Cannot be enabled for Staff or Attendee.</p>
+                </div>
+              )}
+            </>
+          )}
+
           <div>
             <label className="block text-sm font-bold text-charcoal mb-2">
-              Photo {formData.role !== 'Attendee' ? '*' : ''} (max 300KB{formData.role !== 'Attendee' ? ', required' : ', optional for Attendee'})
+              Photo {photoRequired ? '*' : ''} (max 300KB
+              {photoRequired ? ', required for Staff' : ', optional for Member and Attendee'})
             </label>
             <div className="flex items-center gap-4">
-              {/* Photo Preview - Circular like team management view */}
               <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-gray-200 flex-shrink-0">
                 {previewUrl && (() => {
-                  // Check if we should show image preview
-                  const isImage = selectedFile 
+                  const isImage = selectedFile
                     ? selectedFile.type.startsWith('image/')
-                    : previewUrl && !previewUrl.toLowerCase().endsWith('.pdf') && (previewUrl.startsWith('blob:') || previewUrl.startsWith('http') || previewUrl.startsWith('data:'));
-                  
+                    : Boolean(
+                        previewUrl &&
+                          !previewUrl.toLowerCase().endsWith('.pdf') &&
+                          (previewUrl.startsWith('blob:') || previewUrl.startsWith('http') || previewUrl.startsWith('data:'))
+                      );
+
                   if (isImage && previewUrl) {
-                    return (
-                      <img 
-                        src={previewUrl} 
-                        alt="Team member" 
-                        className="w-full h-full object-cover"
-                      />
-                    );
-                  } else {
-                    return (
-                      <div className="w-full h-full bg-gold/10 flex items-center justify-center">
-                        <User size={32} className="text-gold" />
-                      </div>
-                    );
+                    return <img src={previewUrl} alt="Team member" className="w-full h-full object-cover" />;
                   }
+                  return (
+                    <div className="w-full h-full bg-gold/10 flex items-center justify-center">
+                      <User size={32} className="text-gold" />
+                    </div>
+                  );
                 })()}
                 {!previewUrl && (
                   <div className="w-full h-full bg-gold/10 flex items-center justify-center">
@@ -713,9 +730,8 @@ export const AdminTeam = () => {
                 )}
               </div>
 
-              {/* Upload Button on the Right */}
               <div className="flex-1">
-                <label 
+                <label
                   htmlFor="team-image-upload"
                   className="flex items-center justify-center gap-2 px-4 py-2 border-2 border-gray-300 rounded-[4px] cursor-pointer bg-white hover:bg-gray-50 hover:border-gold transition-colors"
                 >
@@ -760,6 +776,7 @@ export const AdminTeam = () => {
               </div>
             </div>
           </div>
+
           <div>
             <label className="block text-sm font-bold text-charcoal mb-2">Description (Optional, max 350 characters)</label>
             <textarea
@@ -771,46 +788,30 @@ export const AdminTeam = () => {
                 }
               }}
               className={`w-full p-3 rounded-[4px] border focus:outline-none resize-none ${
-                formData.description.length > 350
-                  ? 'border-red-300 focus:border-red-500'
-                  : 'border-gray-200 focus:border-gold'
+                formData.description.length > 350 ? 'border-red-300 focus:border-red-500' : 'border-gray-200 focus:border-gold'
               }`}
-              placeholder="Enter description (optional, max 350 characters)"
+              placeholder="Notes (e.g. baptised elsewhere)"
               rows={3}
               maxLength={350}
             />
-            <p className={`text-xs mt-1 ${
-              formData.description.length > 350
-                ? 'text-red-500'
-                : 'text-neutral'
-            }`}>
+            <p className={`text-xs mt-1 ${formData.description.length > 350 ? 'text-red-500' : 'text-neutral'}`}>
               {formData.description.length}/350 characters
             </p>
           </div>
+
           <div className="flex gap-3 justify-end pt-4">
             <button
               onClick={() => {
                 setIsModalOpen(false);
                 setEditingMember(null);
-                setFormData({ name: '', role: 'Attendee', email: '', phone: '', img: '', description: '' });
-                handleRemoveFile();
+                resetModal();
               }}
               className="px-6 py-2 border border-gray-200 rounded-[4px] text-charcoal hover:bg-gray-50 transition-colors"
             >
               Cancel
             </button>
-            <GlowingButton
-              onClick={editingMember ? handleUpdate : handleCreate}
-              disabled={
-                !formData.name.trim() || 
-                !formData.role.trim() || 
-                !formData.email.trim() || 
-                !formData.phone.trim() || 
-                formData.description.trim().length > 350 || 
-                isUploading
-              }
-            >
-              {isUploading ? 'Uploading...' : (editingMember ? 'Update Member' : 'Add Member')}
+            <GlowingButton onClick={editingMember ? handleUpdate : handleCreate} disabled={formInvalid}>
+              {isUploading ? 'Uploading...' : editingMember ? 'Update Person' : 'Add Person'}
             </GlowingButton>
           </div>
         </div>
@@ -818,4 +819,3 @@ export const AdminTeam = () => {
     </div>
   );
 };
-

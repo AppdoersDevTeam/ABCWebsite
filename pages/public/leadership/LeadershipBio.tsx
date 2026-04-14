@@ -6,6 +6,7 @@ import { ScrollReveal } from '../../../components/UI/ScrollReveal';
 import { ArrowLeft, ArrowDownToLine, UserRound } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
 import { TeamMember } from '../../../types';
+import { getDisplayRole, inferProfileType } from '../../../lib/teamMemberUtils';
 
 export const LeadershipBio = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -39,9 +40,13 @@ export const LeadershipBio = () => {
         return memberSlug === slugParam.toLowerCase();
       });
 
-      if (foundMember) {
+      if (foundMember && inferProfileType(foundMember) !== 'staff') {
+        setMember(null);
+        setNotFound(true);
+      } else if (foundMember) {
         setMember(foundMember);
       } else {
+        setMember(null);
         setNotFound(true);
       }
     } catch (error) {
@@ -110,7 +115,7 @@ export const LeadershipBio = () => {
                 {member.description ? (
                   <>
                     <span className="block font-raleway font-normal text-center">
-                      {member.role}.
+                      {getDisplayRole(member)}.
                     </span>
                     <span className="block mt-3 sm:mt-4 font-raleway font-normal text-center">
                       {member.description.length > 100 
@@ -120,7 +125,7 @@ export const LeadershipBio = () => {
                   </>
                 ) : (
                   <>
-                    <span className="block font-raleway font-normal text-center">{member.role}.</span>
+                    <span className="block font-raleway font-normal text-center">{getDisplayRole(member)}.</span>
                     <span className="block mt-3 sm:mt-4 font-raleway font-normal text-center">Leading with passion and a heart for service.</span>
                   </>
                 )}
@@ -161,7 +166,7 @@ export const LeadershipBio = () => {
             
             <ScrollReveal direction="left" delay={200}>
               <div className="glass-card rounded-[16px] p-8 bg-white/70 border border-white/50 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 hover-lift">
-                <h3 className="text-3xl font-serif font-normal text-charcoal mb-4">{member.role}</h3>
+                <h3 className="text-3xl font-serif font-normal text-charcoal mb-4">{getDisplayRole(member)}</h3>
                 <div className="space-y-4 text-neutral leading-relaxed">
                   {member.description ? (
                     <p>{member.description}</p>
