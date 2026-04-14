@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { VibrantCard } from '../../components/UI/VibrantCard';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { Modal } from '../../components/UI/Modal';
-import { CalendarDays, Mail, Phone, Edit, Trash2, User, Upload, X, UserPlus } from 'lucide-react';
+import { CalendarDays, Edit, Trash2, User, Upload, X, UserPlus, Download } from 'lucide-react';
 import { TeamMember } from '../../types';
 import { supabase } from '../../lib/supabase';
 import { SkeletonPageHeader } from '../../components/UI/Skeleton';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { buildStoredRole, getDisplayRole, inferProfileType } from '../../lib/teamMemberUtils';
+import { downloadDirectoryCsv, downloadDirectoryPdf } from '../../lib/exportDirectoryPeople';
 
 type ProfileType = 'staff' | 'attendee' | 'member';
 
@@ -81,6 +81,11 @@ export const AdminTeam = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
   const [formData, setFormData] = useState<FormState>(emptyForm);
+  const [selectedProfileTypes, setSelectedProfileTypes] = useState<Record<ProfileType, boolean>>({
+    staff: true,
+    member: true,
+    attendee: true,
+  });
 
   const staffRoleOptions = useMemo(() => {
     const s = formData.staff_role;
@@ -450,6 +455,21 @@ export const AdminTeam = () => {
     );
   }
 
+  const filteredMembers = useMemo(() => {
+    return members.filter((m) => {
+      const pt = inferProfileType(m);
+      return selectedProfileTypes[pt];
+    });
+  }, [members, selectedProfileTypes]);
+
+  const filenameBase = useMemo(() => {
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `directory-people-${yyyy}-${mm}-${dd}`;
+  }, []);
+
   const trimmed = trimForm();
   const validationError = validate(trimmed);
   const formInvalid =
@@ -467,72 +487,134 @@ export const AdminTeam = () => {
         subtitle="Manage staff, attendees, and members in the directory."
         icon={<User size={28} />}
         rightSlot={
-          <GlowingButton size="sm" fullWidth className="md:w-auto" onClick={openCreateModal}>
-            <UserPlus size={16} className="mr-2" />
-            Add Person
-          </GlowingButton>
+          <div className="flex gap-2 flex-wrap">
+            <button
+              type="button"
+              onClick={() => downloadDirectoryCsv(filteredMembers, filenameBase)}
+              className="bg-white border-2 border-gray-200 text-charcoal px-4 py-2 rounded-[4px] font-bold hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-2 text-sm"
+              title="Download CSV (filtered)"
+            >
+              <Download size={16} />
+              CSV
+            </button>
+            <button
+              type="button"
+              onClick={() => downloadDirectoryPdf(filteredMembers, filenameBase)}
+              className="bg-white border-2 border-gray-200 text-charcoal px-4 py-2 rounded-[4px] font-bold hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-2 text-sm"
+              title="Download PDF (filtered)"
+            >
+              <Download size={16} />
+              PDF
+            </button>
+            <GlowingButton size="sm" fullWidth className="md:w-auto" onClick={openCreateModal}>
+              <UserPlus size={16} className="mr-2" />
+              Add Person
+            </GlowingButton>
+          </div>
         }
       />
+
+      {/* Profile type filter */}
+      <div className="glass-card bg-white/80 border border-white/60 rounded-[12px] p-4">
+        <p className="text-sm font-bold text-charcoal mb-3">Filter by role</p>
+        <div className="flex flex-wrap gap-2">
+          {(Object.keys(PROFILE_LABEL) as ProfileType[]).map((pt) => {
+            const checked = selectedProfileTypes[pt];
+            return (
+              <label key={pt} className="cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="sr-only peer"
+                  checked={checked}
+                  onChange={() =>
+                    setSelectedProfileTypes((prev) => ({
+                      ...prev,
+                      [pt]: !prev[pt],
+                    }))
+                  }
+                />
+                <span className="inline-flex items-center px-3 py-2 rounded-[6px] border border-gray-200 bg-white text-sm font-bold text-neutral peer-checked:border-gold peer-checked:bg-gold/10 peer-checked:text-charcoal transition-colors">
+                  {PROFILE_LABEL[pt]}
+                </span>
+              </label>
+            );
+          })}
+        </div>
+        <p className="text-xs text-neutral mt-2">
+          Showing <span className="font-bold text-charcoal">{filteredMembers.length}</span> of{' '}
+          <span className="font-bold text-charcoal">{members.length}</span>
+        </p>
+      </div>
 
       {members.length === 0 ? (
         <div className="text-center py-12 glass-card bg-white/80 border border-white/60 rounded-[12px]">
           <p className="text-neutral">No team members yet. Add your first team member to get started.</p>
         </div>
+      ) : filteredMembers.length === 0 ? (
+        <div className="text-center py-12 glass-card bg-white/80 border border-white/60 rounded-[12px]">
+          <p className="text-neutral">No results match the selected filters.</p>
+        </div>
       ) : (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {members.map((member) => (
-            <VibrantCard key={member.id} className="group bg-white shadow-sm hover:shadow-md hover:border-gold relative">
-              <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button
-                  onClick={() => handleEdit(member)}
-                  className="p-2 bg-white border border-gray-200 rounded-[4px] text-neutral hover:text-gold hover:border-gold transition-colors"
-                  title="Edit"
-                >
-                  <Edit size={16} />
-                </button>
-                <button
-                  onClick={() => handleDelete(member.id)}
-                  className="p-2 bg-white border border-gray-200 rounded-[4px] text-neutral hover:text-red-500 hover:border-red-200 transition-colors"
-                  title="Delete"
-                >
-                  <Trash2 size={16} />
-                </button>
-              </div>
-              <div className="flex items-center space-x-6">
-                <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-gray-100 group-hover:border-gold transition-colors flex-shrink-0">
-                  {member.img ? (
-                    <img src={member.img} alt={member.name} className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full bg-gold/10 flex items-center justify-center">
-                      <User size={32} className="text-gold" />
-                    </div>
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h4 className="font-bold text-xl text-charcoal truncate">{member.name}</h4>
-                  <p className="text-xs text-gold font-bold uppercase tracking-wider mb-1">{getDisplayRole(member)}</p>
-                  <p className="text-[10px] text-neutral uppercase tracking-wide mb-2">
-                    {PROFILE_LABEL[inferProfileType(member)]}
-                  </p>
-                  <div className="flex space-x-4 text-neutral">
-                    {member.email && (
-                      <a href={`mailto:${member.email}`} className="hover:text-gold transition-colors" title={member.email}>
-                        <Mail size={18} />
-                      </a>
-                    )}
-                    {member.phone && (
-                      <a href={`tel:${member.phone}`} className="hover:text-gold transition-colors" title={member.phone}>
-                        <Phone size={18} />
-                      </a>
-                    )}
-                  </div>
-                  {member.description && (
-                    <p className="text-sm text-neutral mt-4 line-clamp-3">{member.description}</p>
-                  )}
-                </div>
-              </div>
-            </VibrantCard>
-          ))}
+        <div className="glass-card bg-white/80 border border-white/60 rounded-[12px] overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-[900px] w-full text-left">
+              <thead className="bg-white/60 sticky top-0">
+                <tr className="border-b border-gray-200">
+                  <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-neutral">Name</th>
+                  <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-neutral">Email</th>
+                  <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-neutral">Phone</th>
+                  <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-neutral">Role</th>
+                  <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-neutral">Status</th>
+                  <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-neutral w-[140px]">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredMembers.map((member, idx) => {
+                  const pt = inferProfileType(member);
+                  return (
+                    <tr
+                      key={member.id}
+                      className={`border-b border-gray-100 hover:bg-gold/5 transition-colors ${
+                        idx % 2 === 0 ? 'bg-white/40' : 'bg-white/20'
+                      }`}
+                    >
+                      <td className="px-4 py-3">
+                        <div className="font-bold text-charcoal">{member.name}</div>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-neutral">{member.email || '-'}</td>
+                      <td className="px-4 py-3 text-sm text-neutral">{member.phone || '-'}</td>
+                      <td className="px-4 py-3 text-sm text-charcoal font-bold">{getDisplayRole(member)}</td>
+                      <td className="px-4 py-3">
+                        <span className="inline-flex items-center px-2 py-1 rounded-full bg-gold/10 text-gold text-[11px] font-bold uppercase tracking-wider">
+                          {PROFILE_LABEL[pt]}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleEdit(member)}
+                            className="px-3 py-2 bg-white border border-gray-200 rounded-[4px] text-neutral hover:text-gold hover:border-gold transition-colors text-sm font-bold inline-flex items-center gap-2"
+                            title="Edit"
+                          >
+                            <Edit size={16} />
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDelete(member.id)}
+                            className="px-3 py-2 bg-white border border-red-200 rounded-[4px] text-red-600 hover:bg-red-50 transition-colors text-sm font-bold inline-flex items-center gap-2"
+                            title="Delete"
+                          >
+                            <Trash2 size={16} />
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 

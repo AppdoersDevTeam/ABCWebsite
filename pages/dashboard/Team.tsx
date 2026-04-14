@@ -22,7 +22,9 @@ export const Team = () => {
         .order('name', { ascending: true });
 
       if (error) throw error;
-      setMembers(data || []);
+      const all = (data || []) as TeamMember[];
+      const staffOnly = all.filter((m) => inferProfileType(m) === 'staff');
+      setMembers(staffOnly);
     } catch (error) {
       console.error('Error fetching team members:', error);
     } finally {
@@ -52,7 +54,7 @@ export const Team = () => {
 
       {members.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-neutral">No team members available yet.</p>
+          <p className="text-neutral">No staff profiles available yet.</p>
         </div>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -70,15 +72,8 @@ export const Team = () => {
               <div>
                 <h4 className="font-bold text-xl text-charcoal">{member.name}</h4>
                 <p className="text-xs text-gold font-bold uppercase tracking-wider mb-1">{getDisplayRole(member)}</p>
-                {inferProfileType(member) === 'member' && member.has_membership_chip && (
-                  <span className="inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-gold/15 text-gold mb-2">
-                    Membership chip
-                  </span>
-                )}
-                {inferProfileType(member) === 'member' && member.membership_start_date && (
-                  <p className="text-xs text-neutral mb-2">
-                    Member since {String(member.membership_start_date).slice(0, 10)}
-                  </p>
+                {member.description && (
+                  <p className="text-sm text-neutral mt-2 line-clamp-3">{member.description}</p>
                 )}
                 <div className="flex space-x-4 text-neutral">
                   {member.email && (
