@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { VibrantCard } from '../../components/UI/VibrantCard';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { Modal } from '../../components/UI/Modal';
-import { Mail, Phone, Edit, Trash2, User, Upload, X, UserPlus } from 'lucide-react';
+import { CalendarDays, Mail, Phone, Edit, Trash2, User, Upload, X, UserPlus } from 'lucide-react';
 import { TeamMember } from '../../types';
 import { supabase } from '../../lib/supabase';
 import { SkeletonPageHeader } from '../../components/UI/Skeleton';
@@ -281,7 +281,7 @@ export const AdminTeam = () => {
         formData.is_baptised === true && formData.baptism_date.trim()
           ? formData.baptism_date.trim()
           : null;
-      row.membership_start_date = null;
+      row.membership_start_date = pt === 'staff' ? trimmed.membership_start_date.trim() || null : null;
       row.has_membership_chip = false;
     }
 
@@ -433,7 +433,7 @@ export const AdminTeam = () => {
       ...prev,
       profile_type,
       has_membership_chip: profile_type === 'member' ? prev.has_membership_chip : false,
-      membership_start_date: profile_type === 'member' ? prev.membership_start_date : '',
+      membership_start_date: profile_type === 'attendee' ? '' : prev.membership_start_date,
     }));
   };
 
@@ -598,6 +598,11 @@ export const AdminTeam = () => {
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none"
               placeholder="type a valid email address"
+              inputMode="email"
+              autoComplete="email"
+              pattern="^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"
+              title="Please enter a valid email address (e.g. name@example.com)."
+              required
             />
           </div>
 
@@ -619,9 +624,11 @@ export const AdminTeam = () => {
 
           {(formData.profile_type === 'member' || formData.profile_type === 'staff' || formData.profile_type === 'attendee') && (
             <>
-              {formData.profile_type === 'member' && (
+              {(formData.profile_type === 'member' || formData.profile_type === 'staff') && (
                 <div>
-                  <label className="block text-sm font-bold text-charcoal mb-2">Membership start date *</label>
+                  <label className="block text-sm font-bold text-charcoal mb-2">
+                    Membership start date {formData.profile_type === 'member' ? '*' : '(optional)'}
+                  </label>
                   <input
                     type="date"
                     value={formData.membership_start_date}
@@ -631,54 +638,83 @@ export const AdminTeam = () => {
                 </div>
               )}
 
-              <div>
-                <span className="block text-sm font-bold text-charcoal mb-2">
-                  Baptised? {(formData.profile_type === 'staff' || formData.profile_type === 'member') ? '*' : '(optional)'}
-                </span>
-                <div className="flex gap-6 flex-wrap">
+              <div className="rounded-[8px] border border-gray-200 bg-white/70 p-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <span className="block text-sm font-bold text-charcoal">
+                      Baptised? {(formData.profile_type === 'staff' || formData.profile_type === 'member') ? '*' : '(optional)'}
+                    </span>
+                    <p className="text-xs text-neutral mt-1">
+                      {formData.profile_type === 'attendee'
+                        ? 'Optional for attendees.'
+                        : 'Required for staff and members.'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-2">
                   {formData.profile_type === 'attendee' && (
-                    <label className="inline-flex items-center gap-2 cursor-pointer">
+                    <label className="relative cursor-pointer">
                       <input
                         type="radio"
                         name="baptised"
+                        className="peer sr-only"
                         checked={formData.is_baptised === null}
                         onChange={() => setFormData({ ...formData, is_baptised: null, baptism_date: '' })}
                       />
-                      <span className="text-sm">Not set</span>
+                      <div className="px-3 py-2 rounded-[6px] border border-gray-200 bg-white text-sm font-bold text-neutral peer-checked:border-gold peer-checked:bg-gold/10 peer-checked:text-charcoal transition-colors">
+                        Not set
+                      </div>
                     </label>
                   )}
-                  <label className="inline-flex items-center gap-2 cursor-pointer">
+
+                  <label className="relative cursor-pointer">
                     <input
                       type="radio"
                       name="baptised"
+                      className="peer sr-only"
                       checked={formData.is_baptised === true}
                       onChange={() => setFormData({ ...formData, is_baptised: true })}
                     />
-                    <span className="text-sm">Yes</span>
+                    <div className="px-3 py-2 rounded-[6px] border border-gray-200 bg-white text-sm font-bold text-neutral peer-checked:border-gold peer-checked:bg-gold/10 peer-checked:text-charcoal transition-colors">
+                      Yes
+                    </div>
                   </label>
-                  <label className="inline-flex items-center gap-2 cursor-pointer">
+
+                  <label className="relative cursor-pointer">
                     <input
                       type="radio"
                       name="baptised"
+                      className="peer sr-only"
                       checked={formData.is_baptised === false}
                       onChange={() => setFormData({ ...formData, is_baptised: false, baptism_date: '' })}
                     />
-                    <span className="text-sm">No</span>
+                    <div className="px-3 py-2 rounded-[6px] border border-gray-200 bg-white text-sm font-bold text-neutral peer-checked:border-gold peer-checked:bg-gold/10 peer-checked:text-charcoal transition-colors">
+                      No
+                    </div>
                   </label>
                 </div>
               </div>
 
               {formData.is_baptised === true && (
-                <div>
+                <div className="mt-1">
                   <label className="block text-sm font-bold text-charcoal mb-2">
                     Baptism date {(formData.profile_type === 'staff' || formData.profile_type === 'member') ? '*' : '(optional)'}
                   </label>
-                  <input
-                    type="date"
-                    value={formData.baptism_date}
-                    onChange={(e) => setFormData({ ...formData, baptism_date: e.target.value })}
-                    className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none bg-white"
-                  />
+                  <div className="relative">
+                    <CalendarDays size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral" />
+                    <input
+                      type="date"
+                      value={formData.baptism_date}
+                      onChange={(e) => setFormData({ ...formData, baptism_date: e.target.value })}
+                      className="w-full pl-10 pr-3 py-3 rounded-[6px] border border-gray-200 focus:border-gold focus:outline-none bg-white"
+                    />
+                  </div>
+                  <p className="text-xs text-neutral mt-1">
+                    {formData.profile_type === 'attendee'
+                      ? 'Optional for attendees.'
+                      : 'Required when Baptised is Yes.'}
+                  </p>
                 </div>
               )}
 

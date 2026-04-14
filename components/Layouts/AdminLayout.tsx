@@ -35,7 +35,7 @@ export const AdminLayout = () => {
     { label: 'User Management', path: '/admin/users', icon: <UserCog size={20} /> },
     { label: 'Prayer Wall', path: '/admin/prayer', icon: <MessageSquare size={20} /> },
     { label: 'Newsletters', path: '/admin/newsletter', icon: <BookOpen size={20} /> },
-    { label: 'Team', path: '/admin/team', icon: <Users size={20} /> },
+    { label: 'Directory / People', path: '/admin/team', icon: <Users size={20} /> },
     { label: 'Events', path: '/admin/events', icon: <Calendar size={20} /> },
     { label: 'Roster', path: '/admin/roster', icon: <ClipboardList size={20} /> },
     { label: 'Photos', path: '/admin/photos', icon: <Image size={20} /> },
