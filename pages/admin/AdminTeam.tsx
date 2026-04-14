@@ -87,6 +87,21 @@ export const AdminTeam = () => {
     attendee: true,
   });
 
+  const filteredMembers = useMemo(() => {
+    return members.filter((m) => {
+      const pt = inferProfileType(m);
+      return selectedProfileTypes[pt];
+    });
+  }, [members, selectedProfileTypes]);
+
+  const filenameBase = useMemo(() => {
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `directory-people-${yyyy}-${mm}-${dd}`;
+  }, []);
+
   const staffRoleOptions = useMemo(() => {
     const s = formData.staff_role;
     if (s && !STAFF_ROLE_OPTIONS.includes(s)) {
@@ -454,21 +469,6 @@ export const AdminTeam = () => {
       </div>
     );
   }
-
-  const filteredMembers = useMemo(() => {
-    return members.filter((m) => {
-      const pt = inferProfileType(m);
-      return selectedProfileTypes[pt];
-    });
-  }, [members, selectedProfileTypes]);
-
-  const filenameBase = useMemo(() => {
-    const d = new Date();
-    const yyyy = d.getFullYear();
-    const mm = String(d.getMonth() + 1).padStart(2, '0');
-    const dd = String(d.getDate()).padStart(2, '0');
-    return `directory-people-${yyyy}-${mm}-${dd}`;
-  }, []);
 
   const trimmed = trimForm();
   const validationError = validate(trimmed);
