@@ -12,6 +12,13 @@ export const OAuthCallback = () => {
   const [isOAuthCallback, setIsOAuthCallback] = useState(false);
   const redirectPathRef = useRef<string | null>(null);
 
+  const replaceToAppBase = () => {
+    // With HashRouter we must keep pathname at the app base (usually "/"),
+    // otherwise you end up with URLs like "/auth/callback#/dashboard" which 404 on refresh in Vercel.
+    const base = import.meta.env.BASE_URL || '/';
+    window.history.replaceState({}, document.title, base);
+  };
+
   useEffect(() => {
     // Check if this is an OAuth callback by looking for access_token in URL
     // Handle malformed hash (e.g., #/auth/callback#access_token=...)
@@ -65,7 +72,7 @@ export const OAuthCallback = () => {
         if (sessionError) {
           console.error('OAuthCallback - Session error:', sessionError);
           setRedirectAttempted(true);
-          window.history.replaceState({}, document.title, window.location.pathname);
+          replaceToAppBase();
           navigate('/login-error?error=session_error', { replace: true });
           return;
         }
@@ -78,7 +85,7 @@ export const OAuthCallback = () => {
               if (!redirectAttempted) {
                 console.log('OAuthCallback - Still no session after wait, redirecting to error page');
                 setRedirectAttempted(true);
-                window.history.replaceState({}, document.title, window.location.pathname);
+                replaceToAppBase();
                 navigate('/login-error?error=no_session', { replace: true });
               }
             }, 2000);
@@ -152,7 +159,7 @@ export const OAuthCallback = () => {
                 const retryProfile = retryUserData as User;
                 setRedirectAttempted(true);
                 // Clean up the URL hash before redirecting
-                window.history.replaceState({}, document.title, window.location.pathname);
+                replaceToAppBase();
                 
                 if (!retryProfile.is_approved) {
                   console.log('OAuthCallback - User not approved after retry, redirecting to pending approval');
@@ -167,7 +174,7 @@ export const OAuthCallback = () => {
               } else {
                 setRedirectAttempted(true);
                 console.warn('OAuthCallback - Profile still not found after retry, redirecting to pending approval');
-                window.history.replaceState({}, document.title, window.location.pathname);
+                replaceToAppBase();
                 navigate('/pending-approval', { replace: true });
               }
             }, 3000);
@@ -175,7 +182,7 @@ export const OAuthCallback = () => {
           } else {
             setRedirectAttempted(true);
             console.warn('OAuthCallback - No user profile available, redirecting to pending approval');
-            window.history.replaceState({}, document.title, window.location.pathname);
+            replaceToAppBase();
             navigate('/pending-approval', { replace: true });
             return;
           }
@@ -191,8 +198,8 @@ export const OAuthCallback = () => {
           role: profile.role
         });
         
-        // Clean up the URL hash before redirecting
-        window.history.replaceState({}, document.title, window.location.pathname);
+        // Clean up the URL before redirecting (keep pathname at app base for HashRouter)
+        replaceToAppBase();
         
         // Determine redirect path
         const redirectPath = !profile.is_approved 
@@ -216,6 +223,7 @@ export const OAuthCallback = () => {
             if ((currentHash.includes('auth/callback') || currentPath.includes('auth/callback')) && redirectPathRef.current) {
               console.log('OAuthCallback - Navigation may have failed, using window.location fallback');
               // For HashRouter, we need to set the hash with the # prefix
+              replaceToAppBase();
               window.location.hash = `#${redirectPathRef.current}`;
             }
           }, 500);
@@ -224,7 +232,7 @@ export const OAuthCallback = () => {
         console.error('OAuth callback handler error:', error);
         if (!redirectAttempted) {
           setRedirectAttempted(true);
-          window.history.replaceState({}, document.title, window.location.pathname);
+          replaceToAppBase();
           navigate('/login-error?error=callback_failed', { replace: true });
         }
       }
@@ -260,6 +268,7 @@ export const OAuthCallback = () => {
           setTimeout(() => {
             if (window.location.hash.includes('auth/callback') || window.location.pathname.includes('auth/callback')) {
               console.log('OAuthCallback - Force redirect using window.location');
+              replaceToAppBase();
               window.location.hash = `#${redirectPathRef.current}`;
             }
           }, 300);
