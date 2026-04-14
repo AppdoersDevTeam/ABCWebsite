@@ -44,8 +44,13 @@ export interface Event {
   time: string;
   location: string;
   category: string;
+  image_url?: string | null;
   description?: string;
   is_public: boolean;
+  /** optional | required */
+  rsvp_mode?: 'optional' | 'required';
+  /** all | staff | members | attendees */
+  audience?: 'all' | 'staff' | 'members' | 'attendees';
   created_at?: string;
   updated_at?: string;
 }

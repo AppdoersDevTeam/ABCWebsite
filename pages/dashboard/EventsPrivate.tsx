@@ -1,24 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import { VibrantCard } from '../../components/UI/VibrantCard';
 import { Calendar as CalIcon } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { Event } from '../../types';
 import { SkeletonPageHeader, SkeletonEventCard } from '../../components/UI/Skeleton';
+import { useAuth } from '../../context/AuthContext';
 
 export const EventsPrivate = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { user } = useAuth();
 
   useEffect(() => {
     fetchEvents();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.role]);
 
   const fetchEvents = async () => {
     try {
-      const { data, error } = await supabase
-        .from('events')
-        .select('*')
-        .order('date', { ascending: true });
+      const isAdmin = user?.role === 'admin';
+      let query = supabase.from('events').select('*').order('date', { ascending: true });
+
+      // Public events always show to all. For private events, apply audience filter.
+      if (!isAdmin) {
+        query = query.or('is_public.eq.true,audience.in.(all,members),audience.is.null');
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
       setEvents(data || []);
@@ -64,26 +73,32 @@ export const EventsPrivate = () => {
             const formattedDate = formatDate(evt.date);
             const dateParts = formattedDate.split(' ');
             return (
-              <div
+              <Link
                 key={evt.id}
-                className="flex items-center p-6 bg-white border border-gray-100 shadow-sm rounded-[8px] hover:border-gold hover:shadow-md transition-all group"
+                to={`/events/${evt.id}`}
+                className="block"
               >
-                <div className="flex-shrink-0 w-20 text-center border-r border-gray-100 pr-6 mr-6">
-                  <span className="block text-xs text-gold uppercase font-bold tracking-widest">{dateParts[0]}</span>
-                  <span className="block text-3xl font-serif text-charcoal font-normal">{dateParts[1]}</span>
+                <div className="flex items-center p-6 bg-white border border-gray-100 shadow-sm rounded-[8px] hover:border-gold hover:shadow-md transition-all group">
+                  <div className="flex-shrink-0 w-20 text-center border-r border-gray-100 pr-6 mr-6">
+                    <span className="block text-xs text-gold uppercase font-bold tracking-widest">{dateParts[0]}</span>
+                    <span className="block text-3xl font-serif text-charcoal font-normal">{dateParts[1]}</span>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-charcoal group-hover:text-gold transition-colors">
+                      {evt.title}
+                    </h3>
+                    <p className="text-neutral text-sm mt-1 flex items-center">
+                      <span className="w-2 h-2 rounded-full bg-gold mr-2"></span> {evt.time} • {evt.location}
+                    </p>
+                    {evt.description && (
+                      <p className="text-neutral text-sm mt-2 line-clamp-2">{evt.description}</p>
+                    )}
+                    <p className="text-gold text-sm font-bold mt-3 group-hover:text-charcoal transition-colors">
+                      See More
+                    </p>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <h3 className="text-xl font-bold text-charcoal group-hover:text-gold transition-colors">
-                    {evt.title}
-                  </h3>
-                  <p className="text-neutral text-sm mt-1 flex items-center">
-                    <span className="w-2 h-2 rounded-full bg-gold mr-2"></span> {evt.time} • {evt.location}
-                  </p>
-                  {evt.description && (
-                    <p className="text-neutral text-sm mt-2">{evt.description}</p>
-                  )}
-                </div>
-              </div>
+              </Link>
             );
           })}
         </div>

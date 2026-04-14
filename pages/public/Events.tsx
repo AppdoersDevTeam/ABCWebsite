@@ -232,10 +232,19 @@ export const Events = () => {
             <div className="grid md:grid-cols-3 gap-8 w-full max-w-[80.5%]">
               {publicEvents.map((evt, i) => {
                 const { day, month } = formatEventDate(evt.date);
+                const thumbUrl = evt.image_url?.trim() ? String(evt.image_url) : '/ABC Logo.png';
                 return (
                   <ScrollReveal key={evt.id} direction="up" delay={i * 100}>
-                    <Link to="/events">
+                    <Link to={`/events/${evt.id}`}>
                       <div className="glass-card border border-white/50 shadow-sm p-0 flex rounded-[8px] overflow-hidden group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 bg-white/70 hover-lift cursor-pointer">
+                        <div className="relative w-24 sm:w-28 md:w-32 bg-gray-100 overflow-hidden flex-shrink-0">
+                          <img
+                            src={thumbUrl}
+                            alt={evt.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            loading="lazy"
+                          />
+                        </div>
                         <div className="bg-gold/35 group-hover:bg-gold transition-all duration-300 w-24 flex flex-col items-center justify-center p-4 text-charcoal group-hover:scale-105">
                           <span className="text-2xl md:text-3xl font-black group-hover:scale-110 transition-transform duration-300">{day}</span>
                           <span className="text-xs md:text-sm font-bold tracking-wider">{month}</span>
@@ -259,6 +268,12 @@ export const Events = () => {
                           {evt.category && (
                             <span className="text-gold text-xs uppercase tracking-widest mt-2 font-bold">{evt.category}</span>
                           )}
+                          <div className="mt-4">
+                            <span className="inline-flex items-center text-sm font-bold text-gold group-hover:text-charcoal transition-colors">
+                              See More
+                              <ArrowRight size={16} className="ml-2 transition-transform duration-300 group-hover:translate-x-1" />
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </Link>

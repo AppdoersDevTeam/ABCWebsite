@@ -6,20 +6,31 @@ import { Event } from '../../types';
 import { supabase } from '../../lib/supabase';
 import { SkeletonPageHeader, SkeletonEventCard } from '../../components/UI/Skeleton';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
+import { downloadEventRsvpsCsv, downloadEventRsvpsPdf } from '../../lib/exportEventRsvps';
 
 export const AdminEvents = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isRsvpModalOpen, setIsRsvpModalOpen] = useState(false);
+  const [rsvpEvent, setRsvpEvent] = useState<Event | null>(null);
+  const [rsvps, setRsvps] = useState<Array<{ id: string; name: string; email: string; created_at: string }>>([]);
+  const [isLoadingRsvps, setIsLoadingRsvps] = useState(false);
   const [formData, setFormData] = useState({ 
     title: '', 
     date: '', 
     time: '', 
     location: '', 
     category: '',
+    image_url: '',
     description: '',
     is_public: true,
+    rsvp_mode: 'optional' as 'optional' | 'required',
+    audience: 'members' as 'all' | 'staff' | 'members' | 'attendees',
   });
 
   useEffect(() => {
@@ -49,6 +60,8 @@ export const AdminEvents = () => {
     }
 
     try {
+      setIsUploading(true);
+      const imageUrl = await runUpload();
       const { data, error } = await supabase
         .from('events')
         .insert([
@@ -58,8 +71,11 @@ export const AdminEvents = () => {
             time: formData.time,
             location: formData.location,
             category: formData.category || 'Other',
+            image_url: imageUrl || null,
             description: formData.description,
             is_public: formData.is_public,
+            rsvp_mode: formData.rsvp_mode,
+            audience: formData.is_public ? 'all' : formData.audience,
           },
         ])
         .select()
@@ -68,11 +84,16 @@ export const AdminEvents = () => {
       if (error) throw error;
 
       setEvents([...events, data]);
-      setFormData({ title: '', date: '', time: '', location: '', category: '', description: '', is_public: true });
+      resetModal();
       setIsModalOpen(false);
     } catch (error: any) {
       console.error('Error creating event:', error);
-      alert(error.message || 'Failed to create event');
+      alert(
+        (error.message || 'Failed to create event') +
+          '\n\nIf the database is missing new columns, run ADD_EVENT_IMAGE_URL.sql in Supabase.'
+      );
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -84,9 +105,14 @@ export const AdminEvents = () => {
       time: event.time,
       location: event.location,
       category: event.category,
+      image_url: event.image_url || '',
       description: event.description || '',
       is_public: event.is_public,
+      rsvp_mode: (event.rsvp_mode || 'optional') as 'optional' | 'required',
+      audience: ((event.audience || (event.is_public ? 'all' : 'members')) as any),
     });
+    setSelectedFile(null);
+    setPreviewUrl(event.image_url || null);
     setIsModalOpen(true);
   };
 
@@ -94,6 +120,8 @@ export const AdminEvents = () => {
     if (!editingEvent) return;
 
     try {
+      setIsUploading(true);
+      const imageUrl = await runUpload();
       const { error } = await supabase
         .from('events')
         .update({
@@ -102,20 +130,27 @@ export const AdminEvents = () => {
           time: formData.time,
           location: formData.location,
           category: formData.category || 'Other',
+          image_url: imageUrl || null,
           description: formData.description,
           is_public: formData.is_public,
+          rsvp_mode: formData.rsvp_mode,
+          audience: formData.is_public ? 'all' : formData.audience,
         })
         .eq('id', editingEvent.id);
 
       if (error) throw error;
 
       fetchEvents();
-      setFormData({ title: '', date: '', time: '', location: '', category: '', description: '', is_public: true });
-      setEditingEvent(null);
+      resetModal();
       setIsModalOpen(false);
     } catch (error: any) {
       console.error('Error updating event:', error);
-      alert(error.message || 'Failed to update event');
+      alert(
+        (error.message || 'Failed to update event') +
+          '\n\nIf the database is missing new columns, run ADD_EVENT_IMAGE_URL.sql in Supabase.'
+      );
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -138,8 +173,128 @@ export const AdminEvents = () => {
 
   const openCreateModal = () => {
     setEditingEvent(null);
-    setFormData({ title: '', date: '', time: '', location: '', category: '', description: '', is_public: true });
+    resetModal();
     setIsModalOpen(true);
+  };
+
+  const resetModal = () => {
+    setFormData({
+      title: '',
+      date: '',
+      time: '',
+      location: '',
+      category: '',
+      image_url: '',
+      description: '',
+      is_public: true,
+      rsvp_mode: 'optional',
+      audience: 'members',
+    });
+    setSelectedFile(null);
+    setPreviewUrl(null);
+  };
+
+  const openRsvpModal = async (evt: Event) => {
+    setRsvpEvent(evt);
+    setIsRsvpModalOpen(true);
+    setIsLoadingRsvps(true);
+    setRsvps([]);
+
+    try {
+      const { data, error } = await supabase
+        .from('event_rsvps')
+        .select('id,name,email,created_at')
+        .eq('event_id', evt.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      setRsvps((data as any[]) || []);
+    } catch (e: unknown) {
+      console.error('Error fetching RSVPs:', e);
+      alert(
+        (e instanceof Error ? e.message : 'Failed to load RSVPs') +
+          '\n\nIf the database table is missing, run CREATE_EVENT_RSVPS_TABLE.sql in Supabase.'
+      );
+    } finally {
+      setIsLoadingRsvps(false);
+    }
+  };
+
+  const rsvpFilenameBase = (evt: Event) => {
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    const safeTitle = (evt.title || 'event')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
+    return `event-rsvps-${safeTitle}-${yyyy}-${mm}-${dd}`;
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file (PNG/JPG)');
+        return;
+      }
+      const maxSize = 2 * 1024 * 1024;
+      if (file.size > maxSize) {
+        alert('Image size must be less than 2MB');
+        return;
+      }
+      setSelectedFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => setPreviewUrl(reader.result as string);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const runUpload = async (): Promise<string> => {
+    if (!selectedFile) return formData.image_url || '';
+
+    let imageUrl = formData.image_url || '';
+    try {
+      const fileExt = selectedFile.name.split('.').pop() || 'jpg';
+      const fileName = `event-images/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage.from('events').upload(fileName, selectedFile, {
+        cacheControl: '3600',
+        upsert: false,
+      });
+
+      if (uploadError) {
+        console.warn('Storage upload failed, saving as base64:', uploadError.message);
+        const reader = new FileReader();
+        const base64Promise = new Promise<string>((resolve, reject) => {
+          reader.onloadend = () => {
+            if (reader.result) resolve(reader.result as string);
+            else reject(new Error('Failed to convert file to base64'));
+          };
+          reader.onerror = reject;
+        });
+        reader.readAsDataURL(selectedFile);
+        imageUrl = await base64Promise;
+      } else {
+        const { data: urlData } = supabase.storage.from('events').getPublicUrl(fileName);
+        imageUrl = urlData.publicUrl;
+      }
+    } catch (e: unknown) {
+      console.warn('Storage upload failed, using base64 fallback:', e);
+      const reader = new FileReader();
+      const base64Promise = new Promise<string>((resolve, reject) => {
+        reader.onloadend = () => {
+          if (reader.result) resolve(reader.result as string);
+          else reject(new Error('Failed to convert file to base64'));
+        };
+        reader.onerror = reject;
+      });
+      reader.readAsDataURL(selectedFile);
+      imageUrl = await base64Promise;
+    }
+
+    setFormData((prev) => ({ ...prev, image_url: imageUrl }));
+    return imageUrl;
   };
 
   const formatDate = (dateString: string) => {
@@ -186,6 +341,13 @@ export const AdminEvents = () => {
             return (
           <div key={evt.id} className="flex flex-col sm:flex-row sm:items-center p-6 glass-card bg-white/80 border border-white/60 shadow-sm rounded-[12px] hover:border-gold hover:shadow-md transition-all group relative">
             <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button
+                onClick={() => openRsvpModal(evt)}
+                className="p-2 bg-white border border-gray-200 rounded-[4px] text-neutral hover:text-gold hover:border-gold transition-colors"
+                title="View RSVPs"
+              >
+                RSVPs
+              </button>
               <button
                 onClick={() => handleEdit(evt)}
                 className="p-2 bg-white border border-gray-200 rounded-[4px] text-neutral hover:text-gold hover:border-gold transition-colors"
@@ -240,7 +402,7 @@ export const AdminEvents = () => {
         onClose={() => {
           setIsModalOpen(false);
           setEditingEvent(null);
-          setFormData({ title: '', date: '', time: '', location: '', category: '' });
+          resetModal();
         }}
         title={editingEvent ? 'Edit Event' : 'Add Event'}
       >
@@ -294,12 +456,38 @@ export const AdminEvents = () => {
               className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none"
             >
               <option value="">Select Category</option>
-              <option value="Meeting">Meeting</option>
-              <option value="Rehearsal">Rehearsal</option>
-              <option value="Service">Service</option>
-              <option value="Event">Event</option>
+              <option value="Sunday Service">Sunday Service</option>
+              <option value="Members Meeting">Members Meeting</option>
+              <option value="Fast & Prayer Meeting">Fast & Prayer Meeting</option>
+              <option value="Young Adults">Young Adults</option>
+              <option value="Kids Programme">Kids Programme</option>
+              <option value="Community Lunch">Community Lunch</option>
               <option value="Other">Other</option>
             </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-charcoal mb-2">Event image (optional)</label>
+            <div className="flex items-center gap-4">
+              <div className="w-24 h-16 rounded-[8px] overflow-hidden border border-gray-200 bg-gray-50 flex-shrink-0">
+                <img
+                  src={previewUrl || formData.image_url || '/ABC Logo.png'}
+                  alt="Event preview"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="flex-1">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileSelect}
+                  className="block w-full text-sm text-neutral file:mr-4 file:py-2 file:px-4 file:rounded-[6px] file:border-0 file:text-sm file:font-bold file:bg-gold/10 file:text-charcoal hover:file:bg-gold/20"
+                />
+                <p className="text-xs text-neutral mt-1">
+                  If no image is uploaded, the site will use the default banner: <span className="font-bold">/ABC Logo.png</span>
+                </p>
+              </div>
+            </div>
           </div>
           <div>
             <label className="block text-sm font-bold text-charcoal mb-2">Description (Optional)</label>
@@ -321,6 +509,39 @@ export const AdminEvents = () => {
             />
             <label htmlFor="is_public" className="text-sm text-charcoal">Make this event public</label>
           </div>
+
+          <div>
+            <label className="block text-sm font-bold text-charcoal mb-2">Audience</label>
+            <select
+              value={formData.is_public ? 'all' : formData.audience}
+              onChange={(e) =>
+                setFormData({ ...formData, audience: e.target.value as 'all' | 'staff' | 'members' | 'attendees' })
+              }
+              disabled={formData.is_public}
+              className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none bg-white disabled:opacity-60"
+            >
+              <option value="all">All</option>
+              <option value="members">Members (logged in)</option>
+              <option value="staff">Staff (admins only)</option>
+              <option value="attendees">Attendees (public visitors)</option>
+            </select>
+            <p className="text-xs text-neutral mt-1">
+              Public events are always visible to all. For private events: Staff = admins only, Members = any logged-in user.
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-charcoal mb-2">RSVP</label>
+            <select
+              value={formData.rsvp_mode}
+              onChange={(e) => setFormData({ ...formData, rsvp_mode: e.target.value as 'optional' | 'required' })}
+              className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none bg-white"
+            >
+              <option value="optional">Optional</option>
+              <option value="required">Required</option>
+            </select>
+            <p className="text-xs text-neutral mt-1">Shown on the event detail page as “RSVP optional/required”.</p>
+          </div>
           <div className="flex gap-3 justify-end pt-4">
             <button
               onClick={() => {
@@ -334,11 +555,91 @@ export const AdminEvents = () => {
             </button>
             <GlowingButton
               onClick={editingEvent ? handleUpdate : handleCreate}
-              disabled={!formData.title || !formData.date || !formData.time || !formData.location}
+              disabled={!formData.title || !formData.date || !formData.time || !formData.location || isUploading}
             >
-              {editingEvent ? 'Update Event' : 'Add Event'}
+              {isUploading ? 'Uploading...' : editingEvent ? 'Update Event' : 'Add Event'}
             </GlowingButton>
           </div>
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={isRsvpModalOpen}
+        onClose={() => {
+          setIsRsvpModalOpen(false);
+          setRsvpEvent(null);
+          setRsvps([]);
+          setIsLoadingRsvps(false);
+        }}
+        title={rsvpEvent ? `RSVPs — ${rsvpEvent.title}` : 'RSVPs'}
+      >
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-neutral">
+              Total RSVPs: <span className="font-bold text-charcoal">{rsvps.length}</span>
+            </p>
+            {rsvpEvent ? (
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => downloadEventRsvpsCsv(rsvps, rsvpFilenameBase(rsvpEvent))}
+                  className="bg-white border border-gray-200 text-charcoal px-3 py-2 rounded-[6px] font-bold hover:bg-gray-50 transition-colors text-sm"
+                  title="Download CSV"
+                >
+                  CSV
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    downloadEventRsvpsPdf(
+                      rsvps,
+                      rsvpFilenameBase(rsvpEvent),
+                      `RSVPs — ${rsvpEvent.title}`
+                    )
+                  }
+                  className="bg-white border border-gray-200 text-charcoal px-3 py-2 rounded-[6px] font-bold hover:bg-gray-50 transition-colors text-sm"
+                  title="Download PDF"
+                >
+                  PDF
+                </button>
+              </div>
+            ) : (
+              <span className="text-xs text-neutral">—</span>
+            )}
+          </div>
+
+          {isLoadingRsvps ? (
+            <div className="space-y-2">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="h-10 bg-gray-100 rounded animate-pulse" />
+              ))}
+            </div>
+          ) : rsvps.length === 0 ? (
+            <p className="text-neutral text-sm">No RSVPs yet.</p>
+          ) : (
+            <div className="max-h-80 overflow-auto border border-gray-100 rounded-[8px]">
+              <table className="w-full text-left">
+                <thead className="bg-white sticky top-0">
+                  <tr className="border-b border-gray-100">
+                    <th className="px-3 py-2 text-xs font-bold uppercase tracking-wider text-neutral">Name</th>
+                    <th className="px-3 py-2 text-xs font-bold uppercase tracking-wider text-neutral">Email</th>
+                    <th className="px-3 py-2 text-xs font-bold uppercase tracking-wider text-neutral">Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rsvps.map((r) => (
+                    <tr key={r.id} className="border-b border-gray-50">
+                      <td className="px-3 py-2 text-sm text-charcoal font-bold">{r.name}</td>
+                      <td className="px-3 py-2 text-sm text-neutral">{r.email}</td>
+                      <td className="px-3 py-2 text-sm text-neutral">
+                        {new Date(r.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </Modal>
     </div>

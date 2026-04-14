@@ -11,6 +11,7 @@ import { Home } from './pages/public/Home';
 import { About } from './pages/public/About';
 import { History } from './pages/public/History';
 import { Events } from './pages/public/Events';
+import { EventDetail } from './pages/public/EventDetail';
 import { Sermons } from './pages/public/events/Sermons';
 import { SundayService } from './pages/public/events/SundayService';
 import { YoungAdults } from './pages/public/events/YoungAdults';
@@ -149,6 +150,7 @@ const AppRoutes = () => {
               <Route path="about/leadership/emily-white" element={<EmilyWhite />} />
               <Route path="about/leadership/:slug" element={<LeadershipBio />} />
               <Route path="events" element={<Events />} />
+              <Route path="events/:id" element={<EventDetail />} />
               <Route path="events/sermons" element={<Sermons />} />
               <Route path="events/sunday-service" element={<SundayService />} />
               <Route path="events/young-adults" element={<YoungAdults />} />
