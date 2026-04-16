@@ -6,8 +6,6 @@ import { Mail, Phone, Shield, User as UserIcon } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { displayName } from '../../lib/constants';
 
-type TestRoleOverride = 'none' | 'member' | 'admin';
-
 export const Login = () => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [authMethod, setAuthMethod] = useState<'email' | 'phone'>('email');
@@ -20,20 +18,13 @@ export const Login = () => {
   const [success, setSuccess] = useState<string | null>(null);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [loginFlash, setLoginFlash] = useState<{ name: string; role: string } | null>(null);
-  const [testRoleOverride, setTestRoleOverride] = useState<TestRoleOverride>('none');
   const { loginWithEmail, loginWithPhone, signUpWithEmail, signUpWithPhone, signInWithGoogle, isLoading, user, refreshUserProfile } = useAuth();
   const navigate = useNavigate();
 
   const getRedirectPath = (role: string, isApproved: boolean): string => {
     if (!isApproved) return '/pending-approval';
-    // Persist the test override so route guards respect it
-    if (testRoleOverride !== 'none') {
-      sessionStorage.setItem('testRoleOverride', testRoleOverride);
-    } else {
-      sessionStorage.removeItem('testRoleOverride');
-    }
-    if (testRoleOverride === 'member') return '/dashboard';
-    if (testRoleOverride === 'admin' && role === 'admin') return '/admin';
+    // Clear any leftover test override on fresh login
+    sessionStorage.removeItem('testRoleOverride');
     return role === 'admin' ? '/admin' : '/dashboard';
   };
 
@@ -114,9 +105,7 @@ export const Login = () => {
             const isApproved = userData?.is_approved ?? user?.is_approved ?? false;
             const nameToShow = displayName(userData || user);
 
-            // Show role flash before redirecting
-            const effectiveRole = testRoleOverride !== 'none' ? testRoleOverride : role;
-            setLoginFlash({ name: nameToShow, role: effectiveRole });
+            setLoginFlash({ name: nameToShow, role });
 
             const redirectPath = getRedirectPath(role, isApproved);
             
@@ -404,29 +393,6 @@ export const Login = () => {
                 Google
              </GlowingButton>
           </div>
-
-          {/* Test Role Override Toggle — visible to admins only */}
-          {!isSignUp && user?.role === 'admin' && (
-            <div className="border border-dashed border-gray-300 rounded-[4px] p-3 bg-gray-50/50">
-              <p className="text-xs font-bold text-neutral mb-2 uppercase tracking-wider">Test: Sign in as</p>
-              <div className="flex gap-2">
-                {(['none', 'member', 'admin'] as TestRoleOverride[]).map((opt) => (
-                  <button
-                    key={opt}
-                    type="button"
-                    onClick={() => setTestRoleOverride(opt)}
-                    className={`flex-1 py-1.5 px-3 rounded-[4px] text-xs font-bold transition-colors ${
-                      testRoleOverride === opt
-                        ? 'bg-gold text-charcoal shadow-sm'
-                        : 'bg-white text-neutral hover:text-charcoal border border-gray-200'
-                    }`}
-                  >
-                    {opt === 'none' ? 'Default' : opt === 'member' ? 'Member' : 'Admin'}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
 
           <div className="text-center">
             <button

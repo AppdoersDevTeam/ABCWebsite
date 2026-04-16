@@ -10,7 +10,8 @@ import {
   LogOut, 
   Menu,
   MessageSquare,
-  X
+  X,
+  ArrowRightLeft
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { displayName, displayInitial } from '../../lib/constants';
@@ -25,6 +26,7 @@ export const DashboardLayout = () => {
   useAutoSectionReveal();
 
   const handleLogout = () => {
+    sessionStorage.removeItem('testRoleOverride');
     logout();
     navigate('/login');
   };
@@ -108,6 +110,18 @@ export const DashboardLayout = () => {
                 </span>
               </div>
             </div>
+            {user?.role === 'admin' && (
+              <button 
+                onClick={() => {
+                  sessionStorage.removeItem('testRoleOverride');
+                  navigate('/admin');
+                }}
+                className="w-full flex items-center space-x-3 px-4 py-3 text-neutral hover:bg-blue-50 hover:text-blue-600 transition-colors rounded-[4px]"
+              >
+                <ArrowRightLeft size={18} />
+                <span className="text-sm font-bold">Back to Admin</span>
+              </button>
+            )}
             <button 
               onClick={handleLogout}
               className="w-full flex items-center space-x-3 px-4 py-3 text-neutral hover:bg-red-50 hover:text-red-500 transition-colors rounded-[4px]"

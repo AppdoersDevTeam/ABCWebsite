@@ -12,7 +12,8 @@ import {
   MessageSquare,
   X,
   Shield,
-  UserCog
+  UserCog,
+  ArrowRightLeft
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { displayName, displayInitial } from '../../lib/constants';
@@ -27,6 +28,7 @@ export const AdminLayout = () => {
   useAutoSectionReveal();
 
   const handleLogout = () => {
+    sessionStorage.removeItem('testRoleOverride');
     logout();
     navigate('/login');
   };
@@ -114,6 +116,16 @@ export const AdminLayout = () => {
                 </span>
               </div>
             </div>
+            <button 
+              onClick={() => {
+                sessionStorage.setItem('testRoleOverride', 'member');
+                navigate('/dashboard');
+              }}
+              className="w-full flex items-center space-x-3 px-4 py-3 text-neutral hover:bg-blue-50 hover:text-blue-600 transition-colors rounded-[4px]"
+            >
+              <ArrowRightLeft size={18} />
+              <span className="text-sm font-bold">View as Member</span>
+            </button>
             <button 
               onClick={handleLogout}
               className="w-full flex items-center space-x-3 px-4 py-3 text-neutral hover:bg-red-50 hover:text-red-500 transition-colors rounded-[4px]"
