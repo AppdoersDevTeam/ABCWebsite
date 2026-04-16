@@ -116,8 +116,14 @@ CREATE TRIGGER on_auth_user_created
   FOR EACH ROW
   EXECUTE FUNCTION public.handle_new_user();
 
--- Step 4: Replace is_admin_user() — now checks BOTH the hardcoded email
--- AND the role column so promoted admins also pass the check.
+-- Step 4: Drop existing RLS policies FIRST (they depend on is_admin_user)
+DROP POLICY IF EXISTS "Admins can read all users" ON users;
+DROP POLICY IF EXISTS "Admins can update user approvals" ON users;
+DROP POLICY IF EXISTS "Admins can delete users" ON users;
+DROP POLICY IF EXISTS "Users can read own profile" ON users;
+DROP POLICY IF EXISTS "Users can update own profile" ON users;
+
+-- Step 5: Now safe to replace is_admin_user()
 DROP FUNCTION IF EXISTS public.is_admin_user(UUID);
 
 CREATE OR REPLACE FUNCTION public.is_admin_user(user_id UUID)
@@ -130,17 +136,14 @@ DECLARE
   user_email TEXT;
   user_role  TEXT;
 BEGIN
-  -- Get email from auth.users (no RLS)
   SELECT email INTO user_email
   FROM auth.users
   WHERE id = user_id;
 
-  -- Super admin email always passes
   IF LOWER(COALESCE(user_email, '')) = 'devteam@appdoers.co.nz' THEN
     RETURN true;
   END IF;
 
-  -- Check role in public.users using a direct query (SECURITY DEFINER bypasses RLS)
   SELECT role INTO user_role
   FROM public.users
   WHERE id = user_id;
@@ -149,8 +152,7 @@ BEGIN
 END;
 $$;
 
--- Step 5: New function — is_super_admin_user()
--- Only super admins can promote/demote other users' roles.
+-- Step 6: New function — is_super_admin_user()
 CREATE OR REPLACE FUNCTION public.is_super_admin_user(user_id UUID)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
@@ -168,11 +170,7 @@ BEGIN
 END;
 $$;
 
--- Step 6: Re-create admin RLS policies (drop first to avoid conflicts)
-DROP POLICY IF EXISTS "Admins can read all users" ON users;
-DROP POLICY IF EXISTS "Admins can update user approvals" ON users;
-DROP POLICY IF EXISTS "Admins can delete users" ON users;
-
+-- Step 7: Re-create RLS policies with the new function
 CREATE POLICY "Admins can read all users" ON users
   FOR SELECT USING (public.is_admin_user(auth.uid()));
 
