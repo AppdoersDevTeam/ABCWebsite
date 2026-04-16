@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { Modal } from '../../components/UI/Modal';
-import { Calendar as CalIcon, Edit, Trash2, Plus } from 'lucide-react';
+import { Calendar as CalIcon, Edit, Trash2, Plus, Users, Image, Upload } from 'lucide-react';
 import { Event } from '../../types';
 import { supabase } from '../../lib/supabase';
 import { SkeletonPageHeader, SkeletonEventCard } from '../../components/UI/Skeleton';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { downloadEventRsvpsCsv, downloadEventRsvpsPdf } from '../../lib/exportEventRsvps';
+
+const DEFAULT_THUMB = '/ABC Logo.png';
 
 export const AdminEvents = () => {
   const [events, setEvents] = useState<Event[]>([]);
@@ -338,56 +340,89 @@ export const AdminEvents = () => {
           {events.map((evt) => {
             const formattedDate = formatDate(evt.date);
             const dateParts = formattedDate.split(' ');
+            const hasImage = !!evt.image_url?.trim();
+            const audienceLabel = (evt.audience || 'members').charAt(0).toUpperCase() + (evt.audience || 'members').slice(1);
             return (
-          <div key={evt.id} className="flex flex-col sm:flex-row sm:items-center p-6 glass-card bg-white/80 border border-white/60 shadow-sm rounded-[12px] hover:border-gold hover:shadow-md transition-all group relative">
-            <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-              <button
-                onClick={() => openRsvpModal(evt)}
-                className="p-2 bg-white border border-gray-200 rounded-[4px] text-neutral hover:text-gold hover:border-gold transition-colors"
-                title="View RSVPs"
-              >
-                RSVPs
-              </button>
-              <button
-                onClick={() => handleEdit(evt)}
-                className="p-2 bg-white border border-gray-200 rounded-[4px] text-neutral hover:text-gold hover:border-gold transition-colors"
-                title="Edit"
-              >
-                <Edit size={16} />
-              </button>
-              <button
-                onClick={() => handleDelete(evt.id)}
-                className="p-2 bg-white border border-gray-200 rounded-[4px] text-neutral hover:text-red-500 hover:border-red-200 transition-colors"
-                title="Delete"
-              >
-                <Trash2 size={16} />
-              </button>
-            </div>
-            <div className="flex-shrink-0 w-full sm:w-20 text-left sm:text-center border-b sm:border-b-0 sm:border-r border-gray-100 pb-4 sm:pb-0 sm:pr-6 sm:mr-6 mb-4 sm:mb-0">
-              <span className="block text-xs text-gold uppercase font-bold tracking-widest">{dateParts[0]}</span>
-              <span className="block text-3xl font-serif text-charcoal font-normal">{dateParts[1]}</span>
-            </div>
-            <div className="flex-1">
-              <h3 className="text-xl font-bold text-charcoal group-hover:text-gold transition-colors">{evt.title}</h3>
-              <p className="text-neutral text-sm mt-1 flex items-center">
-                <span className="w-2 h-2 rounded-full bg-gold mr-2"></span>
-                {evt.time} • {evt.location}
-              </p>
-              <div className="flex items-center gap-2 mt-2">
-                {evt.category && (
-                  <span className="inline-block text-xs bg-gold/10 text-gold px-2 py-1 rounded uppercase tracking-wider font-bold">
-                    {evt.category}
+          <div key={evt.id} className="bg-white border border-gray-100 shadow-sm rounded-[12px] overflow-hidden hover:border-gold hover:shadow-md transition-all group relative">
+            <div className="flex flex-col sm:flex-row">
+              {/* Thumbnail */}
+              <div className="relative w-full sm:w-36 flex-shrink-0">
+                <div className="aspect-[16/10] sm:aspect-auto sm:h-full overflow-hidden">
+                  {hasImage ? (
+                    <img
+                      src={String(evt.image_url)}
+                      alt={evt.title}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-[#3a4a1f] via-[#4a5d2a] to-[#2d3a16] flex items-center justify-center min-h-[80px]">
+                      <img src={DEFAULT_THUMB} alt="ABC" className="h-8 w-auto opacity-80" loading="lazy" />
+                    </div>
+                  )}
+                </div>
+                <div className="absolute top-2 left-2 bg-white/90 backdrop-blur rounded-full px-2 py-1 shadow-sm">
+                  <span className="text-[10px] font-bold text-neutral uppercase tracking-widest">{dateParts[0]}</span>
+                  <span className="ml-1 text-xs font-black text-charcoal">{dateParts[1]}</span>
+                </div>
+              </div>
+
+              {/* Content */}
+              <div className="flex-1 p-4 sm:p-5">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-lg font-bold text-charcoal group-hover:text-gold transition-colors truncate">{evt.title}</h3>
+                    <p className="text-neutral text-sm mt-1 flex items-center">
+                      <span className="w-2 h-2 rounded-full bg-gold mr-2 flex-shrink-0"></span>
+                      {evt.time} &bull; {evt.location}
+                    </p>
+                  </div>
+
+                  {/* Actions - always visible for usability */}
+                  <div className="flex gap-1.5 flex-shrink-0">
+                    <button
+                      onClick={(e) => { e.preventDefault(); openRsvpModal(evt); }}
+                      className="p-2 bg-gray-50 border border-gray-200 rounded-[6px] text-neutral hover:text-gold hover:border-gold hover:bg-gold/5 transition-colors"
+                      title="View RSVPs"
+                    >
+                      <Users size={14} />
+                    </button>
+                    <button
+                      onClick={(e) => { e.preventDefault(); handleEdit(evt); }}
+                      className="p-2 bg-gray-50 border border-gray-200 rounded-[6px] text-neutral hover:text-gold hover:border-gold hover:bg-gold/5 transition-colors"
+                      title="Edit"
+                    >
+                      <Edit size={14} />
+                    </button>
+                    <button
+                      onClick={(e) => { e.preventDefault(); handleDelete(evt.id); }}
+                      className="p-2 bg-gray-50 border border-gray-200 rounded-[6px] text-neutral hover:text-red-500 hover:border-red-200 hover:bg-red-50 transition-colors"
+                      title="Delete"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-1.5 mt-3">
+                  {evt.category && (
+                    <span className="inline-block text-[10px] bg-gold/10 text-gold px-2 py-0.5 rounded-full uppercase tracking-wider font-bold border border-gold/20">
+                      {evt.category}
+                    </span>
+                  )}
+                  {evt.is_public ? (
+                    <span className="inline-block text-[10px] bg-green-50 text-green-700 px-2 py-0.5 rounded-full uppercase tracking-wider font-bold border border-green-200">
+                      Public
+                    </span>
+                  ) : (
+                    <span className="inline-block text-[10px] bg-gray-50 text-gray-600 px-2 py-0.5 rounded-full uppercase tracking-wider font-bold border border-gray-200">
+                      Private &middot; {audienceLabel}
+                    </span>
+                  )}
+                  <span className="inline-block text-[10px] bg-white text-neutral px-2 py-0.5 rounded-full uppercase tracking-wider font-bold border border-gray-200">
+                    RSVP {evt.rsvp_mode || 'optional'}
                   </span>
-                )}
-                {evt.is_public ? (
-                  <span className="inline-block text-xs bg-green-100 text-green-700 px-2 py-1 rounded uppercase tracking-wider font-bold">
-                    Public
-                  </span>
-                ) : (
-                  <span className="inline-block text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded uppercase tracking-wider font-bold">
-                    Private
-                  </span>
-                )}
+                </div>
               </div>
             </div>
           </div>
@@ -467,25 +502,40 @@ export const AdminEvents = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-bold text-charcoal mb-2">Event image (optional)</label>
-            <div className="flex items-center gap-4">
-              <div className="w-24 h-16 rounded-[8px] overflow-hidden border border-gray-200 bg-gray-50 flex-shrink-0">
-                <img
-                  src={previewUrl || formData.image_url || '/ABC Logo.png'}
-                  alt="Event preview"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="flex-1">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileSelect}
-                  className="block w-full text-sm text-neutral file:mr-4 file:py-2 file:px-4 file:rounded-[6px] file:border-0 file:text-sm file:font-bold file:bg-gold/10 file:text-charcoal hover:file:bg-gold/20"
-                />
-                <p className="text-xs text-neutral mt-1">
-                  If no image is uploaded, the site will use the default banner: <span className="font-bold">/ABC Logo.png</span>
-                </p>
+            <label className="block text-sm font-bold text-charcoal mb-2">Event Banner Image</label>
+            <div className="rounded-[10px] border-2 border-dashed border-gray-200 hover:border-gold/50 transition-colors p-4">
+              <div className="flex items-center gap-4">
+                <div className="w-28 h-20 rounded-[8px] overflow-hidden border border-gray-200 bg-gray-50 flex-shrink-0">
+                  {(previewUrl || formData.image_url) ? (
+                    <img
+                      src={previewUrl || formData.image_url || DEFAULT_THUMB}
+                      alt="Event preview"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-[#3a4a1f] via-[#4a5d2a] to-[#2d3a16] flex items-center justify-center">
+                      <img src={DEFAULT_THUMB} alt="Default" className="h-6 w-auto opacity-80" />
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1">
+                  <label className="inline-flex items-center gap-2 px-4 py-2 rounded-[6px] bg-gold/10 text-charcoal text-sm font-bold hover:bg-gold/20 transition-colors cursor-pointer">
+                    <Upload size={14} />
+                    {selectedFile ? 'Change Image' : 'Upload Image'}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileSelect}
+                      className="sr-only"
+                    />
+                  </label>
+                  {selectedFile && (
+                    <p className="text-xs text-gold font-bold mt-1.5">{selectedFile.name}</p>
+                  )}
+                  <p className="text-xs text-neutral mt-1.5">
+                    PNG or JPG, max 2MB. {!selectedFile && !formData.image_url && 'Defaults to church logo if left empty.'}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -547,7 +597,7 @@ export const AdminEvents = () => {
               onClick={() => {
                 setIsModalOpen(false);
                 setEditingEvent(null);
-                setFormData({ title: '', date: '', time: '', location: '', category: '', description: '', is_public: true });
+                resetModal();
               }}
               className="px-6 py-2 border border-gray-200 rounded-[4px] text-charcoal hover:bg-gray-50 transition-colors"
             >

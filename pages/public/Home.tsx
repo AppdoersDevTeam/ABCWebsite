@@ -290,44 +290,93 @@ export const Home = () => {
                        <p className="text-neutral text-lg">No upcoming events scheduled</p>
                        <p className="text-neutral text-sm mt-2">Check back soon for new events!</p>
                      </div>
-                   ) : (
-                     // Real events
-                     upcomingEvents.map((evt, i) => {
-                       const { day, month } = formatEventDate(evt.date);
-                       return (
-                         <ScrollReveal key={evt.id} direction="up" delay={i * 100}>
-                           <Link to="/events">
-                             <div className="glass-card border border-white/50 shadow-sm p-0 flex rounded-[8px] overflow-hidden group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 bg-white/70 hover-lift cursor-pointer">
-                               <div className="bg-gold transition-all duration-300 w-24 flex flex-col items-center justify-center p-4 text-white group-hover:scale-105">
-                                 <span className="text-2xl md:text-3xl font-black group-hover:scale-110 transition-transform duration-300">{day}</span>
-                                 <span className="text-xs md:text-sm font-bold tracking-wider">{month}</span>
-                               </div>
-                               <div className="p-6 flex-1 flex flex-col justify-center">
-                                 <h4 className="text-lg md:text-xl font-bold text-charcoal mb-1 group-hover:text-gold transition-colors duration-300">{evt.title}</h4>
-                                 <span className="text-neutral text-sm flex items-center group-hover:text-black transition-colors mb-1">
-                                   <div className="w-8 h-8 bg-gold/10 rounded-full flex items-center justify-center mr-2 group-hover:bg-gold transition-all duration-300 group-hover:scale-110 group-hover:rotate-6 icon-bounce">
-                                     <Clock size={16} className="text-gold group-hover:text-white"/>
-                                   </div>
-                                   {formatEventTime(evt.date, evt.time)}
-                                 </span>
-                                 {evt.location && (
-                                   <span className="text-neutral text-xs flex items-center mt-1">
-                                     <div className="w-8 h-8 bg-gold/10 rounded-full flex items-center justify-center mr-2 group-hover:bg-gold transition-all duration-300 group-hover:scale-110 group-hover:rotate-6 icon-bounce">
-                                       <MapPin size={16} className="text-gold group-hover:text-white"/>
-                                     </div>
-                                     {evt.location}
-                                   </span>
-                                 )}
-                                 {evt.category && (
-                                   <span className="text-gold text-xs uppercase tracking-widest mt-2 font-bold">{evt.category}</span>
-                                 )}
-                               </div>
-                             </div>
-                           </Link>
-                         </ScrollReveal>
-                       );
-                     })
-                   )}
+                  ) : (
+                    upcomingEvents.map((evt, i) => {
+                      const { day, month } = formatEventDate(evt.date);
+                      const hasImage = !!evt.image_url?.trim();
+                      return (
+                        <ScrollReveal key={evt.id} direction="up" delay={i * 90}>
+                          <Link to={`/events/${evt.id}`} className="group block h-full">
+                            <div className="glass-card bg-white/75 border border-white/55 shadow-sm rounded-[16px] overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-full flex flex-col">
+                              <div className="relative aspect-[16/9] overflow-hidden">
+                                {hasImage ? (
+                                  <img
+                                    src={String(evt.image_url)}
+                                    alt={evt.title}
+                                    className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700"
+                                    loading="lazy"
+                                  />
+                                ) : (
+                                  <div className="w-full h-full bg-gradient-to-br from-[#3a4a1f] via-[#4a5d2a] to-[#2d3a16] flex items-center justify-center">
+                                    <img
+                                      src="/ABC Logo.png"
+                                      alt="Ashburton Baptist Church"
+                                      className="h-14 md:h-16 w-auto opacity-90"
+                                      loading="lazy"
+                                    />
+                                  </div>
+                                )}
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
+
+                                <div className="absolute top-4 left-4 inline-flex items-center gap-2 bg-white/90 backdrop-blur-md border border-white/60 rounded-full px-3 py-2 shadow-sm">
+                                  <span className="text-charcoal font-black text-sm leading-none">{day}</span>
+                                  <span className="text-neutral font-bold text-[11px] tracking-widest">{month}</span>
+                                </div>
+
+                                {evt.category && (
+                                  <div className="absolute bottom-4 left-4">
+                                    <span className="inline-flex items-center px-3 py-1 rounded-full bg-gold/90 text-white text-[11px] font-bold uppercase tracking-widest shadow-sm">
+                                      {evt.category}
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+
+                              <div className="p-6 flex-1 flex flex-col">
+                                <h4 className="text-xl font-bold text-charcoal group-hover:text-gold transition-colors line-clamp-2">
+                                  {evt.title}
+                                </h4>
+
+                                <div className="mt-4 space-y-2 flex-1">
+                                  <div className="flex items-center text-sm text-neutral">
+                                    <div className="w-9 h-9 bg-gold/10 rounded-full flex items-center justify-center mr-3 flex-shrink-0 group-hover:bg-gold transition-colors">
+                                      <Clock size={16} className="text-gold group-hover:text-white" />
+                                    </div>
+                                    <span className="group-hover:text-charcoal transition-colors">
+                                      {formatEventTime(evt.date, evt.time)}
+                                    </span>
+                                  </div>
+
+                                  {evt.location && (
+                                    <div className="flex items-center text-sm text-neutral">
+                                      <div className="w-9 h-9 bg-gold/10 rounded-full flex items-center justify-center mr-3 flex-shrink-0 group-hover:bg-gold transition-colors">
+                                        <MapPin size={16} className="text-gold group-hover:text-white" />
+                                      </div>
+                                      <span className="group-hover:text-charcoal transition-colors line-clamp-1">
+                                        {evt.location}
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
+
+                                <div className="mt-5">
+                                  <GlowingButton
+                                    variant="outline"
+                                    size="sm"
+                                    fullWidth
+                                    className="!rounded-full !bg-gold !text-white !border-gold transition-all duration-500 ease-out hover:scale-110 hover:shadow-2xl hover:shadow-gold/60 active:scale-95 hover:-translate-y-1 !normal-case !tracking-normal"
+                                  >
+                                    See More
+                                    <ArrowRight size={18} className="ml-2 transition-transform duration-300 group-hover:translate-x-1" />
+                                  </GlowingButton>
+                                </div>
+                              </div>
+                            </div>
+                          </Link>
+                        </ScrollReveal>
+                      );
+                    })
+                  )}
                  </div>
                </div>
           </div>
