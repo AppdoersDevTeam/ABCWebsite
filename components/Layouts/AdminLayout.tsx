@@ -15,6 +15,7 @@ import {
   UserCog
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { displayName, displayInitial } from '../../lib/constants';
 import { ScrollToTop } from '../ScrollToTop';
 import { useAutoSectionReveal } from '../UI/useAutoSectionReveal';
 
@@ -103,12 +104,14 @@ export const AdminLayout = () => {
           <div className="p-4 border-t border-gray-100">
             <div className="flex items-center space-x-3 px-4 py-4 mb-2 rounded-[4px] bg-gold/10 border border-gold/20">
               <div className="w-10 h-10 rounded-full bg-gold flex items-center justify-center text-charcoal font-bold text-lg">
-                {user?.name?.charAt(0)?.toUpperCase() || 'A'}
+                {displayInitial(user)}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold text-charcoal truncate">{user?.name || 'Admin'}</p>
+                <p className="text-sm font-bold text-charcoal truncate">{displayName(user)}</p>
                 <p className="text-xs text-neutral truncate">{user?.email || ''}</p>
-                <span className="text-[10px] text-gold font-bold uppercase tracking-wider">Admin</span>
+                <span className="text-[10px] text-gold font-bold uppercase tracking-wider">
+                  {user?.is_super_admin ? 'Super Admin' : 'Admin'}
+                </span>
               </div>
             </div>
             <button 

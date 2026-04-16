@@ -2,8 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { GlowingButton } from '../../components/UI/GlowingButton';
-import { Mail, Phone } from 'lucide-react';
+import { Mail, Phone, Shield, User as UserIcon } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { displayName } from '../../lib/constants';
+
+type TestRoleOverride = 'none' | 'member' | 'admin';
 
 export const Login = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -11,33 +14,34 @@ export const Login = () => {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [loginFlash, setLoginFlash] = useState<{ name: string; role: string } | null>(null);
+  const [testRoleOverride, setTestRoleOverride] = useState<TestRoleOverride>('none');
   const { loginWithEmail, loginWithPhone, signUpWithEmail, signUpWithPhone, signInWithGoogle, isLoading, user, refreshUserProfile } = useAuth();
   const navigate = useNavigate();
 
+  const getRedirectPath = (role: string, isApproved: boolean): string => {
+    if (!isApproved) return '/pending-approval';
+    // Persist the test override so route guards respect it
+    if (testRoleOverride !== 'none') {
+      sessionStorage.setItem('testRoleOverride', testRoleOverride);
+    } else {
+      sessionStorage.removeItem('testRoleOverride');
+    }
+    if (testRoleOverride === 'member') return '/dashboard';
+    if (testRoleOverride === 'admin' && role === 'admin') return '/admin';
+    return role === 'admin' ? '/admin' : '/dashboard';
+  };
+
   useEffect(() => {
-    // Only redirect if user is already logged in when component mounts
-    // (e.g., if they navigate to /login while already logged in)
-    // Don't redirect if we're currently in the process of logging in (handleSubmit will handle that)
     if (user && !isLoading && !isLoggingIn) {
-      console.log('Login - User already logged in, redirecting. User:', user);
-      // Small delay to ensure state is fully set
       setTimeout(() => {
-        // Check if user is approved first
-        if (!user.is_approved) {
-          navigate('/pending-approval', { replace: true });
-          return;
-        }
-        
-        // On successful login, redirect to appropriate dashboard
-        if (user.role === 'admin') {
-          navigate('/admin', { replace: true });
-        } else {
-          navigate('/dashboard', { replace: true });
-        }
+        const redirectPath = getRedirectPath(user.role, user.is_approved);
+        navigate(redirectPath, { replace: true });
       }, 100);
     }
   }, [user, isLoading, navigate, isLoggingIn]);
@@ -50,24 +54,22 @@ export const Login = () => {
     try {
       if (isSignUp) {
         if (authMethod === 'email') {
-          if (!email || !password || !name) {
+          if (!email || !password || !firstName) {
             setError('Please fill in all required fields');
             return;
           }
-          await signUpWithEmail(email, password, name, phone || undefined);
+          await signUpWithEmail(email, password, firstName, lastName, phone || undefined);
           setSuccess('Account created! Please wait for admin approval.');
-          // For sign up, redirect to pending approval
           setTimeout(() => {
             navigate('/pending-approval', { replace: true });
           }, 500);
         } else {
-          if (!phone || !password || !name) {
+          if (!phone || !password || !firstName) {
             setError('Please fill in all required fields');
             return;
           }
-          await signUpWithPhone(phone, password, name, email || undefined);
+          await signUpWithPhone(phone, password, firstName, lastName, email || undefined);
           setSuccess('Account created! Please wait for admin approval.');
-          // For sign up, redirect to pending approval
           setTimeout(() => {
             navigate('/pending-approval', { replace: true });
           }, 500);
@@ -92,14 +94,9 @@ export const Login = () => {
             await loginWithPhone(phone, password);
           }
           
-          // After login, get session immediately and redirect
-          // Don't wait for profile fetch - redirect immediately and let route guards handle it
           const { data: { session } } = await supabase.auth.getSession();
           
           if (session?.user) {
-            console.log('Login - Session found, attempting to fetch user profile for redirect');
-            
-            // Try to get user profile with a short timeout
             const profilePromise = supabase
               .from('users')
               .select('*')
@@ -108,58 +105,37 @@ export const Login = () => {
               .then(result => result.data);
             
             const timeoutPromise = new Promise((resolve) => {
-              setTimeout(() => resolve(null), 2000); // 2 second timeout
+              setTimeout(() => resolve(null), 2000);
             });
             
             const userData = await Promise.race([profilePromise, timeoutPromise]) as any;
             
-            let redirectPath = '/dashboard'; // Default to dashboard
+            const role = userData?.role || user?.role || 'member';
+            const isApproved = userData?.is_approved ?? user?.is_approved ?? false;
+            const nameToShow = displayName(userData || user);
+
+            // Show role flash before redirecting
+            const effectiveRole = testRoleOverride !== 'none' ? testRoleOverride : role;
+            setLoginFlash({ name: nameToShow, role: effectiveRole });
+
+            const redirectPath = getRedirectPath(role, isApproved);
             
-            if (userData) {
-              console.log('Login - User profile fetched, redirecting. User:', {
-                id: userData.id,
-                email: userData.email,
-                is_approved: userData.is_approved,
-                role: userData.role
-              });
-              
-              if (!userData.is_approved) {
-                redirectPath = '/pending-approval';
-              } else if (userData.role === 'admin') {
-                redirectPath = '/admin';
-              }
-            } else {
-              // Profile fetch timed out or failed, use context user if available
-              console.warn('Login - Profile fetch timed out, using context user or defaulting to dashboard');
-              if (user) {
-                if (!user.is_approved) {
-                  redirectPath = '/pending-approval';
-                } else if (user.role === 'admin') {
-                  redirectPath = '/admin';
-                }
-              }
-            }
-            
-            console.log('Login - Redirecting to:', redirectPath);
-            
-            // Redirect immediately - don't wait for profile refresh
-            navigate(redirectPath, { replace: true });
-            
-            // Fallback: if navigation doesn't work after a short delay, use window.location
+            // Brief delay so the user sees the flash
             setTimeout(() => {
-              const currentHash = window.location.hash;
-              if (currentHash.includes('login') || currentHash === '#/') {
-                console.log('Login - Navigation may have failed, using window.location fallback');
-                window.location.hash = `#${redirectPath}`;
-              }
-            }, 500);
+              navigate(redirectPath, { replace: true });
+              
+              setTimeout(() => {
+                const currentHash = window.location.hash;
+                if (currentHash.includes('login') || currentHash === '#/') {
+                  window.location.hash = `#${redirectPath}`;
+                }
+              }, 500);
+            }, 1200);
             
-            // Refresh profile in background (don't wait for it)
             refreshUserProfile().catch(err => {
               console.warn('Login - Background profile refresh failed:', err);
             });
           } else {
-            console.error('Login - No session found after login');
             throw new Error('Login failed - no session created');
           }
         } finally {
@@ -185,6 +161,25 @@ export const Login = () => {
       navigate(`/login-error?error=oauth_failed`, { replace: true });
     }
   };
+
+  // Login flash overlay — shown briefly after successful login
+  if (loginFlash) {
+    return (
+      <div className="min-h-[80vh] flex items-center justify-center px-4 relative pt-32 md:pt-40 pb-32 bg-[#A8B774]">
+        <div className="max-w-md w-full glass-card bg-white/80 p-10 shadow-xl border border-white/50 rounded-[16px] relative z-10 backdrop-blur-xl text-center space-y-4 animate-pulse">
+          <div className="mx-auto w-16 h-16 rounded-full flex items-center justify-center bg-gold/20 text-gold">
+            {loginFlash.role === 'admin' ? <Shield size={32} /> : <UserIcon size={32} />}
+          </div>
+          <h2 className="text-3xl font-serif font-normal text-charcoal">
+            Welcome, {loginFlash.name}
+          </h2>
+          <span className="inline-block text-xs font-bold text-charcoal bg-gold px-4 py-2 rounded-full border border-gold uppercase tracking-widest shadow-sm">
+            Signing in as {loginFlash.role === 'admin' ? 'Admin' : 'Member'}
+          </span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 relative pt-32 md:pt-40 pb-32 bg-[#A8B774]">
@@ -243,20 +238,36 @@ export const Login = () => {
 
         <form className="mt-4 space-y-6" onSubmit={handleSubmit}>
           {isSignUp && (
-            <div>
-              <label htmlFor="name" className="block text-sm font-bold text-charcoal mb-2">
-                Full Name
-              </label>
-              <input
-                id="name"
-                name="name"
-                type="text"
-                required={isSignUp}
-                className="appearance-none rounded-[4px] relative block w-full px-4 py-4 border border-gray-300 bg-white text-charcoal placeholder-gray-400 focus:outline-none focus:ring-gold focus:border-gold focus:z-10 shadow-sm"
-                placeholder="John Doe"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label htmlFor="first-name" className="block text-sm font-bold text-charcoal mb-2">
+                  First Name *
+                </label>
+                <input
+                  id="first-name"
+                  name="first-name"
+                  type="text"
+                  required={isSignUp}
+                  className="appearance-none rounded-[4px] relative block w-full px-4 py-4 border border-gray-300 bg-white text-charcoal placeholder-gray-400 focus:outline-none focus:ring-gold focus:border-gold focus:z-10 shadow-sm"
+                  placeholder="John"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                />
+              </div>
+              <div>
+                <label htmlFor="last-name" className="block text-sm font-bold text-charcoal mb-2">
+                  Last Name
+                </label>
+                <input
+                  id="last-name"
+                  name="last-name"
+                  type="text"
+                  className="appearance-none rounded-[4px] relative block w-full px-4 py-4 border border-gray-300 bg-white text-charcoal placeholder-gray-400 focus:outline-none focus:ring-gold focus:border-gold focus:z-10 shadow-sm"
+                  placeholder="Doe"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                />
+              </div>
             </div>
           )}
 
@@ -393,6 +404,29 @@ export const Login = () => {
                 Google
              </GlowingButton>
           </div>
+
+          {/* Test Role Override Toggle — visible to admins only */}
+          {!isSignUp && user?.role === 'admin' && (
+            <div className="border border-dashed border-gray-300 rounded-[4px] p-3 bg-gray-50/50">
+              <p className="text-xs font-bold text-neutral mb-2 uppercase tracking-wider">Test: Sign in as</p>
+              <div className="flex gap-2">
+                {(['none', 'member', 'admin'] as TestRoleOverride[]).map((opt) => (
+                  <button
+                    key={opt}
+                    type="button"
+                    onClick={() => setTestRoleOverride(opt)}
+                    className={`flex-1 py-1.5 px-3 rounded-[4px] text-xs font-bold transition-colors ${
+                      testRoleOverride === opt
+                        ? 'bg-gold text-charcoal shadow-sm'
+                        : 'bg-white text-neutral hover:text-charcoal border border-gray-200'
+                    }`}
+                  >
+                    {opt === 'none' ? 'Default' : opt === 'member' ? 'Member' : 'Admin'}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="text-center">
             <button

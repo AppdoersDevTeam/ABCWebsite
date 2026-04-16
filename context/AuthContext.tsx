@@ -1,17 +1,43 @@
 import React, { createContext, useContext, useState, useEffect, PropsWithChildren } from 'react';
 import { User } from '../types';
 import { supabase } from '../lib/supabase';
-import { ADMIN_EMAIL } from '../lib/constants';
+import { ADMIN_EMAIL, SUPER_ADMIN_EMAIL } from '../lib/constants';
 import { getUserTimezone } from '../lib/dateUtils';
 import type { AuthError, Session, User as SupabaseUser } from '@supabase/supabase-js';
+
+function splitName(fullName: string): { first_name: string; last_name: string } {
+  const idx = fullName.indexOf(' ');
+  if (idx > 0) return { first_name: fullName.slice(0, idx), last_name: fullName.slice(idx + 1) };
+  return { first_name: fullName, last_name: '' };
+}
+
+function buildFallbackUser(su: SupabaseUser): User {
+  const isAdminEmail = su.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+  const isSuperAdmin = su.email?.toLowerCase() === SUPER_ADMIN_EMAIL.toLowerCase();
+  const fullName = su.user_metadata?.full_name || su.email?.split('@')[0] || 'User';
+  const { first_name, last_name } = su.user_metadata?.first_name
+    ? { first_name: su.user_metadata.first_name as string, last_name: (su.user_metadata.last_name as string) || '' }
+    : splitName(fullName);
+  return {
+    id: su.id,
+    email: su.email || '',
+    phone: su.phone || undefined,
+    first_name,
+    last_name,
+    name: [first_name, last_name].filter(Boolean).join(' '),
+    is_approved: isAdminEmail,
+    role: isAdminEmail ? 'admin' : 'member',
+    is_super_admin: isSuperAdmin,
+  };
+}
 
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   loginWithEmail: (email: string, password: string) => Promise<void>;
   loginWithPhone: (phone: string, password?: string) => Promise<void>;
-  signUpWithEmail: (email: string, password: string, name: string, phone?: string) => Promise<void>;
-  signUpWithPhone: (phone: string, password: string, name: string, email?: string) => Promise<void>;
+  signUpWithEmail: (email: string, password: string, firstName: string, lastName: string, phone?: string) => Promise<void>;
+  signUpWithPhone: (phone: string, password: string, firstName: string, lastName: string, email?: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
   isAuthenticated: boolean;
@@ -57,16 +83,7 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
       
       if (!result) {
         console.warn('fetchUserProfile - Query timed out, using fallback');
-        const isAdminEmail = supabaseUser.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
-        const fallbackUser: User = {
-          id: supabaseUser.id,
-          email: supabaseUser.email || '',
-          phone: supabaseUser.phone || undefined,
-          name: supabaseUser.user_metadata?.full_name || supabaseUser.email?.split('@')[0] || 'User',
-          is_approved: isAdminEmail,
-          role: isAdminEmail ? 'admin' : 'member',
-        };
-        return fallbackUser;
+        return buildFallbackUser(supabaseUser);
       }
 
       const { data, error } = result as any;
@@ -74,16 +91,7 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
       if (error) {
         // If user doesn't exist in users table, create one
         if (error.code === 'PGRST116') {
-          const isAdminEmail = supabaseUser.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
-          
-          const newUser: User = {
-            id: supabaseUser.id,
-            email: supabaseUser.email || '',
-            phone: supabaseUser.phone || undefined,
-            name: supabaseUser.user_metadata?.full_name || supabaseUser.email?.split('@')[0] || 'User',
-            is_approved: isAdminEmail,
-            role: isAdminEmail ? 'admin' : 'member',
-          };
+          const newUser = buildFallbackUser(supabaseUser);
 
           // Insert new user into database (don't await - do it in background)
           supabase
@@ -105,29 +113,22 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
           return newUser;
         }
         
-        // Create fallback user profile
-        const isAdminEmail = supabaseUser.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
-        const fallbackUser: User = {
-          id: supabaseUser.id,
-          email: supabaseUser.email || '',
-          phone: supabaseUser.phone || undefined,
-          name: supabaseUser.user_metadata?.full_name || supabaseUser.email?.split('@')[0] || 'User',
-          is_approved: isAdminEmail,
-          role: isAdminEmail ? 'admin' : 'member',
-        };
+        const fallbackUser = buildFallbackUser(supabaseUser);
         userProfileCache.current = { userId: supabaseUser.id, profile: fallbackUser, timestamp: Date.now() };
         return fallbackUser;
       }
 
       const userData = data as User;
       const isAdminEmail = userData.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+      const isSuperAdminEmail = userData.email?.toLowerCase() === SUPER_ADMIN_EMAIL.toLowerCase();
       
       // Do timezone and admin updates asynchronously (don't block)
       const currentTimezone = getUserTimezone();
       const needsTimezoneUpdate = !userData.user_timezone;
       const needsAdminUpdate = isAdminEmail && (userData.role !== 'admin' || !userData.is_approved);
+      const needsSuperAdminUpdate = isSuperAdminEmail && !userData.is_super_admin;
       
-      if (needsTimezoneUpdate || needsAdminUpdate) {
+      if (needsTimezoneUpdate || needsAdminUpdate || needsSuperAdminUpdate) {
         // Update in background - don't wait for it
         const updateData: any = {};
         if (needsTimezoneUpdate) {
@@ -139,6 +140,10 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
           updateData.is_approved = true;
           userData.role = 'admin';
           userData.is_approved = true;
+        }
+        if (needsSuperAdminUpdate) {
+          updateData.is_super_admin = true;
+          userData.is_super_admin = true;
         }
         
         supabase
@@ -159,17 +164,7 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
       return userData;
     } catch (error) {
       console.error('Error in fetchUserProfile:', error);
-      // Return fallback on error
-      const isAdminEmail = supabaseUser.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
-      const fallbackUser: User = {
-        id: supabaseUser.id,
-        email: supabaseUser.email || '',
-        phone: supabaseUser.phone || undefined,
-        name: supabaseUser.user_metadata?.full_name || supabaseUser.email?.split('@')[0] || 'User',
-        is_approved: isAdminEmail,
-        role: isAdminEmail ? 'admin' : 'member',
-      };
-      return fallbackUser;
+      return buildFallbackUser(supabaseUser);
     }
   };
 
@@ -208,15 +203,7 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
             userProfile = await fetchUserProfile(session.user, true);
           } catch (error) {
             console.error('AuthContext - Error in profile fetch in initAuth, using fallback:', error);
-            const isAdminEmail = session.user.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
-            userProfile = {
-              id: session.user.id,
-              email: session.user.email || '',
-              phone: session.user.phone || undefined,
-              name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'User',
-              is_approved: isAdminEmail,
-              role: isAdminEmail ? 'admin' : 'member',
-            };
+            userProfile = buildFallbackUser(session.user);
           }
           
           if (!isMounted) return;
@@ -330,15 +317,7 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
             userProfile = await fetchUserProfile(session.user, true);
           } catch (error) {
             console.error('AuthContext - Error in profile fetch during INITIAL_SESSION, using fallback:', error);
-            const isAdminEmail = session.user.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
-            userProfile = {
-              id: session.user.id,
-              email: session.user.email || '',
-              phone: session.user.phone || undefined,
-              name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'User',
-              is_approved: isAdminEmail,
-              role: isAdminEmail ? 'admin' : 'member',
-            };
+            userProfile = buildFallbackUser(session.user);
           }
           
           if (userProfile) {
@@ -371,15 +350,7 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
           userProfile = await fetchUserProfile(session.user, true);
         } catch (error) {
           console.error('AuthContext - Error in profile fetch, using fallback:', error);
-          const isAdminEmail = session.user.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
-          userProfile = {
-            id: session.user.id,
-            email: session.user.email || '',
-            phone: session.user.phone || undefined,
-            name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'User',
-            is_approved: isAdminEmail,
-            role: isAdminEmail ? 'admin' : 'member',
-          };
+          userProfile = buildFallbackUser(session.user);
         }
         
         console.log('AuthContext - Fetched profile from auth state change:', userProfile);
@@ -518,16 +489,19 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
     }
   };
 
-  const signUpWithEmail = async (email: string, password: string, name: string, phone?: string) => {
+  const signUpWithEmail = async (email: string, password: string, firstName: string, lastName: string, phone?: string) => {
     setIsLoading(true);
     try {
       const userTimezone = getUserTimezone();
+      const fullName = [firstName, lastName].filter(Boolean).join(' ');
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
-            full_name: name,
+            full_name: fullName,
+            first_name: firstName,
+            last_name: lastName,
             phone: phone || null,
             timezone: userTimezone,
           },
@@ -557,16 +531,19 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
     }
   };
 
-  const signUpWithPhone = async (phone: string, password: string, name: string, email?: string) => {
+  const signUpWithPhone = async (phone: string, password: string, firstName: string, lastName: string, email?: string) => {
     setIsLoading(true);
     try {
       const userTimezone = getUserTimezone();
+      const fullName = [firstName, lastName].filter(Boolean).join(' ');
       const { data, error } = await supabase.auth.signUp({
         phone,
         password,
         options: {
           data: {
-            full_name: name,
+            full_name: fullName,
+            first_name: firstName,
+            last_name: lastName,
             email: email || null,
             timezone: userTimezone,
           },

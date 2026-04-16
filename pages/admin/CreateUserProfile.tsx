@@ -12,7 +12,8 @@ interface CreateUserProfileProps {
 
 export const CreateUserProfile: React.FC<CreateUserProfileProps> = ({ isOpen, onClose, onSuccess }) => {
   const [email, setEmail] = useState('');
-  const [name, setName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [phone, setPhone] = useState('');
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -69,11 +70,15 @@ export const CreateUserProfile: React.FC<CreateUserProfileProps> = ({ isOpen, on
         return;
       }
 
+      const fName = firstName || email.split('@')[0];
+      const lName = lastName || '';
       const newUser: User = {
         id: userId,
         email: email.toLowerCase(),
         phone: phone || undefined,
-        name: name || email.split('@')[0],
+        first_name: fName,
+        last_name: lName,
+        name: [fName, lName].filter(Boolean).join(' '),
         is_approved: false,
         role: 'member',
       };
@@ -93,7 +98,8 @@ export const CreateUserProfile: React.FC<CreateUserProfileProps> = ({ isOpen, on
       console.log('User profile created:', data);
       alert('User profile created successfully! They can now be approved.');
       setEmail('');
-      setName('');
+      setFirstName('');
+      setLastName('');
       setPhone('');
       onSuccess();
       onClose();
@@ -131,16 +137,28 @@ export const CreateUserProfile: React.FC<CreateUserProfileProps> = ({ isOpen, on
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-bold text-charcoal mb-2">Name *</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none"
-            placeholder="John Doe"
-            required
-          />
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-sm font-bold text-charcoal mb-2">First Name *</label>
+            <input
+              type="text"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none"
+              placeholder="John"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-charcoal mb-2">Last Name</label>
+            <input
+              type="text"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none"
+              placeholder="Doe"
+            />
+          </div>
         </div>
 
         <div>
@@ -162,7 +180,7 @@ export const CreateUserProfile: React.FC<CreateUserProfileProps> = ({ isOpen, on
           >
             Cancel
           </button>
-          <GlowingButton onClick={handleCreate} disabled={isCreating || !email || !name}>
+          <GlowingButton onClick={handleCreate} disabled={isCreating || !email || !firstName}>
             {isCreating ? 'Creating...' : 'Create Profile'}
           </GlowingButton>
         </div>

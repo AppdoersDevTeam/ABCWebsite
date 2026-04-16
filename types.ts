@@ -4,9 +4,13 @@ export interface User {
   id: string;
   email: string;
   phone?: string;
+  first_name: string;
+  last_name: string;
+  /** Legacy combined name — kept for backward compat. Prefer first_name + last_name. */
   name: string;
   is_approved: boolean;
   role: 'member' | 'admin';
+  is_super_admin?: boolean;
   created_at?: string;
   user_timezone?: string;
 }

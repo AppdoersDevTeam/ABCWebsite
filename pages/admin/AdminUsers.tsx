@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { Users, UserCheck, X, Shield, Ban, Plus } from 'lucide-react';
+import { Users, UserCheck, X, Shield, ShieldOff, Ban, Plus, Crown } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { displayName, displayInitial } from '../../lib/constants';
 import { User } from '../../types';
 import { CreateUserProfile } from './CreateUserProfile';
 import { SkeletonPageHeader, SkeletonStatsCard, SkeletonUserCard } from '../../components/UI/Skeleton';
@@ -16,7 +17,7 @@ export const AdminUsers = () => {
   const [pendingCount, setPendingCount] = useState(0);
   const [isLoadingUsers, setIsLoadingUsers] = useState(true);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [filter, setFilter] = useState<'all' | 'pending' | 'approved'>('all');
+  const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'admins'>('all');
 
   useEffect(() => {
     fetchUsers();
@@ -125,6 +126,47 @@ export const AdminUsers = () => {
     }
   };
 
+  const handleMakeAdmin = async (userId: string, userName: string) => {
+    if (!window.confirm(`Make ${userName} an admin? They will be able to access the admin dashboard.`)) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('users')
+        .update({ role: 'admin', is_approved: true })
+        .eq('id', userId);
+
+      if (error) throw error;
+      alert(`${userName} is now an admin`);
+      fetchUsers();
+    } catch (error) {
+      console.error('Error making user admin:', error);
+      alert('Failed to make user an admin');
+    }
+  };
+
+  const handleRevokeAdmin = async (userId: string, userName: string) => {
+    if (!window.confirm(`Revoke admin rights from ${userName}? They will become a regular member.`)) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('users')
+        .update({ role: 'member' })
+        .eq('id', userId);
+
+      if (error) throw error;
+      alert(`${userName} is now a member`);
+      fetchUsers();
+    } catch (error) {
+      console.error('Error revoking admin:', error);
+      alert('Failed to revoke admin rights');
+    }
+  };
+
+  const isSuperAdmin = user?.is_super_admin === true;
 
   const formatDate = (dateString: string | undefined, userTimezone?: string) => {
     // For admin views, display dates in the admin's current timezone
@@ -137,6 +179,8 @@ export const AdminUsers = () => {
         return allUsers.filter(u => !u.is_approved);
       case 'approved':
         return allUsers.filter(u => u.is_approved);
+      case 'admins':
+        return allUsers.filter(u => u.role === 'admin');
       default:
         return allUsers;
     }
@@ -234,6 +278,16 @@ export const AdminUsers = () => {
         >
           Approved ({allUsers.filter(u => u.is_approved).length})
         </button>
+        <button
+          onClick={() => setFilter('admins')}
+          className={`px-6 py-3 font-bold transition-colors ${
+            filter === 'admins'
+              ? 'text-charcoal border-b-2 border-gold'
+              : 'text-neutral hover:text-charcoal'
+          }`}
+        >
+          Admins ({allUsers.filter(u => u.role === 'admin').length})
+        </button>
       </div>
 
       {/* Users List */}
@@ -259,15 +313,26 @@ export const AdminUsers = () => {
                 <div className="flex-1">
                   <div className="flex items-start gap-4">
                     <div className="w-12 h-12 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-lg flex-shrink-0">
-                      {u.name.charAt(0).toUpperCase()}
+                      {displayInitial(u)}
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2 flex-wrap">
-                        <h3 className="font-bold text-xl text-charcoal">{u.name}</h3>
-                        {u.role === 'admin' && (
+                        <h3 className="font-bold text-xl text-charcoal">{displayName(u)}</h3>
+                        {u.is_super_admin && (
+                          <span className="bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded uppercase font-bold flex items-center gap-1">
+                            <Crown size={12} />
+                            Super Admin
+                          </span>
+                        )}
+                        {u.role === 'admin' && !u.is_super_admin && (
                           <span className="bg-red-100 text-red-700 text-xs px-2 py-1 rounded uppercase font-bold flex items-center gap-1">
                             <Shield size={12} />
                             Admin
+                          </span>
+                        )}
+                        {u.role === 'member' && (
+                          <span className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded uppercase font-bold flex items-center gap-1">
+                            Member
                           </span>
                         )}
                         {u.is_approved ? (
@@ -301,16 +366,43 @@ export const AdminUsers = () => {
                   </div>
                 </div>
                 <div className="flex gap-2 flex-wrap flex-shrink-0">
+                  {/* Role Management — super admin only, cannot change own role or other super admins */}
+                  {isSuperAdmin && u.id !== user?.id && !u.is_super_admin && (
+                    <>
+                      {u.role === 'member' ? (
+                        <button
+                          onClick={() => handleMakeAdmin(u.id, displayName(u))}
+                          className="bg-purple-100 border-2 border-purple-300 text-purple-700 px-4 py-2 rounded-[4px] font-bold hover:bg-purple-200 transition-colors shadow-sm flex items-center gap-2 text-sm"
+                          title="Promote to admin"
+                        >
+                          <Shield size={16} />
+                          Make Admin
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => handleRevokeAdmin(u.id, displayName(u))}
+                          className="bg-orange-100 border-2 border-orange-300 text-orange-700 px-4 py-2 rounded-[4px] font-bold hover:bg-orange-200 transition-colors shadow-sm flex items-center gap-2 text-sm"
+                          title="Demote to member"
+                        >
+                          <ShieldOff size={16} />
+                          Revoke Admin
+                        </button>
+                      )}
+                    </>
+                  )}
+
                   {/* Approval Management */}
                   {u.is_approved ? (
-                    <button
-                      onClick={() => handleRevokeApproval(u.id, u.name)}
-                      className="bg-red-100 border-2 border-red-300 text-red-700 px-4 py-2 rounded-[4px] font-bold hover:bg-red-200 transition-colors shadow-sm flex items-center gap-2 text-sm"
-                      title="Revoke user approval"
-                    >
-                      <Ban size={16} />
-                      Revoke Access
-                    </button>
+                    u.id !== user?.id && !u.is_super_admin && (
+                      <button
+                        onClick={() => handleRevokeApproval(u.id, displayName(u))}
+                        className="bg-red-100 border-2 border-red-300 text-red-700 px-4 py-2 rounded-[4px] font-bold hover:bg-red-200 transition-colors shadow-sm flex items-center gap-2 text-sm"
+                        title="Revoke user approval"
+                      >
+                        <Ban size={16} />
+                        Revoke Access
+                      </button>
+                    )
                   ) : (
                     <button
                       onClick={() => handleApproveUser(u.id)}

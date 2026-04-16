@@ -4,6 +4,7 @@ import { VibrantCard } from '../../components/UI/VibrantCard';
 import { Calendar, MessageSquare, BookOpen, Users, Image, ClipboardList, ArrowUpRight, UserCheck, X, Plus, Shield } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
+import { displayName } from '../../lib/constants';
 import { User } from '../../types';
 import { SkeletonPageHeader, SkeletonCard, SkeletonUserCard, SkeletonStatsCard } from '../../components/UI/Skeleton';
 import { formatRelativeDateInTimezone, formatFullDateTimeInTimezone } from '../../lib/dateUtils';
@@ -494,7 +495,7 @@ export const AdminOverview = () => {
     <div className="space-y-8">
       <AdminPageHeader
         title="Admin Dashboard"
-        subtitle={`Welcome back, ${user?.name || 'Admin'}. Manage your church community.`}
+        subtitle={`Welcome back, ${displayName(user)}. Manage your church community.`}
         icon={<Shield size={28} />}
         rightSlot={
           <span className="text-xs font-bold text-charcoal bg-gold px-4 py-2 rounded-full border border-gold uppercase tracking-widest shadow-sm">
@@ -689,7 +690,7 @@ export const AdminOverview = () => {
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-bold text-charcoal">{u.name} ({u.email})</p>
+                      <p className="font-bold text-charcoal">{displayName(u)} ({u.email})</p>
                       <p className="text-neutral">
                         Role: {u.role} | Approved: {u.is_approved ? 'Yes' : 'No'} | 
                         Created: {u.created_at ? formatFullDateTimeInTimezone(u.created_at, u.user_timezone) : 'Unknown'}

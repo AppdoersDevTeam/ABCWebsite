@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { displayName } from '../../lib/constants';
 import { VibrantCard } from '../../components/UI/VibrantCard';
 import { Calendar, MessageSquare, BookOpen, ArrowUpRight } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
@@ -87,12 +88,12 @@ export const DashboardHome = () => {
     <div className="space-y-8">
         <div className="flex justify-between items-end border-b border-gray-200 pb-6">
              <div>
-                <h1 className="text-4xl font-serif font-normal text-charcoal">Welcome, {user?.name}</h1>
+                <h1 className="text-4xl font-serif font-normal text-charcoal">Welcome, {displayName(user)}</h1>
                 <p className="text-neutral mt-2">Here is what is happening in your community.</p>
              </div>
-             <div className="hidden md:block">
+             <div className="hidden md:flex items-center gap-2">
                  <span className="text-xs font-bold text-charcoal bg-gold px-4 py-2 rounded-full border border-gold uppercase tracking-widest shadow-sm">
-                   {user?.role === 'admin' ? 'Admin Access' : 'Member Access'}
+                   {user?.is_super_admin ? 'Super Admin' : user?.role === 'admin' ? 'Admin Access' : 'Member Access'}
                  </span>
              </div>
         </div>

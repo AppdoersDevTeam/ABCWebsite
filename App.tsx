@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { ADMIN_EMAIL } from './lib/constants';
 import { PublicLayout } from './components/Layouts/PublicLayout';
 import { DashboardLayout } from './components/Layouts/DashboardLayout';
 import { AdminLayout } from './components/Layouts/AdminLayout';
@@ -82,21 +81,19 @@ const ProtectedRoute = () => {
     return <Navigate to="/pending-approval" replace />;
   }
 
-  // Redirect admins to admin dashboard
-  if (user.role === 'admin') {
-    console.log('ProtectedRoute - Admin user, redirecting to admin dashboard');
+  // Redirect admins to admin dashboard unless test override says "member"
+  const testOverride = sessionStorage.getItem('testRoleOverride');
+  if (user.role === 'admin' && testOverride !== 'member') {
     return <Navigate to="/admin" replace />;
   }
 
-  console.log('ProtectedRoute - User approved, allowing access to dashboard');
   return <Outlet />;
 };
 
-// Admin Route Component
+// Admin Route Component — allows any user with role === 'admin'
 const AdminRoute = () => {
   const { user, isLoading } = useAuth();
 
-  // Only show loading during initial auth check
   if (isLoading) {
     return (
         <div className="min-h-screen page-shell page-shell-image flex items-center justify-center text-charcoal font-serif">
@@ -106,31 +103,17 @@ const AdminRoute = () => {
   }
 
   if (!user) {
-    console.log('AdminRoute - No user, redirecting to login');
     return <Navigate to="/login" replace />;
   }
 
-  // Only allow the specific admin email to access admin dashboard
-  const isAdminEmail = user.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
-  console.log('AdminRoute - isAdminEmail:', isAdminEmail, 'user.email:', user.email, 'ADMIN_EMAIL:', ADMIN_EMAIL);
-  
-  if (!isAdminEmail) {
-    // Redirect non-admin users to dashboard
-    console.log('AdminRoute - Not admin email, redirecting to dashboard');
-    return <Navigate to="/dashboard" replace />;
-  }
-
   if (!user.is_approved) {
-    console.log('AdminRoute - User not approved, redirecting to pending-approval');
     return <Navigate to="/pending-approval" replace />;
   }
 
   if (user.role !== 'admin') {
-    console.log('AdminRoute - User role is not admin, redirecting to dashboard');
     return <Navigate to="/dashboard" replace />;
   }
 
-  console.log('AdminRoute - All checks passed, rendering Outlet');
   return <Outlet />;
 };
 
