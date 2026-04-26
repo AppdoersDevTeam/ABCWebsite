@@ -32,19 +32,36 @@ export const NeedPrayer = () => {
 
     try {
       const userTimezone = getUserTimezone();
-      const { error: submitError } = await supabase.from('prayer_requests').insert([
-        {
-          user_id: user?.id,
-          name: formData.isAnonymous ? 'Anonymous' : formData.name || 'Anonymous',
-          content: formData.content,
-          is_anonymous: formData.isAnonymous || !formData.name,
-          is_confidential: formData.isConfidential,
-          prayer_count: 0,
-          user_timezone: userTimezone,
-        },
-      ]);
+      const attachUser = Boolean(user?.id);
+      const { error: submitError } = await supabase.rpc('submit_prayer_request', {
+        p_name: formData.isAnonymous ? '' : formData.name,
+        p_content: formData.content,
+        p_is_anonymous: formData.isAnonymous || !formData.name,
+        p_is_confidential: formData.isConfidential,
+        p_user_timezone: userTimezone,
+        p_attach_user: attachUser,
+      });
 
-      if (submitError) throw submitError;
+      if (submitError) {
+        const msg = submitError.message || '';
+        // PostgREST: missing function / args mismatch
+        if (msg.includes('submit_prayer_request') && (msg.toLowerCase().includes('function') || msg.toLowerCase().includes('Could not find'))) {
+          const { error: insertError } = await supabase.from('prayer_requests').insert([
+            {
+              user_id: user?.id ?? null,
+              name: formData.isAnonymous ? 'Anonymous' : formData.name || 'Anonymous',
+              content: formData.content,
+              is_anonymous: formData.isAnonymous || !formData.name,
+              is_confidential: formData.isConfidential,
+              prayer_count: 0,
+              user_timezone: userTimezone,
+            },
+          ]);
+          if (insertError) throw insertError;
+        } else {
+          throw submitError;
+        }
+      }
 
       setSuccess(true);
       setFormData({ name: '', content: '', isConfidential: false, isAnonymous: false });

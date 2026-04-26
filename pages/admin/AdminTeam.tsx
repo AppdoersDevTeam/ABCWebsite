@@ -63,7 +63,7 @@ function memberToForm(m: TeamMember): FormState {
   return {
     name: m.name,
     profile_type: pt,
-    staff_role: pt === 'staff' ? (m.staff_role || m.role || STAFF_ROLE_OPTIONS[0]).trim() : STAFF_ROLE_OPTIONS[0],
+    staff_role: pt === 'staff' ? (m.staff_role || m.role || STAFF_ROLE_OPTIONS[0]).trim() : (m.staff_role || STAFF_ROLE_OPTIONS[0]),
     email: m.email || '',
     phone: m.phone || '',
     img: m.img || '',
@@ -278,7 +278,8 @@ export const AdminTeam = () => {
     const row: Record<string, unknown> = {
       name: trimmed.name,
       profile_type: pt,
-      staff_role: pt === 'staff' ? trimmed.staff_role : null,
+      // Keep staff_role for staff and members (hidden for attendees).
+      staff_role: pt === 'staff' || pt === 'member' ? trimmed.staff_role : null,
       role: storedRole,
       email: trimmed.email,
       phone: trimmed.phone,
@@ -655,9 +656,11 @@ export const AdminTeam = () => {
             <p className="text-xs text-neutral mt-1">Staff, Attendee, or Member (church directory).</p>
           </div>
 
-          {formData.profile_type === 'staff' && (
+          {formData.profile_type !== 'attendee' && (
             <div>
-              <label className="block text-sm font-bold text-charcoal mb-2">Job / role type *</label>
+              <label className="block text-sm font-bold text-charcoal mb-2">
+                Job / role type {formData.profile_type === 'staff' ? '*' : '(optional)'}
+              </label>
               <select
                 value={formData.staff_role}
                 onChange={(e) => setFormData({ ...formData, staff_role: e.target.value })}
@@ -669,6 +672,9 @@ export const AdminTeam = () => {
                   </option>
                 ))}
               </select>
+              {formData.profile_type === 'member' && (
+                <p className="text-xs text-neutral mt-1">Hidden for attendees.</p>
+              )}
             </div>
           )}
 
