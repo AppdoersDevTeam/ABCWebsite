@@ -2,6 +2,16 @@ import type { User as SupabaseUser } from '@supabase/supabase-js';
 import { supabase } from './supabase';
 import type { User } from '../types';
 
+async function withTimeout<T>(p: Promise<T>, ms: number, label: string): Promise<T | null> {
+  const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), ms));
+  const res = (await Promise.race([p, timeout])) as any;
+  if (res === null) {
+    console.warn(`syncDirectoryUserLink: timeout (${label}) after ${ms}ms`);
+    return null;
+  }
+  return res as T;
+}
+
 function normalizeEmail(email: string | null | undefined): string | null {
   if (!email) return null;
   const t = email.trim().toLowerCase();
@@ -31,11 +41,17 @@ export async function syncDirectoryUserLink(supabaseUser: SupabaseUser, userRow:
   }
 
   try {
-    const { data: byUid, error: uidErr } = await supabase
-      .from('team_members')
-      .select('id, user_id, created_from_user_sync')
-      .eq('user_id', uid)
-      .maybeSingle();
+    const byUidRes = await withTimeout(
+      supabase
+        .from('team_members')
+        .select('id, user_id, created_from_user_sync')
+        .eq('user_id', uid)
+        .maybeSingle(),
+      2500,
+      'lookup_by_user_id'
+    );
+    if (!byUidRes) return;
+    const { data: byUid, error: uidErr } = byUidRes as any;
 
     if (uidErr) {
       console.warn('syncDirectoryUserLink: lookup by user_id failed', uidErr);
@@ -45,10 +61,16 @@ export async function syncDirectoryUserLink(supabaseUser: SupabaseUser, userRow:
       return;
     }
 
-    const { data: byEmail, error: emailErr } = await supabase
-      .from('team_members')
-      .select('id, name, email, user_id, created_from_user_sync')
-      .ilike('email', emailNorm);
+    const byEmailRes = await withTimeout(
+      supabase
+        .from('team_members')
+        .select('id, name, email, user_id, created_from_user_sync')
+        .ilike('email', emailNorm),
+      2500,
+      'lookup_by_email'
+    );
+    if (!byEmailRes) return;
+    const { data: byEmail, error: emailErr } = byEmailRes as any;
 
     if (emailErr) {
       console.warn('syncDirectoryUserLink: lookup by email failed', emailErr);
@@ -85,10 +107,15 @@ export async function syncDirectoryUserLink(supabaseUser: SupabaseUser, userRow:
     }
 
     if (chosenId) {
-      const { error: updErr } = await supabase
-        .from('team_members')
-        .update({ user_id: uid, created_from_user_sync: false })
-        .eq('id', chosenId);
+      const updRes = await withTimeout(
+        supabase
+          .from('team_members')
+          .update({ user_id: uid, created_from_user_sync: false })
+          .eq('id', chosenId),
+        2500,
+        'link_existing'
+      );
+      const updErr = (updRes as any)?.error;
       if (updErr) {
         console.warn('syncDirectoryUserLink: failed to link existing directory row', updErr);
       }
@@ -110,7 +137,12 @@ export async function syncDirectoryUserLink(supabaseUser: SupabaseUser, userRow:
       created_from_user_sync: true,
     };
 
-    const { error: insErr } = await supabase.from('team_members').insert([insertPayload]);
+    const insRes = await withTimeout(
+      supabase.from('team_members').insert([insertPayload]),
+      2500,
+      'create_shell'
+    );
+    const insErr = (insRes as any)?.error;
     if (insErr) {
       if (String(insErr.message || '').includes('user_id') || String(insErr.code) === '42703') {
         console.warn(

@@ -86,7 +86,7 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
       if (!result) {
         console.warn('fetchUserProfile - Query timed out, using fallback');
         const fb = buildFallbackUser(supabaseUser);
-        await syncDirectoryUserLink(supabaseUser, fb);
+        void syncDirectoryUserLink(supabaseUser, fb);
         return fb;
       }
 
@@ -114,13 +114,13 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
 
           // Cache and return immediately
           userProfileCache.current = { userId: supabaseUser.id, profile: newUser, timestamp: Date.now() };
-          await syncDirectoryUserLink(supabaseUser, newUser);
+          void syncDirectoryUserLink(supabaseUser, newUser);
           return newUser;
         }
         
         const fallbackUser = buildFallbackUser(supabaseUser);
         userProfileCache.current = { userId: supabaseUser.id, profile: fallbackUser, timestamp: Date.now() };
-        await syncDirectoryUserLink(supabaseUser, fallbackUser);
+        void syncDirectoryUserLink(supabaseUser, fallbackUser);
         return fallbackUser;
       }
 
@@ -167,12 +167,12 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
 
       // Cache the profile
       userProfileCache.current = { userId: supabaseUser.id, profile: userData, timestamp: Date.now() };
-      await syncDirectoryUserLink(supabaseUser, userData);
+      void syncDirectoryUserLink(supabaseUser, userData);
       return userData;
     } catch (error) {
       console.error('Error in fetchUserProfile:', error);
       const fb = buildFallbackUser(supabaseUser);
-      await syncDirectoryUserLink(supabaseUser, fb);
+      void syncDirectoryUserLink(supabaseUser, fb);
       return fb;
     }
   };
