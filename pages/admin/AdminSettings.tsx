@@ -129,8 +129,8 @@ export const AdminSettings = () => {
   return (
     <div className="space-y-8">
       <AdminPageHeader
-        title="Settings"
-        subtitle="Manage Groups and Job Roles used in the directory."
+        title="Directory Setup"
+        subtitle="Manage groups and job roles used in Directory / People."
         icon={<Settings size={28} />}
       />
 

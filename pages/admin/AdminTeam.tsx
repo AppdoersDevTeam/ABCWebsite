@@ -129,12 +129,18 @@ export const AdminTeam = () => {
   }, []);
 
   const staffRoleOptions = useMemo(() => {
+    const fromDb = jobRoles
+      .filter((r) => r.is_active !== false)
+      .map((r) => r.name)
+      .filter(Boolean);
+    const base = fromDb.length > 0 ? fromDb : STAFF_ROLE_OPTIONS;
+
     const s = formData.staff_role;
-    if (s && !STAFF_ROLE_OPTIONS.includes(s)) {
-      return [s, ...STAFF_ROLE_OPTIONS];
+    if (s && !base.includes(s)) {
+      return [s, ...base];
     }
-    return STAFF_ROLE_OPTIONS;
-  }, [formData.staff_role]);
+    return base;
+  }, [formData.staff_role, jobRoles]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);

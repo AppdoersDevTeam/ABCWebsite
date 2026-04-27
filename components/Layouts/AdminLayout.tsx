@@ -43,7 +43,7 @@ export const AdminLayout = () => {
     { label: 'Events', path: '/admin/events', icon: <Calendar size={20} /> },
     { label: 'Roster', path: '/admin/roster', icon: <ClipboardList size={20} /> },
     { label: 'Photos', path: '/admin/photos', icon: <Image size={20} /> },
-    { label: 'Settings', path: '/admin/settings', icon: <Settings size={20} /> },
+    { label: 'Directory Setup', path: '/admin/settings', icon: <Settings size={20} /> },
   ];
 
   return (
