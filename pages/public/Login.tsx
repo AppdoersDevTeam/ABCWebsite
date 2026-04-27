@@ -18,7 +18,9 @@ export const Login = () => {
   const [success, setSuccess] = useState<string | null>(null);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [loginFlash, setLoginFlash] = useState<{ name: string; role: string } | null>(null);
-  const { loginWithEmail, loginWithPhone, signUpWithEmail, signUpWithPhone, signInWithGoogle, isLoading, user, refreshUserProfile } = useAuth();
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const { loginWithEmail, loginWithPhone, signUpWithEmail, signUpWithPhone, signInWithGoogle, isLoading, user, refreshUserProfile, sendPasswordReset } = useAuth();
   const navigate = useNavigate();
 
   const getRedirectPath = (role: string, isApproved: boolean): string => {
@@ -43,6 +45,24 @@ export const Login = () => {
     setSuccess(null);
 
     try {
+      if (isResettingPassword) {
+        const normalizedEmail = (resetEmail || email || '').trim();
+        if (!normalizedEmail) {
+          setError('Please enter your email address');
+          return;
+        }
+
+        if (!window.confirm(`Send password reset link to ${normalizedEmail}?`)) {
+          return;
+        }
+
+        await sendPasswordReset(normalizedEmail);
+        setSuccess('Password reset email sent. Please check your inbox.');
+        setIsResettingPassword(false);
+        setResetEmail('');
+        return;
+      }
+
       if (isSignUp) {
         if (authMethod === 'email') {
           if (!email || !password || !firstName) {
@@ -226,6 +246,43 @@ export const Login = () => {
         </div>
 
         <form className="mt-4 space-y-6" onSubmit={handleSubmit}>
+          {isResettingPassword && (
+            <div className="bg-gray-50 border border-gray-200 rounded-[4px] p-4 space-y-3">
+              <p className="text-sm text-neutral">
+                Enter your email and we’ll send you a password reset link.
+              </p>
+              <div>
+                <label htmlFor="reset-email" className="block text-sm font-bold text-charcoal mb-2">
+                  Email address
+                </label>
+                <input
+                  id="reset-email"
+                  name="reset-email"
+                  type="email"
+                  required
+                  className="appearance-none rounded-[4px] relative block w-full px-4 py-4 border border-gray-300 bg-white text-charcoal placeholder-gray-400 focus:outline-none focus:ring-gold focus:border-gold focus:z-10 shadow-sm"
+                  placeholder="Email address"
+                  value={resetEmail}
+                  onChange={(e) => setResetEmail(e.target.value)}
+                />
+              </div>
+              <div className="flex items-center justify-between gap-3">
+                <button
+                  type="button"
+                  className="text-sm text-neutral hover:text-charcoal font-bold"
+                  onClick={() => {
+                    setIsResettingPassword(false);
+                    setResetEmail('');
+                    setError(null);
+                    setSuccess(null);
+                  }}
+                >
+                  Back to sign in
+                </button>
+              </div>
+            </div>
+          )}
+
           {isSignUp && (
             <div className="grid grid-cols-2 gap-3">
               <div>
@@ -260,38 +317,40 @@ export const Login = () => {
             </div>
           )}
 
-          {authMethod === 'email' ? (
-            <div>
-              <label htmlFor="email-address" className="block text-sm font-bold text-charcoal mb-2">
-                Email address
-              </label>
-              <input
-                id="email-address"
-                name="email"
-                type="email"
-                required
-                className="appearance-none rounded-[4px] relative block w-full px-4 py-4 border border-gray-300 bg-white text-charcoal placeholder-gray-400 focus:outline-none focus:ring-gold focus:border-gold focus:z-10 shadow-sm"
-                placeholder="Email address"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-          ) : (
-            <div>
-              <label htmlFor="phone" className="block text-sm font-bold text-charcoal mb-2">
-                Phone Number
-              </label>
-              <input
-                id="phone"
-                name="phone"
-                type="tel"
-                required
-                className="appearance-none rounded-[4px] relative block w-full px-4 py-4 border border-gray-300 bg-white text-charcoal placeholder-gray-400 focus:outline-none focus:ring-gold focus:border-gold focus:z-10 shadow-sm"
-                placeholder="+1234567890"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-              />
-            </div>
+          {!isResettingPassword && (
+            authMethod === 'email' ? (
+              <div>
+                <label htmlFor="email-address" className="block text-sm font-bold text-charcoal mb-2">
+                  Email address
+                </label>
+                <input
+                  id="email-address"
+                  name="email"
+                  type="email"
+                  required
+                  className="appearance-none rounded-[4px] relative block w-full px-4 py-4 border border-gray-300 bg-white text-charcoal placeholder-gray-400 focus:outline-none focus:ring-gold focus:border-gold focus:z-10 shadow-sm"
+                  placeholder="Email address"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+            ) : (
+              <div>
+                <label htmlFor="phone" className="block text-sm font-bold text-charcoal mb-2">
+                  Phone Number
+                </label>
+                <input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  required
+                  className="appearance-none rounded-[4px] relative block w-full px-4 py-4 border border-gray-300 bg-white text-charcoal placeholder-gray-400 focus:outline-none focus:ring-gold focus:border-gold focus:z-10 shadow-sm"
+                  placeholder="+1234567890"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                />
+              </div>
+            )
           )}
 
           {isSignUp && authMethod === 'email' && (
@@ -328,31 +387,35 @@ export const Login = () => {
             </div>
           )}
 
-          <div>
-            <label htmlFor="password" className="block text-sm font-bold text-charcoal mb-2">
-              Password
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              required
-              className="appearance-none rounded-[4px] relative block w-full px-4 py-4 border border-gray-300 bg-white text-charcoal placeholder-gray-400 focus:outline-none focus:ring-gold focus:border-gold focus:z-10 shadow-sm"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
+          {!isResettingPassword && (
+            <div>
+              <label htmlFor="password" className="block text-sm font-bold text-charcoal mb-2">
+                Password
+              </label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                required
+                className="appearance-none rounded-[4px] relative block w-full px-4 py-4 border border-gray-300 bg-white text-charcoal placeholder-gray-400 focus:outline-none focus:ring-gold focus:border-gold focus:z-10 shadow-sm"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+          )}
 
-          {!isSignUp && (
+          {!isSignUp && !isResettingPassword && (
             <div className="flex items-center justify-end">
               <Link
                 to="#"
                 className="text-sm text-gold hover:text-charcoal font-bold"
                 onClick={(e) => {
                   e.preventDefault();
-                  // TODO: Implement password reset
-                  alert('Password reset functionality coming soon');
+                  setIsResettingPassword(true);
+                  setResetEmail(email);
+                  setError(null);
+                  setSuccess(null);
                 }}
               >
                 Forgot password?
@@ -367,8 +430,8 @@ export const Login = () => {
                 disabled={isLoading}
             >
               {isLoading 
-                ? (isSignUp ? 'Creating account...' : 'Signing in...') 
-                : (isSignUp ? 'Sign up' : 'Sign in')
+                ? (isResettingPassword ? 'Sending...' : isSignUp ? 'Creating account...' : 'Signing in...')
+                : (isResettingPassword ? 'Send reset link' : isSignUp ? 'Sign up' : 'Sign in')
               }
             </GlowingButton>
           </div>
@@ -399,6 +462,8 @@ export const Login = () => {
               type="button"
               onClick={() => {
                 setIsSignUp(!isSignUp);
+                setIsResettingPassword(false);
+                setResetEmail('');
                 setError(null);
                 setSuccess(null);
               }}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { Users, UserCheck, X, Shield, ShieldOff, Ban, Plus, Crown } from 'lucide-react';
+import { Users, UserCheck, X, Shield, ShieldOff, Ban, Plus, Crown, KeyRound } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { displayName, displayInitial } from '../../lib/constants';
 import { User } from '../../types';
@@ -11,7 +11,7 @@ import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 
 export const AdminUsers = () => {
-  const { user } = useAuth();
+  const { user, sendPasswordReset } = useAuth();
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [pendingUsers, setPendingUsers] = useState<User[]>([]);
   const [pendingCount, setPendingCount] = useState(0);
@@ -163,6 +163,26 @@ export const AdminUsers = () => {
     } catch (error) {
       console.error('Error revoking admin:', error);
       alert('Failed to revoke admin rights');
+    }
+  };
+
+  const handleSendPasswordReset = async (email: string | null | undefined) => {
+    const normalizedEmail = (email || '').trim();
+    if (!normalizedEmail) {
+      alert('This user does not have an email address on file.');
+      return;
+    }
+
+    if (!window.confirm(`Send password reset link to ${normalizedEmail}?`)) {
+      return;
+    }
+
+    try {
+      await sendPasswordReset(normalizedEmail);
+      alert('Password reset email sent. Ask the user to check their inbox.');
+    } catch (error) {
+      console.error('Error sending password reset email:', error);
+      alert('Failed to send password reset email');
     }
   };
 
@@ -366,6 +386,16 @@ export const AdminUsers = () => {
                   </div>
                 </div>
                 <div className="flex gap-2 flex-wrap flex-shrink-0">
+                  {/* Password reset */}
+                  <button
+                    onClick={() => handleSendPasswordReset(u.email)}
+                    className="bg-white border-2 border-gray-200 text-neutral px-4 py-2 rounded-[4px] font-bold hover:bg-gray-50 hover:text-charcoal transition-colors shadow-sm flex items-center gap-2 text-sm"
+                    title="Send a password reset email"
+                  >
+                    <KeyRound size={16} />
+                    Reset Password
+                  </button>
+
                   {/* Role Management — super admin only, cannot change own role or other super admins */}
                   {isSuperAdmin && u.id !== user?.id && !u.is_super_admin && (
                     <>

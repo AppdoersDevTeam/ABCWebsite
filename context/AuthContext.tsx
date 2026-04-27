@@ -650,7 +650,8 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
       const siteUrl = import.meta.env.VITE_SITE_URL || window.location.origin;
       const baseUrl = siteUrl.replace(/\/$/, '');
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${baseUrl}/reset-password`,
+        // App uses HashRouter, so the SPA route must include the hash fragment.
+        redirectTo: `${baseUrl}/#/reset-password`,
       });
 
       if (error) throw error;

@@ -26,6 +26,7 @@ import { OAuthCallback } from './pages/public/OAuthCallback';
 import { OAuthCallbackWrapper } from './pages/public/OAuthCallbackWrapper';
 import { Terms } from './pages/public/Terms';
 import { Privacy } from './pages/public/Privacy';
+import { ResetPassword } from './pages/public/ResetPassword';
 
 // Leadership Pages
 import { DavidMiller } from './pages/public/leadership/DavidMiller';
@@ -155,6 +156,7 @@ const AppRoutes = () => {
               <Route path="login-error" element={<LoginError />} />
               {/* OAuth callback route - Supabase redirects here after OAuth */}
               <Route path="auth/callback" element={<OAuthCallback />} />
+              <Route path="reset-password" element={<ResetPassword />} />
               <Route path="terms" element={<Terms />} />
               <Route path="privacy" element={<Privacy />} />
             </Route>
