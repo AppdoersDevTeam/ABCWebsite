@@ -3,7 +3,6 @@ import { Settings, Tag, Briefcase, Plus, Save, Trash2 } from 'lucide-react';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { supabase } from '../../lib/supabase';
 import type { Group, JobRole } from '../../types';
-import { useBlocker } from 'react-router-dom';
 
 type Tab = 'groups' | 'job_roles';
 
@@ -24,6 +23,8 @@ export const AdminSettings = () => {
   const [savedGroups, setSavedGroups] = useState<Group[]>([]);
   const [savedJobRoles, setSavedJobRoles] = useState<JobRole[]>([]);
   const isDiscardingRef = useRef(false);
+  const isRevertingHashRef = useRef(false);
+  const lastHashRef = useRef<string>(typeof window !== 'undefined' ? window.location.hash : '');
 
   const [newGroupName, setNewGroupName] = useState('');
   const [newJobRoleName, setNewJobRoleName] = useState('');
@@ -182,18 +183,37 @@ export const AdminSettings = () => {
     return () => window.removeEventListener('beforeunload', onBeforeUnload);
   }, [hasUnsavedChanges]);
 
-  // Block in-app navigation (discarding changes if user chooses to leave)
-  const blocker = useBlocker(hasUnsavedChanges && !isDiscardingRef.current);
+  // HashRouter-compatible navigation blocking.
+  // React Router v7's useBlocker requires a data router; this app uses HashRouter in App.tsx.
   useEffect(() => {
-    if (blocker.state !== 'blocked') return;
-    const leave = window.confirm('You have unsaved changes. Leave without saving? Your changes will be discarded.');
-    if (leave) {
-      discardChanges();
-      blocker.proceed?.();
-    } else {
-      blocker.reset?.();
-    }
-  }, [blocker]);
+    lastHashRef.current = window.location.hash;
+
+    const onHashChange = () => {
+      if (isRevertingHashRef.current) {
+        isRevertingHashRef.current = false;
+        lastHashRef.current = window.location.hash;
+        return;
+      }
+
+      const nextHash = window.location.hash;
+      if (!hasUnsavedChanges || isDiscardingRef.current) {
+        lastHashRef.current = nextHash;
+        return;
+      }
+
+      const leave = window.confirm('You have unsaved changes. Leave without saving? Your changes will be discarded.');
+      if (leave) {
+        discardChanges();
+        lastHashRef.current = nextHash;
+      } else {
+        isRevertingHashRef.current = true;
+        window.location.hash = lastHashRef.current || '#/admin/settings';
+      }
+    };
+
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, [hasUnsavedChanges, savedGroups, savedJobRoles]);
 
   return (
     <div className="space-y-8">
