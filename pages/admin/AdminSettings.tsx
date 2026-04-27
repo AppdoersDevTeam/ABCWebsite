@@ -246,6 +246,12 @@ export const AdminSettings = () => {
             </table>
           </div>
 
+          {groups.length === 0 && (
+            <div className="rounded-[8px] border border-dashed border-gray-200 bg-white/60 p-4 text-sm text-neutral">
+              No groups yet. Add your first group above (e.g. Worship, Women, Sound).
+            </div>
+          )}
+
           <p className="text-xs text-neutral">
             Active groups ({activeGroups.length}) will show up in the Directory / People create/edit form and filters.
           </p>
@@ -336,6 +342,12 @@ export const AdminSettings = () => {
               </tbody>
             </table>
           </div>
+
+          {jobRoles.length === 0 && (
+            <div className="rounded-[8px] border border-dashed border-gray-200 bg-white/60 p-4 text-sm text-neutral">
+              No job roles yet. Run `ADD_GROUPS_AND_JOB_ROLES.sql` again (it seeds the default roles), or add roles here.
+            </div>
+          )}
 
           <p className="text-xs text-neutral">
             Active job roles ({activeJobRoles.length}) will show up in the Directory / People create/edit form and filters.

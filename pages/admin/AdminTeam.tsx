@@ -86,6 +86,7 @@ export const AdminTeam = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [groups, setGroups] = useState<Group[]>([]);
   const [jobRoles, setJobRoles] = useState<JobRole[]>([]);
+  const [directorySetupWarning, setDirectorySetupWarning] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
   const [formData, setFormData] = useState<FormState>(emptyForm);
@@ -160,10 +161,14 @@ export const AdminTeam = () => {
       if (rErr) throw rErr;
       setGroups((g || []) as Group[]);
       setJobRoles((r || []) as JobRole[]);
+      setDirectorySetupWarning(null);
     } catch (e) {
       console.warn('Groups/job roles not loaded (SQL may not be applied yet).', e);
       setGroups([]);
       setJobRoles([]);
+      setDirectorySetupWarning(
+        'Groups/Job Roles could not be loaded (likely missing RLS policies). Re-run ADD_GROUPS_AND_JOB_ROLES.sql, then refresh.'
+      );
     }
   };
 
@@ -634,6 +639,12 @@ export const AdminTeam = () => {
           </div>
         }
       />
+
+      {directorySetupWarning && (
+        <div className="glass-card bg-white/80 border border-amber-200 rounded-[12px] p-4 text-sm text-amber-800">
+          {directorySetupWarning}
+        </div>
+      )}
 
       {/* Profile type filter */}
       <div className="glass-card bg-white/80 border border-white/60 rounded-[12px] p-4">

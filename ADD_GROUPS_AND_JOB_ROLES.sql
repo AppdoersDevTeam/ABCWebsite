@@ -15,6 +15,14 @@ create table if not exists public.groups (
 create unique index if not exists groups_slug_unique on public.groups (slug);
 create unique index if not exists groups_name_unique on public.groups (name);
 
+-- RLS (admin-only management)
+alter table public.groups enable row level security;
+drop policy if exists "Admins can manage groups" on public.groups;
+create policy "Admins can manage groups" on public.groups
+  for all
+  using (public.is_admin_user(auth.uid()))
+  with check (public.is_admin_user(auth.uid()));
+
 -- 2) Job Roles (job titles; can be multiple per person)
 create table if not exists public.job_roles (
   id uuid primary key default gen_random_uuid(),
@@ -28,6 +36,13 @@ create table if not exists public.job_roles (
 
 create unique index if not exists job_roles_slug_unique on public.job_roles (slug);
 create unique index if not exists job_roles_name_unique on public.job_roles (name);
+
+alter table public.job_roles enable row level security;
+drop policy if exists "Admins can manage job roles" on public.job_roles;
+create policy "Admins can manage job roles" on public.job_roles
+  for all
+  using (public.is_admin_user(auth.uid()))
+  with check (public.is_admin_user(auth.uid()));
 
 -- 3) Join tables
 create table if not exists public.team_member_groups (
@@ -43,6 +58,20 @@ create table if not exists public.team_member_job_roles (
   created_at timestamp with time zone not null default now(),
   primary key (team_member_id, job_role_id)
 );
+
+alter table public.team_member_groups enable row level security;
+drop policy if exists "Admins can manage team member groups" on public.team_member_groups;
+create policy "Admins can manage team member groups" on public.team_member_groups
+  for all
+  using (public.is_admin_user(auth.uid()))
+  with check (public.is_admin_user(auth.uid()));
+
+alter table public.team_member_job_roles enable row level security;
+drop policy if exists "Admins can manage team member job roles" on public.team_member_job_roles;
+create policy "Admins can manage team member job roles" on public.team_member_job_roles
+  for all
+  using (public.is_admin_user(auth.uid()))
+  with check (public.is_admin_user(auth.uid()));
 
 -- Optional: seed a few common groups (safe to remove)
 insert into public.groups (name, slug, sort_order)
