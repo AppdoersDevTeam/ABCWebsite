@@ -112,6 +112,10 @@ export interface PhotoFolder {
 
 export interface TeamMember {
   id: string;
+  /** When set, links this directory row to `public.users.id` / auth uid. */
+  user_id?: string | null;
+  /** True when this row was auto-created on first login (no directory match). */
+  created_from_user_sync?: boolean | null;
   name: string;
   role: string;
   email: string;

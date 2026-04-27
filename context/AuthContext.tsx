@@ -3,6 +3,7 @@ import { User } from '../types';
 import { supabase } from '../lib/supabase';
 import { ADMIN_EMAIL, SUPER_ADMIN_EMAIL } from '../lib/constants';
 import { getUserTimezone } from '../lib/dateUtils';
+import { syncDirectoryUserLink } from '../lib/directoryUserLink';
 import type { AuthError, Session, User as SupabaseUser } from '@supabase/supabase-js';
 
 function splitName(fullName: string): { first_name: string; last_name: string } {
@@ -62,6 +63,7 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
         const { userId, profile, timestamp } = userProfileCache.current;
         if (userId === supabaseUser.id && Date.now() - timestamp < CACHE_DURATION) {
           console.log('fetchUserProfile - Using cached profile');
+          void syncDirectoryUserLink(supabaseUser, profile);
           return profile;
         }
       }
@@ -83,7 +85,9 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
       
       if (!result) {
         console.warn('fetchUserProfile - Query timed out, using fallback');
-        return buildFallbackUser(supabaseUser);
+        const fb = buildFallbackUser(supabaseUser);
+        await syncDirectoryUserLink(supabaseUser, fb);
+        return fb;
       }
 
       const { data, error } = result as any;
@@ -110,11 +114,13 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
 
           // Cache and return immediately
           userProfileCache.current = { userId: supabaseUser.id, profile: newUser, timestamp: Date.now() };
+          await syncDirectoryUserLink(supabaseUser, newUser);
           return newUser;
         }
         
         const fallbackUser = buildFallbackUser(supabaseUser);
         userProfileCache.current = { userId: supabaseUser.id, profile: fallbackUser, timestamp: Date.now() };
+        await syncDirectoryUserLink(supabaseUser, fallbackUser);
         return fallbackUser;
       }
 
@@ -161,10 +167,13 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
 
       // Cache the profile
       userProfileCache.current = { userId: supabaseUser.id, profile: userData, timestamp: Date.now() };
+      await syncDirectoryUserLink(supabaseUser, userData);
       return userData;
     } catch (error) {
       console.error('Error in fetchUserProfile:', error);
-      return buildFallbackUser(supabaseUser);
+      const fb = buildFallbackUser(supabaseUser);
+      await syncDirectoryUserLink(supabaseUser, fb);
+      return fb;
     }
   };
 

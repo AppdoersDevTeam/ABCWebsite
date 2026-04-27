@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { Users, UserCheck, X, Shield, ShieldOff, Ban, Plus, Crown, KeyRound } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { displayName, displayInitial } from '../../lib/constants';
 import { User } from '../../types';
 import { CreateUserProfile } from './CreateUserProfile';
+import { LinkDirectoryUserModal } from './LinkDirectoryUserModal';
 import { SkeletonPageHeader, SkeletonStatsCard, SkeletonUserCard } from '../../components/UI/Skeleton';
 import { formatRelativeDateInTimezone } from '../../lib/dateUtils';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
@@ -18,6 +19,10 @@ export const AdminUsers = () => {
   const [isLoadingUsers, setIsLoadingUsers] = useState(true);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'admins'>('all');
+  const [directoryByUserId, setDirectoryByUserId] = useState<
+    Record<string, { id: string; created_from_user_sync?: boolean | null }>
+  >({});
+  const [linkModalUser, setLinkModalUser] = useState<User | null>(null);
 
   useEffect(() => {
     fetchUsers();
@@ -51,15 +56,39 @@ export const AdminUsers = () => {
         console.error('AdminUsers - Error fetching pending users:', pendingError);
       }
 
-      setAllUsers(allUsers || []);
+      const list = allUsers || [];
+      setAllUsers(list);
       setPendingUsers(pendingData || []);
       setPendingCount(pendingData?.length || 0);
       console.log('AdminUsers - Set users:', allUsers?.length || 0);
+
+      const ids = list.map((u) => u.id).filter(Boolean);
+      if (ids.length) {
+        const { data: dirRows, error: dirErr } = await supabase
+          .from('team_members')
+          .select('id,user_id,created_from_user_sync')
+          .in('user_id', ids);
+        if (dirErr) {
+          console.warn('AdminUsers - directory link lookup failed (run ADD_TEAM_MEMBERS_USER_ID.sql):', dirErr);
+          setDirectoryByUserId({});
+        } else {
+          const map: Record<string, { id: string; created_from_user_sync?: boolean | null }> = {};
+          (dirRows || []).forEach((r: any) => {
+            if (r.user_id) {
+              map[r.user_id] = { id: r.id, created_from_user_sync: r.created_from_user_sync };
+            }
+          });
+          setDirectoryByUserId(map);
+        }
+      } else {
+        setDirectoryByUserId({});
+      }
     } catch (error) {
       console.error('AdminUsers - Error fetching users:', error);
       setAllUsers([]);
       setPendingUsers([]);
       setPendingCount(0);
+      setDirectoryByUserId({});
     } finally {
       setIsLoadingUsers(false);
       console.log('AdminUsers - fetchUsers completed');
@@ -193,6 +222,10 @@ export const AdminUsers = () => {
     return formatRelativeDateInTimezone(dateString, userTimezone);
   };
 
+  const directoryNeedsReviewCount = useMemo(() => {
+    return allUsers.filter((u) => !directoryByUserId[u.id]).length;
+  }, [allUsers, directoryByUserId]);
+
   const filteredUsers = () => {
     switch (filter) {
       case 'pending':
@@ -263,6 +296,19 @@ export const AdminUsers = () => {
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {!isLoadingUsers && directoryNeedsReviewCount > 0 && (
+        <div className="rounded-[12px] border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
+          <p className="font-bold">
+            {directoryNeedsReviewCount} user{directoryNeedsReviewCount === 1 ? '' : 's'} not linked to Directory
+          </p>
+          <p className="text-amber-900 mt-1">
+            Roster and ministry permissions use the Directory (team members) record linked by{' '}
+            <code className="text-xs">user_id</code>. Use <span className="font-bold">Link Directory</span> on each user
+            to search and attach a directory person, or create a new one.
+          </p>
         </div>
       )}
 
@@ -355,6 +401,21 @@ export const AdminUsers = () => {
                             Member
                           </span>
                         )}
+                        {directoryByUserId[u.id] ? (
+                          directoryByUserId[u.id]?.created_from_user_sync ? (
+                            <span className="bg-sky-100 text-sky-800 text-xs px-2 py-1 rounded uppercase font-bold">
+                              Directory: auto-created
+                            </span>
+                          ) : (
+                            <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded uppercase font-bold">
+                              Directory: linked
+                            </span>
+                          )
+                        ) : (
+                          <span className="bg-amber-100 text-amber-900 text-xs px-2 py-1 rounded uppercase font-bold">
+                            Directory: needs review
+                          </span>
+                        )}
                         {u.is_approved ? (
                           <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded uppercase font-bold">
                             Approved
@@ -386,6 +447,14 @@ export const AdminUsers = () => {
                   </div>
                 </div>
                 <div className="flex gap-2 flex-wrap flex-shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setLinkModalUser(u)}
+                    className="bg-white border-2 border-amber-200 text-amber-900 px-4 py-2 rounded-[4px] font-bold hover:bg-amber-50 transition-colors shadow-sm text-sm"
+                    title="Link this website user to a Directory person"
+                  >
+                    Link Directory
+                  </button>
                   {/* Password reset */}
                   <button
                     onClick={() => handleSendPasswordReset(u.email)}
@@ -468,6 +537,15 @@ export const AdminUsers = () => {
         onClose={() => setIsCreateModalOpen(false)}
         onSuccess={() => {
           fetchUsers();
+        }}
+      />
+
+      <LinkDirectoryUserModal
+        isOpen={!!linkModalUser}
+        onClose={() => setLinkModalUser(null)}
+        targetUser={linkModalUser}
+        onSuccess={() => {
+          void fetchUsers();
         }}
       />
     </div>

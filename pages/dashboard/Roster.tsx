@@ -20,7 +20,7 @@ export const Roster = () => {
       setSelectedGroupId(null);
       setSelectedRosterId(null);
 
-      if (!user?.email) {
+      if (!user?.id) {
         setGroups([]);
         setRostersByGroup(new Map());
         setLeaderByGroup(new Map());
@@ -29,7 +29,7 @@ export const Roster = () => {
       }
 
       try {
-        // 1) Resolve this user's ministry (group) memberships from Directory
+        // 1) Resolve this user's ministry (group) memberships from Directory (linked by user_id)
         const { data: tm, error: tmErr } = await supabase
           .from('team_members')
           .select(
@@ -42,7 +42,7 @@ export const Roster = () => {
             )
           `
           )
-          .ilike('email', user.email)
+          .eq('user_id', user.id)
           .maybeSingle();
 
         if (tmErr) throw tmErr;
@@ -134,7 +134,7 @@ export const Roster = () => {
     };
 
     run();
-  }, [user?.email]);
+  }, [user?.id]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);

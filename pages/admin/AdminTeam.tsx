@@ -248,6 +248,17 @@ export const AdminTeam = () => {
     return `directory-people-${yyyy}-${mm}-${dd}`;
   }, []);
 
+  /** Normalized emails that appear on more than one directory row (data hygiene warning). */
+  const duplicateEmails = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const m of members) {
+      const e = (m.email || '').trim().toLowerCase();
+      if (!e) continue;
+      counts.set(e, (counts.get(e) || 0) + 1);
+    }
+    return new Set([...counts.entries()].filter(([, n]) => n > 1).map(([e]) => e));
+  }, [members]);
+
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -998,6 +1009,15 @@ export const AdminTeam = () => {
         </div>
       ) : (
         <div className="glass-card bg-white/80 border border-white/60 rounded-[12px] overflow-hidden">
+          {duplicateEmails.size > 0 && (
+            <div className="px-4 py-3 bg-amber-50 border-b border-amber-200 text-sm text-amber-900">
+              <p className="font-bold">Duplicate directory emails detected</p>
+              <p className="text-amber-800 mt-1">
+                Some people share the same email address. User ↔ Directory auto-link and roster permissions use
+                email matching — resolve duplicates in Directory so each login email maps to one person.
+              </p>
+            </div>
+          )}
           <div className="overflow-x-auto">
             <table className="min-w-[900px] w-full text-left">
               <thead className="bg-white/60 sticky top-0">
@@ -1015,15 +1035,33 @@ export const AdminTeam = () => {
               <tbody>
                 {sortedVisibleMembers.map((member, idx) => {
                   const pt = inferProfileType(member);
+                  const emailKey = (member.email || '').trim().toLowerCase();
+                  const dupEmail = !!emailKey && duplicateEmails.has(emailKey);
                   return (
                     <tr
                       key={member.id}
                       className={`border-b border-gray-100 hover:bg-gold/5 transition-colors ${
                         idx % 2 === 0 ? 'bg-white/40' : 'bg-white/20'
-                      }`}
+                      } ${dupEmail ? 'ring-1 ring-inset ring-amber-200' : ''}`}
                     >
                       <td className="px-4 py-3">
                         <div className="font-bold text-charcoal">{member.name}</div>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {member.user_id ? (
+                            <span className="text-[10px] font-bold uppercase tracking-wide text-green-800 bg-green-100 px-2 py-0.5 rounded">
+                              Linked account
+                            </span>
+                          ) : (
+                            <span className="text-[10px] font-bold uppercase tracking-wide text-neutral bg-gray-100 px-2 py-0.5 rounded">
+                              No account link
+                            </span>
+                          )}
+                          {dupEmail && (
+                            <span className="text-[10px] font-bold uppercase tracking-wide text-amber-900 bg-amber-100 px-2 py-0.5 rounded">
+                              Duplicate email
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-4 py-3 text-sm text-neutral">{member.email || '-'}</td>
                       <td className="px-4 py-3 text-sm text-neutral">{member.phone || '-'}</td>
