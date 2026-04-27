@@ -53,6 +53,7 @@ import { AdminTeam } from './pages/admin/AdminTeam';
 import { AdminEvents } from './pages/admin/AdminEvents';
 import { AdminRoster } from './pages/admin/AdminRoster';
 import { AdminPhotos } from './pages/admin/AdminPhotos';
+import { AdminSettings } from './pages/admin/AdminSettings';
 
 // Protected Route Component
 const ProtectedRoute = () => {
@@ -185,6 +186,7 @@ const AppRoutes = () => {
                 <Route path="events" element={<AdminEvents />} />
                 <Route path="roster" element={<AdminRoster />} />
                 <Route path="photos" element={<AdminPhotos />} />
+                <Route path="settings" element={<AdminSettings />} />
               </Route>
             </Route>
         </Routes>

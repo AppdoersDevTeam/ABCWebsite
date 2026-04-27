@@ -8,6 +8,8 @@ type ExportRow = {
   Email: string;
   Phone: string;
   Role: string;
+  Groups: string;
+  JobRoles: string;
   Status: string;
 };
 
@@ -23,6 +25,8 @@ function toRows(members: TeamMember[]): ExportRow[] {
     Email: m.email ?? '',
     Phone: m.phone ?? '',
     Role: getDisplayRole(m),
+    Groups: (m.groups || []).map((g) => g.name).filter(Boolean).join('; '),
+    JobRoles: (m.job_roles || []).map((r) => r.name).filter(Boolean).join('; '),
     Status: PROFILE_LABEL[inferProfileType(m)],
   }));
 }
@@ -48,7 +52,7 @@ function downloadBlob(filename: string, blob: Blob) {
 
 export function downloadDirectoryCsv(members: TeamMember[], filenameBase: string) {
   const rows = toRows(members);
-  const headers: (keyof ExportRow)[] = ['Name', 'Email', 'Phone', 'Role', 'Status'];
+  const headers: (keyof ExportRow)[] = ['Name', 'Email', 'Phone', 'Role', 'Groups', 'JobRoles', 'Status'];
 
   const lines = [
     headers.join(','),
@@ -68,8 +72,8 @@ export function downloadDirectoryPdf(members: TeamMember[], filenameBase: string
 
   autoTable(doc, {
     startY: 60,
-    head: [['Name', 'Email', 'Phone', 'Role', 'Status']],
-    body: rows.map((r) => [r.Name, r.Email, r.Phone, r.Role, r.Status]),
+    head: [['Name', 'Email', 'Phone', 'Role', 'Groups', 'Job Roles', 'Status']],
+    body: rows.map((r) => [r.Name, r.Email, r.Phone, r.Role, r.Groups, r.JobRoles, r.Status]),
     styles: { fontSize: 9, cellPadding: 6 },
     headStyles: { fillColor: [210, 167, 74] }, // gold-ish
     margin: { left: 40, right: 40 },

@@ -1,0 +1,20 @@
+{
+  "title": "[ABCWebsite] Events module: image upload, RSVP, categories, calendar & detail",
+  "comment": "## Summary\n\nI reviewed **T-1776244163265** against the **ABCWebsite** codebase and produced a delivery plan that treats this as **verify, close gaps, QA, and ship**.\n\n## Assessment\n\n- **Scope** is **P1** and spans: admin **event image upload**, **church logo** default banner, **RSVP** optional/required, **admin RSVP list** with **downloads**, **categories**, **audience** filters, public **calendar** cards with **See More**, and **event detail** with full fields and RSVP.\n- **Key finding:** Much of this is **already implemented** in `pages/admin/AdminEvents.tsx` (upload to Supabase storage, category select including Sunday Service / Members Meeting / Fast & Prayer Meeting, RSVP mode, audience select, RSVP modal with **CSV/PDF** export), `pages/public/Events.tsx` and `pages/dashboard/EventsPrivate.tsx` (thumbnail, date, **See More**), and `pages/public/EventDetail.tsx` (detail layout, RSVP to `event_rsvps`, logo fallback `DEFAULT_EVENT_BANNER`).\n- **Risks / gaps:** (1) **Audience = Attendees** — confirm access rules in `EventDetail` match product intent (logic may need completion vs Staff/Members). (2) **Rex** must confirm **Supabase** migrations and **RLS**/storage policies are applied where the app references SQL helper files.\n\n## Routing\n\n- After Sara approves: start with **Dev** to reconcile the ticket checklist with production-ready behavior, then **Quinn** → **Ray**; **Rex** on infra; **Sage** optional for event-page SEO.\n\n## Conclusion\n\n**newStatus:** `awaiting_approval` — no build execution until **Sara** approves in the UI.",
+  "newStatus": "awaiting_approval",
+  "assignTo": "developer",
+  "needsClarification": false,
+  "clarificationQuestion": null,
+  "clarificationForm": null,
+  "plan": "Phase 1 — Build & reconcile (Dev): Walk the ticket against code — **event image upload** on admin create/edit; **church logo** (`/ABC Logo.png`) when **no image**; **RSVP toggle** (`rsvp_mode` optional/required); **admin RSVP list** with **count** and **downloadable** exports; **event categories** (Sunday Service, Members Meeting, Fast & Prayer Meeting, etc.); **audience** Staff / Members / Attendees / All — fix any incomplete access rules; **calendar** listing with **thumbnail**, **date**, **title**, **See More**; **detail page** with **full photo**, **date**, **time**, **location**, **description**, **RSVP**. Align `types`/queries with Supabase. → Phase 2 — QA (Quinn): Upload edge cases, fallback imagery, RSVP duplicate/error paths, export files, filters + public vs private events, responsive calendar/detail. → Phase 3 — Review (Ray): Code review and approval. → Phase 4 — DevOps (Rex): Migrations, storage bucket, RLS, deploy. Optional — SEO (Sage): meta/structured data for event routes.",
+  "actionItems": [
+    "Add event image upload field to event creation form (admin)",
+    "If no image uploaded → auto-insert church logo as default banner",
+    "Add RSVP toggle per event (admin: required or optional)",
+    "Admin can view RSVP list (how many / who RSVPed) — downloadable",
+    "Add event categories: Sunday Service, Members Meeting, Fast & Prayer Meeting, etc.",
+    "Add audience filter per event: Staff / Members / Attendees / All",
+    "Calendar view: show thumbnail, date, title, and 'See More' button",
+    "Event detail: full photo, date, time, location, description, RSVP button"
+  ]
+}

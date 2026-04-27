@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { Modal } from '../../components/UI/Modal';
 import { CalendarDays, Edit, Trash2, User, Upload, X, UserPlus, Download } from 'lucide-react';
-import { TeamMember } from '../../types';
+import type { Group, JobRole, TeamMember } from '../../types';
 import { supabase } from '../../lib/supabase';
 import { SkeletonPageHeader } from '../../components/UI/Skeleton';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
@@ -38,6 +38,8 @@ const emptyForm = (): FormState => ({
   phone: '',
   img: '',
   description: '',
+  group_ids: [],
+  job_role_ids: [],
   is_baptised: null,
   baptism_date: '',
   membership_start_date: '',
@@ -52,6 +54,8 @@ interface FormState {
   phone: string;
   img: string;
   description: string;
+  group_ids: string[];
+  job_role_ids: string[];
   is_baptised: boolean | null;
   baptism_date: string;
   membership_start_date: string;
@@ -68,6 +72,8 @@ function memberToForm(m: TeamMember): FormState {
     phone: m.phone || '',
     img: m.img || '',
     description: m.description || '',
+    group_ids: (m.groups || []).map((g) => g.id),
+    job_role_ids: (m.job_roles || []).map((r) => r.id),
     is_baptised: m.is_baptised ?? null,
     baptism_date: m.baptism_date ? String(m.baptism_date).slice(0, 10) : '',
     membership_start_date: m.membership_start_date ? String(m.membership_start_date).slice(0, 10) : '',
@@ -78,6 +84,8 @@ function memberToForm(m: TeamMember): FormState {
 export const AdminTeam = () => {
   const [members, setMembers] = useState<TeamMember[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [groups, setGroups] = useState<Group[]>([]);
+  const [jobRoles, setJobRoles] = useState<JobRole[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
   const [formData, setFormData] = useState<FormState>(emptyForm);
@@ -86,13 +94,31 @@ export const AdminTeam = () => {
     member: true,
     attendee: true,
   });
+  const [selectedGroupIds, setSelectedGroupIds] = useState<Record<string, boolean>>({});
+  const [selectedJobRoleIds, setSelectedJobRoleIds] = useState<Record<string, boolean>>({});
 
   const filteredMembers = useMemo(() => {
     return members.filter((m) => {
       const pt = inferProfileType(m);
-      return selectedProfileTypes[pt];
+      if (!selectedProfileTypes[pt]) return false;
+
+      const anyGroupSelected = Object.values(selectedGroupIds).some(Boolean);
+      if (anyGroupSelected) {
+        const memberGroupIds = new Set((m.groups || []).map((g) => g.id));
+        const ok = Object.entries(selectedGroupIds).some(([id, on]) => on && memberGroupIds.has(id));
+        if (!ok) return false;
+      }
+
+      const anyRoleSelected = Object.values(selectedJobRoleIds).some(Boolean);
+      if (anyRoleSelected) {
+        const memberRoleIds = new Set((m.job_roles || []).map((r) => r.id));
+        const ok = Object.entries(selectedJobRoleIds).some(([id, on]) => on && memberRoleIds.has(id));
+        if (!ok) return false;
+      }
+
+      return true;
     });
-  }, [members, selectedProfileTypes]);
+  }, [members, selectedProfileTypes, selectedGroupIds, selectedJobRoleIds]);
 
   const filenameBase = useMemo(() => {
     const d = new Date();
@@ -115,17 +141,64 @@ export const AdminTeam = () => {
 
   useEffect(() => {
     fetchMembers();
+    fetchLookups();
   }, []);
+
+  const fetchLookups = async () => {
+    try {
+      const [{ data: g, error: gErr }, { data: r, error: rErr }] = await Promise.all([
+        supabase.from('groups').select('*').order('sort_order', { ascending: true }).order('name', { ascending: true }),
+        supabase.from('job_roles').select('*').order('sort_order', { ascending: true }).order('name', { ascending: true }),
+      ]);
+      if (gErr) throw gErr;
+      if (rErr) throw rErr;
+      setGroups((g || []) as Group[]);
+      setJobRoles((r || []) as JobRole[]);
+    } catch (e) {
+      console.warn('Groups/job roles not loaded (SQL may not be applied yet).', e);
+      setGroups([]);
+      setJobRoles([]);
+    }
+  };
 
   const fetchMembers = async () => {
     try {
       const { data, error } = await supabase
         .from('team_members')
-        .select('*')
+        .select(
+          `
+          *,
+          team_member_groups:team_member_groups(
+            group_id,
+            groups:groups(id, name, slug, sort_order, is_active)
+          ),
+          team_member_job_roles:team_member_job_roles(
+            job_role_id,
+            job_roles:job_roles(id, name, slug, sort_order, is_active)
+          )
+        `
+        )
         .order('name', { ascending: true });
 
       if (error) throw error;
-      setMembers(data || []);
+      const withJoins = (data || []).map((row: any) => {
+        const groupsArr: Group[] =
+          (row.team_member_groups || [])
+            .map((x: any) => x.groups)
+            .filter(Boolean) || [];
+        const rolesArr: JobRole[] =
+          (row.team_member_job_roles || [])
+            .map((x: any) => x.job_roles)
+            .filter(Boolean) || [];
+
+        const member: TeamMember = {
+          ...(row as TeamMember),
+          groups: groupsArr,
+          job_roles: rolesArr,
+        };
+        return member;
+      });
+      setMembers(withJoins);
     } catch (error) {
       console.error('Error fetching team members:', error);
       alert('Failed to load team members');
@@ -176,6 +249,22 @@ export const AdminTeam = () => {
   const resetModal = () => {
     handleRemoveFile();
     setFormData(emptyForm());
+  };
+
+  const syncMemberGroups = async (teamMemberId: string, groupIds: string[]) => {
+    await supabase.from('team_member_groups').delete().eq('team_member_id', teamMemberId);
+    if (groupIds.length === 0) return;
+    const rows = groupIds.map((group_id) => ({ team_member_id: teamMemberId, group_id }));
+    const { error } = await supabase.from('team_member_groups').insert(rows);
+    if (error) throw error;
+  };
+
+  const syncMemberJobRoles = async (teamMemberId: string, jobRoleIds: string[]) => {
+    await supabase.from('team_member_job_roles').delete().eq('team_member_id', teamMemberId);
+    if (jobRoleIds.length === 0) return;
+    const rows = jobRoleIds.map((job_role_id) => ({ team_member_id: teamMemberId, job_role_id }));
+    const { error } = await supabase.from('team_member_job_roles').insert(rows);
+    if (error) throw error;
   };
 
   const validate = (trimmed: {
@@ -344,7 +433,20 @@ export const AdminTeam = () => {
 
       if (error) throw error;
 
-      setMembers([...members, data as TeamMember]);
+      const created = data as TeamMember;
+
+      // Attendees stay as-is: no groups/job roles
+      const desiredGroupIds = trimmed.profile_type === 'attendee' ? [] : formData.group_ids;
+      const desiredJobRoleIds = trimmed.profile_type === 'attendee' ? [] : formData.job_role_ids;
+
+      try {
+        await syncMemberGroups(created.id, desiredGroupIds);
+        await syncMemberJobRoles(created.id, desiredJobRoleIds);
+      } catch (joinErr) {
+        console.warn('Join-table save failed (run ADD_GROUPS_AND_JOB_ROLES.sql in Supabase).', joinErr);
+      }
+
+      await fetchMembers();
       resetModal();
       setIsModalOpen(false);
     } catch (error: unknown) {
@@ -410,6 +512,16 @@ export const AdminTeam = () => {
 
       if (error) throw error;
 
+      const desiredGroupIds = trimmed.profile_type === 'attendee' ? [] : formData.group_ids;
+      const desiredJobRoleIds = trimmed.profile_type === 'attendee' ? [] : formData.job_role_ids;
+
+      try {
+        await syncMemberGroups(editingMember.id, desiredGroupIds);
+        await syncMemberJobRoles(editingMember.id, desiredJobRoleIds);
+      } catch (joinErr) {
+        console.warn('Join-table save failed (run ADD_GROUPS_AND_JOB_ROLES.sql in Supabase).', joinErr);
+      }
+
       await fetchMembers();
       resetModal();
       setEditingMember(null);
@@ -455,6 +567,8 @@ export const AdminTeam = () => {
       profile_type,
       has_membership_chip: profile_type === 'member' ? prev.has_membership_chip : false,
       membership_start_date: profile_type === 'attendee' ? '' : prev.membership_start_date,
+      group_ids: profile_type === 'attendee' ? [] : prev.group_ids,
+      job_role_ids: profile_type === 'attendee' ? [] : prev.job_role_ids,
     }));
   };
 
@@ -547,6 +661,72 @@ export const AdminTeam = () => {
         </p>
       </div>
 
+      {(groups.length > 0 || jobRoles.length > 0) && (
+        <div className="glass-card bg-white/80 border border-white/60 rounded-[12px] p-4 space-y-4">
+          {groups.length > 0 && (
+            <div>
+              <p className="text-sm font-bold text-charcoal mb-3">Filter by groups</p>
+              <div className="flex flex-wrap gap-2">
+                {groups
+                  .filter((g) => g.is_active !== false)
+                  .map((g) => {
+                    const checked = !!selectedGroupIds[g.id];
+                    return (
+                      <label key={g.id} className="cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className="sr-only peer"
+                          checked={checked}
+                          onChange={() =>
+                            setSelectedGroupIds((prev) => ({
+                              ...prev,
+                              [g.id]: !prev[g.id],
+                            }))
+                          }
+                        />
+                        <span className="inline-flex items-center px-3 py-2 rounded-[6px] border border-gray-200 bg-white text-sm font-bold text-neutral peer-checked:border-gold peer-checked:bg-gold/10 peer-checked:text-charcoal transition-colors">
+                          {g.name}
+                        </span>
+                      </label>
+                    );
+                  })}
+              </div>
+            </div>
+          )}
+
+          {jobRoles.length > 0 && (
+            <div>
+              <p className="text-sm font-bold text-charcoal mb-3">Filter by job roles</p>
+              <div className="flex flex-wrap gap-2">
+                {jobRoles
+                  .filter((r) => r.is_active !== false)
+                  .map((r) => {
+                    const checked = !!selectedJobRoleIds[r.id];
+                    return (
+                      <label key={r.id} className="cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className="sr-only peer"
+                          checked={checked}
+                          onChange={() =>
+                            setSelectedJobRoleIds((prev) => ({
+                              ...prev,
+                              [r.id]: !prev[r.id],
+                            }))
+                          }
+                        />
+                        <span className="inline-flex items-center px-3 py-2 rounded-[6px] border border-gray-200 bg-white text-sm font-bold text-neutral peer-checked:border-gold peer-checked:bg-gold/10 peer-checked:text-charcoal transition-colors">
+                          {r.name}
+                        </span>
+                      </label>
+                    );
+                  })}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {members.length === 0 ? (
         <div className="text-center py-12 glass-card bg-white/80 border border-white/60 rounded-[12px]">
           <p className="text-neutral">No team members yet. Add your first team member to get started.</p>
@@ -565,6 +745,8 @@ export const AdminTeam = () => {
                   <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-neutral">Email</th>
                   <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-neutral">Phone</th>
                   <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-neutral">Role</th>
+                  <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-neutral">Groups</th>
+                  <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-neutral">Job Roles</th>
                   <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-neutral">Status</th>
                   <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-neutral w-[140px]">Actions</th>
                 </tr>
@@ -585,6 +767,12 @@ export const AdminTeam = () => {
                       <td className="px-4 py-3 text-sm text-neutral">{member.email || '-'}</td>
                       <td className="px-4 py-3 text-sm text-neutral">{member.phone || '-'}</td>
                       <td className="px-4 py-3 text-sm text-charcoal font-bold">{getDisplayRole(member)}</td>
+                      <td className="px-4 py-3 text-sm text-neutral">
+                        {(member.groups || []).map((g) => g.name).filter(Boolean).join(', ') || '-'}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-neutral">
+                        {(member.job_roles || []).map((r) => r.name).filter(Boolean).join(', ') || '-'}
+                      </td>
                       <td className="px-4 py-3">
                         <span className="inline-flex items-center px-2 py-1 rounded-full bg-gold/10 text-gold text-[11px] font-bold uppercase tracking-wider">
                           {PROFILE_LABEL[pt]}
@@ -674,6 +862,76 @@ export const AdminTeam = () => {
               </select>
               {formData.profile_type === 'member' && (
                 <p className="text-xs text-neutral mt-1">Hidden for attendees.</p>
+              )}
+            </div>
+          )}
+
+          {formData.profile_type !== 'attendee' && (groups.length > 0 || jobRoles.length > 0) && (
+            <div className="rounded-[8px] border border-gray-200 bg-white/70 p-4 space-y-4">
+              {groups.length > 0 && (
+                <div>
+                  <label className="block text-sm font-bold text-charcoal mb-2">Groups (optional)</label>
+                  <div className="flex flex-wrap gap-2">
+                    {groups
+                      .filter((g) => g.is_active !== false)
+                      .map((g) => {
+                        const checked = formData.group_ids.includes(g.id);
+                        return (
+                          <label key={g.id} className="cursor-pointer">
+                            <input
+                              type="checkbox"
+                              className="sr-only peer"
+                              checked={checked}
+                              onChange={() =>
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  group_ids: checked
+                                    ? prev.group_ids.filter((id) => id !== g.id)
+                                    : [...prev.group_ids, g.id],
+                                }))
+                              }
+                            />
+                            <span className="inline-flex items-center px-3 py-2 rounded-[6px] border border-gray-200 bg-white text-sm font-bold text-neutral peer-checked:border-gold peer-checked:bg-gold/10 peer-checked:text-charcoal transition-colors">
+                              {g.name}
+                            </span>
+                          </label>
+                        );
+                      })}
+                  </div>
+                </div>
+              )}
+
+              {jobRoles.length > 0 && (
+                <div>
+                  <label className="block text-sm font-bold text-charcoal mb-2">Job roles (optional)</label>
+                  <div className="flex flex-wrap gap-2">
+                    {jobRoles
+                      .filter((r) => r.is_active !== false)
+                      .map((r) => {
+                        const checked = formData.job_role_ids.includes(r.id);
+                        return (
+                          <label key={r.id} className="cursor-pointer">
+                            <input
+                              type="checkbox"
+                              className="sr-only peer"
+                              checked={checked}
+                              onChange={() =>
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  job_role_ids: checked
+                                    ? prev.job_role_ids.filter((id) => id !== r.id)
+                                    : [...prev.job_role_ids, r.id],
+                                }))
+                              }
+                            />
+                            <span className="inline-flex items-center px-3 py-2 rounded-[6px] border border-gray-200 bg-white text-sm font-bold text-neutral peer-checked:border-gold peer-checked:bg-gold/10 peer-checked:text-charcoal transition-colors">
+                              {r.name}
+                            </span>
+                          </label>
+                        );
+                      })}
+                  </div>
+                </div>
               )}
             </div>
           )}

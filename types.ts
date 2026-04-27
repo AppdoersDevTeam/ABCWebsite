@@ -118,10 +118,34 @@ export interface TeamMember {
   profile_type?: 'staff' | 'attendee' | 'member';
   /** Job title when profile_type is staff */
   staff_role?: string | null;
+  /** Group tags (ministries, teams, etc). Populated via join table in admin directory. */
+  groups?: Group[];
+  /** Job roles/titles (can be many). Populated via join table in admin directory. */
+  job_roles?: JobRole[];
   is_baptised?: boolean | null;
   baptism_date?: string | null;
   membership_start_date?: string | null;
   has_membership_chip?: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface Group {
+  id: string;
+  name: string;
+  slug?: string | null;
+  sort_order?: number | null;
+  is_active?: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface JobRole {
+  id: string;
+  name: string;
+  slug?: string | null;
+  sort_order?: number | null;
+  is_active?: boolean;
   created_at?: string;
   updated_at?: string;
 }
