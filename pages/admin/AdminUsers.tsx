@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { Users, UserCheck, X, Shield, ShieldOff, Ban, Plus, Crown, KeyRound, AlertTriangle } from 'lucide-react';
+import { Users, UserCheck, X, Shield, ShieldOff, Ban, Crown, KeyRound, AlertTriangle } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { displayName, displayInitial } from '../../lib/constants';
 import { User } from '../../types';
@@ -17,7 +17,6 @@ export const AdminUsers = () => {
   const [pendingUsers, setPendingUsers] = useState<User[]>([]);
   const [pendingCount, setPendingCount] = useState(0);
   const [isLoadingUsers, setIsLoadingUsers] = useState(true);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'admins'>('all');
   const [directoryByUserId, setDirectoryByUserId] = useState<
     Record<string, { id: string; created_from_user_sync?: boolean | null }>
@@ -334,10 +333,6 @@ export const AdminUsers = () => {
             >
               {isRelinking ? 'Checking…' : 'Check Directory Links'}
             </GlowingButton>
-            <GlowingButton size="sm" fullWidth className="md:w-auto" onClick={() => setIsCreateModalOpen(true)}>
-              <Plus size={16} className="mr-2" />
-              Create user profile
-            </GlowingButton>
           </div>
         }
       />
@@ -388,16 +383,16 @@ export const AdminUsers = () => {
       )}
 
       {!isLoadingUsers && directoryNeedsReviewCount > 0 && (
-        <div className="rounded-[12px] border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950 shadow-sm">
+        <div className="rounded-[12px] border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-950 shadow-sm">
           <div className="flex items-start gap-3">
-            <div className="mt-0.5 text-amber-700">
+            <div className="mt-0.5 text-red-700">
               <AlertTriangle size={18} />
             </div>
             <div className="flex-1">
               <p className="font-bold">
                 {directoryNeedsReviewCount} user{directoryNeedsReviewCount === 1 ? '' : 's'} not linked to Directory
               </p>
-              <p className="text-amber-900 mt-1">
+              <p className="text-red-900 mt-1">
                 Users need a linked Directory person to inherit ministry/group permissions (rosters). If they shouldn’t have one, you can ignore this. Otherwise click{' '}
                 <span className="font-bold">Link Directory</span>.
               </p>
@@ -467,7 +462,11 @@ export const AdminUsers = () => {
           {filteredUsers().map((u) => (
             <div
               key={u.id}
-              className="glass-card bg-white/80 border border-white/60 p-6 rounded-[12px] hover:border-gold transition-all shadow-sm"
+              className={`glass-card border p-6 rounded-[12px] transition-all shadow-sm ${
+                directoryByUserId[u.id]
+                  ? 'bg-white/80 border-white/60 hover:border-gold'
+                  : 'bg-red-50/70 border-red-200 hover:border-red-300'
+              }`}
             >
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div className="flex-1">
@@ -491,11 +490,11 @@ export const AdminUsers = () => {
                           </span>
                         )}
                         {directoryByUserId[u.id] ? (
-                          <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded uppercase font-bold">
+                          <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded font-bold">
                             Directory linked
                           </span>
                         ) : (
-                          <span className="bg-amber-100 text-amber-900 text-xs px-2 py-1 rounded uppercase font-bold inline-flex items-center gap-1 border border-amber-200">
+                          <span className="bg-red-100 text-red-800 text-xs px-2 py-1 rounded font-bold inline-flex items-center gap-1 border border-red-200">
                             <AlertTriangle size={12} />
                             Directory not linked
                           </span>
@@ -534,7 +533,7 @@ export const AdminUsers = () => {
                   <button
                     type="button"
                     onClick={() => setLinkModalUser(u)}
-                    className="bg-white border-2 border-amber-200 text-amber-900 px-4 py-2 rounded-[4px] font-bold hover:bg-amber-50 transition-colors shadow-sm text-sm"
+                    className="bg-blue-100 border-2 border-blue-300 text-blue-700 px-4 py-2 rounded-[4px] font-bold hover:bg-blue-200 transition-colors shadow-sm text-sm"
                     title="Link this website user to a Directory person"
                   >
                     Link Directory
@@ -542,7 +541,7 @@ export const AdminUsers = () => {
                   {/* Password reset */}
                   <button
                     onClick={() => handleSendPasswordReset(u.email)}
-                    className="bg-white border-2 border-gray-200 text-neutral px-4 py-2 rounded-[4px] font-bold hover:bg-gray-50 hover:text-charcoal transition-colors shadow-sm flex items-center gap-2 text-sm"
+                    className="bg-white border-2 border-gray-200 text-charcoal px-4 py-2 rounded-[4px] font-bold hover:border-gold hover:text-gold transition-colors shadow-sm flex items-center gap-2 text-sm"
                     title="Send a password reset email"
                   >
                     <KeyRound size={16} />
@@ -614,15 +613,6 @@ export const AdminUsers = () => {
           ))}
         </div>
       )}
-
-      {/* Create User Profile Modal */}
-      <CreateUserProfile
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        onSuccess={() => {
-          fetchUsers();
-        }}
-      />
 
       <LinkDirectoryUserModal
         isOpen={!!linkModalUser}

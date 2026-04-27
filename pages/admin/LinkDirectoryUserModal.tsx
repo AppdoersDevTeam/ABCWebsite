@@ -43,6 +43,21 @@ export const LinkDirectoryUserModal: React.FC<LinkDirectoryUserModalProps> = ({
     }
   }, [isOpen]);
 
+  // Preload suggested matches (email) so the list isn't empty.
+  useEffect(() => {
+    if (!isOpen || !targetUser?.email) return;
+    const email = (targetUser.email || '').trim();
+    if (!email) return;
+    setQ(email);
+    // Run once per open.
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    (async () => {
+      await new Promise((r) => setTimeout(r, 0));
+      await search();
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, targetUser?.id]);
+
   const search = async () => {
     const term = q.trim();
     if (!term) {
@@ -133,8 +148,8 @@ export const LinkDirectoryUserModal: React.FC<LinkDirectoryUserModalProps> = ({
     <Modal isOpen={isOpen} onClose={onClose} title={`Link to Directory — ${displayName(targetUser)}`}>
       <div className="space-y-4">
         <p className="text-sm text-neutral">
-          Search for an existing directory person (unlinked or linked). Linking sets <code className="text-xs">user_id</code>{' '}
-          so ministry groups and rosters apply to this login.
+          Search for an existing directory person (unlinked or linked). Linking connects this login to that directory
+          record so ministry groups and rosters apply.
         </p>
 
         <div className="flex gap-2 flex-wrap">
@@ -158,7 +173,7 @@ export const LinkDirectoryUserModal: React.FC<LinkDirectoryUserModalProps> = ({
 
         <div className="max-h-56 overflow-y-auto border border-gray-100 rounded-[6px] divide-y divide-gray-100">
           {rows.length === 0 ? (
-            <p className="p-4 text-sm text-neutral">No results yet. Search above.</p>
+            <p className="p-4 text-sm text-neutral">No results yet. Search by name, email, or phone.</p>
           ) : (
             rows.map((r) => (
               <label
