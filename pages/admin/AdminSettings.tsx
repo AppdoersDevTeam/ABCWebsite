@@ -114,10 +114,23 @@ export const AdminSettings = () => {
     if (!name) return;
     try {
       const payload = { name, slug: slugify(name), is_active: true };
-      const { data, error } = await supabase.from('event_categories').insert([payload]).select('*').single();
+      // If the slug already exists (often from seeded defaults), "reactivate" instead of failing.
+      const { data, error } = await supabase
+        .from('event_categories')
+        .upsert([payload], { onConflict: 'slug' })
+        .select('*')
+        .single();
       if (error) throw error;
-      setEventCategories((prev) => [...prev, data as EventCategory]);
-      setSavedEventCategories((prev) => [...prev, data as EventCategory]);
+      setEventCategories((prev) => {
+        const next = data as EventCategory;
+        const exists = prev.some((x) => x.id === next.id);
+        return exists ? prev.map((x) => (x.id === next.id ? next : x)) : [...prev, next];
+      });
+      setSavedEventCategories((prev) => {
+        const next = data as EventCategory;
+        const exists = prev.some((x) => x.id === next.id);
+        return exists ? prev.map((x) => (x.id === next.id ? next : x)) : [...prev, next];
+      });
       setNewCategoryName('');
     } catch (e) {
       console.error('Create event category failed', e);

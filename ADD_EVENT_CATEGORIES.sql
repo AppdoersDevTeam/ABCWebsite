@@ -16,6 +16,14 @@ create table if not exists public.event_categories (
 create unique index if not exists event_categories_name_key on public.event_categories (lower(name));
 create unique index if not exists event_categories_slug_key on public.event_categories (slug);
 
+-- RLS (admin-only management)
+alter table public.event_categories enable row level security;
+drop policy if exists "Admins can manage event categories" on public.event_categories;
+create policy "Admins can manage event categories" on public.event_categories
+  for all
+  using (public.is_admin_user(auth.uid()))
+  with check (public.is_admin_user(auth.uid()));
+
 -- Seed initial set (idempotent)
 insert into public.event_categories (name, slug, sort_order, is_active)
 values
