@@ -332,11 +332,11 @@ export const AdminUsers = () => {
               onClick={() => void recheckDirectoryLinks()}
               disabled={isRelinking || isLoadingUsers}
             >
-              {isRelinking ? 'Re-checking…' : 'Re-check Directory Links'}
+              {isRelinking ? 'Checking…' : 'Check Directory Links'}
             </GlowingButton>
             <GlowingButton size="sm" fullWidth className="md:w-auto" onClick={() => setIsCreateModalOpen(true)}>
               <Plus size={16} className="mr-2" />
-              Create User Profile
+              Create user profile
             </GlowingButton>
           </div>
         }
@@ -388,18 +388,18 @@ export const AdminUsers = () => {
       )}
 
       {!isLoadingUsers && directoryNeedsReviewCount > 0 && (
-        <div className="rounded-[12px] border-2 border-red-300 bg-red-50 px-4 py-3 text-sm text-red-950 shadow-sm">
+        <div className="rounded-[12px] border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950 shadow-sm">
           <div className="flex items-start gap-3">
-            <div className="mt-0.5 text-red-700">
+            <div className="mt-0.5 text-amber-700">
               <AlertTriangle size={18} />
             </div>
             <div className="flex-1">
-              <p className="font-extrabold uppercase tracking-wider">
-                Action needed: {directoryNeedsReviewCount} user{directoryNeedsReviewCount === 1 ? '' : 's'} not linked to Directory
+              <p className="font-bold">
+                {directoryNeedsReviewCount} user{directoryNeedsReviewCount === 1 ? '' : 's'} not linked to Directory
               </p>
-              <p className="text-red-900 mt-1">
-                Only users linked to a Directory person will inherit ministry/groups permissions (rosters). If a user shouldn’t have a directory record, that’s fine — just ignore it.
-                Otherwise click <span className="font-bold">Link Directory</span> on the user row.
+              <p className="text-amber-900 mt-1">
+                Users need a linked Directory person to inherit ministry/group permissions (rosters). If they shouldn’t have one, you can ignore this. Otherwise click{' '}
+                <span className="font-bold">Link Directory</span>.
               </p>
             </div>
           </div>
@@ -495,7 +495,7 @@ export const AdminUsers = () => {
                             Directory linked
                           </span>
                         ) : (
-                          <span className="bg-red-100 text-red-800 text-xs px-2 py-1 rounded uppercase font-extrabold inline-flex items-center gap-1 border border-red-200">
+                          <span className="bg-amber-100 text-amber-900 text-xs px-2 py-1 rounded uppercase font-bold inline-flex items-center gap-1 border border-amber-200">
                             <AlertTriangle size={12} />
                             Directory not linked
                           </span>
