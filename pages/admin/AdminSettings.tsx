@@ -1,8 +1,9 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Settings, Tag, Briefcase, Plus, Save, Trash2 } from 'lucide-react';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { supabase } from '../../lib/supabase';
 import type { Group, JobRole } from '../../types';
+import { useBlocker } from 'react-router-dom';
 
 type Tab = 'groups' | 'job_roles';
 
@@ -20,6 +21,9 @@ export const AdminSettings = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [groups, setGroups] = useState<Group[]>([]);
   const [jobRoles, setJobRoles] = useState<JobRole[]>([]);
+  const [savedGroups, setSavedGroups] = useState<Group[]>([]);
+  const [savedJobRoles, setSavedJobRoles] = useState<JobRole[]>([]);
+  const isDiscardingRef = useRef(false);
 
   const [newGroupName, setNewGroupName] = useState('');
   const [newJobRoleName, setNewJobRoleName] = useState('');
@@ -37,8 +41,12 @@ export const AdminSettings = () => {
       ]);
       if (gErr) throw gErr;
       if (rErr) throw rErr;
-      setGroups((g || []) as Group[]);
-      setJobRoles((r || []) as JobRole[]);
+      const gg = (g || []) as Group[];
+      const rr = (r || []) as JobRole[];
+      setGroups(gg);
+      setJobRoles(rr);
+      setSavedGroups(gg);
+      setSavedJobRoles(rr);
     } catch (e) {
       console.error('Failed to load settings lists', e);
       alert('Failed to load Groups / Job Roles. Make sure ADD_GROUPS_AND_JOB_ROLES.sql has been run in Supabase.');
@@ -58,6 +66,7 @@ export const AdminSettings = () => {
       const { data, error } = await supabase.from('groups').insert([payload]).select('*').single();
       if (error) throw error;
       setGroups((prev) => [...prev, data as Group]);
+      setSavedGroups((prev) => [...prev, data as Group]);
       setNewGroupName('');
     } catch (e) {
       console.error('Create group failed', e);
@@ -73,6 +82,7 @@ export const AdminSettings = () => {
       const { data, error } = await supabase.from('job_roles').insert([payload]).select('*').single();
       if (error) throw error;
       setJobRoles((prev) => [...prev, data as JobRole]);
+      setSavedJobRoles((prev) => [...prev, data as JobRole]);
       setNewJobRoleName('');
     } catch (e) {
       console.error('Create job role failed', e);
@@ -80,24 +90,32 @@ export const AdminSettings = () => {
     }
   };
 
-  const updateGroup = async (id: string, patch: Partial<Group>) => {
+  const saveGroup = async (id: string) => {
+    const g = groups.find((x) => x.id === id);
+    if (!g) return;
     try {
-      const { error } = await supabase.from('groups').update(patch).eq('id', id);
+      const payload: Partial<Group> = { name: g.name?.trim() || '', slug: slugify(g.name || ''), is_active: g.is_active !== false };
+      const { error } = await supabase.from('groups').update(payload).eq('id', id);
       if (error) throw error;
-      setGroups((prev) => prev.map((g) => (g.id === id ? { ...g, ...patch } : g)));
+      setGroups((prev) => prev.map((x) => (x.id === id ? { ...x, ...payload } : x)));
+      setSavedGroups((prev) => prev.map((x) => (x.id === id ? { ...x, ...payload } : x)));
     } catch (e) {
-      console.error('Update group failed', e);
+      console.error('Save group failed', e);
       alert('Failed to update group.');
     }
   };
 
-  const updateJobRole = async (id: string, patch: Partial<JobRole>) => {
+  const saveJobRole = async (id: string) => {
+    const r = jobRoles.find((x) => x.id === id);
+    if (!r) return;
     try {
-      const { error } = await supabase.from('job_roles').update(patch).eq('id', id);
+      const payload: Partial<JobRole> = { name: r.name?.trim() || '', slug: slugify(r.name || ''), is_active: r.is_active !== false };
+      const { error } = await supabase.from('job_roles').update(payload).eq('id', id);
       if (error) throw error;
-      setJobRoles((prev) => prev.map((r) => (r.id === id ? { ...r, ...patch } : r)));
+      setJobRoles((prev) => prev.map((x) => (x.id === id ? { ...x, ...payload } : x)));
+      setSavedJobRoles((prev) => prev.map((x) => (x.id === id ? { ...x, ...payload } : x)));
     } catch (e) {
-      console.error('Update job role failed', e);
+      console.error('Save job role failed', e);
       alert('Failed to update job role.');
     }
   };
@@ -108,6 +126,7 @@ export const AdminSettings = () => {
       const { error } = await supabase.from('groups').delete().eq('id', id);
       if (error) throw error;
       setGroups((prev) => prev.filter((g) => g.id !== id));
+      setSavedGroups((prev) => prev.filter((g) => g.id !== id));
     } catch (e) {
       console.error('Delete group failed', e);
       alert('Delete failed (it may be in use). Try disabling it instead.');
@@ -120,11 +139,61 @@ export const AdminSettings = () => {
       const { error } = await supabase.from('job_roles').delete().eq('id', id);
       if (error) throw error;
       setJobRoles((prev) => prev.filter((r) => r.id !== id));
+      setSavedJobRoles((prev) => prev.filter((r) => r.id !== id));
     } catch (e) {
       console.error('Delete job role failed', e);
       alert('Delete failed (it may be in use). Try disabling it instead.');
     }
   };
+
+  const hasUnsavedChanges = useMemo(() => {
+    const norm = (xs: Array<Group | JobRole>) =>
+      xs
+        .map((x) => ({
+          id: x.id,
+          name: (x.name || '').trim(),
+          is_active: (x as any).is_active !== false,
+        }))
+        .sort((a, b) => a.id.localeCompare(b.id));
+    return (
+      JSON.stringify(norm(groups)) !== JSON.stringify(norm(savedGroups)) ||
+      JSON.stringify(norm(jobRoles)) !== JSON.stringify(norm(savedJobRoles))
+    );
+  }, [groups, jobRoles, savedGroups, savedJobRoles]);
+
+  const discardChanges = () => {
+    isDiscardingRef.current = true;
+    setGroups(savedGroups);
+    setJobRoles(savedJobRoles);
+    // allow state to settle before we consider blocking again
+    setTimeout(() => {
+      isDiscardingRef.current = false;
+    }, 0);
+  };
+
+  // Warn on browser tab close/refresh
+  useEffect(() => {
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (!hasUnsavedChanges) return;
+      e.preventDefault();
+      e.returnValue = '';
+    };
+    window.addEventListener('beforeunload', onBeforeUnload);
+    return () => window.removeEventListener('beforeunload', onBeforeUnload);
+  }, [hasUnsavedChanges]);
+
+  // Block in-app navigation (discarding changes if user chooses to leave)
+  const blocker = useBlocker(hasUnsavedChanges && !isDiscardingRef.current);
+  useEffect(() => {
+    if (blocker.state !== 'blocked') return;
+    const leave = window.confirm('You have unsaved changes. Leave without saving? Your changes will be discarded.');
+    if (leave) {
+      discardChanges();
+      blocker.proceed?.();
+    } else {
+      blocker.reset?.();
+    }
+  }, [blocker]);
 
   return (
     <div className="space-y-8">
@@ -137,7 +206,17 @@ export const AdminSettings = () => {
       <div className="glass-card bg-white/80 border border-white/60 rounded-[12px] p-2 flex gap-2 flex-wrap">
         <button
           type="button"
-          onClick={() => setTab('groups')}
+          onClick={() => {
+            if (tab === 'groups') return;
+            if (hasUnsavedChanges) {
+              const leave = window.confirm(
+                'You have unsaved changes. Switch tabs without saving? Your changes will be discarded.'
+              );
+              if (!leave) return;
+              discardChanges();
+            }
+            setTab('groups');
+          }}
           className={`px-4 py-2 rounded-[8px] text-sm font-bold inline-flex items-center gap-2 ${
             tab === 'groups' ? 'bg-gold/15 text-charcoal border border-gold/40' : 'bg-white border border-gray-200 text-neutral'
           }`}
@@ -147,7 +226,17 @@ export const AdminSettings = () => {
         </button>
         <button
           type="button"
-          onClick={() => setTab('job_roles')}
+          onClick={() => {
+            if (tab === 'job_roles') return;
+            if (hasUnsavedChanges) {
+              const leave = window.confirm(
+                'You have unsaved changes. Switch tabs without saving? Your changes will be discarded.'
+              );
+              if (!leave) return;
+              discardChanges();
+            }
+            setTab('job_roles');
+          }}
           className={`px-4 py-2 rounded-[8px] text-sm font-bold inline-flex items-center gap-2 ${
             tab === 'job_roles' ? 'bg-gold/15 text-charcoal border border-gold/40' : 'bg-white border border-gray-200 text-neutral'
           }`}
@@ -213,7 +302,11 @@ export const AdminSettings = () => {
                         <input
                           type="checkbox"
                           checked={g.is_active !== false}
-                          onChange={(e) => updateGroup(g.id, { is_active: e.target.checked })}
+                          onChange={(e) =>
+                            setGroups((prev) =>
+                              prev.map((x) => (x.id === g.id ? { ...x, is_active: e.target.checked } : x))
+                            )
+                          }
                         />
                         <span className="text-sm font-bold text-charcoal">{g.is_active !== false ? 'Yes' : 'No'}</span>
                       </label>
@@ -222,7 +315,7 @@ export const AdminSettings = () => {
                       <div className="flex gap-2">
                         <button
                           type="button"
-                          onClick={() => updateGroup(g.id, { name: g.name?.trim() || '', slug: slugify(g.name || '') })}
+                          onClick={() => saveGroup(g.id)}
                           className="px-3 py-2 bg-white border border-gray-200 rounded-[6px] text-neutral hover:text-gold hover:border-gold transition-colors text-sm font-bold inline-flex items-center gap-2"
                           title="Save"
                         >
@@ -310,7 +403,11 @@ export const AdminSettings = () => {
                         <input
                           type="checkbox"
                           checked={r.is_active !== false}
-                          onChange={(e) => updateJobRole(r.id, { is_active: e.target.checked })}
+                          onChange={(e) =>
+                            setJobRoles((prev) =>
+                              prev.map((x) => (x.id === r.id ? { ...x, is_active: e.target.checked } : x))
+                            )
+                          }
                         />
                         <span className="text-sm font-bold text-charcoal">{r.is_active !== false ? 'Yes' : 'No'}</span>
                       </label>
@@ -319,7 +416,7 @@ export const AdminSettings = () => {
                       <div className="flex gap-2">
                         <button
                           type="button"
-                          onClick={() => updateJobRole(r.id, { name: r.name?.trim() || '', slug: slugify(r.name || '') })}
+                          onClick={() => saveJobRole(r.id)}
                           className="px-3 py-2 bg-white border border-gray-200 rounded-[6px] text-neutral hover:text-gold hover:border-gold transition-colors text-sm font-bold inline-flex items-center gap-2"
                           title="Save"
                         >

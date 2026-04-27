@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { Modal } from '../../components/UI/Modal';
-import { CalendarDays, Edit, Trash2, User, Upload, X, UserPlus, Download } from 'lucide-react';
+import { CalendarDays, Edit, Trash2, User, Upload, X, UserPlus, Download, Search, ChevronDown } from 'lucide-react';
 import type { Group, JobRole, TeamMember } from '../../types';
 import { supabase } from '../../lib/supabase';
 import { SkeletonPageHeader } from '../../components/UI/Skeleton';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { buildStoredRole, getDisplayRole, inferProfileType } from '../../lib/teamMemberUtils';
 import { downloadDirectoryCsv, downloadDirectoryPdf } from '../../lib/exportDirectoryPeople';
+import metadata from '../../metadata.json';
 
 type ProfileType = 'staff' | 'attendee' | 'member';
 
@@ -67,7 +68,12 @@ function memberToForm(m: TeamMember): FormState {
   return {
     name: m.name,
     profile_type: pt,
-    staff_role: pt === 'staff' ? (m.staff_role || m.role || STAFF_ROLE_OPTIONS[0]).trim() : (m.staff_role || STAFF_ROLE_OPTIONS[0]),
+    staff_role:
+      pt === 'staff'
+        ? (m.staff_role || m.role || STAFF_ROLE_OPTIONS[0]).trim()
+        : pt === 'member'
+          ? (m.staff_role || '').trim()
+          : STAFF_ROLE_OPTIONS[0],
     email: m.email || '',
     phone: m.phone || '',
     img: m.img || '',
@@ -97,6 +103,7 @@ export const AdminTeam = () => {
   });
   const [selectedGroupIds, setSelectedGroupIds] = useState<Record<string, boolean>>({});
   const [selectedJobRoleIds, setSelectedJobRoleIds] = useState<Record<string, boolean>>({});
+  const [searchText, setSearchText] = useState('');
 
   const filteredMembers = useMemo(() => {
     return members.filter((m) => {
@@ -120,6 +127,34 @@ export const AdminTeam = () => {
       return true;
     });
   }, [members, selectedProfileTypes, selectedGroupIds, selectedJobRoleIds]);
+
+  const visibleMembers = useMemo(() => {
+    const q = searchText.trim().toLowerCase();
+    if (!q) return filteredMembers;
+
+    return filteredMembers.filter((m) => {
+      const haystack = [
+        m.name ?? '',
+        m.email ?? '',
+        m.phone ?? '',
+        getDisplayRole(m) ?? '',
+        (m.groups || []).map((g) => g.name).filter(Boolean).join(' '),
+        (m.job_roles || []).map((r) => r.name).filter(Boolean).join(' '),
+      ]
+        .join(' ')
+        .toLowerCase();
+      return haystack.includes(q);
+    });
+  }, [filteredMembers, searchText]);
+
+  const churchName = (metadata as any)?.name ? String((metadata as any).name) : 'Church';
+
+  const clearFilters = () => {
+    setSearchText('');
+    setSelectedProfileTypes({ staff: true, member: true, attendee: true });
+    setSelectedGroupIds({});
+    setSelectedJobRoleIds({});
+  };
 
   const filenameBase = useMemo(() => {
     const d = new Date();
@@ -379,7 +414,14 @@ export const AdminTeam = () => {
       name: trimmed.name,
       profile_type: pt,
       // Keep staff_role for staff and members (hidden for attendees).
-      staff_role: pt === 'staff' || pt === 'member' ? trimmed.staff_role : null,
+      staff_role:
+        pt === 'staff'
+          ? trimmed.staff_role
+          : pt === 'member'
+            ? trimmed.staff_role.trim()
+              ? trimmed.staff_role.trim()
+              : null
+            : null,
       role: storedRole,
       email: trimmed.email,
       phone: trimmed.phone,
@@ -576,6 +618,7 @@ export const AdminTeam = () => {
     setFormData((prev) => ({
       ...prev,
       profile_type,
+      staff_role: profile_type === 'member' && prev.profile_type !== 'member' ? '' : prev.staff_role,
       has_membership_chip: profile_type === 'member' ? prev.has_membership_chip : false,
       membership_start_date: profile_type === 'attendee' ? '' : prev.membership_start_date,
       group_ids: profile_type === 'attendee' ? [] : prev.group_ids,
@@ -616,7 +659,7 @@ export const AdminTeam = () => {
           <div className="flex gap-2 flex-wrap">
             <button
               type="button"
-              onClick={() => downloadDirectoryCsv(filteredMembers, filenameBase)}
+              onClick={() => downloadDirectoryCsv(visibleMembers, filenameBase, { churchName, exportedAt: new Date() })}
               className="bg-white border-2 border-gray-200 text-charcoal px-4 py-2 rounded-[4px] font-bold hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-2 text-sm"
               title="Download CSV (filtered)"
             >
@@ -625,7 +668,7 @@ export const AdminTeam = () => {
             </button>
             <button
               type="button"
-              onClick={() => downloadDirectoryPdf(filteredMembers, filenameBase)}
+              onClick={() => downloadDirectoryPdf(visibleMembers, filenameBase, { churchName, exportedAt: new Date() })}
               className="bg-white border-2 border-gray-200 text-charcoal px-4 py-2 rounded-[4px] font-bold hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-2 text-sm"
               title="Download PDF (filtered)"
             >
@@ -646,109 +689,153 @@ export const AdminTeam = () => {
         </div>
       )}
 
-      {/* Profile type filter */}
-      <div className="glass-card bg-white/80 border border-white/60 rounded-[12px] p-4">
-        <p className="text-sm font-bold text-charcoal mb-3">Filter by role</p>
-        <div className="flex flex-wrap gap-2">
-          {(Object.keys(PROFILE_LABEL) as ProfileType[]).map((pt) => {
-            const checked = selectedProfileTypes[pt];
-            return (
-              <label key={pt} className="cursor-pointer">
-                <input
-                  type="checkbox"
-                  className="sr-only peer"
-                  checked={checked}
-                  onChange={() =>
-                    setSelectedProfileTypes((prev) => ({
-                      ...prev,
-                      [pt]: !prev[pt],
-                    }))
-                  }
-                />
-                <span className="inline-flex items-center px-3 py-2 rounded-[6px] border border-gray-200 bg-white text-sm font-bold text-neutral peer-checked:border-gold peer-checked:bg-gold/10 peer-checked:text-charcoal transition-colors">
-                  {PROFILE_LABEL[pt]}
-                </span>
-              </label>
-            );
-          })}
+      <div className="glass-card bg-white/80 border border-white/60 rounded-[12px] p-4 space-y-4">
+        <div className="flex flex-col lg:flex-row gap-3 lg:items-center">
+          <div className="flex-1">
+            <label className="block text-sm font-bold text-charcoal mb-2">Search</label>
+            <div className="relative">
+              <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral" />
+              <input
+                type="text"
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                className="w-full pl-10 pr-10 py-3 rounded-[6px] border border-gray-200 focus:border-gold focus:outline-none bg-white"
+                placeholder="Search name, email, phone, role, groups, job roles…"
+              />
+              {searchText.trim() && (
+                <button
+                  type="button"
+                  onClick={() => setSearchText('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral hover:text-charcoal transition-colors"
+                  title="Clear search"
+                >
+                  <X size={16} />
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="flex items-end justify-between lg:justify-end gap-3">
+            <div className="text-xs text-neutral pb-1">
+              Showing <span className="font-bold text-charcoal">{visibleMembers.length}</span> of{' '}
+              <span className="font-bold text-charcoal">{members.length}</span>
+            </div>
+            <button
+              type="button"
+              onClick={clearFilters}
+              className="px-4 py-2 bg-white border border-gray-200 rounded-[6px] text-sm font-bold text-neutral hover:text-charcoal hover:border-gold transition-colors"
+              title="Clear all filters"
+            >
+              Clear
+            </button>
+          </div>
         </div>
-        <p className="text-xs text-neutral mt-2">
-          Showing <span className="font-bold text-charcoal">{filteredMembers.length}</span> of{' '}
-          <span className="font-bold text-charcoal">{members.length}</span>
-        </p>
+
+        <div>
+          <p className="text-sm font-bold text-charcoal mb-3">Profile type</p>
+          <div className="flex flex-wrap gap-2">
+            {(Object.keys(PROFILE_LABEL) as ProfileType[]).map((pt) => {
+              const checked = selectedProfileTypes[pt];
+              return (
+                <label key={pt} className="cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="sr-only peer"
+                    checked={checked}
+                    onChange={() =>
+                      setSelectedProfileTypes((prev) => ({
+                        ...prev,
+                        [pt]: !prev[pt],
+                      }))
+                    }
+                  />
+                  <span className="inline-flex items-center px-3 py-2 rounded-[6px] border border-gray-200 bg-white text-sm font-bold text-neutral peer-checked:border-gold peer-checked:bg-gold/10 peer-checked:text-charcoal transition-colors">
+                    {PROFILE_LABEL[pt]}
+                  </span>
+                </label>
+              );
+            })}
+          </div>
+        </div>
+
+        {(groups.length > 0 || jobRoles.length > 0) && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            {groups.length > 0 && (
+              <details className="rounded-[10px] border border-gray-200 bg-white/70 px-4 py-3">
+                <summary className="cursor-pointer list-none flex items-center justify-between gap-3">
+                  <span className="text-sm font-bold text-charcoal">Groups</span>
+                  <ChevronDown size={18} className="text-neutral" />
+                </summary>
+                <div className="pt-3 flex flex-wrap gap-2">
+                  {groups
+                    .filter((g) => g.is_active !== false)
+                    .map((g) => {
+                      const checked = !!selectedGroupIds[g.id];
+                      return (
+                        <label key={g.id} className="cursor-pointer">
+                          <input
+                            type="checkbox"
+                            className="sr-only peer"
+                            checked={checked}
+                            onChange={() =>
+                              setSelectedGroupIds((prev) => ({
+                                ...prev,
+                                [g.id]: !prev[g.id],
+                              }))
+                            }
+                          />
+                          <span className="inline-flex items-center px-3 py-2 rounded-[6px] border border-gray-200 bg-white text-sm font-bold text-neutral peer-checked:border-gold peer-checked:bg-gold/10 peer-checked:text-charcoal transition-colors">
+                            {g.name}
+                          </span>
+                        </label>
+                      );
+                    })}
+                </div>
+              </details>
+            )}
+
+            {jobRoles.length > 0 && (
+              <details className="rounded-[10px] border border-gray-200 bg-white/70 px-4 py-3">
+                <summary className="cursor-pointer list-none flex items-center justify-between gap-3">
+                  <span className="text-sm font-bold text-charcoal">Job roles</span>
+                  <ChevronDown size={18} className="text-neutral" />
+                </summary>
+                <div className="pt-3 flex flex-wrap gap-2">
+                  {jobRoles
+                    .filter((r) => r.is_active !== false)
+                    .map((r) => {
+                      const checked = !!selectedJobRoleIds[r.id];
+                      return (
+                        <label key={r.id} className="cursor-pointer">
+                          <input
+                            type="checkbox"
+                            className="sr-only peer"
+                            checked={checked}
+                            onChange={() =>
+                              setSelectedJobRoleIds((prev) => ({
+                                ...prev,
+                                [r.id]: !prev[r.id],
+                              }))
+                            }
+                          />
+                          <span className="inline-flex items-center px-3 py-2 rounded-[6px] border border-gray-200 bg-white text-sm font-bold text-neutral peer-checked:border-gold peer-checked:bg-gold/10 peer-checked:text-charcoal transition-colors">
+                            {r.name}
+                          </span>
+                        </label>
+                      );
+                    })}
+                </div>
+              </details>
+            )}
+          </div>
+        )}
       </div>
-
-      {(groups.length > 0 || jobRoles.length > 0) && (
-        <div className="glass-card bg-white/80 border border-white/60 rounded-[12px] p-4 space-y-4">
-          {groups.length > 0 && (
-            <div>
-              <p className="text-sm font-bold text-charcoal mb-3">Filter by groups</p>
-              <div className="flex flex-wrap gap-2">
-                {groups
-                  .filter((g) => g.is_active !== false)
-                  .map((g) => {
-                    const checked = !!selectedGroupIds[g.id];
-                    return (
-                      <label key={g.id} className="cursor-pointer">
-                        <input
-                          type="checkbox"
-                          className="sr-only peer"
-                          checked={checked}
-                          onChange={() =>
-                            setSelectedGroupIds((prev) => ({
-                              ...prev,
-                              [g.id]: !prev[g.id],
-                            }))
-                          }
-                        />
-                        <span className="inline-flex items-center px-3 py-2 rounded-[6px] border border-gray-200 bg-white text-sm font-bold text-neutral peer-checked:border-gold peer-checked:bg-gold/10 peer-checked:text-charcoal transition-colors">
-                          {g.name}
-                        </span>
-                      </label>
-                    );
-                  })}
-              </div>
-            </div>
-          )}
-
-          {jobRoles.length > 0 && (
-            <div>
-              <p className="text-sm font-bold text-charcoal mb-3">Filter by job roles</p>
-              <div className="flex flex-wrap gap-2">
-                {jobRoles
-                  .filter((r) => r.is_active !== false)
-                  .map((r) => {
-                    const checked = !!selectedJobRoleIds[r.id];
-                    return (
-                      <label key={r.id} className="cursor-pointer">
-                        <input
-                          type="checkbox"
-                          className="sr-only peer"
-                          checked={checked}
-                          onChange={() =>
-                            setSelectedJobRoleIds((prev) => ({
-                              ...prev,
-                              [r.id]: !prev[r.id],
-                            }))
-                          }
-                        />
-                        <span className="inline-flex items-center px-3 py-2 rounded-[6px] border border-gray-200 bg-white text-sm font-bold text-neutral peer-checked:border-gold peer-checked:bg-gold/10 peer-checked:text-charcoal transition-colors">
-                          {r.name}
-                        </span>
-                      </label>
-                    );
-                  })}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
 
       {members.length === 0 ? (
         <div className="text-center py-12 glass-card bg-white/80 border border-white/60 rounded-[12px]">
           <p className="text-neutral">No team members yet. Add your first team member to get started.</p>
         </div>
-      ) : filteredMembers.length === 0 ? (
+      ) : visibleMembers.length === 0 ? (
         <div className="text-center py-12 glass-card bg-white/80 border border-white/60 rounded-[12px]">
           <p className="text-neutral">No results match the selected filters.</p>
         </div>
@@ -769,7 +856,7 @@ export const AdminTeam = () => {
                 </tr>
               </thead>
               <tbody>
-                {filteredMembers.map((member, idx) => {
+                {visibleMembers.map((member, idx) => {
                   const pt = inferProfileType(member);
                   return (
                     <tr
@@ -871,6 +958,9 @@ export const AdminTeam = () => {
                 onChange={(e) => setFormData({ ...formData, staff_role: e.target.value })}
                 className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none bg-white"
               >
+                {formData.profile_type === 'member' && (
+                  <option value="">Select job role (optional)</option>
+                )}
                 {staffRoleOptions.map((role) => (
                   <option key={role} value={role}>
                     {role}
