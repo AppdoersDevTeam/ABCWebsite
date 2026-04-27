@@ -346,7 +346,7 @@ export const AdminUsers = () => {
         </div>
       ) : (
         <div className="grid md:grid-cols-3 gap-4">
-          <div className="glass-card bg-white/80 border border-white/60 p-6 rounded-[12px] shadow-sm">
+          <div className="bg-white border border-gray-200 p-6 rounded-[12px] shadow-sm">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-neutral font-bold">Total Users</p>
@@ -357,7 +357,7 @@ export const AdminUsers = () => {
               </div>
             </div>
           </div>
-          <div className="glass-card bg-white/80 border border-white/60 p-6 rounded-[12px] shadow-sm">
+          <div className="bg-white border border-gray-200 p-6 rounded-[12px] shadow-sm">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-neutral font-bold">Pending Approval</p>
@@ -368,7 +368,7 @@ export const AdminUsers = () => {
               </div>
             </div>
           </div>
-          <div className="glass-card bg-white/80 border border-white/60 p-6 rounded-[12px] shadow-sm">
+          <div className="bg-white border border-gray-200 p-6 rounded-[12px] shadow-sm">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-neutral font-bold">Approved Users</p>
@@ -453,7 +453,7 @@ export const AdminUsers = () => {
           ))}
         </div>
       ) : filteredUsers().length === 0 ? (
-        <div className="text-center py-12 glass-card bg-white/80 rounded-[12px] border border-white/60">
+        <div className="text-center py-12 bg-white rounded-[12px] border border-gray-200">
           <Users size={48} className="text-gray-300 mx-auto mb-4" />
           <p className="text-neutral text-lg font-medium">No users found</p>
         </div>
@@ -462,7 +462,7 @@ export const AdminUsers = () => {
           {filteredUsers().map((u) => (
             <div
               key={u.id}
-              className="glass-card bg-white/80 border border-white/60 p-6 rounded-[12px] hover:border-gold transition-all shadow-sm"
+              className="bg-white border border-gray-200 p-6 rounded-[12px] hover:border-gold transition-all shadow-sm"
             >
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div className="flex-1">
