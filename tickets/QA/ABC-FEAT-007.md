@@ -2,7 +2,7 @@
 
 **Priority**: P1  
 **Owner**: Developer Agent  
-**Status**: BACKLOG
+**Status**: QA
 
 ## Context
 Event categories are currently hardcoded in `pages/admin/AdminEvents.tsx`. They should be managed from Admin Settings, similar to Groups and Job Roles, and categories should be addable/editable/deletable.
@@ -45,6 +45,21 @@ Event categories are currently hardcoded in `pages/admin/AdminEvents.tsx`. They 
 - [ ] Admin Events category dropdown uses DB-backed categories (no hardcoded list).
 - [ ] Existing categories are seeded into `event_categories`.
 - [ ] No console errors introduced.
+
+## QA checklist
+- [x] Run `ADD_EVENT_CATEGORIES.sql` in Supabase.
+- [ ] Admin: `/#/admin/settings` → Event Categories tab exists.
+- [ ] Admin: create a new category → appears in list and persists on reload.
+- [ ] Admin: edit a category name → save → persists on reload.
+- [ ] Admin: disable a category → it no longer appears in Events dropdown.
+- [ ] Admin: delete a category → confirm prompt → success (or clear failure message).
+- [ ] Admin Events: `/#/admin/events` → category dropdown is DB-backed.
+- [ ] Admin Events: edit an event whose category is disabled/deleted → dropdown shows `<category> (missing)` and does not crash.
+
+## QA notes
+- **Build**: `npm run build` passes.
+- **Lint**: no lints reported in touched TS/TSX files.
+- **Blocker**: automated QA cannot access `/#/admin/*` routes without an admin session (redirects to `/#/login`). Please verify the Admin checks above while logged in as an admin.
 
 ## Decision notes / edge cases
 - If a category is **disabled**: it should not appear in dropdown for new events, but existing events with that category should still render that text.

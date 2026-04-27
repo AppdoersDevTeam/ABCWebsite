@@ -2,9 +2,9 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Settings, Tag, Briefcase, Plus, Save, Trash2 } from 'lucide-react';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { supabase } from '../../lib/supabase';
-import type { Group, JobRole } from '../../types';
+import type { EventCategory, Group, JobRole } from '../../types';
 
-type Tab = 'groups' | 'job_roles';
+type Tab = 'groups' | 'job_roles' | 'event_categories';
 
 function slugify(input: string): string {
   return input
@@ -20,14 +20,17 @@ export const AdminSettings = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [groups, setGroups] = useState<Group[]>([]);
   const [jobRoles, setJobRoles] = useState<JobRole[]>([]);
+  const [eventCategories, setEventCategories] = useState<EventCategory[]>([]);
   const [savedGroups, setSavedGroups] = useState<Group[]>([]);
   const [savedJobRoles, setSavedJobRoles] = useState<JobRole[]>([]);
+  const [savedEventCategories, setSavedEventCategories] = useState<EventCategory[]>([]);
   const isDiscardingRef = useRef(false);
   const isRevertingHashRef = useRef(false);
   const lastHashRef = useRef<string>(typeof window !== 'undefined' ? window.location.hash : '');
 
   const [newGroupName, setNewGroupName] = useState('');
   const [newJobRoleName, setNewJobRoleName] = useState('');
+  const [newCategoryName, setNewCategoryName] = useState('');
 
   useEffect(() => {
     void loadAll();
@@ -36,21 +39,32 @@ export const AdminSettings = () => {
   const loadAll = async () => {
     setIsLoading(true);
     try {
-      const [{ data: g, error: gErr }, { data: r, error: rErr }] = await Promise.all([
+      const [{ data: g, error: gErr }, { data: r, error: rErr }, { data: c, error: cErr }] = await Promise.all([
         supabase.from('groups').select('*').order('sort_order', { ascending: true }).order('name', { ascending: true }),
         supabase.from('job_roles').select('*').order('sort_order', { ascending: true }).order('name', { ascending: true }),
+        supabase
+          .from('event_categories')
+          .select('*')
+          .order('sort_order', { ascending: true })
+          .order('name', { ascending: true }),
       ]);
       if (gErr) throw gErr;
       if (rErr) throw rErr;
+      if (cErr) throw cErr;
       const gg = (g || []) as Group[];
       const rr = (r || []) as JobRole[];
+      const cc = (c || []) as EventCategory[];
       setGroups(gg);
       setJobRoles(rr);
+      setEventCategories(cc);
       setSavedGroups(gg);
       setSavedJobRoles(rr);
+      setSavedEventCategories(cc);
     } catch (e) {
       console.error('Failed to load settings lists', e);
-      alert('Failed to load Groups / Job Roles. Make sure ADD_GROUPS_AND_JOB_ROLES.sql has been run in Supabase.');
+      alert(
+        'Failed to load settings lists. Make sure ADD_GROUPS_AND_JOB_ROLES.sql and ADD_EVENT_CATEGORIES.sql have been run in Supabase.'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -58,6 +72,10 @@ export const AdminSettings = () => {
 
   const activeGroups = useMemo(() => groups.filter((g) => g.is_active !== false), [groups]);
   const activeJobRoles = useMemo(() => jobRoles.filter((r) => r.is_active !== false), [jobRoles]);
+  const activeEventCategories = useMemo(
+    () => eventCategories.filter((c) => c.is_active !== false),
+    [eventCategories]
+  );
 
   const createGroup = async () => {
     const name = newGroupName.trim();
@@ -91,6 +109,22 @@ export const AdminSettings = () => {
     }
   };
 
+  const createEventCategory = async () => {
+    const name = newCategoryName.trim();
+    if (!name) return;
+    try {
+      const payload = { name, slug: slugify(name), is_active: true };
+      const { data, error } = await supabase.from('event_categories').insert([payload]).select('*').single();
+      if (error) throw error;
+      setEventCategories((prev) => [...prev, data as EventCategory]);
+      setSavedEventCategories((prev) => [...prev, data as EventCategory]);
+      setNewCategoryName('');
+    } catch (e) {
+      console.error('Create event category failed', e);
+      alert('Failed to create category. If a category with the same name/slug exists, choose a different name.');
+    }
+  };
+
   const saveGroup = async (id: string) => {
     const g = groups.find((x) => x.id === id);
     if (!g) return;
@@ -121,6 +155,25 @@ export const AdminSettings = () => {
     }
   };
 
+  const saveEventCategory = async (id: string) => {
+    const c = eventCategories.find((x) => x.id === id);
+    if (!c) return;
+    try {
+      const payload: Partial<EventCategory> = {
+        name: c.name?.trim() || '',
+        slug: slugify(c.name || ''),
+        is_active: c.is_active !== false,
+      };
+      const { error } = await supabase.from('event_categories').update(payload).eq('id', id);
+      if (error) throw error;
+      setEventCategories((prev) => prev.map((x) => (x.id === id ? { ...x, ...payload } : x)));
+      setSavedEventCategories((prev) => prev.map((x) => (x.id === id ? { ...x, ...payload } : x)));
+    } catch (e) {
+      console.error('Save event category failed', e);
+      alert('Failed to update category.');
+    }
+  };
+
   const deleteGroup = async (id: string) => {
     if (!window.confirm('Delete this group? If it is assigned to people, deletion may fail.')) return;
     try {
@@ -147,6 +200,19 @@ export const AdminSettings = () => {
     }
   };
 
+  const deleteEventCategory = async (id: string) => {
+    if (!window.confirm('Delete this category? Existing events may still reference it by name.')) return;
+    try {
+      const { error } = await supabase.from('event_categories').delete().eq('id', id);
+      if (error) throw error;
+      setEventCategories((prev) => prev.filter((c) => c.id !== id));
+      setSavedEventCategories((prev) => prev.filter((c) => c.id !== id));
+    } catch (e) {
+      console.error('Delete event category failed', e);
+      alert('Delete failed (it may be in use). Try disabling it instead.');
+    }
+  };
+
   const hasUnsavedChanges = useMemo(() => {
     const norm = (xs: Array<Group | JobRole>) =>
       xs
@@ -158,14 +224,16 @@ export const AdminSettings = () => {
         .sort((a, b) => a.id.localeCompare(b.id));
     return (
       JSON.stringify(norm(groups)) !== JSON.stringify(norm(savedGroups)) ||
-      JSON.stringify(norm(jobRoles)) !== JSON.stringify(norm(savedJobRoles))
+      JSON.stringify(norm(jobRoles)) !== JSON.stringify(norm(savedJobRoles)) ||
+      JSON.stringify(norm(eventCategories as any)) !== JSON.stringify(norm(savedEventCategories as any))
     );
-  }, [groups, jobRoles, savedGroups, savedJobRoles]);
+  }, [groups, jobRoles, eventCategories, savedGroups, savedJobRoles, savedEventCategories]);
 
   const discardChanges = () => {
     isDiscardingRef.current = true;
     setGroups(savedGroups);
     setJobRoles(savedJobRoles);
+    setEventCategories(savedEventCategories);
     // allow state to settle before we consider blocking again
     setTimeout(() => {
       isDiscardingRef.current = false;
@@ -213,7 +281,7 @@ export const AdminSettings = () => {
 
     window.addEventListener('hashchange', onHashChange);
     return () => window.removeEventListener('hashchange', onHashChange);
-  }, [hasUnsavedChanges, savedGroups, savedJobRoles]);
+  }, [hasUnsavedChanges, savedGroups, savedJobRoles, savedEventCategories]);
 
   return (
     <div className="space-y-8">
@@ -263,6 +331,28 @@ export const AdminSettings = () => {
         >
           <Briefcase size={16} />
           Job Roles
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            if (tab === 'event_categories') return;
+            if (hasUnsavedChanges) {
+              const leave = window.confirm(
+                'You have unsaved changes. Switch tabs without saving? Your changes will be discarded.'
+              );
+              if (!leave) return;
+              discardChanges();
+            }
+            setTab('event_categories');
+          }}
+          className={`px-4 py-2 rounded-[8px] text-sm font-bold inline-flex items-center gap-2 ${
+            tab === 'event_categories'
+              ? 'bg-gold/15 text-charcoal border border-gold/40'
+              : 'bg-white border border-gray-200 text-neutral'
+          }`}
+        >
+          <Tag size={16} />
+          Event Categories
         </button>
       </div>
 
@@ -369,7 +459,7 @@ export const AdminSettings = () => {
             Active groups ({activeGroups.length}) will show up in the Directory / People create/edit form and filters.
           </p>
         </div>
-      ) : (
+      ) : tab === 'job_roles' ? (
         <div className="glass-card bg-white/80 border border-white/60 rounded-[12px] p-6 space-y-6">
           <div className="flex gap-2 flex-wrap items-end">
             <div className="flex-1 min-w-[240px]">
@@ -468,6 +558,109 @@ export const AdminSettings = () => {
 
           <p className="text-xs text-neutral">
             Active job roles ({activeJobRoles.length}) will show up in the Directory / People create/edit form and filters.
+          </p>
+        </div>
+      ) : (
+        <div className="glass-card bg-white/80 border border-white/60 rounded-[12px] p-6 space-y-6">
+          <div className="flex gap-2 flex-wrap items-end">
+            <div className="flex-1 min-w-[240px]">
+              <label className="block text-sm font-bold text-charcoal mb-2">New category</label>
+              <input
+                value={newCategoryName}
+                onChange={(e) => setNewCategoryName(e.target.value)}
+                className="w-full p-3 rounded-[6px] border border-gray-200 focus:border-gold focus:outline-none bg-white"
+                placeholder="e.g. Sunday Service, Members Meeting"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={createEventCategory}
+              className="px-4 py-3 bg-white border border-gray-200 rounded-[6px] text-charcoal font-bold hover:border-gold hover:text-gold transition-colors inline-flex items-center gap-2"
+              disabled={!newCategoryName.trim()}
+            >
+              <Plus size={16} />
+              Add
+            </button>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="min-w-[760px] w-full text-left">
+              <thead className="bg-white/60">
+                <tr className="border-b border-gray-200">
+                  <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-neutral">Name</th>
+                  <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-neutral">Active</th>
+                  <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-neutral w-[160px]">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {eventCategories.map((c, idx) => (
+                  <tr
+                    key={c.id}
+                    className={`border-b border-gray-100 hover:bg-gold/5 transition-colors ${
+                      idx % 2 === 0 ? 'bg-white/40' : 'bg-white/20'
+                    }`}
+                  >
+                    <td className="px-4 py-3">
+                      <input
+                        value={c.name || ''}
+                        onChange={(e) =>
+                          setEventCategories((prev) =>
+                            prev.map((x) => (x.id === c.id ? { ...x, name: e.target.value } : x))
+                          )
+                        }
+                        className="w-full p-2 rounded-[6px] border border-gray-200 focus:border-gold focus:outline-none bg-white"
+                      />
+                    </td>
+                    <td className="px-4 py-3">
+                      <label className="inline-flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={c.is_active !== false}
+                          onChange={(e) =>
+                            setEventCategories((prev) =>
+                              prev.map((x) => (x.id === c.id ? { ...x, is_active: e.target.checked } : x))
+                            )
+                          }
+                        />
+                        <span className="text-sm font-bold text-charcoal">{c.is_active !== false ? 'Yes' : 'No'}</span>
+                      </label>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => saveEventCategory(c.id)}
+                          className="px-3 py-2 bg-white border border-gray-200 rounded-[6px] text-neutral hover:text-gold hover:border-gold transition-colors text-sm font-bold inline-flex items-center gap-2"
+                          title="Save"
+                        >
+                          <Save size={16} />
+                          Save
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => deleteEventCategory(c.id)}
+                          className="px-3 py-2 bg-white border border-red-200 rounded-[6px] text-red-600 hover:bg-red-50 transition-colors text-sm font-bold inline-flex items-center gap-2"
+                          title="Delete"
+                        >
+                          <Trash2 size={16} />
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {eventCategories.length === 0 && (
+            <div className="rounded-[8px] border border-dashed border-gray-200 bg-white/60 p-4 text-sm text-neutral">
+              No categories yet. Run `ADD_EVENT_CATEGORIES.sql` (it seeds defaults), or add categories here.
+            </div>
+          )}
+
+          <p className="text-xs text-neutral">
+            Active categories ({activeEventCategories.length}) will show up in the Events create/edit form dropdown.
           </p>
         </div>
       )}

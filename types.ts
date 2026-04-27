@@ -150,6 +150,15 @@ export interface JobRole {
   updated_at?: string;
 }
 
+export interface EventCategory {
+  id: string;
+  name: string;
+  slug?: string | null;
+  sort_order?: number | null;
+  is_active?: boolean;
+  created_at?: string;
+}
+
 export interface Database {
   public: {
     Tables: {
@@ -202,6 +211,11 @@ export interface Database {
         Row: TeamMember;
         Insert: Omit<TeamMember, 'id' | 'created_at' | 'updated_at'>;
         Update: Partial<Omit<TeamMember, 'id' | 'created_at'>>;
+      };
+      event_categories: {
+        Row: EventCategory;
+        Insert: Omit<EventCategory, 'id' | 'created_at'>;
+        Update: Partial<Omit<EventCategory, 'id' | 'created_at'>>;
       };
     };
   };
