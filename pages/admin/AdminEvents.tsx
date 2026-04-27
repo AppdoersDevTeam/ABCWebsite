@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { Modal } from '../../components/UI/Modal';
 import { Calendar as CalIcon, Edit, Trash2, Plus, Users, Image, Upload } from 'lucide-react';
-import { Event } from '../../types';
+import type { Event, EventCategory } from '../../types';
 import { supabase } from '../../lib/supabase';
 import { SkeletonPageHeader, SkeletonEventCard } from '../../components/UI/Skeleton';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
@@ -10,11 +10,21 @@ import { downloadEventRsvpsCsv, downloadEventRsvpsPdf } from '../../lib/exportEv
 import metadata from '../../metadata.json';
 
 const DEFAULT_THUMB = '/ABC Logo.png';
+const FALLBACK_CATEGORIES = [
+  'Sunday Service',
+  'Members Meeting',
+  'Fast & Prayer Meeting',
+  'Young Adults',
+  'Kids Programme',
+  'Community Lunch',
+  'Other',
+] as const;
 
 export const AdminEvents = () => {
   const churchName = (metadata as any)?.name ? String((metadata as any).name) : 'Church';
   const [events, setEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [categoryOptions, setCategoryOptions] = useState<string[]>([...FALLBACK_CATEGORIES]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -40,6 +50,7 @@ export const AdminEvents = () => {
 
   useEffect(() => {
     fetchEvents();
+    fetchEventCategories();
   }, []);
 
   const fetchEvents = async () => {
@@ -56,6 +67,30 @@ export const AdminEvents = () => {
       alert('Failed to load events');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const fetchEventCategories = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('event_categories')
+        .select('name, is_active, sort_order')
+        .order('sort_order', { ascending: true })
+        .order('name', { ascending: true });
+
+      if (error) throw error;
+
+      const names =
+        (data || [])
+          .filter((c: Pick<EventCategory, 'is_active'>) => (c as any).is_active !== false)
+          .map((c: Pick<EventCategory, 'name'>) => (c as any).name)
+          .filter((n: any): n is string => typeof n === 'string' && n.trim().length > 0) || [];
+
+      // Keep legacy behavior if table isn't seeded yet.
+      setCategoryOptions(names.length > 0 ? names : [...FALLBACK_CATEGORIES]);
+    } catch (e) {
+      console.warn('AdminEvents - failed to load event_categories, using fallback list', e);
+      setCategoryOptions([...FALLBACK_CATEGORIES]);
     }
   };
 
@@ -505,13 +540,11 @@ export const AdminEvents = () => {
               className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none"
             >
               <option value="">Select Category</option>
-              <option value="Sunday Service">Sunday Service</option>
-              <option value="Members Meeting">Members Meeting</option>
-              <option value="Fast & Prayer Meeting">Fast & Prayer Meeting</option>
-              <option value="Young Adults">Young Adults</option>
-              <option value="Kids Programme">Kids Programme</option>
-              <option value="Community Lunch">Community Lunch</option>
-              <option value="Other">Other</option>
+              {categoryOptions.map((name) => (
+                <option key={name} value={name}>
+                  {name}
+                </option>
+              ))}
             </select>
           </div>
 
