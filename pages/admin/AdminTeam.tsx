@@ -44,7 +44,6 @@ const emptyForm = (): FormState => ({
   is_baptised: null,
   baptism_date: '',
   membership_start_date: '',
-  has_membership_chip: false,
 });
 
 interface FormState {
@@ -60,7 +59,6 @@ interface FormState {
   is_baptised: boolean | null;
   baptism_date: string;
   membership_start_date: string;
-  has_membership_chip: boolean;
 }
 
 function memberToForm(m: TeamMember): FormState {
@@ -83,7 +81,6 @@ function memberToForm(m: TeamMember): FormState {
     is_baptised: m.is_baptised ?? null,
     baptism_date: m.baptism_date ? String(m.baptism_date).slice(0, 10) : '',
     membership_start_date: m.membership_start_date ? String(m.membership_start_date).slice(0, 10) : '',
-    has_membership_chip: pt === 'member' ? (m.has_membership_chip ?? false) : false,
   };
 }
 
@@ -518,7 +515,6 @@ export const AdminTeam = () => {
           ? formData.baptism_date.trim()
           : null;
       row.membership_start_date = trimmed.membership_start_date.trim();
-      row.has_membership_chip = !!formData.has_membership_chip;
     } else {
       // Staff/Attendee may optionally store baptism info too
       row.is_baptised = formData.is_baptised;
@@ -527,7 +523,6 @@ export const AdminTeam = () => {
           ? formData.baptism_date.trim()
           : null;
       row.membership_start_date = pt === 'staff' ? trimmed.membership_start_date.trim() || null : null;
-      row.has_membership_chip = false;
     }
 
     return row;
@@ -705,7 +700,6 @@ export const AdminTeam = () => {
       ...prev,
       profile_type,
       staff_role: profile_type === 'member' && prev.profile_type !== 'member' ? '' : prev.staff_role,
-      has_membership_chip: profile_type === 'member' ? prev.has_membership_chip : false,
       membership_start_date: profile_type === 'attendee' ? '' : prev.membership_start_date,
       group_ids: profile_type === 'attendee' ? [] : prev.group_ids,
       job_role_ids: profile_type === 'attendee' ? [] : prev.job_role_ids,
@@ -1346,19 +1340,6 @@ export const AdminTeam = () => {
                 </div>
               )}
 
-              {formData.profile_type === 'member' && (
-                <div>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={formData.has_membership_chip}
-                      onChange={(e) => setFormData({ ...formData, has_membership_chip: e.target.checked })}
-                    />
-                    <span className="text-sm font-bold text-charcoal">Assign membership chip</span>
-                  </label>
-                  <p className="text-xs text-neutral mt-1">Only applies to members. Cannot be enabled for Staff or Attendee.</p>
-                </div>
-              )}
             </>
           )}
 
