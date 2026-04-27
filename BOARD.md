@@ -6,7 +6,6 @@ Workflow:
 ## BACKLOG
 - `ABC-FEAT-006` — Password reset: admin action + “Forgot password?” on Login
 - `ABC-FEAT-007` — Event categories: manage like Groups/Job Roles (Admin Settings tab)
-- `ABC-FEAT-008` — Admin RSVP list: search + filtered export
 - `ABC-FEAT-009` — Roster per Ministry (Groups): data model + admin upload association
 - `ABC-FEAT-010` — Dashboard: show ministries list → ministry roster details
 
@@ -18,6 +17,7 @@ Workflow:
 ## QA
 - `ABC-FEAT-001` — Admin Directory member table + export (CSV/PDF) + staff-only Team page
 - `ABC-FEAT-002` — Events: images (upload + default logo) + categories + detail page + calendar UI
+- `ABC-FEAT-008` — Admin RSVP list: search + filtered export
 
 ## REVIEW
 - (none)

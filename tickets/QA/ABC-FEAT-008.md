@@ -2,7 +2,7 @@
 
 **Priority**: P1  
 **Owner**: Developer Agent  
-**Status**: BACKLOG
+**Status**: QA
 
 ## Context
 Admins can view RSVPs for an event, but there is no search/filter UI. Exports should match the directory behavior: export exactly what is currently filtered and displayed.
@@ -19,8 +19,15 @@ Admins can view RSVPs for an event, but there is no search/filter UI. Exports sh
   - Uses enhanced export formatting from `ABC-FEAT-005`.
 
 ## Acceptance criteria
-- [ ] Admin RSVP modal has a search box that filters rows by name/email.
-- [ ] Export CSV and PDF export **only the filtered rows currently shown**.
-- [ ] Count display shows filtered vs total.
-- [ ] No console errors introduced.
+- [x] Admin RSVP modal has a search box that filters rows by name/email.
+- [x] Export CSV and PDF export **only the filtered rows currently shown**.
+- [x] Count display shows filtered vs total.
+- [x] No console errors introduced.
+
+## QA checklist
+- [ ] Open Admin → Events, click the RSVP icon on an event with multiple RSVPs.
+- [ ] Verify search filters by both name substring and email substring (case-insensitive).
+- [ ] Verify count reads “Showing X of Y” and updates as you type.
+- [ ] Export CSV and confirm it only includes the filtered rows.
+- [ ] Export PDF and confirm it only includes the filtered rows.
 

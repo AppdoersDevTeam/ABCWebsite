@@ -24,6 +24,7 @@ export const AdminEvents = () => {
   const [rsvpEvent, setRsvpEvent] = useState<Event | null>(null);
   const [rsvps, setRsvps] = useState<Array<{ id: string; name: string; email: string; created_at: string }>>([]);
   const [isLoadingRsvps, setIsLoadingRsvps] = useState(false);
+  const [rsvpSearch, setRsvpSearch] = useState('');
   const [formData, setFormData] = useState({ 
     title: '', 
     date: '', 
@@ -203,6 +204,7 @@ export const AdminEvents = () => {
     setIsRsvpModalOpen(true);
     setIsLoadingRsvps(true);
     setRsvps([]);
+    setRsvpSearch('');
 
     try {
       const { data, error } = await supabase
@@ -222,6 +224,16 @@ export const AdminEvents = () => {
       setIsLoadingRsvps(false);
     }
   };
+
+  const filteredRsvps = (() => {
+    const q = rsvpSearch.trim().toLowerCase();
+    if (!q) return rsvps;
+    return rsvps.filter((r) => {
+      const name = String(r.name ?? '').toLowerCase();
+      const email = String(r.email ?? '').toLowerCase();
+      return name.includes(q) || email.includes(q);
+    });
+  })();
 
   const rsvpFilenameBase = (evt: Event) => {
     const d = new Date();
@@ -622,20 +634,23 @@ export const AdminEvents = () => {
           setRsvpEvent(null);
           setRsvps([]);
           setIsLoadingRsvps(false);
+          setRsvpSearch('');
         }}
         title={rsvpEvent ? `RSVPs — ${rsvpEvent.title}` : 'RSVPs'}
       >
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <p className="text-sm text-neutral">
-              Total RSVPs: <span className="font-bold text-charcoal">{rsvps.length}</span>
+              Showing{' '}
+              <span className="font-bold text-charcoal">{filteredRsvps.length}</span> of{' '}
+              <span className="font-bold text-charcoal">{rsvps.length}</span>
             </p>
             {rsvpEvent ? (
               <div className="flex gap-2">
                 <button
                   type="button"
                   onClick={() =>
-                    downloadEventRsvpsCsv(rsvps, rsvpFilenameBase(rsvpEvent), `RSVPs — ${rsvpEvent.title}`, {
+                    downloadEventRsvpsCsv(filteredRsvps, rsvpFilenameBase(rsvpEvent), `RSVPs — ${rsvpEvent.title}`, {
                       churchName,
                       exportedAt: new Date(),
                     })
@@ -649,7 +664,7 @@ export const AdminEvents = () => {
                   type="button"
                   onClick={() =>
                     downloadEventRsvpsPdf(
-                      rsvps,
+                      filteredRsvps,
                       rsvpFilenameBase(rsvpEvent),
                       `RSVPs — ${rsvpEvent.title}`,
                       { churchName, exportedAt: new Date() }
@@ -666,13 +681,23 @@ export const AdminEvents = () => {
             )}
           </div>
 
+          <div>
+            <input
+              type="text"
+              value={rsvpSearch}
+              onChange={(e) => setRsvpSearch(e.target.value)}
+              className="w-full p-3 rounded-[8px] border border-gray-200 focus:border-gold focus:outline-none"
+              placeholder="Search by name or email…"
+            />
+          </div>
+
           {isLoadingRsvps ? (
             <div className="space-y-2">
               {Array.from({ length: 5 }).map((_, i) => (
                 <div key={i} className="h-10 bg-gray-100 rounded animate-pulse" />
               ))}
             </div>
-          ) : rsvps.length === 0 ? (
+          ) : filteredRsvps.length === 0 ? (
             <p className="text-neutral text-sm">No RSVPs yet.</p>
           ) : (
             <div className="max-h-80 overflow-auto border border-gray-100 rounded-[8px]">
@@ -685,7 +710,7 @@ export const AdminEvents = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {rsvps.map((r) => (
+                  {filteredRsvps.map((r) => (
                     <tr key={r.id} className="border-b border-gray-50">
                       <td className="px-3 py-2 text-sm text-charcoal font-bold">{r.name}</td>
                       <td className="px-3 py-2 text-sm text-neutral">{r.email}</td>
