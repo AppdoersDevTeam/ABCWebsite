@@ -20,42 +20,39 @@ export const PrayerWall = () => {
   const [prayingFor, setPrayingFor] = useState<Set<string>>(new Set());
   const [fallingHearts, setFallingHearts] = useState<Array<{ id: number; left: number; delay: number }>>([]);
 
+  const fetchPrayerRequests = async () => {
+    const { data, error } = await supabase
+      .from('prayer_requests')
+      .select('*')
+      .eq('is_confidential', false)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    setRequests(data || []);
+  };
+
+  const fetchUserPrayerCounts = async () => {
+    if (!user) {
+      setPrayingFor(new Set());
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from('prayer_counts')
+      .select('prayer_request_id')
+      .eq('user_id', user.id);
+
+    if (error) throw error;
+    setPrayingFor(new Set((data || []).map((p: any) => p.prayer_request_id)));
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        // Parallelize queries for faster loading
-        const queries = [
-          supabase
-            .from('prayer_requests')
-            .select('*')
-            .eq('is_confidential', false)
-            .order('created_at', { ascending: false })
-        ];
-
-        // Only fetch prayer counts if user exists
-        if (user) {
-          queries.push(
-            supabase
-              .from('prayer_counts')
-              .select('prayer_request_id')
-              .eq('user_id', user.id)
-          );
-        }
-
-        const results = await Promise.allSettled(queries);
-
-        // Process prayer requests
-        if (results[0].status === 'fulfilled' && !results[0].value.error) {
-          setRequests(results[0].value.data || []);
-        } else {
-          console.error('Error fetching prayer requests:', results[0].status === 'rejected' ? results[0].reason : results[0].value.error);
-        }
-
-        // Process prayer counts if user exists
-        if (user && results[1] && results[1].status === 'fulfilled' && !results[1].value.error) {
-          setPrayingFor(new Set(results[1].value.data?.map((p: any) => p.prayer_request_id) || []));
-        }
+        // Keep calls separate for clearer error surfaces.
+        await fetchPrayerRequests();
+        await fetchUserPrayerCounts();
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
