@@ -104,6 +104,10 @@ export const AdminTeam = () => {
   const [selectedGroupIds, setSelectedGroupIds] = useState<Record<string, boolean>>({});
   const [selectedJobRoleIds, setSelectedJobRoleIds] = useState<Record<string, boolean>>({});
   const [searchText, setSearchText] = useState('');
+  const [sortKey, setSortKey] = useState<
+    'name' | 'email' | 'phone' | 'role' | 'baptism_date' | 'membership_start_date' | 'status' | 'groups' | 'job_roles'
+  >('name');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
 
   const anyGroupSelectedUI = useMemo(() => Object.values(selectedGroupIds).some(Boolean), [selectedGroupIds]);
   const anyJobRoleSelectedUI = useMemo(() => Object.values(selectedJobRoleIds).some(Boolean), [selectedJobRoleIds]);
@@ -156,11 +160,80 @@ export const AdminTeam = () => {
 
   const churchName = (metadata as any)?.name ? String((metadata as any).name) : 'Church';
 
+  const sortedVisibleMembers = useMemo(() => {
+    const dir = sortDir === 'asc' ? 1 : -1;
+
+    const toStr = (v: unknown) => String(v ?? '').trim().toLowerCase();
+
+    const toDateValue = (v: unknown): number | null => {
+      const s = String(v ?? '').trim();
+      if (!s) return null;
+      // Expect YYYY-MM-DD; Date.parse is fine for ISO-ish strings.
+      const t = Date.parse(s);
+      return Number.isFinite(t) ? t : null;
+    };
+
+    const getGroupsStr = (m: TeamMember) => (m.groups || []).map((g) => g.name).filter(Boolean).join(' ');
+    const getJobRolesStr = (m: TeamMember) => (m.job_roles || []).map((r) => r.name).filter(Boolean).join(' ');
+    const getStatusStr = (m: TeamMember) => PROFILE_LABEL[inferProfileType(m)];
+
+    const cmpStr = (a: string, b: string) => a.localeCompare(b, undefined, { sensitivity: 'base' });
+    const cmpDate = (a: number | null, b: number | null) => {
+      if (a === null && b === null) return 0;
+      if (a === null) return sortDir === 'asc' ? 1 : -1;
+      if (b === null) return sortDir === 'asc' ? -1 : 1;
+      return a - b;
+    };
+
+    const out = [...visibleMembers].sort((a, b) => {
+      let c = 0;
+      switch (sortKey) {
+        case 'name':
+          c = cmpStr(toStr(a.name), toStr(b.name));
+          break;
+        case 'email':
+          c = cmpStr(toStr(a.email), toStr(b.email));
+          break;
+        case 'phone':
+          c = cmpStr(toStr(a.phone), toStr(b.phone));
+          break;
+        case 'role':
+          c = cmpStr(toStr(getDisplayRole(a)), toStr(getDisplayRole(b)));
+          break;
+        case 'status':
+          c = cmpStr(toStr(getStatusStr(a)), toStr(getStatusStr(b)));
+          break;
+        case 'groups':
+          c = cmpStr(toStr(getGroupsStr(a)), toStr(getGroupsStr(b)));
+          break;
+        case 'job_roles':
+          c = cmpStr(toStr(getJobRolesStr(a)), toStr(getJobRolesStr(b)));
+          break;
+        case 'baptism_date':
+          c = cmpDate(toDateValue(a.baptism_date), toDateValue(b.baptism_date));
+          break;
+        case 'membership_start_date':
+          c = cmpDate(toDateValue(a.membership_start_date), toDateValue(b.membership_start_date));
+          break;
+        default:
+          c = 0;
+      }
+
+      if (c !== 0) return c * dir;
+      // Tie-breaker: name
+      return cmpStr(toStr(a.name), toStr(b.name));
+    });
+
+    return out;
+  }, [sortDir, sortKey, visibleMembers]);
+
   const clearFilters = () => {
     setSearchText('');
     setSelectedProfileTypes({ staff: true, member: true, attendee: true });
     setSelectedGroupIds({});
     setSelectedJobRoleIds({});
+    setSortKey('name');
+    setSortDir('asc');
   };
 
   const selectAllProfileTypes = () => setSelectedProfileTypes({ staff: true, member: true, attendee: true });
@@ -661,7 +734,7 @@ export const AdminTeam = () => {
           <div className="flex gap-2 flex-wrap">
             <button
               type="button"
-              onClick={() => downloadDirectoryCsv(visibleMembers, filenameBase, { churchName, exportedAt: new Date() })}
+              onClick={() => downloadDirectoryCsv(sortedVisibleMembers, filenameBase, { churchName, exportedAt: new Date() })}
               className="bg-white border-2 border-gray-200 text-charcoal px-4 py-2 rounded-[4px] font-bold hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-2 text-sm"
               title="Download CSV (filtered)"
             >
@@ -670,7 +743,7 @@ export const AdminTeam = () => {
             </button>
             <button
               type="button"
-              onClick={() => downloadDirectoryPdf(visibleMembers, filenameBase, { churchName, exportedAt: new Date() })}
+              onClick={() => downloadDirectoryPdf(sortedVisibleMembers, filenameBase, { churchName, exportedAt: new Date() })}
               className="bg-white border-2 border-gray-200 text-charcoal px-4 py-2 rounded-[4px] font-bold hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-2 text-sm"
               title="Download PDF (filtered)"
             >
@@ -721,6 +794,34 @@ export const AdminTeam = () => {
             <div className="text-xs text-neutral pb-1">
               Showing <span className="font-bold text-charcoal">{visibleMembers.length}</span> of{' '}
               <span className="font-bold text-charcoal">{members.length}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-neutral mb-1">Sort by</label>
+                <select
+                  value={sortKey}
+                  onChange={(e) => setSortKey(e.target.value as any)}
+                  className="px-3 py-2 bg-white border border-gray-200 rounded-[6px] text-sm font-bold text-charcoal hover:border-gold focus:border-gold focus:outline-none transition-colors"
+                >
+                  <option value="name">Alphabetic (Name)</option>
+                  <option value="email">Email</option>
+                  <option value="phone">Phone</option>
+                  <option value="role">Role</option>
+                  <option value="status">Status</option>
+                  <option value="groups">Groups</option>
+                  <option value="job_roles">Job roles</option>
+                  <option value="baptism_date">Date of Baptism</option>
+                  <option value="membership_start_date">Date of Membership</option>
+                </select>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))}
+                className="mt-[18px] px-3 py-2 bg-white border border-gray-200 rounded-[6px] text-sm font-bold text-neutral hover:text-charcoal hover:border-gold transition-colors"
+                title={sortDir === 'asc' ? 'Ascending' : 'Descending'}
+              >
+                {sortDir === 'asc' ? 'A→Z' : 'Z→A'}
+              </button>
             </div>
             <button
               type="button"
@@ -912,7 +1013,7 @@ export const AdminTeam = () => {
                 </tr>
               </thead>
               <tbody>
-                {visibleMembers.map((member, idx) => {
+                {sortedVisibleMembers.map((member, idx) => {
                   const pt = inferProfileType(member);
                   return (
                     <tr

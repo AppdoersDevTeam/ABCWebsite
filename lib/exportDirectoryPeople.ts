@@ -30,8 +30,7 @@ function formatLocalDateTime(d: Date): string {
 }
 
 function toRows(members: TeamMember[]): ExportRow[] {
-  const sorted = [...members].sort((a, b) => (a.name ?? '').localeCompare(b.name ?? ''));
-  return sorted.map((m) => ({
+  return members.map((m) => ({
     Name: m.name ?? '',
     Email: m.email ?? '',
     Phone: m.phone ?? '',
@@ -102,7 +101,7 @@ export function downloadDirectoryPdf(members: TeamMember[], filenameBase: string
       doc.setTextColor(40);
 
       doc.setFontSize(14);
-      doc.text(headerText, 40, 40);
+      doc.text(headerText, pageWidth / 2, 40, { align: 'center' });
 
       doc.setFontSize(9);
       doc.text(exportedAtText, 40, pageHeight - 20);
