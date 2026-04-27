@@ -34,7 +34,7 @@ const STAFF_ROLE_OPTIONS = [
 const emptyForm = (): FormState => ({
   name: '',
   profile_type: 'attendee',
-  staff_role: STAFF_ROLE_OPTIONS[0],
+  staff_role: '',
   email: '',
   phone: '',
   img: '',
@@ -73,7 +73,7 @@ function memberToForm(m: TeamMember): FormState {
         ? (m.staff_role || m.role || STAFF_ROLE_OPTIONS[0]).trim()
         : pt === 'member'
           ? (m.staff_role || '').trim()
-          : STAFF_ROLE_OPTIONS[0],
+          : '',
     email: m.email || '',
     phone: m.phone || '',
     img: m.img || '',
@@ -104,6 +104,13 @@ export const AdminTeam = () => {
   const [selectedGroupIds, setSelectedGroupIds] = useState<Record<string, boolean>>({});
   const [selectedJobRoleIds, setSelectedJobRoleIds] = useState<Record<string, boolean>>({});
   const [searchText, setSearchText] = useState('');
+
+  const anyGroupSelectedUI = useMemo(() => Object.values(selectedGroupIds).some(Boolean), [selectedGroupIds]);
+  const anyJobRoleSelectedUI = useMemo(() => Object.values(selectedJobRoleIds).some(Boolean), [selectedJobRoleIds]);
+  const allProfileTypesSelectedUI = useMemo(
+    () => (Object.keys(PROFILE_LABEL) as ProfileType[]).every((pt) => selectedProfileTypes[pt]),
+    [selectedProfileTypes]
+  );
 
   const filteredMembers = useMemo(() => {
     return members.filter((m) => {
@@ -156,6 +163,10 @@ export const AdminTeam = () => {
     setSelectedJobRoleIds({});
   };
 
+  const selectAllProfileTypes = () => setSelectedProfileTypes({ staff: true, member: true, attendee: true });
+  const selectAllGroups = () => setSelectedGroupIds({});
+  const selectAllJobRoles = () => setSelectedJobRoleIds({});
+
   const filenameBase = useMemo(() => {
     const d = new Date();
     const yyyy = d.getFullYear();
@@ -164,19 +175,6 @@ export const AdminTeam = () => {
     return `directory-people-${yyyy}-${mm}-${dd}`;
   }, []);
 
-  const staffRoleOptions = useMemo(() => {
-    const fromDb = jobRoles
-      .filter((r) => r.is_active !== false)
-      .map((r) => r.name)
-      .filter(Boolean);
-    const base = fromDb.length > 0 ? fromDb : STAFF_ROLE_OPTIONS;
-
-    const s = formData.staff_role;
-    if (s && !base.includes(s)) {
-      return [s, ...base];
-    }
-    return base;
-  }, [formData.staff_role, jobRoles]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -331,8 +329,8 @@ export const AdminTeam = () => {
     if (!phoneRegex.test(trimmed.phone)) return 'Phone number can only contain numbers, spaces, hyphens, and parentheses.';
     if (trimmed.description.length > 350) return 'Description must not exceed 350 characters.';
 
-    if (trimmed.profile_type === 'staff' && !trimmed.staff_role) {
-      return 'Select a job / role for staff.';
+    if (trimmed.profile_type === 'staff' && formData.job_role_ids.length === 0) {
+      return 'Select at least one job role for staff.';
     }
 
     // Baptism rules:
@@ -452,9 +450,13 @@ export const AdminTeam = () => {
   };
 
   function trimForm() {
+    const firstJobRoleName =
+      formData.profile_type === 'staff'
+        ? (jobRoles.find((r) => r.id === formData.job_role_ids[0])?.name || '').trim()
+        : '';
     return {
       name: formData.name.trim(),
-      staff_role: formData.staff_role.trim(),
+      staff_role: firstJobRoleName,
       email: formData.email.trim(),
       phone: formData.phone.trim(),
       description: formData.description.trim(),
@@ -734,6 +736,18 @@ export const AdminTeam = () => {
         <div>
           <p className="text-sm font-bold text-charcoal mb-3">Profile type</p>
           <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={selectAllProfileTypes}
+              className={`inline-flex items-center px-3 py-2 rounded-[6px] border text-sm font-bold transition-colors ${
+                allProfileTypesSelectedUI
+                  ? 'border-gold bg-gold/10 text-charcoal'
+                  : 'border-gray-200 bg-white text-neutral hover:text-charcoal hover:border-gold'
+              }`}
+              title="All profile types"
+            >
+              All
+            </button>
             {(Object.keys(PROFILE_LABEL) as ProfileType[]).map((pt) => {
               const checked = selectedProfileTypes[pt];
               return (
@@ -761,12 +775,32 @@ export const AdminTeam = () => {
         {(groups.length > 0 || jobRoles.length > 0) && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
             {groups.length > 0 && (
-              <details className="rounded-[10px] border border-gray-200 bg-white/70 px-4 py-3">
-                <summary className="cursor-pointer list-none flex items-center justify-between gap-3">
-                  <span className="text-sm font-bold text-charcoal">Groups</span>
+              <details className="rounded-[10px] border border-gray-200 bg-white/70 overflow-hidden">
+                <summary className="cursor-pointer list-none flex items-center justify-between gap-3 px-4 py-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-bold text-charcoal">Groups</span>
+                    <span className="text-xs text-neutral">
+                      {anyGroupSelectedUI ? `${Object.values(selectedGroupIds).filter(Boolean).length} selected` : 'All'}
+                    </span>
+                  </div>
                   <ChevronDown size={18} className="text-neutral" />
                 </summary>
-                <div className="pt-3 flex flex-wrap gap-2">
+                <div className="px-4 pb-4">
+                  <div className="pt-3 flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={selectAllGroups}
+                      className={`inline-flex items-center px-3 py-2 rounded-[6px] border text-sm font-bold transition-colors ${
+                        !anyGroupSelectedUI
+                          ? 'border-gold bg-gold/10 text-charcoal'
+                          : 'border-gray-200 bg-white text-neutral hover:text-charcoal hover:border-gold'
+                      }`}
+                      title="All groups"
+                    >
+                      All
+                    </button>
+                  </div>
+                  <div className="pt-3 flex flex-wrap gap-2">
                   {groups
                     .filter((g) => g.is_active !== false)
                     .map((g) => {
@@ -790,17 +824,38 @@ export const AdminTeam = () => {
                         </label>
                       );
                     })}
+                  </div>
                 </div>
               </details>
             )}
 
             {jobRoles.length > 0 && (
-              <details className="rounded-[10px] border border-gray-200 bg-white/70 px-4 py-3">
-                <summary className="cursor-pointer list-none flex items-center justify-between gap-3">
-                  <span className="text-sm font-bold text-charcoal">Job roles</span>
+              <details className="rounded-[10px] border border-gray-200 bg-white/70 overflow-hidden">
+                <summary className="cursor-pointer list-none flex items-center justify-between gap-3 px-4 py-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-bold text-charcoal">Job roles</span>
+                    <span className="text-xs text-neutral">
+                      {anyJobRoleSelectedUI ? `${Object.values(selectedJobRoleIds).filter(Boolean).length} selected` : 'All'}
+                    </span>
+                  </div>
                   <ChevronDown size={18} className="text-neutral" />
                 </summary>
-                <div className="pt-3 flex flex-wrap gap-2">
+                <div className="px-4 pb-4">
+                  <div className="pt-3 flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={selectAllJobRoles}
+                      className={`inline-flex items-center px-3 py-2 rounded-[6px] border text-sm font-bold transition-colors ${
+                        !anyJobRoleSelectedUI
+                          ? 'border-gold bg-gold/10 text-charcoal'
+                          : 'border-gray-200 bg-white text-neutral hover:text-charcoal hover:border-gold'
+                      }`}
+                      title="All job roles"
+                    >
+                      All
+                    </button>
+                  </div>
+                  <div className="pt-3 flex flex-wrap gap-2">
                   {jobRoles
                     .filter((r) => r.is_active !== false)
                     .map((r) => {
@@ -824,6 +879,7 @@ export const AdminTeam = () => {
                         </label>
                       );
                     })}
+                  </div>
                 </div>
               </details>
             )}
@@ -948,31 +1004,6 @@ export const AdminTeam = () => {
             <p className="text-xs text-neutral mt-1">Staff, Attendee, or Member (church directory).</p>
           </div>
 
-          {formData.profile_type !== 'attendee' && (
-            <div>
-              <label className="block text-sm font-bold text-charcoal mb-2">
-                Job / role type {formData.profile_type === 'staff' ? '*' : '(optional)'}
-              </label>
-              <select
-                value={formData.staff_role}
-                onChange={(e) => setFormData({ ...formData, staff_role: e.target.value })}
-                className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none bg-white"
-              >
-                {formData.profile_type === 'member' && (
-                  <option value="">Select job role (optional)</option>
-                )}
-                {staffRoleOptions.map((role) => (
-                  <option key={role} value={role}>
-                    {role}
-                  </option>
-                ))}
-              </select>
-              {formData.profile_type === 'member' && (
-                <p className="text-xs text-neutral mt-1">Hidden for attendees.</p>
-              )}
-            </div>
-          )}
-
           {formData.profile_type !== 'attendee' && (groups.length > 0 || jobRoles.length > 0) && (
             <div className="rounded-[8px] border border-gray-200 bg-white/70 p-4 space-y-4">
               {groups.length > 0 && (
@@ -1010,7 +1041,9 @@ export const AdminTeam = () => {
 
               {jobRoles.length > 0 && (
                 <div>
-                  <label className="block text-sm font-bold text-charcoal mb-2">Job roles (optional)</label>
+                  <label className="block text-sm font-bold text-charcoal mb-2">
+                    Job roles {formData.profile_type === 'staff' ? '*' : '(optional)'}
+                  </label>
                   <div className="flex flex-wrap gap-2">
                     {jobRoles
                       .filter((r) => r.is_active !== false)
@@ -1038,6 +1071,9 @@ export const AdminTeam = () => {
                         );
                       })}
                   </div>
+                  {formData.profile_type === 'staff' && (
+                    <p className="text-xs text-neutral mt-2">Staff must have at least 1 job role selected.</p>
+                  )}
                 </div>
               )}
             </div>
