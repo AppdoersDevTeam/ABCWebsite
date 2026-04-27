@@ -35,7 +35,11 @@ export interface RosterMember {
 
 export interface RosterImage {
   id: string;
-  date: string; // ISO date string (YYYY-MM-DD)
+  /** Legacy single-date roster support (deprecated). Prefer date_from/date_to. */
+  date?: string | null; // ISO date string (YYYY-MM-DD)
+  group_id?: string | null;
+  date_from?: string | null; // ISO date string (YYYY-MM-DD)
+  date_to?: string | null; // ISO date string (YYYY-MM-DD)
   pdf_url: string;
   created_at?: string;
   updated_at?: string;

@@ -2,7 +2,7 @@
 
 **Priority**: P1  
 **Owner**: Developer Agent  
-**Status**: BACKLOG
+**Status**: QA
 
 ## Context
 Users should only see rosters for ministries (groups) they are part of. UX requested: user sees a list of their ministries and can click into each ministry to view rosters/details.
@@ -26,10 +26,19 @@ Users should only see rosters for ministries (groups) they are part of. UX reque
     - Clicking a roster shows the PDF (iframe or “open in new tab” link consistent with current behavior)
 
 ## Acceptance criteria
-- [ ] User sees only rosters for ministries they belong to.
-- [ ] User sees a list of their ministries and can click into each ministry to view rosters.
-- [ ] Users not in any roster-linked ministry see “No rosters at this time.”
-- [ ] No console errors introduced.
+- [x] User sees only rosters for ministries they belong to.
+- [x] User sees a list of their ministries and can click into each ministry to view rosters.
+- [x] Users not in any roster-linked ministry see “No rosters at this time.”
+- [x] No console errors introduced.
+
+## QA notes
+- **Build**: `npm run build` ✅
+- **Manual smoke test (recommended)**:
+  - Login as a user who is in one or more Directory ministries (groups)
+  - Dashboard → Roster:
+    - Confirm you see only ministry cards for ministries that have rosters
+    - Click a ministry → see roster list + leader info
+    - Click a roster → iframe preview renders and “Open PDF in new tab” works
 
 ## Leader rule (confirmed)
 - Leader is derived from directory:
