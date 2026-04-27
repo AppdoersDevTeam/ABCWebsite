@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { Users, UserCheck, X, Shield, ShieldOff, Ban, Plus, Crown, KeyRound } from 'lucide-react';
+import { Users, UserCheck, X, Shield, ShieldOff, Ban, Plus, Crown, KeyRound, AlertTriangle } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { displayName, displayInitial } from '../../lib/constants';
 import { User } from '../../types';
@@ -23,6 +23,7 @@ export const AdminUsers = () => {
     Record<string, { id: string; created_from_user_sync?: boolean | null }>
   >({});
   const [linkModalUser, setLinkModalUser] = useState<User | null>(null);
+  const [isRelinking, setIsRelinking] = useState(false);
 
   useEffect(() => {
     fetchUsers();
@@ -226,6 +227,82 @@ export const AdminUsers = () => {
     return allUsers.filter((u) => !directoryByUserId[u.id]).length;
   }, [allUsers, directoryByUserId]);
 
+  const tryAutoLinkDirectoryForUser = async (u: User): Promise<boolean> => {
+    const emailNorm = (u.email || '').trim().toLowerCase();
+    if (!emailNorm) return false;
+
+    // If already linked (based on current state), skip.
+    if (directoryByUserId[u.id]) return true;
+
+    const { data: byEmail, error } = await supabase
+      .from('team_members')
+      .select('id,name,user_id')
+      .ilike('email', emailNorm);
+
+    if (error) {
+      console.warn('AdminUsers - auto-link lookup failed', error);
+      return false;
+    }
+
+    const rows = (byEmail || []) as Array<{ id: string; name: string; user_id: string | null }>;
+    if (rows.some((r) => r.user_id && r.user_id !== u.id)) {
+      // Email already linked to another user; leave as needs-review.
+      return false;
+    }
+
+    const unlinked = rows.filter((r) => !r.user_id);
+    if (unlinked.length === 1) {
+      const { error: updErr } = await supabase.from('team_members').update({ user_id: u.id }).eq('id', unlinked[0].id);
+      if (updErr) {
+        console.warn('AdminUsers - auto-link update failed', updErr);
+        return false;
+      }
+      return true;
+    }
+
+    // If multiple candidates, only auto-link on exact name match when unique.
+    const nameNorm = displayName(u).trim().toLowerCase().replace(/\s+/g, ' ');
+    const nameMatches = unlinked.filter(
+      (r) => (r.name || '').trim().toLowerCase().replace(/\s+/g, ' ') === nameNorm
+    );
+    if (nameMatches.length === 1) {
+      const { error: updErr } = await supabase.from('team_members').update({ user_id: u.id }).eq('id', nameMatches[0].id);
+      if (updErr) {
+        console.warn('AdminUsers - auto-link update failed', updErr);
+        return false;
+      }
+      return true;
+    }
+
+    return false;
+  };
+
+  const recheckDirectoryLinks = async () => {
+    setIsRelinking(true);
+    try {
+      const candidates = allUsers.filter((u) => !directoryByUserId[u.id] && !!(u.email || '').trim());
+      if (candidates.length === 0) {
+        alert('All users with emails are already linked (or require manual review).');
+        return;
+      }
+
+      // Do a safe best-effort pass; keep it sequential to avoid hammering Supabase.
+      let linked = 0;
+      for (const u of candidates) {
+        // eslint-disable-next-line no-await-in-loop
+        const ok = await tryAutoLinkDirectoryForUser(u);
+        if (ok) linked += 1;
+      }
+      await fetchUsers();
+      alert(linked > 0 ? `Linked ${linked} user(s) to Directory.` : 'No safe matches found. Manual linking required.');
+    } catch (e) {
+      console.error(e);
+      alert('Failed to recheck directory links.');
+    } finally {
+      setIsRelinking(false);
+    }
+  };
+
   const filteredUsers = () => {
     switch (filter) {
       case 'pending':
@@ -247,10 +324,21 @@ export const AdminUsers = () => {
         subtitle="Manage user permissions and approvals"
         icon={<Users size={28} />}
         rightSlot={
-          <GlowingButton size="sm" fullWidth className="md:w-auto" onClick={() => setIsCreateModalOpen(true)}>
-            <Plus size={16} className="mr-2" />
-            Create User Profile
-          </GlowingButton>
+          <div className="flex gap-2 flex-wrap justify-end">
+            <GlowingButton
+              size="sm"
+              variant="outline"
+              className="md:w-auto"
+              onClick={() => void recheckDirectoryLinks()}
+              disabled={isRelinking || isLoadingUsers}
+            >
+              {isRelinking ? 'Re-checking…' : 'Re-check Directory Links'}
+            </GlowingButton>
+            <GlowingButton size="sm" fullWidth className="md:w-auto" onClick={() => setIsCreateModalOpen(true)}>
+              <Plus size={16} className="mr-2" />
+              Create User Profile
+            </GlowingButton>
+          </div>
         }
       />
 
@@ -300,15 +388,21 @@ export const AdminUsers = () => {
       )}
 
       {!isLoadingUsers && directoryNeedsReviewCount > 0 && (
-        <div className="rounded-[12px] border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
-          <p className="font-bold">
-            {directoryNeedsReviewCount} user{directoryNeedsReviewCount === 1 ? '' : 's'} not linked to Directory
-          </p>
-          <p className="text-amber-900 mt-1">
-            Roster and ministry permissions use the Directory (team members) record linked by{' '}
-            <code className="text-xs">user_id</code>. Use <span className="font-bold">Link Directory</span> on each user
-            to search and attach a directory person, or create a new one.
-          </p>
+        <div className="rounded-[12px] border-2 border-red-300 bg-red-50 px-4 py-3 text-sm text-red-950 shadow-sm">
+          <div className="flex items-start gap-3">
+            <div className="mt-0.5 text-red-700">
+              <AlertTriangle size={18} />
+            </div>
+            <div className="flex-1">
+              <p className="font-extrabold uppercase tracking-wider">
+                Action needed: {directoryNeedsReviewCount} user{directoryNeedsReviewCount === 1 ? '' : 's'} not linked to Directory
+              </p>
+              <p className="text-red-900 mt-1">
+                Only users linked to a Directory person will inherit ministry/groups permissions (rosters). If a user shouldn’t have a directory record, that’s fine — just ignore it.
+                Otherwise click <span className="font-bold">Link Directory</span> on the user row.
+              </p>
+            </div>
+          </div>
         </div>
       )}
 
@@ -396,24 +490,14 @@ export const AdminUsers = () => {
                             Admin
                           </span>
                         )}
-                        {u.role === 'member' && (
-                          <span className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded uppercase font-bold flex items-center gap-1">
-                            Member
-                          </span>
-                        )}
                         {directoryByUserId[u.id] ? (
-                          directoryByUserId[u.id]?.created_from_user_sync ? (
-                            <span className="bg-sky-100 text-sky-800 text-xs px-2 py-1 rounded uppercase font-bold">
-                              Directory: auto-created
-                            </span>
-                          ) : (
-                            <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded uppercase font-bold">
-                              Directory: linked
-                            </span>
-                          )
+                          <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded uppercase font-bold">
+                            Directory linked
+                          </span>
                         ) : (
-                          <span className="bg-amber-100 text-amber-900 text-xs px-2 py-1 rounded uppercase font-bold">
-                            Directory: needs review
+                          <span className="bg-red-100 text-red-800 text-xs px-2 py-1 rounded uppercase font-extrabold inline-flex items-center gap-1 border border-red-200">
+                            <AlertTriangle size={12} />
+                            Directory not linked
                           </span>
                         )}
                         {u.is_approved ? (

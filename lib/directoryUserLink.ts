@@ -29,7 +29,7 @@ function normalizeName(name: string | null | undefined): string {
  * Links the logged-in user to a `team_members` row (Directory) so group memberships apply.
  * - If already linked by `user_id`, no-op.
  * - Else match by email (case-insensitive); if multiple rows, prefer name match to `userRow.name`.
- * - If still ambiguous or no match, insert a minimal attendee directory row and link it.
+ * - If still ambiguous or no match, do nothing (not every website user needs a directory person).
  * Fails soft: logs errors; does not throw to avoid breaking login.
  */
 export async function syncDirectoryUserLink(supabaseUser: SupabaseUser, userRow: User): Promise<void> {
@@ -121,38 +121,7 @@ export async function syncDirectoryUserLink(supabaseUser: SupabaseUser, userRow:
       }
       return;
     }
-
-    const displayName = [userRow.first_name, userRow.last_name].filter(Boolean).join(' ').trim() || userRow.name || 'Member';
-    const phone = (userRow.phone || '').trim() || '0';
-
-    const insertPayload: Record<string, unknown> = {
-      name: displayName,
-      role: 'Attendee',
-      profile_type: 'attendee',
-      email: emailNorm,
-      phone,
-      img: '',
-      description: '',
-      user_id: uid,
-      created_from_user_sync: true,
-    };
-
-    const insRes = await withTimeout(
-      supabase.from('team_members').insert([insertPayload]),
-      2500,
-      'create_shell'
-    );
-    const insErr = (insRes as any)?.error;
-    if (insErr) {
-      if (String(insErr.message || '').includes('user_id') || String(insErr.code) === '42703') {
-        console.warn(
-          'syncDirectoryUserLink: insert failed (run ADD_TEAM_MEMBERS_USER_ID.sql in Supabase).',
-          insErr
-        );
-      } else {
-        console.warn('syncDirectoryUserLink: failed to create directory shell', insErr);
-      }
-    }
+    // No safe match found; do not auto-create directory people.
   } catch (e) {
     console.warn('syncDirectoryUserLink: unexpected error', e);
   }

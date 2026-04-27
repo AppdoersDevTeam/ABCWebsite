@@ -107,54 +107,6 @@ export const LinkDirectoryUserModal: React.FC<LinkDirectoryUserModalProps> = ({
     }
   };
 
-  const createShell = async () => {
-    if (!targetUser?.id) return;
-    const emailNorm = (targetUser.email || '').trim().toLowerCase();
-    if (!emailNorm) {
-      alert('This user has no email; add an email on the user profile before creating a directory shell.');
-      return;
-    }
-    if (
-      !window.confirm(
-        'Create a new Directory person for this user (attendee profile, no groups) and link them? You can edit groups in Directory / People afterward.'
-      )
-    ) {
-      return;
-    }
-    setSaving(true);
-    try {
-      const displayNameStr = displayName(targetUser);
-      const phone = (targetUser.phone || '').trim() || '0';
-      const { error } = await supabase.from('team_members').insert([
-        {
-          name: displayNameStr,
-          role: 'Attendee',
-          profile_type: 'attendee',
-          email: emailNorm,
-          phone,
-          img: '',
-          description: '',
-          user_id: targetUser.id,
-          created_from_user_sync: true,
-        },
-      ]);
-      if (error) throw error;
-      alert('Directory person created and linked.');
-      onSuccess();
-      onClose();
-    } catch (e: unknown) {
-      console.error(e);
-      const msg = e instanceof Error ? e.message : 'Failed to create';
-      if (msg.includes('user_id') || msg.includes('created_from_user_sync')) {
-        alert(`${msg}\n\nRun ADD_TEAM_MEMBERS_USER_ID.sql in Supabase.`);
-      } else {
-        alert(msg);
-      }
-    } finally {
-      setSaving(false);
-    }
-  };
-
   const unlink = async () => {
     if (!targetUser?.id) return;
     if (!window.confirm('Remove the Directory link for this user? They will lose roster access until linked again.')) {
@@ -247,9 +199,6 @@ export const LinkDirectoryUserModal: React.FC<LinkDirectoryUserModalProps> = ({
             <Unlink size={16} />
             Unlink directory
           </button>
-          <GlowingButton type="button" variant="outline" onClick={() => void createShell()} disabled={saving}>
-            Create new directory person
-          </GlowingButton>
           <GlowingButton type="button" onClick={() => void linkSelected()} disabled={saving || !selectedId}>
             <Link2 size={16} className="inline mr-1" />
             Link selected
