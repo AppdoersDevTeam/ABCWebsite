@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { VibrantCard } from '../../components/UI/VibrantCard';
-import { Calendar, MessageSquare, BookOpen, Users, Image, ClipboardList, ArrowUpRight, UserCheck, X, Plus, Shield } from 'lucide-react';
+import { Calendar, MessageSquare, BookOpen, Users, ClipboardList, ArrowUpRight, UserCheck, X, Plus, Shield } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { displayName } from '../../lib/constants';
@@ -22,7 +22,6 @@ export const AdminOverview = () => {
   const [lastNewsletterDate, setLastNewsletterDate] = useState<string | null>(null);
   const [isLoadingStats, setIsLoadingStats] = useState(true);
   const [teamMembersCount, setTeamMembersCount] = useState(0);
-  const [photoFoldersCount, setPhotoFoldersCount] = useState(0);
   const [rosterAssignmentsCount, setRosterAssignmentsCount] = useState(0);
   const [pendingPrayerRequestsCount, setPendingPrayerRequestsCount] = useState(0);
   const [recentActivities, setRecentActivities] = useState<Array<{
@@ -180,15 +179,6 @@ export const AdminOverview = () => {
 
       if (!teamError) {
         setTeamMembersCount(teamCount || 0);
-      }
-
-      // Fetch photo folders count
-      const { count: photoFoldersCount, error: photoFoldersError } = await supabase
-        .from('photo_folders')
-        .select('*', { count: 'exact', head: true });
-
-      if (!photoFoldersError) {
-        setPhotoFoldersCount(photoFoldersCount || 0);
       }
 
       // Fetch roster assignments count
@@ -457,14 +447,6 @@ export const AdminOverview = () => {
       subtitle: isLoadingStats ? 'Loading...' : undefined
     },
     { 
-      label: 'Photo Folders', 
-      value: isLoadingStats ? '...' : photoFoldersCount.toString(), 
-      icon: <Image size={24} />, 
-      path: '/admin/photos', 
-      color: 'text-pink-500',
-      subtitle: isLoadingStats ? 'Loading...' : undefined
-    },
-    { 
       label: 'Roster Assignments', 
       value: isLoadingStats ? '...' : rosterAssignmentsCount.toString(), 
       icon: <ClipboardList size={24} />, 
@@ -472,7 +454,7 @@ export const AdminOverview = () => {
       color: 'text-indigo-500',
       subtitle: isLoadingStats ? 'Loading...' : undefined
     },
-  ], [pendingCount, prayerRequests24h, nextService, lastNewsletterDate, isLoadingStats, teamMembersCount, photoFoldersCount, rosterAssignmentsCount]);
+  ], [pendingCount, prayerRequests24h, nextService, lastNewsletterDate, isLoadingStats, teamMembersCount, rosterAssignmentsCount]);
 
   console.log('AdminOverview - Rendering, user:', user, 'pendingCount:', pendingCount, 'isLoadingUsers:', isLoadingUsers);
 
