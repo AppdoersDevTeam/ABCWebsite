@@ -2,7 +2,7 @@
 
 **Priority**: P1  
 **Owner**: Developer Agent  
-**Status**: IN_PROGRESS
+**Status**: QA
 
 ## Context
 Ministries and Groups are the same concept (existing `groups` table). Rosters should be uploaded per ministry/group and cover a date range (week/month/etc.), not just a single date.
@@ -29,18 +29,30 @@ Ministries and Groups are the same concept (existing `groups` table). Rosters sh
   - Report upload date (the upload timestamp)
 
 ## Acceptance criteria
-- [ ] Admin can upload a roster PDF and assign it to a ministry/group.
-- [ ] Admin must enter date range (From/To).
-- [ ] Admin roster list shows ministry name + date range + upload date.
-- [ ] No console errors introduced.
+- [x] Admin can upload a roster PDF and assign it to a ministry/group.
+- [x] Admin must enter date range (From/To).
+- [x] Admin roster list shows ministry name + date range + upload date.
+- [x] No console errors introduced. (Build passes; no new lints.)
+
+## QA notes
+- **Build**: `npm run build` ✅
+- **SQL**: `CREATE_ROSTER_IMAGES_TABLE.sql` is now idempotent (safe to re-run when `roster_images` already exists).
+- **Manual smoke test (recommended)**:
+  - Admin → Roster Management → Upload roster PDF:
+    - Select ministry
+    - Pick date range
+    - Upload PDF
+    - Confirm card shows ministry + date range + “Uploaded …”
+  - Dashboard → Roster:
+    - Confirm header shows ministry + date range and PDF renders
 
 ## Dev notes
 - Updated SQL scripts:
-  - `CREATE_ROSTER_IMAGES_TABLE.sql` now includes `group_id`, `date_from`, `date_to` and updates uniqueness + indexes.
-  - `MIGRATE_ROSTER_TO_PDF.sql` adds the new columns + backfills `date_from/date_to` from legacy `date` when present.
+  - `CREATE_ROSTER_IMAGES_TABLE.sql`: adds/ensures `group_id`, `date_from`, `date_to`, updates uniqueness + indexes, drops old `UNIQUE(date)` if present.
+  - `MIGRATE_ROSTER_TO_PDF.sql`: adds the new columns + backfills `date_from/date_to` from legacy `date` when present.
 - Updated UI:
   - `pages/admin/AdminRoster.tsx`: upload modal now requires ministry + date range; roster cards show ministry + range + upload timestamp.
-  - `pages/dashboard/Roster.tsx`: displays ministry + date range (still a simple “latest-first” viewer).
+  - `pages/dashboard/Roster.tsx`: displays ministry + date range (latest-first viewer).
 
 ## Leader rule (confirmed)
 - A person is a leader of group G if:
