@@ -43,7 +43,7 @@ import { PrayerWall } from './pages/dashboard/PrayerWall';
 import { Newsletter } from './pages/dashboard/Newsletter';
 import { Team } from './pages/dashboard/Team';
 import { EventsPrivate } from './pages/dashboard/EventsPrivate';
-import { Photos } from './pages/dashboard/Photos';
+import { DashboardHelp } from './pages/dashboard/Help';
 
 // Admin Pages
 import { AdminOverview } from './pages/admin/AdminOverview';
@@ -53,8 +53,8 @@ import { AdminNewsletter } from './pages/admin/AdminNewsletter';
 import { AdminTeam } from './pages/admin/AdminTeam';
 import { AdminEvents } from './pages/admin/AdminEvents';
 import { AdminRoster } from './pages/admin/AdminRoster';
-import { AdminPhotos } from './pages/admin/AdminPhotos';
 import { AdminSettings } from './pages/admin/AdminSettings';
+import { AdminHelp } from './pages/admin/Help';
 
 // Protected Route Component
 const ProtectedRoute = () => {
@@ -173,7 +173,7 @@ const AppRoutes = () => {
                 <Route path="team" element={<Team />} />
                 <Route path="events" element={<EventsPrivate />} />
                 <Route path="roster" element={<Roster />} />
-                <Route path="photos" element={<Photos />} />
+                <Route path="help" element={<DashboardHelp />} />
               </Route>
             </Route>
 
@@ -187,8 +187,8 @@ const AppRoutes = () => {
                 <Route path="team" element={<AdminTeam />} />
                 <Route path="events" element={<AdminEvents />} />
                 <Route path="roster" element={<AdminRoster />} />
-                <Route path="photos" element={<AdminPhotos />} />
                 <Route path="settings" element={<AdminSettings />} />
+                <Route path="help" element={<AdminHelp />} />
               </Route>
             </Route>
         </Routes>

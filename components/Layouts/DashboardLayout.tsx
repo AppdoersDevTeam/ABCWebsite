@@ -5,13 +5,13 @@ import {
   Users, 
   Calendar, 
   BookOpen, 
-  Image, 
   ClipboardList, 
   LogOut, 
   Menu,
   MessageSquare,
   X,
-  ArrowRightLeft
+  ArrowRightLeft,
+  HelpCircle
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { displayName, displayInitial } from '../../lib/constants';
@@ -38,7 +38,7 @@ export const DashboardLayout = () => {
     { label: 'The Team', path: '/dashboard/team', icon: <Users size={20} /> },
     { label: 'Events', path: '/dashboard/events', icon: <Calendar size={20} /> },
     { label: 'Roster', path: '/dashboard/roster', icon: <ClipboardList size={20} /> },
-    { label: 'Photos', path: '/dashboard/photos', icon: <Image size={20} /> },
+    { label: 'Help', path: '/dashboard/help', icon: <HelpCircle size={20} /> },
   ];
 
   return (
