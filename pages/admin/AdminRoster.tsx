@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, FileText, Trash2, Calendar } from 'lucide-react';
+import { Upload, FileText, Trash2, Calendar, Pencil } from 'lucide-react';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { Modal } from '../../components/UI/Modal';
 import type { Group, JobRole, RosterImage, TeamMember } from '../../types';
@@ -74,6 +74,14 @@ export const AdminRoster = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingRoster, setEditingRoster] = useState<RosterRow | null>(null);
+  const [editGroupId, setEditGroupId] = useState<string>('');
+  const [editDateFrom, setEditDateFrom] = useState('');
+  const [editDateTo, setEditDateTo] = useState('');
+  const [editFile, setEditFile] = useState<File | null>(null);
+  const [editPreviewUrl, setEditPreviewUrl] = useState<string | null>(null);
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
 
   useEffect(() => {
     void load();
@@ -178,6 +186,116 @@ export const AdminRoster = () => {
         setPreviewUrl(reader.result as string);
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  const handleEditFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      if (file.type !== 'application/pdf') {
+        alert('Please select a PDF file');
+        return;
+      }
+      setEditFile(file);
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setEditPreviewUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const openEditModal = (r: RosterRow) => {
+    setEditingRoster(r);
+    setEditGroupId(r.group_id || '');
+    setEditDateFrom((r.date_from || r.date || '') as string);
+    setEditDateTo((r.date_to || r.date || '') as string);
+    setEditFile(null);
+    setEditPreviewUrl(null);
+    setIsEditModalOpen(true);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingRoster) return;
+    if (!editGroupId || !editDateFrom || !editDateTo) {
+      alert('Please select a ministry and date range.');
+      return;
+    }
+
+    setIsSavingEdit(true);
+    try {
+      const group = groups.find((g) => g.id === editGroupId) || null;
+      if (!group) {
+        alert('Please select a valid ministry.');
+        return;
+      }
+
+      let newPdfUrl: string | null = null;
+      let newStoragePath: string | null = null;
+
+      if (editFile) {
+        const fileExt = editFile.name.split('.').pop() || 'pdf';
+        const safeSlug = (group.slug || group.name || 'ministry')
+          .toString()
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-+|-+$/g, '');
+        const fileName = `roster-images/${safeSlug}-${editDateFrom}-${editDateTo}-${Date.now()}.${fileExt}`;
+
+        const { error: uploadError } = await supabase.storage.from('roster-images').upload(fileName, editFile, {
+          cacheControl: '3600',
+          upsert: false,
+        });
+        if (uploadError) throw uploadError;
+
+        const { data: urlData } = supabase.storage.from('roster-images').getPublicUrl(fileName);
+        newPdfUrl = urlData.publicUrl;
+        newStoragePath = fileName.replace(/^roster-images\//, '');
+      }
+
+      const payload: Record<string, unknown> = {
+        group_id: editGroupId,
+        date_from: editDateFrom,
+        date_to: editDateTo,
+        // keep legacy date in sync
+        date: editDateFrom,
+      };
+      if (newPdfUrl) payload.pdf_url = newPdfUrl;
+
+      const { error: updErr } = await supabase.from('roster_images').update(payload).eq('id', editingRoster.id);
+      if (updErr) {
+        // If we uploaded a new file but update failed, cleanup the new upload.
+        if (newStoragePath) {
+          await supabase.storage.from('roster-images').remove([newStoragePath]);
+        }
+        throw updErr;
+      }
+
+      // If PDF was replaced, cleanup the old one.
+      if (newPdfUrl && editingRoster.pdf_url) {
+        const oldPath = getStoragePathFromPublicUrl(editingRoster.pdf_url);
+        if (oldPath) {
+          await supabase.storage.from('roster-images').remove([oldPath]);
+        }
+      }
+
+      await fetchRosterImages();
+      setIsEditModalOpen(false);
+      setEditingRoster(null);
+      setEditFile(null);
+      setEditPreviewUrl(null);
+      alert('Roster updated successfully!');
+    } catch (e: any) {
+      console.error('Error updating roster:', e);
+      const msg = e?.message || 'Failed to update roster';
+      alert(
+        msg.includes('roster_images_group_date_range_key')
+          ? 'A roster already exists for that ministry and date range. Choose a different range or edit the existing one.'
+          : msg
+      );
+    } finally {
+      setIsSavingEdit(false);
     }
   };
 
@@ -359,6 +477,13 @@ export const AdminRoster = () => {
             >
               <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                 <button
+                  onClick={() => openEditModal(rosterImage)}
+                  className="p-2 bg-white border border-gray-200 rounded-[4px] text-neutral hover:text-gold hover:border-gold transition-colors shadow-sm"
+                  title="Edit"
+                >
+                  <Pencil size={16} />
+                </button>
+                <button
                   onClick={() => handleDelete(rosterImage.id, rosterImage.pdf_url)}
                   className="p-2 bg-white border border-gray-200 rounded-[4px] text-neutral hover:text-red-500 hover:border-red-200 transition-colors shadow-sm"
                   title="Delete"
@@ -535,6 +660,119 @@ export const AdminRoster = () => {
               disabled={!selectedFile || !selectedGroupId || !dateFrom || !dateTo || isUploading}
             >
               {isUploading ? 'Uploading...' : 'Upload PDF'}
+            </GlowingButton>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Edit Modal */}
+      <Modal
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setEditingRoster(null);
+          setEditGroupId('');
+          setEditDateFrom('');
+          setEditDateTo('');
+          setEditFile(null);
+          setEditPreviewUrl(null);
+        }}
+        title="Edit Roster PDF"
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-bold text-charcoal mb-2">Ministry / Group *</label>
+            <select
+              value={editGroupId}
+              onChange={(e) => setEditGroupId(e.target.value)}
+              className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none bg-white"
+              required
+            >
+              <option value="">Select ministry</option>
+              {groups.map((g) => (
+                <option key={g.id} value={g.id}>
+                  {g.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-bold text-charcoal mb-2">Roster date from *</label>
+              <input
+                type="date"
+                value={editDateFrom}
+                onChange={(e) => setEditDateFrom(e.target.value)}
+                className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-charcoal mb-2">Roster date to *</label>
+              <input
+                type="date"
+                value={editDateTo}
+                onChange={(e) => setEditDateTo(e.target.value)}
+                className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none"
+                required
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-charcoal mb-2">
+              Replace PDF <span className="text-xs text-neutral font-normal">(optional)</span>
+            </label>
+            <div className="border-2 border-dashed border-gray-300 rounded-[4px] p-6 text-center hover:border-gold transition-colors">
+              <input
+                type="file"
+                accept="application/pdf"
+                onChange={handleEditFileSelect}
+                className="hidden"
+                id="roster-pdf-edit-upload"
+              />
+              <label htmlFor="roster-pdf-edit-upload" className="cursor-pointer">
+                <FileText size={32} className="mx-auto text-neutral mb-2" />
+                <p className="text-sm text-charcoal font-bold">
+                  {editFile ? editFile.name : 'Click to upload a replacement PDF'}
+                </p>
+                <p className="text-xs text-neutral mt-1">{editFile ? 'Click to change' : 'or drag and drop'}</p>
+              </label>
+            </div>
+          </div>
+
+          {editingRoster?.pdf_url && (
+            <div className="mt-4">
+              <p className="text-sm font-bold text-charcoal mb-2">Preview:</p>
+              <div className="border border-gray-200 rounded-[4px] overflow-hidden">
+                <iframe
+                  src={editPreviewUrl || editingRoster.pdf_url}
+                  className="w-full h-96 bg-gray-50"
+                  title="PDF Preview"
+                />
+              </div>
+            </div>
+          )}
+
+          <div className="flex gap-3 justify-end pt-4">
+            <button
+              onClick={() => {
+                setIsEditModalOpen(false);
+                setEditingRoster(null);
+                setEditGroupId('');
+                setEditDateFrom('');
+                setEditDateTo('');
+                setEditFile(null);
+                setEditPreviewUrl(null);
+              }}
+              className="px-6 py-2 border border-gray-200 rounded-[4px] text-charcoal hover:bg-gray-50 transition-colors"
+              disabled={isSavingEdit}
+            >
+              Cancel
+            </button>
+            <GlowingButton onClick={handleSaveEdit} disabled={!editGroupId || !editDateFrom || !editDateTo || isSavingEdit}>
+              {isSavingEdit ? 'Saving...' : 'Save changes'}
             </GlowingButton>
           </div>
         </div>
