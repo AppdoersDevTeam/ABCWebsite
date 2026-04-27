@@ -462,11 +462,7 @@ export const AdminUsers = () => {
           {filteredUsers().map((u) => (
             <div
               key={u.id}
-              className={`glass-card border p-6 rounded-[12px] transition-all shadow-sm ${
-                directoryByUserId[u.id]
-                  ? 'bg-white/80 border-white/60 hover:border-gold'
-                  : 'bg-red-50/70 border-red-200 hover:border-red-300'
-              }`}
+              className="glass-card bg-white/80 border border-white/60 p-6 rounded-[12px] hover:border-gold transition-all shadow-sm"
             >
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div className="flex-1">
