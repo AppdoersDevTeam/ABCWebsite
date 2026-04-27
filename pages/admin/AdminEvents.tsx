@@ -7,10 +7,12 @@ import { supabase } from '../../lib/supabase';
 import { SkeletonPageHeader, SkeletonEventCard } from '../../components/UI/Skeleton';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { downloadEventRsvpsCsv, downloadEventRsvpsPdf } from '../../lib/exportEventRsvps';
+import metadata from '../../metadata.json';
 
 const DEFAULT_THUMB = '/ABC Logo.png';
 
 export const AdminEvents = () => {
+  const churchName = (metadata as any)?.name ? String((metadata as any).name) : 'Church';
   const [events, setEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -632,7 +634,12 @@ export const AdminEvents = () => {
               <div className="flex gap-2">
                 <button
                   type="button"
-                  onClick={() => downloadEventRsvpsCsv(rsvps, rsvpFilenameBase(rsvpEvent))}
+                  onClick={() =>
+                    downloadEventRsvpsCsv(rsvps, rsvpFilenameBase(rsvpEvent), `RSVPs — ${rsvpEvent.title}`, {
+                      churchName,
+                      exportedAt: new Date(),
+                    })
+                  }
                   className="bg-white border border-gray-200 text-charcoal px-3 py-2 rounded-[6px] font-bold hover:bg-gray-50 transition-colors text-sm"
                   title="Download CSV"
                 >
@@ -644,7 +651,8 @@ export const AdminEvents = () => {
                     downloadEventRsvpsPdf(
                       rsvps,
                       rsvpFilenameBase(rsvpEvent),
-                      `RSVPs — ${rsvpEvent.title}`
+                      `RSVPs — ${rsvpEvent.title}`,
+                      { churchName, exportedAt: new Date() }
                     )
                   }
                   className="bg-white border border-gray-200 text-charcoal px-3 py-2 rounded-[6px] font-bold hover:bg-gray-50 transition-colors text-sm"
