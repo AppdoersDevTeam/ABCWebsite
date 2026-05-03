@@ -408,7 +408,7 @@ export const AdminTeam = () => {
     if (!trimmed.phone) return 'Phone is required.';
     const phoneRegex = /^[0-9\s\-()]+$/;
     if (!phoneRegex.test(trimmed.phone)) return 'Phone number can only contain numbers, spaces, hyphens, and parentheses.';
-    if (trimmed.description.length > 350) return 'Description must not exceed 350 characters.';
+    if (trimmed.description.length > 1000) return 'Description must not exceed 1000 characters.';
 
     if (trimmed.profile_type === 'staff' && formData.job_role_ids.length === 0) {
       return 'Select at least one job role for staff.';
@@ -1423,24 +1423,24 @@ export const AdminTeam = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-bold text-charcoal mb-2">Description (Optional, max 350 characters)</label>
+            <label className="block text-sm font-bold text-charcoal mb-2">Description (Optional, max 1000 characters)</label>
             <textarea
               value={formData.description}
               onChange={(e) => {
                 const value = e.target.value;
-                if (value.length <= 350) {
+                if (value.length <= 1000) {
                   setFormData({ ...formData, description: value });
                 }
               }}
               className={`w-full p-3 rounded-[4px] border focus:outline-none resize-none ${
-                formData.description.length > 350 ? 'border-red-300 focus:border-red-500' : 'border-gray-200 focus:border-gold'
+                formData.description.length > 1000 ? 'border-red-300 focus:border-red-500' : 'border-gray-200 focus:border-gold'
               }`}
               placeholder="Notes (e.g. baptised elsewhere)"
-              rows={3}
-              maxLength={350}
+              rows={5}
+              maxLength={1000}
             />
-            <p className={`text-xs mt-1 ${formData.description.length > 350 ? 'text-red-500' : 'text-neutral'}`}>
-              {formData.description.length}/350 characters
+            <p className={`text-xs mt-1 ${formData.description.length > 1000 ? 'text-red-500' : 'text-neutral'}`}>
+              {formData.description.length}/1000 characters
             </p>
           </div>
 

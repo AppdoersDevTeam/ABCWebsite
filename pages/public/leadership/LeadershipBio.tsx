@@ -111,24 +111,8 @@ export const LeadershipBio = () => {
               </h1>
             </ScrollReveal>
             <ScrollReveal direction="up" delay={200}>
-              <p className="text-base sm:text-lg md:text-[1.375rem] lg:text-[1.5625rem] leading-relaxed text-white text-center max-w-5xl mx-auto mb-6 transition-all duration-1000 delay-300 px-2 sm:px-0">
-                {member.description ? (
-                  <>
-                    <span className="block font-raleway font-normal text-center">
-                      {getDisplayRole(member)}.
-                    </span>
-                    <span className="block mt-3 sm:mt-4 font-raleway font-normal text-center">
-                      {member.description.length > 100 
-                        ? `${member.description.substring(0, 100)}...` 
-                        : member.description}
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    <span className="block font-raleway font-normal text-center">{getDisplayRole(member)}.</span>
-                    <span className="block mt-3 sm:mt-4 font-raleway font-normal text-center">Leading with passion and a heart for service.</span>
-                  </>
-                )}
+              <p className="text-base sm:text-lg md:text-[1.375rem] leading-relaxed text-white text-center max-w-3xl mx-auto mb-6 transition-all duration-1000 delay-300 px-2 sm:px-0 font-raleway font-normal">
+                {getDisplayRole(member)}
               </p>
             </ScrollReveal>
 
@@ -152,41 +136,45 @@ export const LeadershipBio = () => {
       </section>
       
       <section className="section-plain py-12 md:py-20 relative z-10">
-        <div className="container mx-auto px-4 max-w-4xl">
-          <div className="grid md:grid-cols-2 gap-8 mb-12">
-            <ScrollReveal direction="right" delay={100}>
-              <div className="aspect-[3/4] overflow-hidden rounded-[8px] bg-gray-100">
-                <img 
-                  src={member.img || '/placeholder-avatar.png'} 
-                  alt={member.name} 
-                  className="w-full h-full object-cover"
-                />
+        <div className="container mx-auto px-4 max-w-5xl">
+          <div className="grid md:grid-cols-12 gap-8 lg:gap-10 mb-12 items-start">
+            <ScrollReveal direction="right" delay={100} className="md:col-span-4">
+              <div className="glass-card rounded-[16px] p-5 md:p-6 bg-white/70 border border-white/50 shadow-sm flex justify-center md:justify-start">
+                <div className="w-40 h-40 sm:w-44 sm:h-44 shrink-0 overflow-hidden rounded-[12px] bg-gray-100 border border-gray-200/80 shadow-inner">
+                  <img
+                    src={member.img || '/placeholder-avatar.png'}
+                    alt={member.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
               </div>
             </ScrollReveal>
-            
-            <ScrollReveal direction="left" delay={200}>
-              <div className="glass-card rounded-[16px] p-8 bg-white/70 border border-white/50 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 hover-lift">
-                <h3 className="text-3xl font-serif font-normal text-charcoal mb-4">{getDisplayRole(member)}</h3>
-                <div className="space-y-4 text-neutral leading-relaxed">
+
+            <ScrollReveal direction="left" delay={200} className="md:col-span-8">
+              <div className="rounded-[16px] p-6 md:p-8 bg-white/40 border border-gray-100/80 md:border-0 md:bg-transparent md:p-0">
+                <h3 className="text-2xl md:text-3xl font-serif font-normal text-charcoal mb-4">
+                  {getDisplayRole(member)}
+                </h3>
+                <div className="text-neutral leading-relaxed text-base md:text-lg space-y-4">
                   {member.description ? (
-                    <p>{member.description}</p>
+                    <p className="whitespace-pre-line">{member.description}</p>
                   ) : (
                     <p>
-                      {member.name} serves at Ashburton Baptist Church with dedication and passion. 
+                      {member.name} serves at Ashburton Baptist Church with dedication and passion.
                       Their commitment to ministry and service to the community is evident in their work.
                     </p>
                   )}
                 </div>
                 {(member.email || member.phone) && (
-                  <div className="mt-6 pt-6 border-t border-gray-200">
-                    <div className="space-y-2">
+                  <div className="mt-8 pt-6 border-t border-gray-200">
+                    <div className="space-y-2 text-neutral">
                       {member.email && (
-                        <p className="text-neutral">
+                        <p>
                           <span className="font-bold text-charcoal">Email:</span> {member.email}
                         </p>
                       )}
                       {member.phone && (
-                        <p className="text-neutral">
+                        <p>
                           <span className="font-bold text-charcoal">Phone:</span> {member.phone}
                         </p>
                       )}

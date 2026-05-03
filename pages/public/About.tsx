@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { VibrantCard } from '../../components/UI/VibrantCard';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { ScrollReveal } from '../../components/UI/ScrollReveal';
-import { Modal } from '../../components/UI/Modal';
 import { ArrowRight, ArrowDownToLine, BookOpen, Church, Users } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { TeamMember } from '../../types';
@@ -19,7 +18,6 @@ interface LeadershipMember {
 
 export const About = () => {
   const heroRef = useRef<HTMLDivElement>(null);
-  const [selectedLeader, setSelectedLeader] = useState<number | null>(null);
   const [leadership, setLeadership] = useState<LeadershipMember[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -293,63 +291,26 @@ export const About = () => {
           <div className="flex justify-center">
             <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 w-full max-w-[80.5%]">
               {leadership.map((leader, i) => (
-                <ScrollReveal key={i} direction="up" delay={i * 100}>
-                  <div 
-                    className="group relative hover-lift cursor-pointer"
-                    onClick={() => setSelectedLeader(i)}
+                <ScrollReveal key={leader.bioPath || leader.name} direction="up" delay={i * 100}>
+                  <Link
+                    to={leader.bioPath}
+                    className="group relative block cursor-pointer transition-transform duration-300 ease-out hover:-translate-y-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 rounded-lg"
+                    aria-label={`Read full biography for ${leader.name}`}
                   >
-                    <div className="aspect-[3/4] overflow-hidden rounded-[8px] bg-gray-100">
-                      <img src={leader.img} alt={leader.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                    <div className="aspect-square w-full overflow-hidden rounded-full bg-gray-100 ring-4 ring-white/80 shadow-lg">
+                      <img src={leader.img} alt="" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                     </div>
-                    <div className="mt-6 glass-card bg-white/70 p-4 -mt-10 mx-4 relative rounded-[8px] shadow-lg text-center transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-1 border border-white/50">
-                      <h4 className="text-xl font-serif text-charcoal font-normal group-hover:text-gold transition-colors">{leader.name}</h4>
-                      <p className="text-gold text-xs uppercase tracking-wider font-bold">{leader.role}</p>
+                    <div className="mt-5 text-center space-y-1.5 px-1">
+                      <h4 className="text-xl font-serif text-charcoal font-normal">{leader.name}</h4>
+                      <p className="text-gold text-xs uppercase tracking-wider font-bold leading-snug">{leader.role}</p>
                     </div>
-                  </div>
+                  </Link>
                 </ScrollReveal>
               ))}
             </div>
           </div>
         </div>
       </section>
-
-      {/* Bio Modal */}
-      <Modal 
-        isOpen={selectedLeader !== null} 
-        onClose={() => setSelectedLeader(null)}
-        title={selectedLeader !== null ? leadership[selectedLeader].name : ''}
-      >
-        {selectedLeader !== null && (
-          <div className="space-y-6">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
-                <img 
-                  src={leadership[selectedLeader].img || '/placeholder-avatar.png'} 
-                  alt={leadership[selectedLeader].name}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div>
-                <h3 className="text-2xl font-serif font-normal text-charcoal">{leadership[selectedLeader].name}</h3>
-                <p className="text-gold text-sm uppercase tracking-wider font-bold">{leadership[selectedLeader].role}</p>
-              </div>
-            </div>
-            <p className="text-neutral leading-relaxed text-lg">
-              {leadership[selectedLeader].shortBio}
-            </p>
-            <Link to={leadership[selectedLeader].bioPath}>
-              <GlowingButton 
-                fullWidth 
-                className="group !rounded-full !bg-gold !text-white !border-gold transition-all duration-500 ease-out hover:scale-110 hover:shadow-2xl hover:shadow-gold/60 active:scale-95 hover:-translate-y-1"
-                onClick={() => setSelectedLeader(null)}
-              >
-                <span className="transition-all duration-300 group-hover:tracking-wider">Read Full Biography</span>
-                <ArrowRight size={16} className="ml-2 transition-all duration-500 group-hover:translate-x-2 group-hover:scale-125"/>
-              </GlowingButton>
-            </Link>
-          </div>
-        )}
-      </Modal>
     </div>
   );
 };

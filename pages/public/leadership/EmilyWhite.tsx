@@ -66,7 +66,7 @@ export const EmilyWhite = () => {
         <div className="container mx-auto px-4 max-w-4xl">
           <div className="grid md:grid-cols-2 gap-8 mb-12">
             <ScrollReveal direction="right" delay={100}>
-              <div className="aspect-[3/4] overflow-hidden rounded-[8px] bg-gray-100">
+              <div className="aspect-square w-full max-w-md mx-auto md:mx-0 overflow-hidden rounded-full bg-gray-100 ring-4 ring-white/80 shadow-lg">
                 <img 
                   src="https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=800&q=80" 
                   alt="Emily White" 
