@@ -78,7 +78,7 @@ export const MichaelChen = () => {
             <ScrollReveal direction="left" delay={200}>
               <div className="glass-card rounded-[16px] p-8 bg-white/70 border border-white/50 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 hover-lift">
                 <h3 className="text-3xl font-serif font-normal text-charcoal mb-4">Worship Director</h3>
-                <div className="space-y-4 text-neutral leading-relaxed">
+                <div className="space-y-4 text-neutral leading-relaxed break-words [overflow-wrap:anywhere] min-w-0 max-w-full">
                   <p>
                     Michael Chen leads our worship ministry, bringing a passion for authentic worship 
                     and musical excellence. With over 15 years of experience in worship leading, 
@@ -98,30 +98,6 @@ export const MichaelChen = () => {
               </div>
             </ScrollReveal>
           </div>
-
-          <ScrollReveal direction="up" delay={300}>
-            <div className="glass-card rounded-[16px] p-8 md:p-12 bg-white/70 border border-white/50 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 hover-lift">
-              <h3 className="text-2xl font-serif font-normal text-charcoal mb-6">Ministry Focus</h3>
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <h4 className="font-bold text-charcoal mb-2">Worship Leading</h4>
-                  <p className="text-neutral text-sm">Leading Sunday services and special events</p>
-                </div>
-                <div>
-                  <h4 className="font-bold text-charcoal mb-2">Team Development</h4>
-                  <p className="text-neutral text-sm">Training and mentoring worship team members</p>
-                </div>
-                <div>
-                  <h4 className="font-bold text-charcoal mb-2">Music Selection</h4>
-                  <p className="text-neutral text-sm">Curating songs that connect people with God</p>
-                </div>
-                <div>
-                  <h4 className="font-bold text-charcoal mb-2">Technical Production</h4>
-                  <p className="text-neutral text-sm">Overseeing sound and technical aspects</p>
-                </div>
-              </div>
-            </div>
-          </ScrollReveal>
         </div>
       </section>
     </div>

@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useParams, Navigate } from 'react-router-dom';
-import { VibrantCard } from '../../../components/UI/VibrantCard';
 import { GlowingButton } from '../../../components/UI/GlowingButton';
 import { ScrollReveal } from '../../../components/UI/ScrollReveal';
-import { ArrowLeft, ArrowDownToLine, UserRound } from 'lucide-react';
+import { ArrowLeft, ArrowDownToLine } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
 import { TeamMember } from '../../../types';
 import { getDisplayRole, inferProfileType } from '../../../lib/teamMemberUtils';
@@ -80,7 +79,7 @@ export const LeadershipBio = () => {
   }
 
   if (notFound || !member) {
-    return <Navigate to="/about#leadership" replace />;
+    return <Navigate to={{ pathname: '/about', hash: 'leadership' }} replace />;
   }
 
   return (
@@ -118,10 +117,19 @@ export const LeadershipBio = () => {
 
             <ScrollReveal direction="up" delay={400}>
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-24">
-                <Link to="/about#leadership" className="group">
-                  <GlowingButton variant="outline" size="md" className="!px-6 !py-[14px] !border-gold !bg-gold/20 !text-white hover:!bg-gold hover:!text-white !rounded-full transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:scale-110 hover:!border-gold active:scale-95 hover:-translate-y-1 !normal-case">
-                    <ArrowLeft size={18} className="mr-2 text-gold transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] group-hover:h-5 group-hover:w-5 group-hover:translate-x-1 group-hover:text-white" />
-                    <span className="text-white font-normal text-base leading-6 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] group-hover:font-semibold group-hover:tracking-wider">Back to Leadership</span>
+                <Link to={{ pathname: '/about', hash: 'leadership' }} className="group">
+                  <GlowingButton
+                    variant="outline"
+                    size="md"
+                    className="!px-6 !py-[14px] !border-gold !bg-gold/20 !text-black hover:!bg-gold hover:!text-white !rounded-full transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:scale-110 hover:!border-gold active:scale-95 hover:-translate-y-1 !normal-case"
+                  >
+                    <ArrowLeft
+                      size={18}
+                      className="mr-2 text-black transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] group-hover:h-5 group-hover:w-5 group-hover:translate-x-1 group-hover:text-white"
+                    />
+                    <span className="text-base font-normal leading-6 text-black transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] group-hover:font-semibold group-hover:tracking-wider group-hover:text-white">
+                      Back to Leadership
+                    </span>
                   </GlowingButton>
                 </Link>
               </div>
@@ -137,73 +145,59 @@ export const LeadershipBio = () => {
       
       <section className="section-plain py-12 md:py-20 relative z-10">
         <div className="container mx-auto px-4 max-w-5xl">
-          <div className="grid md:grid-cols-12 gap-8 lg:gap-10 mb-12 items-start">
-            <ScrollReveal direction="right" delay={100} className="md:col-span-4">
-              <div className="glass-card rounded-[16px] p-5 md:p-6 bg-white/70 border border-white/50 shadow-sm flex justify-center md:justify-start">
-                <div className="w-40 h-40 sm:w-44 sm:h-44 shrink-0 overflow-hidden rounded-[12px] bg-gray-100 border border-gray-200/80 shadow-inner">
+          <ScrollReveal direction="up" delay={100} className="min-w-0">
+            <div className="min-w-0 after:content-[''] after:table after:clear-both">
+              {/* Float left on md+ so biography runs beside the photo and continues underneath — no empty column */}
+              <div className="mx-auto mb-6 flex w-max max-w-full justify-center md:mx-0 md:mb-3 md:mr-8 md:mt-0.5 md:float-left">
+                <div className="h-36 w-36 shrink-0 overflow-hidden rounded-full bg-gray-100 shadow-lg ring-4 ring-white/90 sm:h-44 sm:w-44">
                   <img
                     src={member.img || '/placeholder-avatar.png'}
                     alt={member.name}
-                    className="w-full h-full object-cover"
+                    className="h-full w-full object-cover"
                   />
                 </div>
               </div>
-            </ScrollReveal>
 
-            <ScrollReveal direction="left" delay={200} className="md:col-span-8">
-              <div className="rounded-[16px] p-6 md:p-8 bg-white/40 border border-gray-100/80 md:border-0 md:bg-transparent md:p-0">
-                <h3 className="text-2xl md:text-3xl font-serif font-normal text-charcoal mb-4">
+              <div className="min-w-0 text-black">
+                <h3 className="mb-4 text-center font-serif text-2xl font-normal text-charcoal break-words md:text-left md:text-3xl">
                   {getDisplayRole(member)}
                 </h3>
-                <div className="text-neutral leading-relaxed text-base md:text-lg space-y-4">
+                <div className="max-w-full min-w-0 text-base leading-relaxed text-black md:text-lg [&_p]:mb-4 [&_p:last-child]:mb-0">
                   {member.description ? (
-                    <p className="whitespace-pre-line">{member.description}</p>
+                    <p className="hyphens-auto whitespace-pre-line break-words text-pretty text-black [overflow-wrap:anywhere]">
+                      {member.description}
+                    </p>
                   ) : (
-                    <p>
-                      {member.name} serves at Ashburton Baptist Church with dedication and passion.
-                      Their commitment to ministry and service to the community is evident in their work.
+                    <p className="hyphens-auto break-words text-pretty text-black [overflow-wrap:anywhere]">
+                      {member.name} serves at Ashburton Baptist Church with dedication and passion. Their commitment to
+                      ministry and service to the community is evident in their work.
                     </p>
                   )}
                 </div>
-                {(member.email || member.phone) && (
-                  <div className="mt-8 pt-6 border-t border-gray-200">
-                    <div className="space-y-2 text-neutral">
-                      {member.email && (
-                        <p>
-                          <span className="font-bold text-charcoal">Email:</span> {member.email}
-                        </p>
-                      )}
-                      {member.phone && (
-                        <p>
-                          <span className="font-bold text-charcoal">Phone:</span> {member.phone}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                )}
               </div>
-            </ScrollReveal>
-          </div>
 
-          <ScrollReveal direction="up" delay={300}>
-            <div className="glass-card rounded-[16px] p-8 md:p-12 bg-white/70 border border-white/50 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 hover-lift">
-              <h3 className="text-2xl font-serif font-normal text-charcoal mb-6">Ministry Focus</h3>
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <h4 className="font-bold text-charcoal mb-2">Leadership</h4>
-                  <p className="text-neutral text-sm">Serving and leading with excellence</p>
-                </div>
-                <div>
-                  <h4 className="font-bold text-charcoal mb-2">Community</h4>
-                  <p className="text-neutral text-sm">Building relationships and serving others</p>
-                </div>
-                <div>
-                  <h4 className="font-bold text-charcoal mb-2">Ministry</h4>
-                  <p className="text-neutral text-sm">Equipping and empowering the church</p>
-                </div>
-                <div>
-                  <h4 className="font-bold text-charcoal mb-2">Service</h4>
-                  <p className="text-neutral text-sm">Dedicated to serving God and community</p>
+              <div className="clear-both mt-8 border-t border-gray-200 pt-6">
+                {member.email ? (
+                  <p className="mb-8 break-all text-black">
+                    <span className="font-bold text-charcoal">Email:</span> {member.email}
+                  </p>
+                ) : null}
+                <div className="flex justify-center">
+                  <Link to={{ pathname: '/about', hash: 'leadership' }} className="group">
+                    <GlowingButton
+                      variant="outline"
+                      size="md"
+                      className="!px-6 !py-[14px] !border-gold !bg-gold/20 !text-black hover:!bg-gold hover:!text-white !rounded-full transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:scale-110 hover:!border-gold active:scale-95 hover:-translate-y-1 !normal-case"
+                    >
+                      <ArrowLeft
+                        size={18}
+                        className="mr-2 text-black transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] group-hover:h-5 group-hover:w-5 group-hover:translate-x-1 group-hover:text-white"
+                      />
+                      <span className="text-base font-normal leading-6 text-black transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] group-hover:font-semibold group-hover:tracking-wider group-hover:text-white">
+                        Back to Leadership
+                      </span>
+                    </GlowingButton>
+                  </Link>
                 </div>
               </div>
             </div>

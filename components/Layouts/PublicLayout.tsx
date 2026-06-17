@@ -18,7 +18,16 @@ export const PublicLayout = () => {
   const dropdownRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const dropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isLoginPage = location.pathname === '/login';
+  /** Individual leader biography URLs (not the About page leadership section). */
+  const isLeadershipBioPage = /^\/about\/leadership\/.+/.test(location.pathname);
   useAutoSectionReveal();
+
+  useEffect(() => {
+    if (isLeadershipBioPage) {
+      setIsMenuOpen(false);
+      setOpenMobileSubmenu(null);
+    }
+  }, [isLeadershipBioPage]);
 
   // Refresh user profile when component mounts if user is logged in
   // This ensures we have the latest approval status for the header button
@@ -60,38 +69,52 @@ export const PublicLayout = () => {
     };
   }, [openDropdown]);
 
-  // Handle smooth scrolling to hash sections
+  // Scroll to in-page sections (e.g. #leadership). HashRouter URLs look like #/about#leadership — not a valid single CSS selector.
   useEffect(() => {
-    const scrollToHash = () => {
-      const hash = window.location.hash;
-      // Skip OAuth callback parameters (access_token, error, etc.)
-      if (hash && (hash.includes('access_token') || hash.includes('error=') || hash.includes('expires_at'))) {
-        return; // Don't try to scroll to OAuth parameters
+    const scrollToSection = () => {
+      const routeHash = window.location.hash || '';
+      if (
+        routeHash.includes('access_token') ||
+        routeHash.includes('error=') ||
+        routeHash.includes('expires_at')
+      ) {
+        return;
       }
-      
-      // Validate hash: must start with # and have at least one valid character
-      if (hash && hash.length > 1 && hash.startsWith('#')) {
+
+      let sectionId = (location.hash || '').replace(/^#/, '').trim();
+
+      if (!sectionId && routeHash.includes('#', 1)) {
+        const second = routeHash.indexOf('#', 1);
+        sectionId = routeHash.slice(second + 1).split('&')[0]?.trim() || '';
+      }
+
+      if (!sectionId || !/^[a-zA-Z0-9_-]+$/.test(sectionId)) {
+        return;
+      }
+
+      const tryScroll = (): boolean => {
         try {
-          const element = document.querySelector(hash);
-          if (element) {
-            setTimeout(() => {
-              element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 100);
+          const el = document.getElementById(sectionId);
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            return true;
           }
-        } catch (e) {
-          // Invalid selector, ignore
-          console.warn('Invalid hash selector:', hash);
+        } catch {
+          console.warn('Invalid section id:', sectionId);
         }
-      }
+        return false;
+      };
+
+      // About sections mount inside the route; retry so scroll runs after paint.
+      [0, 80, 200, 450, 800].forEach((ms) => {
+        window.setTimeout(() => tryScroll(), ms);
+      });
     };
 
-    // Scroll on initial load if hash exists
-    scrollToHash();
-
-    // Listen for hash changes
-    window.addEventListener('hashchange', scrollToHash);
-    return () => window.removeEventListener('hashchange', scrollToHash);
-  }, [location]);
+    scrollToSection();
+    window.addEventListener('hashchange', scrollToSection);
+    return () => window.removeEventListener('hashchange', scrollToSection);
+  }, [location.pathname, location.hash]);
 
   const handleSubmenuClick = (path: string, hash?: string) => {
     setOpenDropdown(null);
@@ -128,8 +151,8 @@ export const PublicLayout = () => {
       label: 'About', 
       path: '/about',
       submenu: [
-        { label: 'Our Vision', path: '/about#vision', hash: 'vision' },
-        { label: 'Our Beliefs', path: '/about#beliefs', hash: 'beliefs' },
+        { label: 'Our Vision', path: '/about/vision', hash: '' },
+        { label: 'What We Believe', path: '/about#beliefs', hash: 'beliefs' },
         { label: 'Leadership', path: '/about#leadership', hash: 'leadership' },
         { label: 'History', path: '/about/history', hash: '' },
       ]
@@ -316,22 +339,24 @@ export const PublicLayout = () => {
               </div>
             </nav>
 
-            {/* Mobile Menu Button */}
+            {/* Mobile Menu Button — hidden on individual leadership bio pages */}
             <button
-              className={`lg:hidden p-2 transition-colors ${
+              type="button"
+              className={`${isLeadershipBioPage ? 'hidden' : 'lg:hidden'} p-2 transition-colors ${
                 isLoginPage || scrolled
                   ? 'text-[#738242] hover:text-gold'
                   : 'text-white hover:text-gold'
               }`}
               onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-label="Open menu"
             >
               {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
             </button>
           </div>
         </div>
 
-        {/* Mobile Menu */}
-        {isMenuOpen && (
+        {/* Mobile Menu — not used on individual leadership bio pages */}
+        {isMenuOpen && !isLeadershipBioPage && (
           <div className="lg:hidden bg-white absolute w-full h-screen top-0 left-0 p-8 flex flex-col justify-center space-y-6 z-40 overflow-y-auto">
              <button className="absolute top-8 right-8 text-charcoal" onClick={() => setIsMenuOpen(false)}><X size={32}/></button>
             {navItems.map((item) => (

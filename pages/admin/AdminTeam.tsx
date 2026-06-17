@@ -61,6 +61,47 @@ interface FormState {
   membership_start_date: string;
 }
 
+/** Supabase/Postgrest errors are often plain objects, not `instanceof Error`. */
+function getSupabaseErrorMessage(error: unknown): string {
+  if (error == null) return 'Unknown error';
+  if (error instanceof Error) return error.message;
+  if (typeof error === 'object') {
+    const o = error as Record<string, unknown>;
+    const parts: string[] = [];
+    if (typeof o.message === 'string' && o.message) parts.push(o.message);
+    if (typeof o.details === 'string' && o.details) parts.push(`Details: ${o.details}`);
+    if (typeof o.hint === 'string' && o.hint) parts.push(`Hint: ${o.hint}`);
+    if (typeof o.code === 'string' && o.code) parts.push(`Code: ${o.code}`);
+    if (parts.length > 0) return parts.join('\n');
+  }
+  return String(error);
+}
+
+function teamMemberSaveErrorHint(message: string): string {
+  const m = message.toLowerCase();
+  const hints: string[] = [];
+  if (
+    m.includes('too long') ||
+    m.includes('right truncation') ||
+    m.includes('22001') ||
+    m.includes('character varying')
+  ) {
+    hints.push(
+      'Text is longer than the database allows (often `description`). In Supabase SQL editor, run: ALTER_TEAM_MEMBERS_DESCRIPTION_TO_1500.sql (or widen that column to at least your max length).'
+    );
+  }
+  if (m.includes('does not exist') || m.includes('42703')) {
+    hints.push('A column may be missing. Run ADD_TEAM_MEMBER_PROFILE_FIELDS.sql in Supabase.');
+  }
+  if (m.includes('row-level security') || m.includes('rls') || m.includes('42501')) {
+    hints.push('Row-level security blocked this update. Check RLS policies on `team_members` for admin users.');
+  }
+  if (hints.length === 0) {
+    return '\n\nOpen the browser console (F12) for the full error. Common fixes: ADD_TEAM_MEMBER_PROFILE_FIELDS.sql; ALTER_TEAM_MEMBERS_DESCRIPTION_TO_1500.sql for long bios.';
+  }
+  return `\n\n${hints.join('\n\n')}`;
+}
+
 function memberToForm(m: TeamMember): FormState {
   const pt = inferProfileType(m);
   return {
@@ -585,11 +626,8 @@ export const AdminTeam = () => {
       setIsModalOpen(false);
     } catch (error: unknown) {
       console.error('Error creating team member:', error);
-      const msg = error instanceof Error ? error.message : 'Failed to create team member';
-      alert(
-        msg +
-          '\n\nIf the database is missing new columns, run ADD_TEAM_MEMBER_PROFILE_FIELDS.sql in Supabase.'
-      );
+      const msg = getSupabaseErrorMessage(error) || 'Failed to create team member';
+      alert(msg + teamMemberSaveErrorHint(msg));
     } finally {
       setIsUploading(false);
     }
@@ -662,11 +700,8 @@ export const AdminTeam = () => {
       setIsModalOpen(false);
     } catch (error: unknown) {
       console.error('Error updating team member:', error);
-      const msg = error instanceof Error ? error.message : 'Failed to update team member';
-      alert(
-        msg +
-          '\n\nIf the database is missing new columns, run ADD_TEAM_MEMBER_PROFILE_FIELDS.sql in Supabase.'
-      );
+      const msg = getSupabaseErrorMessage(error) || 'Failed to update team member';
+      alert(msg + teamMemberSaveErrorHint(msg));
     } finally {
       setIsUploading(false);
     }
@@ -685,7 +720,7 @@ export const AdminTeam = () => {
       setMembers(members.filter((m) => m.id !== id));
     } catch (error: unknown) {
       console.error('Error deleting team member:', error);
-      alert(error instanceof Error ? error.message : 'Failed to delete team member');
+      alert(getSupabaseErrorMessage(error) || 'Failed to delete team member');
     }
   };
 

@@ -78,7 +78,7 @@ export const DavidMiller = () => {
             <ScrollReveal direction="left" delay={200}>
               <div className="glass-card rounded-[16px] p-8 bg-white/70 border border-white/50 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 hover-lift">
                 <h3 className="text-3xl font-serif font-normal text-charcoal mb-4">Senior Pastor</h3>
-                <div className="space-y-4 text-neutral leading-relaxed">
+                <div className="space-y-4 text-neutral leading-relaxed break-words [overflow-wrap:anywhere] min-w-0 max-w-full">
                   <p>
                     Rev. David Miller has been serving as Senior Pastor at Ashburton Baptist Church since 2015. 
                     With over 20 years of ministry experience, David brings a passion for teaching God's Word 
@@ -99,30 +99,6 @@ export const DavidMiller = () => {
               </div>
             </ScrollReveal>
           </div>
-
-          <ScrollReveal direction="up" delay={300}>
-            <div className="glass-card rounded-[16px] p-8 md:p-12 bg-white/70 border border-white/50 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 hover-lift">
-              <h3 className="text-2xl font-serif font-normal text-charcoal mb-6">Ministry Focus</h3>
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <h4 className="font-bold text-charcoal mb-2">Preaching & Teaching</h4>
-                  <p className="text-neutral text-sm">Leading Sunday services and Bible studies</p>
-                </div>
-                <div>
-                  <h4 className="font-bold text-charcoal mb-2">Leadership Development</h4>
-                  <p className="text-neutral text-sm">Mentoring and equipping church leaders</p>
-                </div>
-                <div>
-                  <h4 className="font-bold text-charcoal mb-2">Community Outreach</h4>
-                  <p className="text-neutral text-sm">Building relationships in Ashburton</p>
-                </div>
-                <div>
-                  <h4 className="font-bold text-charcoal mb-2">Pastoral Care</h4>
-                  <p className="text-neutral text-sm">Supporting and counseling church members</p>
-                </div>
-              </div>
-            </div>
-          </ScrollReveal>
         </div>
       </section>
     </div>

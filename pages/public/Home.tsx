@@ -5,6 +5,7 @@ import { GlowingButton } from '../../components/UI/GlowingButton';
 import { VibrantCard } from '../../components/UI/VibrantCard';
 import { ScrollReveal } from '../../components/UI/ScrollReveal';
 import { supabase } from '../../lib/supabase';
+import { VISION_FOCUS_CARDS } from '../../lib/visionFocusCards';
 import { Event } from '../../types';
 
 export const Home = () => {
@@ -115,7 +116,7 @@ export const Home = () => {
     { q: "Do I need to be a member or have a church background to attend?", a: "Not at all. You don’t need to be a member, and you don’t need to have any church experience. Whether you’re exploring faith, returning to church, or have followed Jesus for years, you are welcome here." },
     { q: "What if I don’t know anyone?", a: "You’re not alone — many people come for the first time without knowing anyone. Our community is friendly and welcoming, and there are simple ways to connect if you’d like, but no pressure if you prefer to remain anonymous at first." },
     { q: "How can I get connected beyond Sunday services?", a: "There are opportunities to connect through small groups, events, and serving teams. These are great ways to build friendships, grow spiritually, and feel at home in the church — but again, participation is always optional and volunteer." },
-    { q: "What does the church believe?", a: "A.B.C. is a Bible-based Christian church focused on loving God, loving people, and serving our community. If you’d like to learn more about what we believe, we’d be happy to talk with you or point you to helpful resources @ About\\Our Beliefs." },
+    { q: "What does the church believe?", a: "A.B.C. is a Bible-based Christian church focused on loving God, loving people, and serving our community. If you’d like to learn more about what we believe, we’d be happy to talk with you or point you to helpful resources @ About → What We Believe." },
     { q: "Where can I park?", a: "We have a dedicated car park on church grounds on Havelock Street. There is also ample free off-street parking available close to and in the vicinity of the church auditorium. Please note that there are roadworks happening around the church and all over the town centre, so please plan your time to allow for extra time to find parking." },
   ];
 
@@ -394,22 +395,33 @@ export const Home = () => {
             }}
           ></div>
           <div className="container mx-auto px-4 relative z-10">
-              <div className="grid md:grid-cols-2 gap-8 items-center">
+              <ScrollReveal direction="down" delay={0}>
+                <div className="mx-auto mb-8 max-w-2xl text-center md:mb-10">
+                  <Church className="mx-auto mb-4 text-gold md:mb-5" size={64} />
+                  <h2 className="font-serif text-3xl font-normal text-white md:text-4xl lg:text-5xl">Our Vision</h2>
+                  <p className="mt-2 text-base font-bold text-gold">Our Church Vision</p>
+                </div>
+              </ScrollReveal>
+              <div className="mx-auto grid max-w-7xl items-start gap-6 md:grid-cols-2 md:items-center md:gap-8 xl:max-w-[calc(90rem-20px)] xl:gap-10">
                   <ScrollReveal direction="right" delay={0}>
                     <div>
-                        <div className="flex items-center gap-4 mb-6">
-                            <Church className="text-gold flex-shrink-0" size={64} />
-                            <h2 className="text-4xl md:text-5xl font-serif font-normal text-white">Welcome <span className="text-gold">to our Family.</span></h2>
-                        </div>
-                        <span className="text-gold font-bold tracking-[0.3em] mb-4 block text-base text-center">Who we are.</span>
+                        <h2 className="mb-6 text-center font-serif text-4xl font-normal text-white md:text-left md:text-5xl">
+                          <span className="text-white">Kia Ora. </span>
+                          <span className="text-gold">Welcome to ABC.</span>
+                        </h2>
                         <p className="text-white text-lg leading-relaxed mb-6">
-                            We aren't just a building. We are a movement of people passionate about Jesus and our city. 
-                            From humble beginnings to a vibrant community, our mission remains the same: <span className="text-black font-bold">Be intentional and Missional.</span>
+                            To be a Christ-centred, Spirit-empowered church in Ashburton where every generation grows in their love for God,
+                            becomes mature, resilient disciples of Jesus, and joins His mission to impact our community and the nations.
                         </p>
+                        <h3 className="text-gold font-bold tracking-[0.2em] mb-3 block text-center text-base">
+                            What this looks like
+                        </h3>
                         <p className="text-white leading-relaxed mb-8">
-                            To see lives transformed by the gospel of Jesus Christ, equipping every generation to impact their community with hope, love, and service.
+                            We are building a legacy church that loves God, loves one another, and makes disciples in a rapidly changing,
+                            multi-ethnic Ashburton. We want to move people beyond surface-level belief into deep discipleship, forming
+                            followers of Jesus who know His Word, walk in His ways, and reflect His character in everyday life.
                         </p>
-                        <Link to="/about" className="group">
+                        <Link to="/about/vision" className="group">
                             <GlowingButton variant="outline" className="!rounded-full !bg-gold !text-white !border-gold transition-all duration-500 ease-out hover:scale-110 hover:shadow-2xl hover:shadow-gold/60 active:scale-95 hover:-translate-y-1">
                                 <span className="transition-all duration-300 group-hover:tracking-wider">EXPLORE</span>
                                 <ArrowRight size={16} className="ml-2 transition-all duration-500 group-hover:translate-x-2 group-hover:scale-125"/>
@@ -417,14 +429,22 @@ export const Home = () => {
                         </Link>
                     </div>
                   </ScrollReveal>
-                  <ScrollReveal direction="left" delay={200}>
-                    <div className="glass-card rounded-[16px] p-8 md:p-12 bg-white/80">
-                        <div className="grid grid-cols-2 gap-4">
-                            {['One God', 'Jesus Savior', 'Spirit Power', 'Bible Authority'].map((item, i) => (
-                                <ScrollReveal key={i} direction="scale" delay={i * 50}>
-                                  <div className="bg-white shadow-sm p-6 rounded-[8px] border border-gray-100 flex flex-col justify-center items-center text-center hover:shadow-md hover:border-gold transition-all duration-300 group">
-                                      <span className="text-xl md:text-2xl font-serif font-normal mb-2 text-charcoal">{item.split(' ')[0]}</span>
-                                      <span className="text-xs uppercase tracking-widest text-neutral group-hover:text-gold font-bold">{item.split(' ')[1]}</span>
+                  <ScrollReveal
+                    direction="left"
+                    delay={200}
+                    className="min-w-0 md:min-w-[min(100%,calc(34rem-20px))] lg:min-w-[calc(38rem-20px)] xl:min-w-[calc(44rem-20px)]"
+                  >
+                    <div className="glass-card w-full rounded-[20px] bg-white/80 p-4 shadow-sm md:p-6 lg:p-8">
+                        <div className="grid grid-cols-1 gap-2 min-[480px]:grid-cols-3 min-[480px]:gap-2 sm:gap-2 md:gap-3 lg:gap-4">
+                            {VISION_FOCUS_CARDS.map((item, i) => (
+                                <ScrollReveal key={item.primary} direction="scale" delay={i * 50}>
+                                  <div className="group flex min-h-[70px] min-w-0 flex-col items-center justify-center rounded-[12px] border border-gray-100 bg-white px-3 py-4 text-center shadow-sm transition-all duration-300 hover:border-gold hover:shadow-md min-[480px]:min-h-[90px] min-[480px]:px-2.5 md:min-h-[106px] md:px-3 md:py-5 lg:min-h-[122px] lg:px-4">
+                                      <span className="mb-1.5 font-serif text-base font-normal leading-tight text-charcoal min-[480px]:whitespace-nowrap md:text-lg lg:text-xl">
+                                        {item.primary}
+                                      </span>
+                                      <span className="text-[11px] font-bold uppercase tracking-widest text-neutral min-[480px]:whitespace-nowrap group-hover:text-gold md:text-xs lg:text-sm">
+                                        {item.secondary}
+                                      </span>
                                   </div>
                                 </ScrollReveal>
                             ))}

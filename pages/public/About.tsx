@@ -7,6 +7,7 @@ import { ArrowRight, ArrowDownToLine, BookOpen, Church, Users } from 'lucide-rea
 import { supabase } from '../../lib/supabase';
 import { TeamMember } from '../../types';
 import { inferProfileType } from '../../lib/teamMemberUtils';
+import { VISION_FOCUS_CARDS } from '../../lib/visionFocusCards';
 
 interface LeadershipMember {
   name: string;
@@ -164,38 +165,50 @@ export const About = () => {
         ></div>
         <div className="container mx-auto px-4 relative z-10">
           <ScrollReveal direction="down" delay={0}>
-            <div className="text-center mb-12 md:mb-16">
-              <Church className="text-gold mx-auto mb-6" size={64} />
-              <h2 className="text-4xl md:text-5xl md:text-6xl font-serif font-normal text-white mb-4">Our Vision</h2>
-              <span className="text-gold font-bold tracking-[0.3em] block text-base">Who We Are</span>
+            <div className="mx-auto mb-10 max-w-2xl text-center md:mb-14">
+              <Church className="mx-auto mb-4 text-gold md:mb-5" size={64} />
+              <h2 className="font-serif text-3xl font-normal text-white md:text-4xl lg:text-5xl">Our Vision</h2>
+              <p className="mt-2 text-base font-bold text-gold">Our Church Vision</p>
             </div>
           </ScrollReveal>
 
-          <div className="grid md:grid-cols-2 gap-8 items-center max-w-6xl mx-auto">
+          <div className="mx-auto grid max-w-7xl items-start gap-6 md:grid-cols-2 md:items-center md:gap-8 xl:max-w-[calc(90rem-20px)] xl:gap-10">
             <ScrollReveal direction="right" delay={0}>
               <div>
-                <div className="flex items-center gap-4 mb-6">
-                  <Church className="text-gold flex-shrink-0" size={64} />
-                  <h2 className="text-4xl md:text-5xl font-serif font-normal text-white">Kia Ora. <span className="text-gold">Welcome to our Family.</span></h2>
-                </div>
-                <span className="text-gold font-bold tracking-[0.3em] mb-4 block text-base text-center">Who we are.</span>
+                <h2 className="mb-6 text-center font-serif text-4xl font-normal text-white md:text-left md:text-5xl">
+                  <span className="text-white">Kia Ora. </span>
+                  <span className="text-gold">Welcome to ABC.</span>
+                </h2>
                 <p className="text-white text-lg leading-relaxed mb-6">
-                  We aren't just a building. We are a movement of people passionate about Jesus and our city. 
-                  From humble beginnings to a vibrant community, our mission remains the same: <span className="text-gold font-bold">Impact.</span>
+                  To be a Christ-centred, Spirit-empowered church in Ashburton where every generation grows in their love for God,
+                  becomes mature, resilient disciples of Jesus, and joins His mission to impact our community and the nations.
                 </p>
+                <h3 className="text-gold font-bold tracking-[0.2em] mb-3 block text-center text-base md:text-left">
+                  What this looks like
+                </h3>
                 <p className="text-white leading-relaxed mb-8">
-                  To see lives transformed by the gospel of Jesus Christ, equipping every generation to impact their community with hope, love, and service.
+                  We are building a legacy church that loves God, loves one another, and makes disciples in a rapidly changing,
+                  multi-ethnic Ashburton. We want to move people beyond surface-level belief into deep discipleship, forming
+                  followers of Jesus who know His Word, walk in His ways, and reflect His character in everyday life.
                 </p>
               </div>
             </ScrollReveal>
-            <ScrollReveal direction="left" delay={200}>
-              <div className="glass-card rounded-[16px] p-8 md:p-12 bg-white/80">
-                <div className="grid grid-cols-2 gap-4">
-                  {['One God', 'Jesus Savior', 'Spirit Power', 'Bible Authority'].map((item, i) => (
-                    <ScrollReveal key={i} direction="scale" delay={i * 50}>
-                      <div className="bg-white shadow-sm p-6 rounded-[8px] border border-gray-100 flex flex-col justify-center items-center text-center hover:shadow-md hover:border-gold transition-all duration-300 group">
-                        <span className="text-xl md:text-2xl font-serif font-normal mb-2 text-charcoal">{item.split(' ')[0]}</span>
-                        <span className="text-xs uppercase tracking-widest text-neutral group-hover:text-gold font-bold">{item.split(' ')[1]}</span>
+            <ScrollReveal
+              direction="left"
+              delay={200}
+              className="min-w-0 md:min-w-[min(100%,calc(34rem-20px))] lg:min-w-[calc(38rem-20px)] xl:min-w-[calc(44rem-20px)]"
+            >
+              <div className="glass-card w-full rounded-[20px] bg-white/80 p-4 shadow-sm md:p-6 lg:p-8">
+                <div className="grid grid-cols-1 gap-2 min-[480px]:grid-cols-3 min-[480px]:gap-2 sm:gap-2 md:gap-3 lg:gap-4">
+                  {VISION_FOCUS_CARDS.map((item, i) => (
+                    <ScrollReveal key={item.primary} direction="scale" delay={i * 50}>
+                      <div className="group flex min-h-[70px] min-w-0 flex-col items-center justify-center rounded-[12px] border border-gray-100 bg-white px-3 py-4 text-center shadow-sm transition-all duration-300 hover:border-gold hover:shadow-md min-[480px]:min-h-[90px] min-[480px]:px-2.5 md:min-h-[106px] md:px-3 md:py-5 lg:min-h-[122px] lg:px-4">
+                        <span className="mb-1.5 font-serif text-base font-normal leading-tight text-charcoal min-[480px]:whitespace-nowrap md:text-lg lg:text-xl">
+                          {item.primary}
+                        </span>
+                        <span className="text-[11px] font-bold uppercase tracking-widest text-neutral min-[480px]:whitespace-nowrap group-hover:text-gold md:text-xs lg:text-sm">
+                          {item.secondary}
+                        </span>
                       </div>
                     </ScrollReveal>
                   ))}
@@ -203,6 +216,26 @@ export const About = () => {
               </div>
             </ScrollReveal>
           </div>
+
+          <ScrollReveal direction="up" delay={250}>
+            <div className="mt-10 flex justify-center md:mt-14">
+              <Link to="/about/vision" className="group">
+                <GlowingButton
+                  variant="outline"
+                  size="md"
+                  className="!px-6 !py-[14px] !border-gold !bg-transparent !text-gold hover:!bg-transparent hover:!text-gold !rounded-full transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:scale-110 hover:shadow-2xl hover:shadow-gold/50 active:scale-95 hover:-translate-y-1 !normal-case"
+                >
+                  <span className="!text-gold font-normal text-base leading-6 transition-all duration-300 group-hover:font-semibold group-hover:tracking-wider">
+                    Explore
+                  </span>
+                  <ArrowRight
+                    size={18}
+                    className="ml-2 !text-gold transition-all duration-300 group-hover:translate-x-1"
+                  />
+                </GlowingButton>
+              </Link>
+            </div>
+          </ScrollReveal>
         </div>
       </section>
 
@@ -212,20 +245,27 @@ export const About = () => {
           <ScrollReveal direction="down" delay={0}>
             <div className="text-center mb-12 md:mb-16">
               <Church className="text-gold mx-auto mb-6" size={64} />
-              <h2 className="text-4xl md:text-5xl font-serif font-normal text-charcoal">Our Beliefs</h2>
-              <span className="text-gold font-bold tracking-[0.3em] block text-base">What We Believe</span>
+              <h2 className="text-4xl md:text-5xl font-serif font-normal text-charcoal">What We Believe</h2>
+              <span className="text-gold font-bold tracking-[0.3em] block text-base">Statement of Faith</span>
             </div>
           </ScrollReveal>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
-            {['One God', 'Jesus Savior', 'Spirit Power', 'Bible Authority'].map((item, i) => (
+            {(
+              [
+                { primary: 'The Father', secondary: 'God' },
+                { primary: 'Jesus', secondary: 'Savior' },
+                { primary: 'The Holy Spirit', secondary: 'Power' },
+                { primary: 'The Bible', secondary: 'Authority' },
+              ] as const
+            ).map((item, i) => (
               <ScrollReveal key={i} direction="up" delay={i * 100}>
                 <div className="glass-card rounded-[16px] p-6 bg-white/70 border border-white/50 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-center">
                   <span className="text-2xl md:text-3xl font-serif font-normal text-charcoal block mb-2">
-                    {item.split(' ')[0]}
+                    {item.primary}
                   </span>
                   <span className="text-xs uppercase tracking-widest text-neutral font-bold">
-                    {item.split(' ')[1]}
+                    {item.secondary}
                   </span>
                 </div>
               </ScrollReveal>
