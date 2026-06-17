@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { VibrantCard } from '../../components/UI/VibrantCard';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { ScrollReveal } from '../../components/UI/ScrollReveal';
-import { Calendar, Building, Flame, Heart, BookOpen, ArrowRight, ArrowDownToLine } from 'lucide-react';
+import { Calendar, Flame, Heart, BookOpen, ArrowRight, ArrowDownToLine } from 'lucide-react';
 
 export const History = () => {
   const heroRef = useRef<HTMLDivElement>(null);
@@ -17,13 +17,13 @@ export const History = () => {
     {
       year: '1885-1887',
       title: 'The First Building',
-      icon: <Building size={32} />,
+      icon: <Calendar size={32} />,
       content: 'In August of 1885, a plot of land was purchased in Peter Street for the sum of £75. Just two years later in April 1887, the Church building was completed and opened its doors to the community. Although the building itself was small, it served its purpose short term and was eventually used as the schoolroom for the Church.'
     },
     {
       year: '1896',
       title: 'The Tabernacle',
-      icon: <Building size={32} />,
+      icon: <Calendar size={32} />,
       content: 'Probably the most exciting development in the life of the Church was with the building of a new, much larger church. The Tabernacle seated 250 people and opened in November 1896. The completion of The Tabernacle was due to the astute efforts of Rev. Albert Agar, the Pastor at the time and also the lead architect for the project. Originally from Australia, Rev Agar had arrived in Ashburton in 1893 and as the dynamic leader of the Church drove not only the promotion of the financing scheme but also the building project to fruition.'
     },
     {
@@ -35,13 +35,13 @@ export const History = () => {
     {
       year: '1926',
       title: 'Havelock Street Building',
-      icon: <Building size={32} />,
+      icon: <Calendar size={32} />,
       content: 'In due course, a new church building commenced, on land purchased on the corner of Cass and Havelock Street, where it stands today. The Havelock Street building was opened on 14th August 1926. Built at a cost of £5000 with a £850 mortgage, becoming debt-free in 1933.'
     },
     {
       year: '1985-2011',
       title: 'Growth & Rebuilding',
-      icon: <Building size={32} />,
+      icon: <Calendar size={32} />,
       content: 'In the mid-1980s, the Church was altered and extended to accommodate a growing congregation. Over the following 20 years the Church family continued to grow and areas of the building underwent considerable wear and tear. With the view to build a new Church in a different location, another property was purchased in Alford Forest Road. But after much prayer and consideration, this property was sold and the current site was extended instead. This building is now finished and officially opened on 1st May 2011. Sadly the old church building was irrevocably damaged by an earthquake on 22nd February 2011. After much prayer and consideration, it was decided to demolish the old building and make room to rebuild in the future. In its place we now have a car park, but plans are in place to extend the building.'
     }
   ];
@@ -119,28 +119,23 @@ export const History = () => {
         <div className="space-y-12">
           {timeline.map((item, i) => (
             <ScrollReveal key={i} direction="up" delay={i * 100}>
-              <div className="relative hover-lift">
-                <div className="flex flex-col md:flex-row gap-8 items-start">
-                  <div className="md:w-32 flex-shrink-0">
-                    <div className="flex items-center gap-4 md:flex-col md:items-start">
-                      <div className="w-16 h-16 bg-gold/10 rounded-full flex items-center justify-center text-white group-hover:bg-gold group-hover:text-white transition-all duration-300">
-                        {item.icon}
-                      </div>
-                      <div className="md:mt-4">
-                        <span className="text-2xl md:text-3xl font-serif font-normal text-charcoal block">{item.year}</span>
-                      </div>
+              <div className="flex flex-col md:flex-row gap-8 items-start">
+                <div className="md:w-32 flex-shrink-0">
+                  <div className="flex items-center gap-4 md:flex-col md:items-start">
+                    <div className="w-16 h-16 bg-gold/10 rounded-full flex items-center justify-center text-gold transition-all duration-300">
+                      {item.icon}
                     </div>
-                  </div>
-                  <div className="flex-1">
-                    <div className="glass-card rounded-[16px] p-8 md:p-10 bg-white/70 border border-white/50 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-                      <h3 className="text-2xl md:text-3xl font-serif font-normal text-charcoal mb-4">{item.title}</h3>
-                      <p className="text-neutral leading-relaxed text-lg">{item.content}</p>
+                    <div className="md:mt-4">
+                      <span className="text-2xl md:text-3xl font-serif font-normal text-charcoal block">{item.year}</span>
                     </div>
                   </div>
                 </div>
-                {i < timeline.length - 1 && (
-                  <div className="hidden md:block absolute left-8 top-24 w-0.5 h-12 bg-gold/30"></div>
-                )}
+                <div className="flex-1">
+                  <div className="glass-card rounded-[16px] p-8 md:p-10 bg-white/70 border border-white/50 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 hover-lift">
+                    <h3 className="text-2xl md:text-3xl font-serif font-normal text-charcoal mb-4">{item.title}</h3>
+                    <p className="text-neutral leading-relaxed text-lg">{item.content}</p>
+                  </div>
+                </div>
               </div>
             </ScrollReveal>
           ))}
