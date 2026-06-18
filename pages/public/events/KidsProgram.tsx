@@ -91,8 +91,7 @@ export const KidsProgram = () => {
                       <div>
                         <h3 className="font-serif text-2xl font-normal text-charcoal mb-2 group-hover:text-gold transition-colors duration-300">When We Meet</h3>
                         <p className="text-neutral mb-2 group-hover:text-charcoal transition-colors"><strong className="text-charcoal">Every Sunday</strong></p>
-                        <p className="text-neutral text-lg font-bold text-gold">10:30 AM</p>
-                        <p className="text-neutral text-sm mt-2 group-hover:text-charcoal transition-colors">During the morning service (school term)</p>
+                        <p className="text-neutral text-lg font-bold text-gold">10:00 AM</p>
                       </div>
                     </div>
                   </div>
@@ -189,9 +188,9 @@ export const KidsProgram = () => {
               {/* CTA */}
               <ScrollReveal direction="up" delay={600}>
                 <div className="text-center pt-8">
-                  <Link to="/im-new">
+                  <Link to="/contact">
                     <GlowingButton variant="gold" size="lg" className="!rounded-full transition-all duration-500 ease-out hover:scale-110 hover:shadow-2xl hover:shadow-gold/60 active:scale-95 hover:-translate-y-1">
-                      I'm New - Learn More
+                      Get in touch
                     </GlowingButton>
                   </Link>
                 </div>
