@@ -38,7 +38,7 @@ export const Contact = () => {
     setIsSubmitting(true);
 
     try {
-      const result = submitContactForm({
+      const result = await submitContactForm({
         firstName: formData.firstName.trim(),
         lastName: formData.lastName.trim(),
         email: formData.email.trim(),
@@ -57,11 +57,11 @@ export const Contact = () => {
 
       setTimeout(() => {
         setSuccess(false);
-        setIsSubmitting(false);
       }, 5000);
     } catch (err: unknown) {
       console.error('Error submitting contact form:', err);
-      setError('Failed to open your email app. Please try again.');
+      setError('Failed to send your message. Please try again.');
+    } finally {
       setIsSubmitting(false);
     }
   };
@@ -148,7 +148,7 @@ export const Contact = () => {
 
                   {success && (
                     <div className="mb-6 p-4 rounded-[8px] bg-green-50 border border-green-200 text-green-800">
-                      Your email app should open with your message ready to send to us.
+                      Thank you! Your message has been sent. We will get back to you soon.
                     </div>
                   )}
 
@@ -216,7 +216,7 @@ export const Contact = () => {
                       disabled={isSubmitting}
                       className="!rounded-full !bg-gold !text-white !border-gold transition-all duration-500 ease-out hover:scale-110 hover:shadow-2xl hover:shadow-gold/60 active:scale-95 hover:-translate-y-1 disabled:opacity-60 disabled:hover:scale-100 disabled:hover:translate-y-0"
                     >
-                      {isSubmitting ? 'Opening email...' : 'Send Message'}
+                      {isSubmitting ? 'Sending...' : 'Send Message'}
                     </GlowingButton>
                   </form>
                 </div>
