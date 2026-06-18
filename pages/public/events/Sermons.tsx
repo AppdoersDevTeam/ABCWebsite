@@ -107,11 +107,7 @@ export const Sermons = () => {
     const query = searchQuery.trim().toLowerCase();
     if (!query) return videos;
 
-    return videos.filter((video) => {
-      const title = video.title.toLowerCase();
-      const description = (video.description || '').toLowerCase();
-      return title.includes(query) || description.includes(query);
-    });
+    return videos.filter((video) => video.title.toLowerCase().includes(query));
   }, [videos, searchQuery]);
 
   const selectedPlaylistTitle = useMemo(() => {
