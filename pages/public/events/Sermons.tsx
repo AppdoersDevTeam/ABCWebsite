@@ -1,23 +1,33 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { GlowingButton } from '../../../components/UI/GlowingButton';
 import { ScrollReveal } from '../../../components/UI/ScrollReveal';
-import { ArrowLeft, Youtube, ExternalLink, Loader2, ArrowDownToLine, Play } from 'lucide-react';
-import { fetchVideosByHandle, isYouTubeApiConfigured, type YouTubeVideo as YouTubeVideoType } from '../../../lib/youtube';
+import { ArrowLeft, Youtube, ExternalLink, Loader2, ArrowDownToLine, Play, Search, X } from 'lucide-react';
+import {
+  fetchChannelPlaylistData,
+  fetchPlaylistVideos,
+  isYouTubeApiConfigured,
+  type YouTubeVideo as YouTubeVideoType,
+  type YouTubePlaylist,
+} from '../../../lib/youtube';
+
+const ALL_VIDEOS_PLAYLIST_ID = '__all_videos__';
 
 export const Sermons = () => {
   const heroRef = useRef<HTMLDivElement>(null);
+  const skipNextPlaylistFetch = useRef(false);
   const [videos, setVideos] = useState<YouTubeVideoType[]>([]);
+  const [playlists, setPlaylists] = useState<YouTubePlaylist[]>([]);
+  const [selectedPlaylistId, setSelectedPlaylistId] = useState<string>(ALL_VIDEOS_PLAYLIST_ID);
+  const [uploadsPlaylistId, setUploadsPlaylistId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  // Tracks which video IDs have been clicked to play (lazy iframe load)
+  const [loadingVideos, setLoadingVideos] = useState(false);
   const [activeVideos, setActiveVideos] = useState<Set<string>>(new Set());
 
-  // YouTube channel URL
   const youtubeChannelUrl = 'https://www.youtube.com/@AshburtonBaptistChurchNZ';
   const channelHandle = 'AshburtonBaptistChurchNZ';
 
-  // Placeholder videos to show if API fails or is missing
   const placeholderVideos: YouTubeVideoType[] = [
     {
       id: 'PLACEHOLDER_1',
@@ -63,53 +73,121 @@ export const Sermons = () => {
     }
   ];
 
+  const playlistOptions = useMemo(() => {
+    const options: YouTubePlaylist[] = [
+      {
+        id: ALL_VIDEOS_PLAYLIST_ID,
+        title: 'All Videos',
+        description: '',
+        thumbnail: '',
+        videoCount: 0,
+      },
+    ];
+
+    const seen = new Set<string>();
+    if (uploadsPlaylistId) {
+      seen.add(uploadsPlaylistId);
+    }
+
+    playlists.forEach((playlist) => {
+      if (!seen.has(playlist.id)) {
+        options.push(playlist);
+        seen.add(playlist.id);
+      }
+    });
+
+    return options;
+  }, [playlists, uploadsPlaylistId]);
+
+  const filteredVideos = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return videos;
+
+    return videos.filter((video) => {
+      const title = video.title.toLowerCase();
+      const description = (video.description || '').toLowerCase();
+      return title.includes(query) || description.includes(query);
+    });
+  }, [videos, searchQuery]);
+
+  const selectedPlaylistTitle = useMemo(() => {
+    return playlistOptions.find((p) => p.id === selectedPlaylistId)?.title ?? 'All Videos';
+  }, [playlistOptions, selectedPlaylistId]);
+
   useEffect(() => {
-    const fetchVideos = async () => {
+    const loadInitialData = async () => {
       try {
         setLoading(true);
-        setError(null);
 
-        // Try to use YouTube Data API v3 if configured
         if (isYouTubeApiConfigured()) {
           try {
-            const fetchedVideos = await fetchVideosByHandle(channelHandle, 50);
+            const { uploadsPlaylistId: uploadsId, playlists: channelPlaylists } =
+              await fetchChannelPlaylistData(channelHandle);
 
-            // Map the API response to our interface
-            const mappedVideos: YouTubeVideoType[] = fetchedVideos.map((video: YouTubeVideoType) => ({
-              id: video.id,
-              title: video.title,
-              publishedAt: video.publishedAt,
-              thumbnail: video.thumbnail,
-              description: video.description
-            }));
+            setUploadsPlaylistId(uploadsId);
+            setPlaylists(channelPlaylists);
+            setSelectedPlaylistId(ALL_VIDEOS_PLAYLIST_ID);
 
-            if (mappedVideos.length > 0) {
-              setVideos(mappedVideos);
-              return; // Success, exit early
+            if (uploadsId) {
+              const fetchedVideos = await fetchPlaylistVideos(uploadsId, 50);
+              setVideos(fetchedVideos);
+              skipNextPlaylistFetch.current = true;
             }
-          } catch (apiError: any) {
+            return;
+          } catch (apiError) {
             console.warn('YouTube API error:', apiError);
-            // Fall through to use placeholders
           }
         } else {
           console.info('YouTube API key not configured. Using placeholder videos. See YOUTUBE_API_SETUP.md for setup instructions.');
         }
 
-        // Fallback: Use placeholder videos if API is not configured or fails
+        setPlaylists([]);
         setVideos(placeholderVideos);
-        setError(null); // Don't show error, just use placeholders
-      } catch (err: any) {
-        console.error('Error fetching videos:', err);
-        // Fallback: Use placeholder videos if everything fails
+      } catch (err) {
+        console.error('Error fetching sermons:', err);
+        setPlaylists([]);
         setVideos(placeholderVideos);
-        setError(null);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchVideos();
+    loadInitialData();
   }, [channelHandle]);
+
+  useEffect(() => {
+    if (loading) return;
+    if (!isYouTubeApiConfigured()) return;
+
+    if (skipNextPlaylistFetch.current) {
+      skipNextPlaylistFetch.current = false;
+      return;
+    }
+
+    const playlistId =
+      selectedPlaylistId === ALL_VIDEOS_PLAYLIST_ID
+        ? uploadsPlaylistId
+        : selectedPlaylistId;
+
+    if (!playlistId) return;
+
+    const loadPlaylistVideos = async () => {
+      try {
+        setLoadingVideos(true);
+        setActiveVideos(new Set());
+
+        const fetchedVideos = await fetchPlaylistVideos(playlistId, 50);
+        setVideos(fetchedVideos);
+      } catch (err) {
+        console.error('Error fetching playlist videos:', err);
+        setVideos([]);
+      } finally {
+        setLoadingVideos(false);
+      }
+    };
+
+    loadPlaylistVideos();
+  }, [selectedPlaylistId, uploadsPlaylistId, loading]);
 
   const formatDate = (dateString: string) => {
     if (!dateString) return 'Date not available';
@@ -129,20 +207,19 @@ export const Sermons = () => {
     setActiveVideos(prev => new Set(prev).add(videoId));
   };
 
-  // YouTube high-quality thumbnail URL pattern
   const getYouTubeThumbnail = (videoId: string, apiThumbnail: string): string => {
     if (apiThumbnail) return apiThumbnail;
     return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
   };
 
+  const showFilters = !loading && (playlistOptions.length > 1 || videos.length > 0);
+
   return (
     <div className="space-y-0 overflow-hidden">
-      {/* Hero Section */}
       <section
         ref={heroRef}
         className="relative min-h-screen flex items-center justify-center overflow-hidden"
       >
-        {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <img
             src="/ABC background01.png"
@@ -154,7 +231,6 @@ export const Sermons = () => {
           <div className="absolute inset-0 bg-gray-700/45"></div>
         </div>
 
-        {/* Hero Content */}
         <div className="container relative z-10 px-4 mx-auto pt-[224px] md:pt-[256px]">
           <div className="max-w-4xl mx-auto text-center">
             <ScrollReveal direction="up" delay={150}>
@@ -183,7 +259,6 @@ export const Sermons = () => {
           </div>
         </div>
 
-        {/* Pulsing Down Arrow - positioned relative to section for proper centering */}
         <div className="absolute bottom-6 left-0 right-0 flex justify-center z-20 pulse-arrow animate-ping-pong">
           <ArrowDownToLine size={32} className="text-gold" />
         </div>
@@ -199,13 +274,7 @@ export const Sermons = () => {
             </div>
           </ScrollReveal>
 
-          {/* TODO: Spotify podcast embed — pending client confirmation.
-              When confirmed, add a Spotify iframe embed here using the church's podcast URL.
-              Example: <iframe src="https://open.spotify.com/embed/show/SHOW_ID" ... />
-          */}
-
         <div className="max-w-6xl mx-auto">
-          {/* YouTube Channel Link */}
           <ScrollReveal direction="down" delay={0}>
             <div className="glass-card rounded-[16px] p-8 md:p-12 mb-12 border border-white/50 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group hover-lift bg-white/70">
               <div className="flex flex-col md:flex-row items-center justify-between gap-4">
@@ -230,7 +299,6 @@ export const Sermons = () => {
             </div>
           </ScrollReveal>
 
-          {/* Sermons Grid */}
           <div className="mb-8">
             <ScrollReveal direction="down" delay={200}>
               <h2 className="text-3xl md:text-4xl font-serif font-normal text-charcoal mb-2">Recent Sermons</h2>
@@ -238,16 +306,95 @@ export const Sermons = () => {
             </ScrollReveal>
           </div>
 
-          {loading && (
-          <div className="text-center py-20">
-            <Loader2 className="animate-spin text-gold mx-auto mb-4" size={48} />
-            <p className="text-neutral">Loading sermons from YouTube...</p>
-          </div>
-        )}
+          {showFilters && (
+            <ScrollReveal direction="up" delay={100}>
+              <div className="mb-8 space-y-5">
+                <div className="relative max-w-xl mx-auto">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral" size={20} aria-hidden="true" />
+                  <input
+                    type="search"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search sermons by title..."
+                    aria-label="Search sermons"
+                    className="w-full pl-12 pr-12 py-3.5 rounded-full border border-white/60 bg-white/80 text-charcoal placeholder:text-neutral/70 shadow-sm focus:outline-none focus:ring-2 focus:ring-gold focus:border-gold transition-all"
+                  />
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchQuery('')}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral hover:text-charcoal transition-colors"
+                      aria-label="Clear search"
+                    >
+                      <X size={18} />
+                    </button>
+                  )}
+                </div>
 
-          {!loading && videos.length > 0 && (
+                {playlistOptions.length > 1 && (
+                  <div className="flex justify-center">
+                    <div className="inline-flex flex-wrap justify-center gap-2 bg-white/60 backdrop-blur-sm rounded-full p-1.5 border border-white/50 max-w-full">
+                      {playlistOptions.map((playlist) => (
+                        <button
+                          key={playlist.id}
+                          type="button"
+                          onClick={() => setSelectedPlaylistId(playlist.id)}
+                          disabled={loadingVideos}
+                          className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 disabled:opacity-60 ${
+                            selectedPlaylistId === playlist.id
+                              ? 'bg-gold text-white shadow-lg shadow-gold/30'
+                              : 'text-charcoal/80 hover:bg-white/80 hover:text-charcoal'
+                          }`}
+                        >
+                          {playlist.title}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </ScrollReveal>
+          )}
+
+          {loading && (
+            <div className="text-center py-20">
+              <Loader2 className="animate-spin text-gold mx-auto mb-4" size={48} />
+              <p className="text-neutral">Loading sermons from YouTube...</p>
+            </div>
+          )}
+
+          {!loading && loadingVideos && (
+            <div className="text-center py-12">
+              <Loader2 className="animate-spin text-gold mx-auto mb-4" size={40} />
+              <p className="text-neutral">Loading {selectedPlaylistTitle}...</p>
+            </div>
+          )}
+
+          {!loading && !loadingVideos && filteredVideos.length === 0 && (
+            <div className="text-center py-16">
+              <div className="w-20 h-20 bg-gold/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Search className="text-gold/60" size={36} />
+              </div>
+              <p className="text-charcoal text-lg font-serif">
+                {searchQuery
+                  ? `No sermons match "${searchQuery}"`
+                  : `No videos found in ${selectedPlaylistTitle}`}
+              </p>
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="mt-4 text-gold text-sm font-bold hover:underline"
+                >
+                  Clear search
+                </button>
+              )}
+            </div>
+          )}
+
+          {!loading && !loadingVideos && filteredVideos.length > 0 && (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {videos.map((video, i) => {
+              {filteredVideos.map((video, i) => {
                 const isPlaceholder = video.id.startsWith('PLACEHOLDER');
                 const isActive = activeVideos.has(video.id);
                 const thumbnailUrl = !isPlaceholder ? getYouTubeThumbnail(video.id, video.thumbnail) : '';
@@ -255,7 +402,6 @@ export const Sermons = () => {
                 return (
                   <ScrollReveal key={video.id || i} direction="up" delay={i * 100}>
                     <div className="glass-card rounded-[16px] border border-white/50 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group hover-lift bg-white/70 overflow-hidden">
-                      {/* Video Embed or Placeholder */}
                       <div className="relative w-full pb-[56.25%] bg-gray-100">
                         {isPlaceholder ? (
                           <div className="absolute inset-0 flex flex-col items-center justify-center bg-gold/10 p-6 text-center">
@@ -264,7 +410,6 @@ export const Sermons = () => {
                             <p className="text-neutral text-sm">Check back shortly for this sermon</p>
                           </div>
                         ) : isActive ? (
-                          // Inline iframe embed — loads after user clicks play
                           <iframe
                             className="absolute top-0 left-0 w-full h-full"
                             src={`https://www.youtube.com/embed/${video.id}?autoplay=1`}
@@ -274,7 +419,6 @@ export const Sermons = () => {
                             loading="lazy"
                           ></iframe>
                         ) : (
-                          // Click-to-play thumbnail (avoids loading all iframes on page load)
                           <button
                             onClick={() => handlePlayVideo(video.id)}
                             className="absolute inset-0 w-full h-full focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2 rounded-none"
@@ -285,7 +429,6 @@ export const Sermons = () => {
                               alt={video.title}
                               className="w-full h-full object-cover"
                             />
-                            {/* Play button overlay */}
                             <div className="absolute inset-0 flex items-center justify-center bg-black/20 hover:bg-black/30 transition-colors duration-200">
                               <div className="w-16 h-16 bg-gold rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform duration-200">
                                 <Play size={28} className="text-white ml-1" fill="white" />
@@ -295,7 +438,6 @@ export const Sermons = () => {
                         )}
                       </div>
 
-                      {/* Video Info */}
                       <div className="p-4 sm:p-5 bg-white/90">
                         <h3 className="text-sm sm:text-[1rem] font-serif font-normal text-charcoal mb-2 leading-snug line-clamp-3 break-words min-h-[3.75rem] group-hover:text-gold transition-colors duration-300">
                           {video.title}

@@ -16,6 +16,19 @@ export interface YouTubeVideo {
   viewCount?: string;
 }
 
+export interface YouTubePlaylist {
+  id: string;
+  title: string;
+  description: string;
+  thumbnail: string;
+  videoCount: number;
+}
+
+export interface ChannelPlaylistData {
+  uploadsPlaylistId: string | null;
+  playlists: YouTubePlaylist[];
+}
+
 /**
  * Get channel ID from channel handle (e.g., @AshburtonBaptistChurchNZ)
  * @param handle - YouTube channel handle (without @)
@@ -71,13 +84,35 @@ export async function getChannelIdFromHandle(handle: string): Promise<string | n
 }
 
 /**
- * Fetch videos from a YouTube channel using channel ID
- * @param channelId - YouTube channel ID
- * @param maxResults - Maximum number of videos to fetch (default: 50, max: 50)
- * @returns Array of YouTube videos
+ * Get the uploads playlist ID for a YouTube channel
  */
-export async function fetchChannelVideos(
-  channelId: string,
+export async function getUploadsPlaylistId(channelId: string): Promise<string | null> {
+  if (!YOUTUBE_API_KEY) {
+    return null;
+  }
+
+  const channelResponse = await fetch(
+    `${YOUTUBE_API_BASE_URL}/channels?part=contentDetails&id=${channelId}&key=${YOUTUBE_API_KEY}`
+  );
+
+  if (!channelResponse.ok) {
+    throw new Error(`Failed to fetch channel details: ${channelResponse.statusText}`);
+  }
+
+  const channelData = await channelResponse.json();
+
+  if (!channelData.items || channelData.items.length === 0) {
+    throw new Error('Channel not found');
+  }
+
+  return channelData.items[0].contentDetails?.relatedPlaylists?.uploads ?? null;
+}
+
+/**
+ * Fetch videos from a YouTube playlist
+ */
+export async function fetchPlaylistVideos(
+  playlistId: string,
   maxResults: number = 50
 ): Promise<YouTubeVideo[]> {
   if (!YOUTUBE_API_KEY) {
@@ -86,30 +121,8 @@ export async function fetchChannelVideos(
   }
 
   try {
-    // First, get the uploads playlist ID from the channel
-    const channelResponse = await fetch(
-      `${YOUTUBE_API_BASE_URL}/channels?part=contentDetails&id=${channelId}&key=${YOUTUBE_API_KEY}`
-    );
-
-    if (!channelResponse.ok) {
-      throw new Error(`Failed to fetch channel details: ${channelResponse.statusText}`);
-    }
-
-    const channelData = await channelResponse.json();
-    
-    if (!channelData.items || channelData.items.length === 0) {
-      throw new Error('Channel not found');
-    }
-
-    const uploadsPlaylistId = channelData.items[0].contentDetails?.relatedPlaylists?.uploads;
-    
-    if (!uploadsPlaylistId) {
-      throw new Error('Uploads playlist not found');
-    }
-
-    // Fetch videos from the uploads playlist
     const videosResponse = await fetch(
-      `${YOUTUBE_API_BASE_URL}/playlistItems?part=snippet&playlistId=${uploadsPlaylistId}&maxResults=${maxResults}&key=${YOUTUBE_API_KEY}`
+      `${YOUTUBE_API_BASE_URL}/playlistItems?part=snippet&playlistId=${playlistId}&maxResults=${maxResults}&key=${YOUTUBE_API_KEY}`
     );
 
     if (!videosResponse.ok) {
@@ -122,41 +135,122 @@ export async function fetchChannelVideos(
       return [];
     }
 
-    // Get additional video details (duration, view count, etc.)
-    const videoIds = videosData.items.map((item: any) => item.snippet.resourceId.videoId).join(',');
-    
+    const videoIds = videosData.items
+      .map((item: any) => item.snippet.resourceId?.videoId)
+      .filter(Boolean)
+      .join(',');
+
+    if (!videoIds) {
+      return [];
+    }
+
     const videoDetailsResponse = await fetch(
       `${YOUTUBE_API_BASE_URL}/videos?part=snippet,statistics,contentDetails&id=${videoIds}&key=${YOUTUBE_API_KEY}`
     );
 
     const videoDetailsData = await videoDetailsResponse.json();
     const videoDetailsMap = new Map(
-      videoDetailsData.items.map((video: any) => [video.id, video])
+      (videoDetailsData.items || []).map((video: any) => [video.id, video])
     );
 
-    // Map the data to our YouTubeVideo interface
-    const videos: YouTubeVideo[] = videosData.items.map((item: any) => {
-      const videoId = item.snippet.resourceId.videoId;
-      const details = videoDetailsMap.get(videoId);
-      
-      return {
-        id: videoId,
-        title: item.snippet.title,
-        publishedAt: item.snippet.publishedAt,
-        thumbnail: item.snippet.thumbnails?.high?.url || item.snippet.thumbnails?.medium?.url || '',
-        description: item.snippet.description || '',
-        channelId: item.snippet.channelId,
-        channelTitle: item.snippet.channelTitle,
-        duration: details?.contentDetails?.duration,
-        viewCount: details?.statistics?.viewCount,
-      };
-    });
+    const videos: YouTubeVideo[] = videosData.items
+      .map((item: any) => {
+        const videoId = item.snippet.resourceId?.videoId;
+        if (!videoId) return null;
+
+        const details = videoDetailsMap.get(videoId);
+
+        return {
+          id: videoId,
+          title: item.snippet.title,
+          publishedAt: item.snippet.publishedAt,
+          thumbnail: item.snippet.thumbnails?.high?.url || item.snippet.thumbnails?.medium?.url || '',
+          description: item.snippet.description || '',
+          channelId: item.snippet.channelId,
+          channelTitle: item.snippet.channelTitle,
+          duration: details?.contentDetails?.duration,
+          viewCount: details?.statistics?.viewCount,
+        };
+      })
+      .filter(Boolean) as YouTubeVideo[];
 
     return videos;
   } catch (error) {
-    console.error('Error fetching channel videos:', error);
+    console.error('Error fetching playlist videos:', error);
     throw error;
   }
+}
+
+/**
+ * Fetch public playlists from a YouTube channel
+ */
+export async function fetchChannelPlaylists(
+  channelId: string,
+  maxResults: number = 50
+): Promise<YouTubePlaylist[]> {
+  if (!YOUTUBE_API_KEY) {
+    return [];
+  }
+
+  const response = await fetch(
+    `${YOUTUBE_API_BASE_URL}/playlists?part=snippet,contentDetails&channelId=${channelId}&maxResults=${maxResults}&key=${YOUTUBE_API_KEY}`
+  );
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch playlists: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+
+  if (!data.items || data.items.length === 0) {
+    return [];
+  }
+
+  return data.items.map((item: any) => ({
+    id: item.id,
+    title: item.snippet.title,
+    description: item.snippet.description || '',
+    thumbnail: item.snippet.thumbnails?.medium?.url || item.snippet.thumbnails?.default?.url || '',
+    videoCount: Number(item.contentDetails?.itemCount || 0),
+  }));
+}
+
+/**
+ * Fetch playlists and uploads playlist ID for a channel handle
+ */
+export async function fetchChannelPlaylistData(handle: string): Promise<ChannelPlaylistData> {
+  const cleanHandle = handle.replace('@', '');
+  const channelId = await getChannelIdFromHandle(cleanHandle);
+
+  if (!channelId) {
+    throw new Error(`Could not find channel ID for handle: ${handle}`);
+  }
+
+  const [uploadsPlaylistId, playlists] = await Promise.all([
+    getUploadsPlaylistId(channelId),
+    fetchChannelPlaylists(channelId),
+  ]);
+
+  return { uploadsPlaylistId, playlists };
+}
+
+/**
+ * Fetch videos from a YouTube channel using channel ID
+ * @param channelId - YouTube channel ID
+ * @param maxResults - Maximum number of videos to fetch (default: 50, max: 50)
+ * @returns Array of YouTube videos
+ */
+export async function fetchChannelVideos(
+  channelId: string,
+  maxResults: number = 50
+): Promise<YouTubeVideo[]> {
+  const uploadsPlaylistId = await getUploadsPlaylistId(channelId);
+
+  if (!uploadsPlaylistId) {
+    throw new Error('Uploads playlist not found');
+  }
+
+  return fetchPlaylistVideos(uploadsPlaylistId, maxResults);
 }
 
 /**
