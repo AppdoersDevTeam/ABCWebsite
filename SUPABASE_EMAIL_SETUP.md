@@ -273,6 +273,8 @@ Need to reset your password? We've got you
 | SMTP auth failed | Use App Password, not normal Google password; confirm 2-Step Verification is on |
 | App Passwords missing | Workspace admin may need to allow App Passwords for the org |
 | Link goes to wrong site | Site URL and `VITE_SITE_URL` must match production domain |
+| Sign up again, no email | Supabase does not resend on duplicate signup — use **Resend confirmation email** on the login page (the app now does this automatically for unconfirmed accounts) |
+| “Success” but no email arrives | Supabase may rate-limit auth emails (default was **2 per hour** per project). Check **Authentication → Rate Limits** and increase **Email sent**; also verify custom SMTP in **Authentication → Emails → SMTP** |
 | Logo doesn’t show | Logo must be publicly reachable at `https://ashburtonbaptistchurch.vercel.app/ABC%20Logo.png` |
 | Lands in spam | Emails from Google Workspace usually deliver well; check the custom HTML template is saved |
 

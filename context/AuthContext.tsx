@@ -5,6 +5,7 @@ import { ADMIN_EMAIL, SUPER_ADMIN_EMAIL } from '../lib/constants';
 import { getUserTimezone } from '../lib/dateUtils';
 import { syncDirectoryUserLink } from '../lib/directoryUserLink';
 import { hasAuthCallbackParams, completeAuthCallbackFromUrl } from '../lib/authCallback';
+import { getAuthEmailRedirectUrl } from '../lib/authRedirect';
 import type { AuthError, Session, User as SupabaseUser } from '@supabase/supabase-js';
 
 function splitName(fullName: string): { first_name: string; last_name: string } {
@@ -36,6 +37,7 @@ function buildFallbackUser(su: SupabaseUser): User {
 export type SignUpResult = {
   needsEmailVerification: boolean;
   emailAlreadyRegistered: boolean;
+  resentConfirmation: boolean;
 };
 
 interface AuthContextType {
@@ -475,6 +477,20 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
     return siteUrl.replace(/\/$/, '');
   };
 
+  const getSignupConfirmationRedirect = () =>
+    getAuthEmailRedirectUrl('/auth/callback');
+
+  const resendSignupConfirmation = async (email: string) => {
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email: email.trim().toLowerCase(),
+      options: {
+        emailRedirectTo: getSignupConfirmationRedirect(),
+      },
+    });
+    if (error) throw error;
+  };
+
   const signUpWithEmail = async (email: string, password: string, firstName: string, lastName: string, phone?: string) => {
     setIsLoading(true);
     try {
@@ -484,7 +500,7 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
         email: email.trim().toLowerCase(),
         password,
         options: {
-          emailRedirectTo: `${getSiteBaseUrl()}/#/auth/callback`,
+          emailRedirectTo: getSignupConfirmationRedirect(),
           data: {
             full_name: fullName,
             first_name: firstName,
@@ -499,8 +515,17 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
 
       const emailAlreadyRegistered =
         !!data.user && (data.user.identities?.length ?? 0) === 0;
+      const isAlreadyConfirmed = !!data.user?.email_confirmed_at;
+      let resentConfirmation = false;
+
+      if (emailAlreadyRegistered && data.user && !isAlreadyConfirmed) {
+        await resendSignupConfirmation(email);
+        resentConfirmation = true;
+      }
+
       const needsEmailVerification =
-        !data.session && !!data.user && !emailAlreadyRegistered;
+        (!data.session && !!data.user && !emailAlreadyRegistered) ||
+        (emailAlreadyRegistered && !isAlreadyConfirmed);
 
       if (data.user && data.session) {
         const userProfile = await fetchUserProfile(data.user);
@@ -514,24 +539,13 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
         setUser(userProfile);
       }
 
-      return { needsEmailVerification, emailAlreadyRegistered };
+      return { needsEmailVerification, emailAlreadyRegistered, resentConfirmation };
     } catch (error) {
       console.error('Sign up error:', error);
       throw error;
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const resendSignupConfirmation = async (email: string) => {
-    const { error } = await supabase.auth.resend({
-      type: 'signup',
-      email: email.trim().toLowerCase(),
-      options: {
-        emailRedirectTo: `${getSiteBaseUrl()}/#/auth/callback`,
-      },
-    });
-    if (error) throw error;
   };
 
   const signInWithGoogle = async () => {
@@ -608,12 +622,8 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
 
   const sendPasswordReset = async (email: string) => {
     try {
-      // Use environment variable for production URL, fallback to window.location.origin for development
-      const siteUrl = import.meta.env.VITE_SITE_URL || window.location.origin;
-      const baseUrl = siteUrl.replace(/\/$/, '');
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        // App uses HashRouter, so the SPA route must include the hash fragment.
-        redirectTo: `${baseUrl}/#/reset-password`,
+        redirectTo: getAuthEmailRedirectUrl('/reset-password'),
       });
 
       if (error) throw error;

@@ -12,6 +12,7 @@ import {
   type SignupFieldErrors,
 } from '../../lib/validateSignupFields';
 import { normalizePhoneForAuth, sanitizePhoneInput } from '../../lib/validatePhone';
+import { getAuthEmailErrorMessage } from '../../lib/authEmailErrors';
 
 function fieldInputClass(hasError: boolean): string {
   const base =
@@ -177,11 +178,23 @@ export const Login = () => {
         setPendingVerificationEmail(verificationEmail);
 
         if (result.emailAlreadyRegistered) {
-          setAwaitingEmailVerification(true);
           setIsSignUp(false);
-          setSuccess(
-            `An account with ${verificationEmail} already exists. If you have not confirmed your email yet, use “Resend confirmation email” below. If you already confirmed, sign in with your password.`
-          );
+          if (result.resentConfirmation) {
+            setAwaitingEmailVerification(true);
+            setSuccess(
+              `A new confirmation email was sent to ${verificationEmail}. Click the link once, then return here and sign in.`
+            );
+          } else if (result.needsEmailVerification) {
+            setAwaitingEmailVerification(true);
+            setSuccess(
+              `An account with ${verificationEmail} already exists but is not confirmed yet. Use “Resend confirmation email” below.`
+            );
+          } else {
+            setAwaitingEmailVerification(false);
+            setSuccess(
+              `An account with ${verificationEmail} already exists. Please sign in with your password.`
+            );
+          }
           return;
         }
 
@@ -259,8 +272,13 @@ export const Login = () => {
         setAwaitingEmailVerification(true);
         setIsSignUp(false);
         setError(
-          'Your email is not confirmed yet. Check your inbox for the confirmation link, or resend it below.'
+          'Your email is not confirmed yet. Use “Resend confirmation email” below, or check your spam folder.'
         );
+        return;
+      }
+
+      if (message.includes('rate limit') || message.includes('over_email_send_rate_limit')) {
+        setError(getAuthEmailErrorMessage(err));
         return;
       }
 
@@ -289,7 +307,7 @@ export const Login = () => {
       setSuccess(`A new confirmation email was sent to ${targetEmail}. Click the link once, then sign in here.`);
     } catch (err: any) {
       console.error('Resend confirmation error:', err);
-      setError(err?.message || 'Could not resend confirmation email. Please try again.');
+      setError(getAuthEmailErrorMessage(err));
     } finally {
       setIsResendingConfirmation(false);
     }
