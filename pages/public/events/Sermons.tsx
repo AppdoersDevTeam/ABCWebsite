@@ -330,7 +330,7 @@ export const Sermons = () => {
                 <div className="relative max-w-xl mx-auto">
                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral" size={20} aria-hidden="true" />
                   <input
-                    type="search"
+                    type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search sermons by title..."
