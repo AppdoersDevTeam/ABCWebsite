@@ -155,7 +155,7 @@ export const ImNew = () => {
                                     {item.q === "How to Find Us" && (
                                         <div className="mt-4">
                                             <a 
-                                                href="https://www.google.com/maps/search/?api=1&query=284+Havelock+Street+Ashburton+7700" 
+                                                href="https://www.google.com/maps/place/Ashburton+Baptist+Church/@-43.9051098,171.7502485,18.5z/data=!4m15!1m8!3m7!1s0x6d2dbba461b8d6f5:0x63966241b07bfc88!2s284+Havelock+Street,+Ashburton+7700!3b1!8m2!3d-43.9051173!4d171.7502208!16s%2Fg%2F11snqxblnc!3m5!1s0x6d2dbba463785799:0x96360c079be56e2f!8m2!3d-43.9051173!4d171.7502208!16s%2Fg%2F11cnc86fsn?entry=ttu&g_ep=EgoyMDI2MDYxMy4wIKXMDSoASAFQAw%3D%3D" 
                                                 target="_blank" 
                                                 rel="noopener noreferrer"
                                                 className="inline-flex items-center gap-2 text-gold hover:text-charcoal font-bold transition-colors duration-300 group/link"
