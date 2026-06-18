@@ -24,6 +24,10 @@ export const LoginError = () => {
         return 'Google sign-in failed. Please try again or use email/password.';
       case 'login_failed':
         return 'Login failed. Please check your credentials and try again.';
+      case 'confirm_failed':
+        return 'We could not confirm your email from that link. If you already confirmed, try signing in. Otherwise, request a new confirmation email from the sign-in page.';
+      case 'email_not_confirmed':
+        return 'Your email address has not been confirmed yet. Check your inbox for the confirmation link, or sign in and use “Resend confirmation email”.';
       default:
         return 'An error occurred during login. Please try again.';
     }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { Shield, User as UserIcon } from 'lucide-react';
@@ -51,9 +51,12 @@ export const Login = () => {
   const [resetEmail, setResetEmail] = useState('');
   const [fieldErrors, setFieldErrors] = useState<SignupFieldErrors>({});
   const [awaitingEmailVerification, setAwaitingEmailVerification] = useState(false);
+  const [pendingVerificationEmail, setPendingVerificationEmail] = useState('');
+  const [isResendingConfirmation, setIsResendingConfirmation] = useState(false);
   const {
     loginWithEmail,
     signUpWithEmail,
+    resendSignupConfirmation,
     signInWithGoogle,
     isLoading,
     user,
@@ -61,6 +64,25 @@ export const Login = () => {
     sendPasswordReset,
   } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const status = params.get('status');
+    if (status === 'confirm_link_used') {
+      setIsSignUp(false);
+      setAwaitingEmailVerification(false);
+      setSuccess(
+        'This confirmation link has already been used or has expired. If you already confirmed your email, sign in below with your password. Otherwise, use “Resend confirmation email”.'
+      );
+      navigate('/login', { replace: true });
+    } else if (status === 'email_confirmed') {
+      setIsSignUp(false);
+      setAwaitingEmailVerification(false);
+      setSuccess('Your email is confirmed. Sign in with your email and password.');
+      navigate('/login', { replace: true });
+    }
+  }, [location.search, navigate]);
 
   const clearFieldError = (field: SignupField) => {
     setFieldErrors((prev) => {
@@ -151,10 +173,22 @@ export const Login = () => {
           lastName.trim(),
           normalizedPhone
         );
+        const verificationEmail = email.trim().toLowerCase();
+        setPendingVerificationEmail(verificationEmail);
+
+        if (result.emailAlreadyRegistered) {
+          setAwaitingEmailVerification(true);
+          setIsSignUp(false);
+          setSuccess(
+            `An account with ${verificationEmail} already exists. If you have not confirmed your email yet, use “Resend confirmation email” below. If you already confirmed, sign in with your password.`
+          );
+          return;
+        }
+
         if (result.needsEmailVerification) {
           setAwaitingEmailVerification(true);
           setSuccess(
-            `We sent a verification link to ${email.trim()}. Please check your inbox and click the link to confirm your email.`
+            `We sent a verification link to ${verificationEmail}. Click the link once to confirm your email, then return here and sign in.`
           );
           return;
         }
@@ -218,7 +252,46 @@ export const Login = () => {
     } catch (err: any) {
       console.error('Login error:', err);
       setIsLoggingIn(false);
+      const message = (err?.message || '').toLowerCase();
+
+      if (message.includes('email not confirmed')) {
+        setPendingVerificationEmail(email.trim().toLowerCase());
+        setAwaitingEmailVerification(true);
+        setIsSignUp(false);
+        setError(
+          'Your email is not confirmed yet. Check your inbox for the confirmation link, or resend it below.'
+        );
+        return;
+      }
+
+      if (message.includes('invalid login credentials') || message.includes('invalid email or password')) {
+        setError('Incorrect email or password. Please try again.');
+        return;
+      }
+
       navigate(`/login-error?error=login_failed`, { replace: true });
+    }
+  };
+
+  const handleResendConfirmation = async () => {
+    const targetEmail = (pendingVerificationEmail || email).trim().toLowerCase();
+    if (!targetEmail) {
+      setError('Enter your email address first.');
+      return;
+    }
+
+    setIsResendingConfirmation(true);
+    setError(null);
+    try {
+      await resendSignupConfirmation(targetEmail);
+      setPendingVerificationEmail(targetEmail);
+      setEmail(targetEmail);
+      setSuccess(`A new confirmation email was sent to ${targetEmail}. Click the link once, then sign in here.`);
+    } catch (err: any) {
+      console.error('Resend confirmation error:', err);
+      setError(err?.message || 'Could not resend confirmation email. Please try again.');
+    } finally {
+      setIsResendingConfirmation(false);
     }
   };
 
@@ -280,19 +353,52 @@ export const Login = () => {
         {awaitingEmailVerification ? (
           <div className="space-y-4 text-sm text-neutral">
             <p>
-              Check your inbox for a verification email. After confirming, you can sign in and wait for admin approval.
+              <strong>Next steps:</strong>
             </p>
-            <button
-              type="button"
-              onClick={() => {
-                setAwaitingEmailVerification(false);
-                setIsSignUp(false);
-                setSuccess(null);
-              }}
-              className="text-gold hover:text-charcoal font-bold"
-            >
-              Back to sign in
-            </button>
+            <ol className="list-decimal list-inside space-y-2 pl-1">
+              <li>Open the email we sent and click the confirmation link <strong>once</strong>.</li>
+              <li>Return here and sign in with your email and password.</li>
+            </ol>
+            <p className="text-xs text-neutral/80">
+              The link only works once. If you already clicked it, you do not need another email — just sign in.
+            </p>
+            {!pendingVerificationEmail && (
+              <FormField error={fieldErrors.email}>
+                <label htmlFor="resend-email" className="block text-sm font-bold text-charcoal mb-2">
+                  Email address
+                </label>
+                <input
+                  id="resend-email"
+                  type="email"
+                  className={fieldInputClass(!!fieldErrors.email)}
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </FormField>
+            )}
+            <div className="flex flex-col gap-2">
+              <GlowingButton
+                type="button"
+                fullWidth
+                disabled={isResendingConfirmation}
+                onClick={handleResendConfirmation}
+              >
+                {isResendingConfirmation ? 'Sending...' : 'Resend confirmation email'}
+              </GlowingButton>
+              <button
+                type="button"
+                onClick={() => {
+                  setAwaitingEmailVerification(false);
+                  setIsSignUp(false);
+                  setSuccess(null);
+                  setError(null);
+                }}
+                className="text-gold hover:text-charcoal font-bold"
+              >
+                Back to sign in
+              </button>
+            </div>
           </div>
         ) : (
         <form className="mt-4 space-y-6" onSubmit={handleSubmit}>
@@ -433,7 +539,20 @@ export const Login = () => {
           )}
 
           {!isSignUp && !isResettingPassword && (
-            <div className="flex items-center justify-end">
+            <div className="flex items-center justify-between gap-4">
+              <button
+                type="button"
+                className="text-sm text-neutral hover:text-charcoal font-bold text-left"
+                onClick={() => {
+                  setAwaitingEmailVerification(true);
+                  setIsSignUp(false);
+                  setPendingVerificationEmail(email.trim().toLowerCase());
+                  setError(null);
+                  setSuccess(null);
+                }}
+              >
+                Need a confirmation email?
+              </button>
               <Link
                 to="#"
                 className="text-sm text-gold hover:text-charcoal font-bold"
@@ -495,6 +614,7 @@ export const Login = () => {
                 setSuccess(null);
                 setFieldErrors({});
                 setAwaitingEmailVerification(false);
+                setPendingVerificationEmail('');
               }}
               className="text-sm text-gold hover:text-charcoal font-bold"
             >

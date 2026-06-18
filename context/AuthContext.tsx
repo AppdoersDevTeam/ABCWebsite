@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase';
 import { ADMIN_EMAIL, SUPER_ADMIN_EMAIL } from '../lib/constants';
 import { getUserTimezone } from '../lib/dateUtils';
 import { syncDirectoryUserLink } from '../lib/directoryUserLink';
+import { hasAuthCallbackParams, completeAuthCallbackFromUrl } from '../lib/authCallback';
 import type { AuthError, Session, User as SupabaseUser } from '@supabase/supabase-js';
 
 function splitName(fullName: string): { first_name: string; last_name: string } {
@@ -32,11 +33,17 @@ function buildFallbackUser(su: SupabaseUser): User {
   };
 }
 
+export type SignUpResult = {
+  needsEmailVerification: boolean;
+  emailAlreadyRegistered: boolean;
+};
+
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   loginWithEmail: (email: string, password: string) => Promise<void>;
-  signUpWithEmail: (email: string, password: string, firstName: string, lastName: string, phone?: string) => Promise<{ needsEmailVerification: boolean }>;
+  signUpWithEmail: (email: string, password: string, firstName: string, lastName: string, phone?: string) => Promise<SignUpResult>;
+  resendSignupConfirmation: (email: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
   isAuthenticated: boolean;
@@ -393,29 +400,32 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
       }
     });
 
-    // Handle OAuth callback - check URL for hash fragments
+    // Handle OAuth / email-confirmation callback params on initial load
     const handleOAuthCallback = async () => {
-      const hashParams = new URLSearchParams(window.location.hash.substring(1));
-      const accessToken = hashParams.get('access_token');
-      
-      if (accessToken) {
-        console.log('AuthContext - OAuth callback detected, processing...');
-        // Supabase should have already processed this, but we'll wait for the session
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user) {
-          const userProfile = await fetchUserProfile(session.user);
-          if (userProfile) {
-            // Ensure timezone is set for OAuth users
-            const userTimezone = getUserTimezone();
-            if (!userProfile.user_timezone) {
-              await supabase
-                .from('users')
-                .update({ user_timezone: userTimezone })
-                .eq('id', session.user.id);
-              userProfile.user_timezone = userTimezone;
-            }
-            setUser(userProfile);
+      if (!hasAuthCallbackParams()) {
+        return;
+      }
+
+      console.log('AuthContext - Auth callback params detected, processing...');
+      const { error: callbackError } = await completeAuthCallbackFromUrl();
+      if (callbackError) {
+        console.warn('AuthContext - Callback exchange failed:', callbackError);
+        return;
+      }
+
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        const userProfile = await fetchUserProfile(session.user);
+        if (userProfile) {
+          const userTimezone = getUserTimezone();
+          if (!userProfile.user_timezone) {
+            await supabase
+              .from('users')
+              .update({ user_timezone: userTimezone })
+              .eq('id', session.user.id);
+            userProfile.user_timezone = userTimezone;
           }
+          setUser(userProfile);
         }
       }
     };
@@ -487,7 +497,10 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
 
       if (error) throw error;
 
-      const needsEmailVerification = !data.session && !!data.user;
+      const emailAlreadyRegistered =
+        !!data.user && (data.user.identities?.length ?? 0) === 0;
+      const needsEmailVerification =
+        !data.session && !!data.user && !emailAlreadyRegistered;
 
       if (data.user && data.session) {
         const userProfile = await fetchUserProfile(data.user);
@@ -501,13 +514,24 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
         setUser(userProfile);
       }
 
-      return { needsEmailVerification };
+      return { needsEmailVerification, emailAlreadyRegistered };
     } catch (error) {
       console.error('Sign up error:', error);
       throw error;
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const resendSignupConfirmation = async (email: string) => {
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email: email.trim().toLowerCase(),
+      options: {
+        emailRedirectTo: `${getSiteBaseUrl()}/#/auth/callback`,
+      },
+    });
+    if (error) throw error;
   };
 
   const signInWithGoogle = async () => {
@@ -626,6 +650,7 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
         isLoading,
         loginWithEmail,
         signUpWithEmail,
+        resendSignupConfirmation,
         signInWithGoogle,
         logout,
         isAuthenticated: !!user && user.is_approved,

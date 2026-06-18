@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { User } from '../../types';
+import { completeAuthCallbackFromUrl } from '../../lib/authCallback';
 
 export const OAuthCallback = () => {
   const navigate = useNavigate();
@@ -44,8 +45,10 @@ export const OAuthCallback = () => {
     
     // Also check if we're on the callback route and have a session (OAuth might have completed)
     const hasOAuthParams = hash.includes('access_token') || search.includes('access_token') || 
+                          search.includes('code=') || hash.includes('code=') ||
                           hash.includes('error') || search.includes('error') ||
-                          (location.pathname === '/auth/callback' && (hash === '#' || hash === '')); // Empty hash on callback route might mean OAuth completed
+                          hash.includes('type=signup') || hash.includes('type=email') ||
+                          (location.pathname === '/auth/callback' && (hash === '#' || hash === ''));
     
     setIsOAuthCallback(hasOAuthParams || location.pathname === '/auth/callback');
   }, [location]);
@@ -65,6 +68,24 @@ export const OAuthCallback = () => {
         }
 
         console.log('OAuthCallback - Processing callback');
+
+        const { error: callbackError } = await completeAuthCallbackFromUrl();
+        if (callbackError) {
+          console.warn('OAuthCallback - Callback exchange failed:', callbackError);
+          setRedirectAttempted(true);
+          replaceToAppBase();
+          const lower = callbackError.toLowerCase();
+          if (
+            lower.includes('expired') ||
+            lower.includes('invalid') ||
+            lower.includes('already')
+          ) {
+            navigate('/login?status=confirm_link_used', { replace: true });
+          } else {
+            navigate('/login-error?error=confirm_failed', { replace: true });
+          }
+          return;
+        }
 
         // Always check session first to get the most up-to-date state
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();

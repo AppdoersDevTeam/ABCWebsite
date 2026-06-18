@@ -9,7 +9,8 @@ export const CONTACT_FORM_RECIPIENT = 'pastor@ashburtonbaptist.co.nz';
 export const CHURCH_NAME = 'Ashburton Baptist Church';
 export const CHURCH_OFFICE_EMAIL = 'office@ashburtonbaptist.co.nz';
 export const CHURCH_WEBSITE_URL = 'https://www.ashburtonbaptist.co.nz';
-export const CHURCH_LOGO_URL = `${CHURCH_WEBSITE_URL}/ABC%20Logo.png`;
+/** Public logo URL for emails (Vercel). www.ashburtonbaptist.co.nz still serves the old site. */
+export const CHURCH_LOGO_URL = 'https://ashburtonbaptistchurch.vercel.app/ABC%20Logo.png';
 export const CHURCH_ADDRESS = '284 Havelock Street, Ashburton 7700';
 
 /** Build a display name from first + last, falling back to legacy name. */
