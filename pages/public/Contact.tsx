@@ -87,8 +87,12 @@ export const Contact = () => {
                   <h3 className="text-3xl font-serif font-normal text-charcoal mb-8">Send a Message</h3>
                   <form className="space-y-6">
                     <div className="grid lg:grid-cols-2 gap-6">
-                      <input type="text" placeholder="NAME" className="w-full p-4 rounded-[8px] input-sun" />
+                      <input type="text" placeholder="FIRST NAME" className="w-full p-4 rounded-[8px] input-sun" />
+                      <input type="text" placeholder="LAST NAME" className="w-full p-4 rounded-[8px] input-sun" />
+                    </div>
+                    <div className="grid lg:grid-cols-2 gap-6">
                       <input type="email" placeholder="EMAIL" className="w-full p-4 rounded-[8px] input-sun" />
+                      <input type="tel" placeholder="PHONE NUMBER" className="w-full p-4 rounded-[8px] input-sun" />
                     </div>
                     <input type="text" placeholder="SUBJECT" className="w-full p-4 rounded-[8px] input-sun" />
                     <textarea rows={6} placeholder="MESSAGE" className="w-full p-4 rounded-[8px] input-sun"></textarea>
