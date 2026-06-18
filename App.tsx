@@ -15,6 +15,7 @@ import { EventDetail } from './pages/public/EventDetail';
 import { Sermons } from './pages/public/events/Sermons';
 import { SundayService } from './pages/public/events/SundayService';
 import { YoungAdults } from './pages/public/events/YoungAdults';
+import { TeensYouth } from './pages/public/events/TeensYouth';
 import { CommunityLunch } from './pages/public/events/CommunityLunch';
 import { KidsProgram } from './pages/public/events/KidsProgram';
 import { ImNew } from './pages/public/ImNew';
@@ -141,6 +142,7 @@ const AppRoutes = () => {
               <Route path="events/sermons" element={<Sermons />} />
               <Route path="events/sunday-service" element={<SundayService />} />
               <Route path="events/young-adults" element={<YoungAdults />} />
+              <Route path="events/teens-youth" element={<TeensYouth />} />
               <Route path="events/community-lunch" element={<CommunityLunch />} />
               <Route path="events/kids-program" element={<KidsProgram />} />
               <Route path="im-new" element={<ImNew />} />

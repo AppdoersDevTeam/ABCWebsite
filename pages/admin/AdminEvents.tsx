@@ -15,6 +15,7 @@ const FALLBACK_CATEGORIES = [
   'Members Meeting',
   'Fast & Prayer Meeting',
   'Young Adults',
+  'Teens & Youth',
   'Kids Programme',
   'Community Lunch',
   'Other',

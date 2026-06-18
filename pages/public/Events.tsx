@@ -12,6 +12,7 @@ const ALL_CATEGORIES = [
   'Members Meeting',
   'Fast & Prayer Meeting',
   'Young Adults',
+  'Teens & Youth',
   'Kids Programme',
   'Community Lunch',
   'Other',
@@ -95,6 +96,13 @@ export const Events = () => {
       title: 'Young Adults',
       description: 'Connect and grow with other young adults through faith and friendship.',
       link: '/events/young-adults',
+      icon: <Users size={28} />
+    },
+    {
+      id: 'teens-youth',
+      title: 'Teens & Youth',
+      description: 'A welcoming space for teens to grow in faith and build friendships. Every Tuesday at 7:00 PM.',
+      link: '/events/teens-youth',
       icon: <Users size={28} />
     },
     {

@@ -31,6 +31,7 @@ values
   ('Members Meeting', 'members-meeting', 20, true),
   ('Fast & Prayer Meeting', 'fast-prayer-meeting', 30, true),
   ('Young Adults', 'young-adults', 40, true),
+  ('Teens & Youth', 'teens-youth', 45, true),
   ('Kids Programme', 'kids-programme', 50, true),
   ('Community Lunch', 'community-lunch', 60, true),
   ('Other', 'other', 999, true)
