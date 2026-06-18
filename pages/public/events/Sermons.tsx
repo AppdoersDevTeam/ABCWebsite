@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { GlowingButton } from '../../../components/UI/GlowingButton';
 import { ScrollReveal } from '../../../components/UI/ScrollReveal';
-import { ArrowLeft, Youtube, ExternalLink, Loader2, ArrowDownToLine, Play, Search, X } from 'lucide-react';
+import { ArrowLeft, Youtube, ExternalLink, Loader2, ArrowDownToLine, Play, Search, X, ListMusic } from 'lucide-react';
+import { StyledSelect } from '../../../components/UI/StyledSelect';
 import {
   fetchChannelPlaylistData,
   fetchPlaylistVideos,
@@ -12,6 +13,9 @@ import {
 } from '../../../lib/youtube';
 
 const ALL_VIDEOS_PLAYLIST_ID = '__all_videos__';
+const PLAYLIST_PILL_MAX_COUNT = 4;
+const PLAYLIST_PILL_MAX_TITLE_LENGTH = 22;
+const PLAYLIST_PILL_MAX_TOTAL_CHARS = 72;
 
 export const Sermons = () => {
   const heroRef = useRef<HTMLDivElement>(null);
@@ -113,6 +117,24 @@ export const Sermons = () => {
   const selectedPlaylistTitle = useMemo(() => {
     return playlistOptions.find((p) => p.id === selectedPlaylistId)?.title ?? 'All Videos';
   }, [playlistOptions, selectedPlaylistId]);
+
+  const playlistSelectOptions = useMemo(
+    () => playlistOptions.map((playlist) => ({ value: playlist.id, label: playlist.title })),
+    [playlistOptions]
+  );
+
+  const usePlaylistDropdown = useMemo(() => {
+    if (playlistOptions.length <= 1) return false;
+    if (playlistOptions.length > PLAYLIST_PILL_MAX_COUNT) return true;
+
+    const maxTitleLength = Math.max(...playlistOptions.map((playlist) => playlist.title.length));
+    const totalTitleChars = playlistOptions.reduce((sum, playlist) => sum + playlist.title.length, 0);
+
+    return (
+      maxTitleLength > PLAYLIST_PILL_MAX_TITLE_LENGTH ||
+      totalTitleChars > PLAYLIST_PILL_MAX_TOTAL_CHARS
+    );
+  }, [playlistOptions]);
 
   useEffect(() => {
     const loadInitialData = async () => {
@@ -307,7 +329,7 @@ export const Sermons = () => {
           </div>
 
           {showFilters && (
-            <ScrollReveal direction="up" delay={100}>
+            <ScrollReveal direction="up" delay={100} className="relative z-40">
               <div className="mb-8 space-y-5">
                 <div className="relative max-w-xl mx-auto">
                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral" size={20} aria-hidden="true" />
@@ -332,24 +354,38 @@ export const Sermons = () => {
                 </div>
 
                 {playlistOptions.length > 1 && (
-                  <div className="flex justify-center">
-                    <div className="inline-flex flex-wrap justify-center gap-2 bg-white/60 backdrop-blur-sm rounded-full p-1.5 border border-white/50 max-w-full">
-                      {playlistOptions.map((playlist) => (
-                        <button
-                          key={playlist.id}
-                          type="button"
-                          onClick={() => setSelectedPlaylistId(playlist.id)}
-                          disabled={loadingVideos}
-                          className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 disabled:opacity-60 ${
-                            selectedPlaylistId === playlist.id
-                              ? 'bg-gold text-white shadow-lg shadow-gold/30'
-                              : 'text-charcoal/80 hover:bg-white/80 hover:text-charcoal'
-                          }`}
-                        >
-                          {playlist.title}
-                        </button>
-                      ))}
+                  <div className="flex justify-center max-w-xl mx-auto w-full">
+                    <div className={`w-full ${usePlaylistDropdown ? '' : 'md:hidden'}`}>
+                      <StyledSelect
+                        id="playlist-filter"
+                        label="Filter by playlist"
+                        value={selectedPlaylistId}
+                        options={playlistSelectOptions}
+                        onChange={setSelectedPlaylistId}
+                        disabled={loadingVideos}
+                        icon={<ListMusic size={20} aria-hidden="true" />}
+                      />
                     </div>
+
+                    {!usePlaylistDropdown && (
+                      <div className="hidden md:inline-flex flex-wrap justify-center gap-2 bg-white/60 backdrop-blur-sm rounded-full p-1.5 border border-white/50 max-w-full">
+                        {playlistOptions.map((playlist) => (
+                          <button
+                            key={playlist.id}
+                            type="button"
+                            onClick={() => setSelectedPlaylistId(playlist.id)}
+                            disabled={loadingVideos}
+                            className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 disabled:opacity-60 ${
+                              selectedPlaylistId === playlist.id
+                                ? 'bg-gold text-white shadow-lg shadow-gold/30'
+                                : 'text-charcoal/80 hover:bg-white/80 hover:text-charcoal'
+                            }`}
+                          >
+                            {playlist.title}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
