@@ -6,7 +6,8 @@ export interface ChildEntry {
 }
 
 export interface ContactFormData {
-  name: string;
+  firstName: string;
+  lastName: string;
   spouse?: string;
   ageBracket?: string;
   email: string;
@@ -38,17 +39,22 @@ function formatYesNo(value: boolean | undefined): string {
 }
 
 function buildEmailSubject(formData: ContactFormData): string {
-  return `Website Connect Form - ${formData.name}`;
+  const fullName = [formData.firstName, formData.lastName].filter(Boolean).join(' ').trim();
+  return `Website Connect Form - ${fullName}`;
 }
 
 function buildEmailBody(formData: ContactFormData): string {
+  const fullName = [formData.firstName, formData.lastName].filter(Boolean).join(' ').trim();
+
   const sections: string[] = [
     'NEW CONNECT FORM SUBMISSION',
     'Ashburton Baptist Church website',
     RULE,
     '',
     'CONTACT DETAILS',
-    `Name:         ${formData.name}`,
+    `First Name:   ${formData.firstName}`,
+    `Last Name:    ${formData.lastName}`,
+    `Full Name:    ${fullName}`,
     `Spouse:       ${formData.spouse?.trim() || 'Not provided'}`,
     `Age:          ${formData.ageBracket?.trim() || 'Not provided'}`,
     `Email:        ${formData.email}`,

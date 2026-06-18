@@ -29,7 +29,8 @@ const initialChildren = [
 ];
 
 const initialFormData = {
-  name: '',
+  firstName: '',
+  lastName: '',
   spouse: '',
   ageBracket: '',
   email: '',
@@ -219,8 +220,13 @@ export const Contact = () => {
   };
 
   const validateRequired = (): boolean => {
-    if (!formData.name.trim() || !formData.email.trim() || !formData.phone.trim()) {
-      setError('Please fill in your name, email, and phone number.');
+    if (
+      !formData.firstName.trim() ||
+      !formData.lastName.trim() ||
+      !formData.email.trim() ||
+      !formData.phone.trim()
+    ) {
+      setError('Please fill in your first name, last name, email, and phone number.');
       return false;
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -234,17 +240,27 @@ export const Contact = () => {
   const goNext = () => {
     setError(null);
     if (currentStep === 1 && !validateRequired()) return;
-    setCurrentStep((s) => Math.min(s + 1, STEPS.length));
+    // Defer so the Continue click doesn't land on the Submit button when step changes.
+    window.setTimeout(() => {
+      setCurrentStep((s) => Math.min(s + 1, STEPS.length));
+    }, 0);
   };
 
   const goBack = () => {
     setError(null);
-    setCurrentStep((s) => Math.max(s - 1, 1));
+    window.setTimeout(() => {
+      setCurrentStep((s) => Math.max(s - 1, 1));
+    }, 0);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    if (currentStep < STEPS.length) {
+      goNext();
+      return;
+    }
 
     if (honeypot.trim()) return;
     if (!validateRequired()) {
@@ -256,7 +272,8 @@ export const Contact = () => {
 
     try {
       const result = await submitContactForm({
-        name: formData.name.trim(),
+        firstName: formData.firstName.trim(),
+        lastName: formData.lastName.trim(),
         spouse: formData.spouse.trim(),
         ageBracket: formData.ageBracket,
         email: formData.email.trim(),
@@ -434,14 +451,24 @@ export const Contact = () => {
                 {/* Step 1: Contact details */}
                 {currentStep === 1 && (
                   <div className="space-y-6 max-w-2xl mx-auto">
-                    <input
-                      type="text"
-                      placeholder="NAME *"
-                      className="w-full p-4 rounded-[8px] input-sun"
-                      value={formData.name}
-                      onChange={(e) => updateField('name', e.target.value)}
-                      required
-                    />
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <input
+                        type="text"
+                        placeholder="FIRST NAME *"
+                        className="w-full p-4 rounded-[8px] input-sun"
+                        value={formData.firstName}
+                        onChange={(e) => updateField('firstName', e.target.value)}
+                        required
+                      />
+                      <input
+                        type="text"
+                        placeholder="LAST NAME *"
+                        className="w-full p-4 rounded-[8px] input-sun"
+                        value={formData.lastName}
+                        onChange={(e) => updateField('lastName', e.target.value)}
+                        required
+                      />
+                    </div>
                     <div className="grid sm:grid-cols-2 gap-4">
                       <input
                         type="tel"
@@ -688,7 +715,11 @@ export const Contact = () => {
                     <GlowingButton
                       type="button"
                       size="lg"
-                      onClick={goNext}
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        goNext();
+                      }}
                       className="!rounded-full !bg-gold !text-white !border-gold transition-all duration-300 hover:scale-105 active:scale-95 flex items-center gap-2"
                     >
                       Continue
