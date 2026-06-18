@@ -90,7 +90,7 @@ If App Passwords are not an option, use a transactional provider like [Resend](h
 2. Open **Confirm signup**
 3. Set **Subject** to:
    ```
-   Confirm your Ashburton Baptist Church member account
+   Welcome! One quick step to join our member community
    ```
 4. Replace the body with the HTML below (Supabase uses `{{ .ConfirmationURL }}` for the button link)
 
@@ -102,42 +102,61 @@ If App Passwords are not an option, use a transactional provider like [Resend](h
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Confirm your account</title>
 </head>
-<body style="margin:0;padding:0;background-color:#A8B774;font-family:Arial,Helvetica,sans-serif;color:#222222;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#A8B774;padding:32px 16px;">
+<body style="margin:0;padding:0;background-color:#A8B774;font-family:Georgia,'Times New Roman',serif;color:#222222;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:linear-gradient(180deg,#A8B774 0%,#96a866 100%);padding:40px 16px;">
     <tr>
       <td align="center">
-        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:560px;background-color:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,0.08);">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:580px;background-color:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,0.12);">
           <tr>
-            <td style="padding:32px 32px 16px;text-align:center;background-color:#ffffff;">
-              <img src="https://www.ashburtonbaptist.co.nz/ABC%20Logo.png" alt="Ashburton Baptist Church" width="120" style="display:block;margin:0 auto 16px;border:0;" />
-              <h1 style="margin:0;font-size:24px;line-height:1.3;color:#222222;font-weight:normal;">Welcome to Ashburton Baptist Church</h1>
+            <td style="height:6px;background-color:#fbcb05;font-size:0;line-height:0;">&nbsp;</td>
+          </tr>
+          <tr>
+            <td style="padding:36px 36px 20px;text-align:center;background-color:#ffffff;">
+              <img src="https://www.ashburtonbaptist.co.nz/ABC%20Logo.png" alt="Ashburton Baptist Church" width="110" style="display:block;margin:0 auto 20px;border:0;" />
+              <p style="margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:bold;letter-spacing:0.15em;text-transform:uppercase;color:#808080;">Ashburton Baptist Church</p>
+              <h1 style="margin:0 0 12px;font-size:28px;line-height:1.25;color:#222222;font-weight:normal;">You&rsquo;re almost there!</h1>
+              <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.5;color:#666666;font-style:italic;">Disciples of Jesus impacting Ashburton and the nations.</p>
             </td>
           </tr>
           <tr>
-            <td style="padding:8px 32px 24px;font-size:16px;line-height:1.6;color:#444444;">
-              <p style="margin:0 0 16px;">Thanks for creating a member account on our website.</p>
-              <p style="margin:0 0 24px;">Please confirm your email address so we know this account belongs to you. After confirming, you can sign in and wait for admin approval to access the member area.</p>
-              <table role="presentation" cellspacing="0" cellpadding="0" style="margin:0 auto 24px;">
+            <td style="padding:8px 36px 28px;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.65;color:#444444;">
+              <p style="margin:0 0 20px;">Kia ora — thank you for signing up for a member account on our website. We&rsquo;re glad you want to stay connected with our church family.</p>
+              <p style="margin:0 0 24px;">Tap the button below to confirm your email address. It only takes a moment.</p>
+              <table role="presentation" cellspacing="0" cellpadding="0" style="margin:0 auto 28px;">
                 <tr>
-                  <td align="center" style="border-radius:8px;background-color:#fbcb05;">
-                    <a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:14px 28px;font-size:16px;font-weight:bold;color:#222222;text-decoration:none;">Confirm my email</a>
+                  <td align="center" style="border-radius:10px;background-color:#fbcb05;box-shadow:0 4px 14px rgba(251,203,5,0.45);">
+                    <a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:16px 36px;font-size:17px;font-weight:bold;color:#222222;text-decoration:none;font-family:Arial,Helvetica,sans-serif;">Confirm my email &rarr;</a>
                   </td>
                 </tr>
               </table>
-              <p style="margin:0 0 16px;font-size:14px;color:#808080;">If the button doesn’t work, copy and paste this link into your browser:</p>
-              <p style="margin:0 0 24px;font-size:14px;word-break:break-all;"><a href="{{ .ConfirmationURL }}" style="color:#222222;">{{ .ConfirmationURL }}</a></p>
-              <p style="margin:0;font-size:14px;color:#808080;">If you didn’t sign up on the Ashburton Baptist Church website, you can safely ignore this email.</p>
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 0 28px;background-color:#f8f9f4;border-radius:12px;border:1px solid #e8ecd8;">
+                <tr>
+                  <td style="padding:20px 24px;">
+                    <p style="margin:0 0 12px;font-size:13px;font-weight:bold;letter-spacing:0.08em;text-transform:uppercase;color:#222222;">Once you&rsquo;re confirmed &amp; approved, you&rsquo;ll have access to:</p>
+                    <p style="margin:0 0 8px;font-size:15px;color:#444444;">&#10003;&nbsp; The member directory</p>
+                    <p style="margin:0 0 8px;font-size:15px;color:#444444;">&#10003;&nbsp; Service rosters</p>
+                    <p style="margin:0;font-size:15px;color:#444444;">&#10003;&nbsp; The prayer wall</p>
+                  </td>
+                </tr>
+              </table>
+              <p style="margin:0 0 8px;font-size:13px;color:#808080;">Button not working? Copy and paste this link into your browser:</p>
+              <p style="margin:0 0 24px;font-size:13px;line-height:1.5;word-break:break-all;"><a href="{{ .ConfirmationURL }}" style="color:#222222;text-decoration:underline;">{{ .ConfirmationURL }}</a></p>
+              <p style="margin:0;font-size:13px;color:#999999;">If you didn&rsquo;t create an account on our website, you can safely ignore this email.</p>
             </td>
           </tr>
           <tr>
-            <td style="padding:20px 32px 28px;border-top:1px solid #eeeeee;font-size:13px;line-height:1.5;color:#808080;text-align:center;">
-              <strong style="color:#222222;">Ashburton Baptist Church</strong><br />
-              284 Havelock Street, Ashburton 7700<br />
-              <a href="mailto:office@ashburtonbaptist.co.nz" style="color:#222222;">office@ashburtonbaptist.co.nz</a><br />
-              <a href="https://www.ashburtonbaptist.co.nz" style="color:#222222;">www.ashburtonbaptist.co.nz</a>
+            <td style="padding:24px 36px 32px;background-color:#222222;text-align:center;">
+              <p style="margin:0 0 6px;font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:bold;color:#fbcb05;">Ashburton Baptist Church</p>
+              <p style="margin:0 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.5;color:#cccccc;">284 Havelock Street, Ashburton 7700</p>
+              <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;">
+                <a href="mailto:office@ashburtonbaptist.co.nz" style="color:#ffffff;text-decoration:none;">office@ashburtonbaptist.co.nz</a>
+                &nbsp;&middot;&nbsp;
+                <a href="https://www.ashburtonbaptist.co.nz" style="color:#ffffff;text-decoration:none;">ashburtonbaptist.co.nz</a>
+              </p>
             </td>
           </tr>
         </table>
+        <p style="margin:20px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#ffffff;opacity:0.85;">Sent with care from your church family.</p>
       </td>
     </tr>
   </table>
@@ -151,14 +170,72 @@ If App Passwords are not an option, use a transactional provider like [Resend](h
 
 ## Step 4: Customise the Reset password email (optional but recommended)
 
-Use the same branding for **Reset password** so forgot-password emails also look legitimate.
+Use matching branding for **Reset password** so forgot-password emails also look legitimate.
 
 **Subject:**
 ```
-Reset your Ashburton Baptist Church password
+Need to reset your password? We've got you
 ```
 
-**Body:** Same HTML as above, but change the heading to “Reset your password”, the intro text to mention password reset, and replace `{{ .ConfirmationURL }}` with the reset link variable Supabase provides in that template (usually also `{{ .ConfirmationURL }}` for recovery emails).
+**Body:** Use the HTML below (uses `{{ .ConfirmationURL }}` for the reset link).
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reset your password</title>
+</head>
+<body style="margin:0;padding:0;background-color:#A8B774;font-family:Georgia,'Times New Roman',serif;color:#222222;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:linear-gradient(180deg,#A8B774 0%,#96a866 100%);padding:40px 16px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:580px;background-color:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,0.12);">
+          <tr>
+            <td style="height:6px;background-color:#fbcb05;font-size:0;line-height:0;">&nbsp;</td>
+          </tr>
+          <tr>
+            <td style="padding:36px 36px 20px;text-align:center;background-color:#ffffff;">
+              <img src="https://www.ashburtonbaptist.co.nz/ABC%20Logo.png" alt="Ashburton Baptist Church" width="110" style="display:block;margin:0 auto 20px;border:0;" />
+              <p style="margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:bold;letter-spacing:0.15em;text-transform:uppercase;color:#808080;">Ashburton Baptist Church</p>
+              <h1 style="margin:0;font-size:28px;line-height:1.25;color:#222222;font-weight:normal;">Reset your password</h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:8px 36px 28px;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.65;color:#444444;">
+              <p style="margin:0 0 20px;">We received a request to reset the password for your member account.</p>
+              <p style="margin:0 0 24px;">Click the button below to choose a new password. This link will expire after a short time for your security.</p>
+              <table role="presentation" cellspacing="0" cellpadding="0" style="margin:0 auto 28px;">
+                <tr>
+                  <td align="center" style="border-radius:10px;background-color:#fbcb05;box-shadow:0 4px 14px rgba(251,203,5,0.45);">
+                    <a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:16px 36px;font-size:17px;font-weight:bold;color:#222222;text-decoration:none;font-family:Arial,Helvetica,sans-serif;">Reset my password &rarr;</a>
+                  </td>
+                </tr>
+              </table>
+              <p style="margin:0 0 8px;font-size:13px;color:#808080;">Button not working? Copy and paste this link into your browser:</p>
+              <p style="margin:0 0 24px;font-size:13px;line-height:1.5;word-break:break-all;"><a href="{{ .ConfirmationURL }}" style="color:#222222;text-decoration:underline;">{{ .ConfirmationURL }}</a></p>
+              <p style="margin:0;font-size:13px;color:#999999;">If you didn&rsquo;t request a password reset, you can safely ignore this email — your password won&rsquo;t change.</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:24px 36px 32px;background-color:#222222;text-align:center;">
+              <p style="margin:0 0 6px;font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:bold;color:#fbcb05;">Ashburton Baptist Church</p>
+              <p style="margin:0 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.5;color:#cccccc;">284 Havelock Street, Ashburton 7700</p>
+              <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;">
+                <a href="mailto:office@ashburtonbaptist.co.nz" style="color:#ffffff;text-decoration:none;">office@ashburtonbaptist.co.nz</a>
+                &nbsp;&middot;&nbsp;
+                <a href="https://www.ashburtonbaptist.co.nz" style="color:#ffffff;text-decoration:none;">ashburtonbaptist.co.nz</a>
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+```
 
 ---
 
