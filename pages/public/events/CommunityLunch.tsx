@@ -187,7 +187,7 @@ export const CommunityLunch = () => {
                 <div className="text-center pt-8">
                   <Link to="/contact">
                     <GlowingButton variant="gold" size="lg" className="!rounded-full transition-all duration-500 ease-out hover:scale-110 hover:shadow-2xl hover:shadow-gold/60 active:scale-95 hover:-translate-y-1">
-                      Contact Us to Volunteer
+                      Get in touch
                     </GlowingButton>
                   </Link>
                 </div>
