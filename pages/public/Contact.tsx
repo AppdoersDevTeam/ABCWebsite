@@ -516,7 +516,7 @@ export const Contact = () => {
                           type="tel"
                           inputMode="tel"
                           autoComplete="tel"
-                          placeholder="MOBILE NUMBER"
+                          placeholder="PHONE NUMBER"
                           className={fieldInputClass(Boolean(fieldErrors.phone))}
                           value={formData.phone}
                           onChange={(e) => updateField('phone', sanitizePhoneInput(e.target.value))}
@@ -524,7 +524,7 @@ export const Contact = () => {
                         />
                         {!fieldErrors.phone && (
                           <p className="text-xs text-neutral px-1">
-                            Optional — e.g. 021 123 4567 or +64 21 123 4567
+                            Optional — e.g. 021 123 4567, 03-308 5409, or 0800 123 456
                           </p>
                         )}
                       </FormField>
