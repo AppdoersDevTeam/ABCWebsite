@@ -49,7 +49,7 @@ export function validateStep1Fields(fields: {
   const emailError = getEmailValidationError(fields.email);
   if (emailError) errors.email = emailError;
 
-  const phoneError = getPhoneValidationError(fields.phone, { required: true });
+  const phoneError = getPhoneValidationError(fields.phone, { required: false });
   if (phoneError) errors.phone = phoneError;
 
   return errors;

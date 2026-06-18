@@ -12,7 +12,7 @@ export interface ContactFormData {
   spouseLastName?: string;
   ageBracket?: string;
   email: string;
-  phone: string;
+  phone?: string;
   addressLine1?: string;
   addressLine2?: string;
   children?: ChildEntry[];
