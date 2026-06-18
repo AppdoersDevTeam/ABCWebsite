@@ -16,6 +16,7 @@ const initialFormData = {
 export const Contact = () => {
   const heroRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState(initialFormData);
+  const [honeypot, setHoneypot] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -23,6 +24,10 @@ export const Contact = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    if (honeypot.trim()) {
+      return;
+    }
 
     if (!formData.firstName.trim() || !formData.email.trim() || !formData.subject.trim() || !formData.message.trim()) {
       setError('Please fill in first name, email, subject, and message.');
@@ -159,6 +164,16 @@ export const Contact = () => {
                   )}
 
                   <form className="space-y-6" onSubmit={handleSubmit}>
+                    <input
+                      type="text"
+                      name="_honeypot"
+                      value={honeypot}
+                      onChange={(e) => setHoneypot(e.target.value)}
+                      tabIndex={-1}
+                      autoComplete="off"
+                      className="hidden"
+                      aria-hidden
+                    />
                     <div className="grid lg:grid-cols-2 gap-6">
                       <input
                         type="text"

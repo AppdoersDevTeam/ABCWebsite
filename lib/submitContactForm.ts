@@ -4,28 +4,56 @@ export interface ContactFormData {
   firstName: string;
   lastName: string;
   email: string;
-  phone: string;
+  phone?: string;
   subject: string;
   message: string;
 }
 
-const formEndpoint = `https://formsubmit.co/ajax/${encodeURIComponent(CONTACT_FORM_RECIPIENT)}`;
+const recipientEmail = CONTACT_FORM_RECIPIENT;
+const formEndpoint = `https://formsubmit.co/ajax/${encodeURIComponent(recipientEmail)}`;
 
-export async function submitContactForm(
+const RULE = '────────────────────────────────────────';
+
+function buildEmailSubject(formData: ContactFormData): string {
+  return `Website Contact Form - ${formData.subject}`;
+}
+
+function buildEmailBody(formData: ContactFormData): string {
+  const fullName = [formData.firstName, formData.lastName].filter(Boolean).join(' ').trim();
+
+  const sections: string[] = [
+    'NEW CONTACT FORM SUBMISSION',
+    'Ashburton Baptist Church website',
+    RULE,
+    '',
+    'CONTACT DETAILS',
+    `First Name: ${formData.firstName}`,
+    `Last Name:  ${formData.lastName?.trim() || 'Not provided'}`,
+    `Name:       ${fullName || formData.firstName}`,
+    `Email:      ${formData.email}`,
+    `Phone:      ${formData.phone?.trim() || 'Not provided'}`,
+    `Subject:    ${formData.subject}`,
+  ];
+
+  if (formData.message.trim()) {
+    sections.push('', RULE, '', 'MESSAGE', formData.message.trim());
+  }
+
+  sections.push('', RULE, '', `Reply to: ${formData.email}`);
+
+  return sections.join('\n');
+}
+
+export const submitContactForm = async (
   formData: ContactFormData
-): Promise<{ success: boolean; message: string }> {
+): Promise<{ success: boolean; message: string }> => {
   try {
     const payload: Record<string, string> = {
-      _subject: `Website Contact Form - ${formData.subject}`,
+      message: buildEmailBody(formData),
+      _subject: buildEmailSubject(formData),
       _replyto: formData.email,
-      _template: 'table',
+      _template: 'box',
       _captcha: 'false',
-      'First Name': formData.firstName,
-      'Last Name': formData.lastName || '—',
-      Email: formData.email,
-      Phone: formData.phone || 'Not provided',
-      Subject: formData.subject,
-      Message: formData.message,
     };
 
     const response = await fetch(formEndpoint, {
@@ -48,12 +76,12 @@ export async function submitContactForm(
 
     return {
       success: true,
-      message: 'Thank you! Your message has been sent. We will get back to you soon.',
+      message: `Thank you! Your message has been sent. We will get back to you soon.`,
     };
   } catch {
     return {
       success: false,
-      message: `We could not send your message right now. Please email us directly at ${CONTACT_FORM_RECIPIENT}.`,
+      message: `We could not send your message right now. Please email us directly at ${recipientEmail}.`,
     };
   }
-}
+};
