@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { ScrollReveal } from '../../components/UI/ScrollReveal';
 import { Download, ChevronDown, MapPin, Heart, ArrowDownToLine, Clock } from 'lucide-react';
@@ -173,6 +174,16 @@ export const ImNew = () => {
                 );
             })}
           </div>
+
+          <ScrollReveal direction="up" delay={400}>
+            <div className="text-center pt-12">
+              <Link to="/contact">
+                <GlowingButton variant="gold" size="lg" className="!rounded-full transition-all duration-500 ease-out hover:scale-110 hover:shadow-2xl hover:shadow-gold/60 active:scale-95 hover:-translate-y-1">
+                  Get in touch
+                </GlowingButton>
+              </Link>
+            </div>
+          </ScrollReveal>
         </div>
       </section>
     </div>

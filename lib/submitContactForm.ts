@@ -1,12 +1,31 @@
 import { CONTACT_FORM_RECIPIENT } from './constants';
 
+export interface ChildEntry {
+  name: string;
+  age: string;
+}
+
 export interface ContactFormData {
-  firstName: string;
-  lastName: string;
+  name: string;
+  spouse?: string;
+  ageBracket?: string;
   email: string;
-  phone?: string;
-  subject: string;
-  message: string;
+  phone: string;
+  addressLine1?: string;
+  addressLine2?: string;
+  children?: ChildEntry[];
+  firstTimeVisitor?: boolean;
+  beenBefore?: boolean;
+  committedToJesus?: boolean;
+  recommittedToJesus?: boolean;
+  wantConnectGroup?: boolean;
+  interestedInBaptism?: boolean;
+  talkToPastor?: boolean;
+  wantNewsletter?: boolean;
+  wantMembership?: boolean;
+  wantVolunteer?: boolean;
+  knowMoreAbout?: string;
+  prayerRequest?: string;
 }
 
 const recipientEmail = CONTACT_FORM_RECIPIENT;
@@ -14,30 +33,74 @@ const formEndpoint = `https://formsubmit.co/ajax/${encodeURIComponent(recipientE
 
 const RULE = '────────────────────────────────────────';
 
+function formatYesNo(value: boolean | undefined): string {
+  return value ? 'Yes' : 'No';
+}
+
 function buildEmailSubject(formData: ContactFormData): string {
-  return `Website Contact Form - ${formData.subject}`;
+  return `Website Connect Form - ${formData.name}`;
 }
 
 function buildEmailBody(formData: ContactFormData): string {
-  const fullName = [formData.firstName, formData.lastName].filter(Boolean).join(' ').trim();
-
   const sections: string[] = [
-    'NEW CONTACT FORM SUBMISSION',
+    'NEW CONNECT FORM SUBMISSION',
     'Ashburton Baptist Church website',
     RULE,
     '',
     'CONTACT DETAILS',
-    `First Name: ${formData.firstName}`,
-    `Last Name:  ${formData.lastName?.trim() || 'Not provided'}`,
-    `Name:       ${fullName || formData.firstName}`,
-    `Email:      ${formData.email}`,
-    `Phone:      ${formData.phone?.trim() || 'Not provided'}`,
-    `Subject:    ${formData.subject}`,
+    `Name:         ${formData.name}`,
+    `Spouse:       ${formData.spouse?.trim() || 'Not provided'}`,
+    `Age:          ${formData.ageBracket?.trim() || 'Not provided'}`,
+    `Email:        ${formData.email}`,
+    `Phone:        ${formData.phone}`,
+    `Address:      ${formData.addressLine1?.trim() || 'Not provided'}`,
+    `              ${formData.addressLine2?.trim() || ''}`.trimEnd(),
   ];
 
-  if (formData.message.trim()) {
-    sections.push('', RULE, '', 'MESSAGE', formData.message.trim());
+  sections.push('', 'CHILDREN');
+  const children = formData.children ?? [];
+  if (children.some((child) => child.name.trim() || child.age.trim())) {
+    children.forEach((child, index) => {
+      if (child.name.trim() || child.age.trim()) {
+        sections.push(
+          `  ${index + 1}. ${child.name.trim() || 'Not provided'} (Age: ${child.age.trim() || 'Not provided'})`
+        );
+      }
+    });
+  } else {
+    sections.push('  Not provided');
   }
+
+  sections.push(
+    '',
+    RULE,
+    '',
+    'VISITOR STATUS',
+    `1st Time Visitor:  ${formatYesNo(formData.firstTimeVisitor)}`,
+    `I've Been Before:  ${formatYesNo(formData.beenBefore)}`,
+    '',
+    'START',
+    `Committed life to Jesus:     ${formatYesNo(formData.committedToJesus)}`,
+    `Recommitted life to Jesus:   ${formatYesNo(formData.recommittedToJesus)}`,
+    '',
+    'NEXT STEP',
+    `Join a Connect Group:        ${formatYesNo(formData.wantConnectGroup)}`,
+    `Interested in baptism:      ${formatYesNo(formData.interestedInBaptism)}`,
+    `Talk to a Pastor:            ${formatYesNo(formData.talkToPastor)}`,
+    `Weekly newsletter:           ${formatYesNo(formData.wantNewsletter)}`,
+    '',
+    'GET INVOLVED',
+    `Become a member:             ${formatYesNo(formData.wantMembership)}`,
+    `Volunteer for a ministry:    ${formatYesNo(formData.wantVolunteer)}`,
+    '',
+    RULE,
+    '',
+    "I'D LIKE TO KNOW MORE ABOUT",
+    formData.knowMoreAbout?.trim() || 'Not provided',
+    '',
+    'PRAYER REQUEST',
+    formData.prayerRequest?.trim() || 'Not provided'
+  );
 
   sections.push('', RULE, '', `Reply to: ${formData.email}`);
 
