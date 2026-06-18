@@ -1,11 +1,71 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { ScrollReveal } from '../../components/UI/ScrollReveal';
+import { submitContactForm } from '../../lib/submitContactForm';
 import { MapPin, Phone, Mail, MessageSquare, ArrowDownToLine } from 'lucide-react';
+
+const initialFormData = {
+  firstName: '',
+  lastName: '',
+  email: '',
+  phone: '',
+  subject: '',
+  message: '',
+};
 
 export const Contact = () => {
   const heroRef = useRef<HTMLDivElement>(null);
-  
+  const [formData, setFormData] = useState(initialFormData);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    if (!formData.firstName.trim() || !formData.email.trim() || !formData.subject.trim() || !formData.message.trim()) {
+      setError('Please fill in first name, email, subject, and message.');
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email.trim())) {
+      setError('Please enter a valid email address.');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const result = submitContactForm({
+        firstName: formData.firstName.trim(),
+        lastName: formData.lastName.trim(),
+        email: formData.email.trim(),
+        phone: formData.phone.trim(),
+        subject: formData.subject.trim(),
+        message: formData.message.trim(),
+      });
+
+      if (!result.success) {
+        setError(result.message);
+        return;
+      }
+
+      setSuccess(true);
+      setFormData(initialFormData);
+
+      setTimeout(() => {
+        setSuccess(false);
+        setIsSubmitting(false);
+      }, 5000);
+    } catch (err: unknown) {
+      console.error('Error submitting contact form:', err);
+      setError('Failed to open your email app. Please try again.');
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="space-y-0 overflow-hidden">
       {/* Hero Section */}
@@ -85,19 +145,78 @@ export const Contact = () => {
               <div>
                 <div id="message" className="glass-card bg-white/70 p-6 md:p-12 rounded-[16px] h-full scroll-mt-24 border border-white/50 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 hover-lift">
                   <h3 className="text-3xl font-serif font-normal text-charcoal mb-8">Send a Message</h3>
-                  <form className="space-y-6">
+
+                  {success && (
+                    <div className="mb-6 p-4 rounded-[8px] bg-green-50 border border-green-200 text-green-800">
+                      Your email app should open with your message ready to send to us.
+                    </div>
+                  )}
+
+                  {error && (
+                    <div className="mb-6 p-4 rounded-[8px] bg-red-50 border border-red-200 text-red-800">
+                      {error}
+                    </div>
+                  )}
+
+                  <form className="space-y-6" onSubmit={handleSubmit}>
                     <div className="grid lg:grid-cols-2 gap-6">
-                      <input type="text" placeholder="FIRST NAME" className="w-full p-4 rounded-[8px] input-sun" />
-                      <input type="text" placeholder="LAST NAME" className="w-full p-4 rounded-[8px] input-sun" />
+                      <input
+                        type="text"
+                        placeholder="FIRST NAME"
+                        className="w-full p-4 rounded-[8px] input-sun"
+                        value={formData.firstName}
+                        onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                        required
+                      />
+                      <input
+                        type="text"
+                        placeholder="LAST NAME"
+                        className="w-full p-4 rounded-[8px] input-sun"
+                        value={formData.lastName}
+                        onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                      />
                     </div>
                     <div className="grid lg:grid-cols-2 gap-6">
-                      <input type="email" placeholder="EMAIL" className="w-full p-4 rounded-[8px] input-sun" />
-                      <input type="tel" placeholder="PHONE NUMBER" className="w-full p-4 rounded-[8px] input-sun" />
+                      <input
+                        type="email"
+                        placeholder="EMAIL"
+                        className="w-full p-4 rounded-[8px] input-sun"
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        required
+                      />
+                      <input
+                        type="tel"
+                        placeholder="PHONE NUMBER"
+                        className="w-full p-4 rounded-[8px] input-sun"
+                        value={formData.phone}
+                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      />
                     </div>
-                    <input type="text" placeholder="SUBJECT" className="w-full p-4 rounded-[8px] input-sun" />
-                    <textarea rows={6} placeholder="MESSAGE" className="w-full p-4 rounded-[8px] input-sun"></textarea>
-                    <GlowingButton type="submit" size="lg" fullWidth className="!rounded-full !bg-gold !text-white !border-gold transition-all duration-500 ease-out hover:scale-110 hover:shadow-2xl hover:shadow-gold/60 active:scale-95 hover:-translate-y-1">
-                      Send Message
+                    <input
+                      type="text"
+                      placeholder="SUBJECT"
+                      className="w-full p-4 rounded-[8px] input-sun"
+                      value={formData.subject}
+                      onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                      required
+                    />
+                    <textarea
+                      rows={6}
+                      placeholder="MESSAGE"
+                      className="w-full p-4 rounded-[8px] input-sun"
+                      value={formData.message}
+                      onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                      required
+                    />
+                    <GlowingButton
+                      type="submit"
+                      size="lg"
+                      fullWidth
+                      disabled={isSubmitting}
+                      className="!rounded-full !bg-gold !text-white !border-gold transition-all duration-500 ease-out hover:scale-110 hover:shadow-2xl hover:shadow-gold/60 active:scale-95 hover:-translate-y-1 disabled:opacity-60 disabled:hover:scale-100 disabled:hover:translate-y-0"
+                    >
+                      {isSubmitting ? 'Opening email...' : 'Send Message'}
                     </GlowingButton>
                   </form>
                 </div>

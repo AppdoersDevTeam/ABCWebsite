@@ -4,6 +4,7 @@
 // Other admins are promoted via the admin dashboard by a super admin.
 export const ADMIN_EMAIL = 'devteam@appdoers.co.nz';
 export const SUPER_ADMIN_EMAIL = ADMIN_EMAIL;
+export const CONTACT_FORM_RECIPIENT = 'pastor@ashburtonbaptist.co.nz';
 
 /** Build a display name from first + last, falling back to legacy name. */
 export function displayName(user: { first_name?: string; last_name?: string; name?: string } | null | undefined): string {
