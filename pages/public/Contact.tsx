@@ -3,6 +3,13 @@ import { GlowingButton } from '../../components/UI/GlowingButton';
 import { ScrollReveal } from '../../components/UI/ScrollReveal';
 import { submitContactForm } from '../../lib/submitContactForm';
 import {
+  getStep1SummaryError,
+  validateStep1Fields,
+  type Step1Field,
+  type Step1FieldErrors,
+} from '../../lib/validateContactFields';
+import { sanitizePhoneInput } from '../../lib/validatePhone';
+import {
   MapPin,
   Phone,
   Mail,
@@ -198,6 +205,25 @@ function InterestGroup({
   );
 }
 
+function FormField({
+  error,
+  children,
+}: {
+  error?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="space-y-1">
+      {children}
+      {error && <p className="text-xs text-red-600 px-1">{error}</p>}
+    </div>
+  );
+}
+
+function fieldInputClass(hasError: boolean): string {
+  return `w-full p-4 rounded-[8px] input-sun${hasError ? ' border-2 border-red-400 focus:border-red-500' : ''}`;
+}
+
 export const Contact = () => {
   const heroRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState<FormData>(initialFormData);
@@ -206,9 +232,17 @@ export const Contact = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Step1FieldErrors>({});
 
   const updateField = <K extends keyof FormData>(key: K, value: FormData[K]) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
+    if (key in fieldErrors) {
+      setFieldErrors((prev) => {
+        const next = { ...prev };
+        delete next[key as Step1Field];
+        return next;
+      });
+    }
   };
 
   const updateChild = (index: number, field: 'name' | 'age', value: string) => {
@@ -220,27 +254,27 @@ export const Contact = () => {
     }));
   };
 
-  const validateRequired = (): boolean => {
-    if (
-      !formData.firstName.trim() ||
-      !formData.lastName.trim() ||
-      !formData.email.trim() ||
-      !formData.phone.trim()
-    ) {
-      setError('Please fill in your first name, last name, email, and phone number.');
+  const validateStep1 = (): boolean => {
+    const errors = validateStep1Fields({
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      email: formData.email,
+      phone: formData.phone,
+    });
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      setError(getStep1SummaryError(errors));
       return false;
     }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email.trim())) {
-      setError('Please enter a valid email address.');
-      return false;
-    }
+
+    setFieldErrors({});
+    setError(null);
     return true;
   };
 
   const goNext = () => {
-    setError(null);
-    if (currentStep === 1 && !validateRequired()) return;
+    if (currentStep === 1 && !validateStep1()) return;
     // Defer so the Continue click doesn't land on the Submit button when step changes.
     window.setTimeout(() => {
       setCurrentStep((s) => Math.min(s + 1, STEPS.length));
@@ -264,7 +298,7 @@ export const Contact = () => {
     }
 
     if (honeypot.trim()) return;
-    if (!validateRequired()) {
+    if (!validateStep1()) {
       setCurrentStep(1);
       return;
     }
@@ -304,6 +338,7 @@ export const Contact = () => {
 
       setSuccess(true);
       setFormData(initialFormData);
+      setFieldErrors({});
       setCurrentStep(1);
       setTimeout(() => setSuccess(false), 5000);
     } catch (err: unknown) {
@@ -431,7 +466,7 @@ export const Contact = () => {
                 </div>
               )}
 
-              <form className="mt-8" onSubmit={handleSubmit}>
+              <form className="mt-8" onSubmit={handleSubmit} noValidate>
                 <input
                   type="text"
                   name="_honeypot"
@@ -454,40 +489,57 @@ export const Contact = () => {
                 {currentStep === 1 && (
                   <div className="space-y-6 max-w-2xl mx-auto">
                     <div className="grid sm:grid-cols-2 gap-4">
-                      <input
-                        type="text"
-                        placeholder="FIRST NAME *"
-                        className="w-full p-4 rounded-[8px] input-sun"
-                        value={formData.firstName}
-                        onChange={(e) => updateField('firstName', e.target.value)}
-                        required
-                      />
-                      <input
-                        type="text"
-                        placeholder="LAST NAME *"
-                        className="w-full p-4 rounded-[8px] input-sun"
-                        value={formData.lastName}
-                        onChange={(e) => updateField('lastName', e.target.value)}
-                        required
-                      />
+                      <FormField error={fieldErrors.firstName}>
+                        <input
+                          type="text"
+                          placeholder="FIRST NAME *"
+                          className={fieldInputClass(Boolean(fieldErrors.firstName))}
+                          value={formData.firstName}
+                          onChange={(e) => updateField('firstName', e.target.value)}
+                          aria-invalid={Boolean(fieldErrors.firstName)}
+                        />
+                      </FormField>
+                      <FormField error={fieldErrors.lastName}>
+                        <input
+                          type="text"
+                          placeholder="LAST NAME *"
+                          className={fieldInputClass(Boolean(fieldErrors.lastName))}
+                          value={formData.lastName}
+                          onChange={(e) => updateField('lastName', e.target.value)}
+                          aria-invalid={Boolean(fieldErrors.lastName)}
+                        />
+                      </FormField>
                     </div>
                     <div className="grid sm:grid-cols-2 gap-4">
-                      <input
-                        type="tel"
-                        placeholder="PHONE NUMBER *"
-                        className="w-full p-4 rounded-[8px] input-sun"
-                        value={formData.phone}
-                        onChange={(e) => updateField('phone', e.target.value)}
-                        required
-                      />
-                      <input
-                        type="email"
-                        placeholder="EMAIL *"
-                        className="w-full p-4 rounded-[8px] input-sun"
-                        value={formData.email}
-                        onChange={(e) => updateField('email', e.target.value)}
-                        required
-                      />
+                      <FormField error={fieldErrors.phone}>
+                        <input
+                          type="tel"
+                          inputMode="tel"
+                          autoComplete="tel"
+                          placeholder="MOBILE NUMBER *"
+                          className={fieldInputClass(Boolean(fieldErrors.phone))}
+                          value={formData.phone}
+                          onChange={(e) => updateField('phone', sanitizePhoneInput(e.target.value))}
+                          aria-invalid={Boolean(fieldErrors.phone)}
+                        />
+                        {!fieldErrors.phone && (
+                          <p className="text-xs text-neutral px-1">
+                            e.g. 021 123 4567 or +64 21 123 4567
+                          </p>
+                        )}
+                      </FormField>
+                      <FormField error={fieldErrors.email}>
+                        <input
+                          type="email"
+                          inputMode="email"
+                          autoComplete="email"
+                          placeholder="EMAIL *"
+                          className={fieldInputClass(Boolean(fieldErrors.email))}
+                          value={formData.email}
+                          onChange={(e) => updateField('email', e.target.value)}
+                          aria-invalid={Boolean(fieldErrors.email)}
+                        />
+                      </FormField>
                     </div>
 
                     <CollapsibleSection

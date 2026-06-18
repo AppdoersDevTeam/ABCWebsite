@@ -61,7 +61,7 @@ function buildEmailBody(formData: ContactFormData): string {
     `Spouse Name:  ${[formData.spouseFirstName, formData.spouseLastName].filter(Boolean).join(' ').trim() || 'Not provided'}`,
     `Age:          ${formData.ageBracket?.trim() || 'Not provided'}`,
     `Email:        ${formData.email}`,
-    `Phone:        ${formData.phone}`,
+    `Phone:        ${formData.phone?.trim() || 'Not provided'}`,
     `Address:      ${formData.addressLine1?.trim() || 'Not provided'}`,
     `              ${formData.addressLine2?.trim() || ''}`.trimEnd(),
   ];
