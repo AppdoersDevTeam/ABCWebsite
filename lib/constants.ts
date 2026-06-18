@@ -26,3 +26,30 @@ export function displayInitial(user: { first_name?: string; name?: string } | nu
   const letter = (user.first_name || user.name || 'U').charAt(0);
   return letter.toUpperCase();
 }
+
+function normalizeEmail(email: string | null | undefined): string {
+  return (email || '').trim().toLowerCase();
+}
+
+/** True for the Appdoers service account hidden from other admins in user lists. */
+export function isServiceAccountEmail(email: string | null | undefined): boolean {
+  return normalizeEmail(email) === ADMIN_EMAIL.toLowerCase();
+}
+
+/** Whether a user row should appear in admin user-management UIs for the current viewer. */
+export function shouldShowUserInAdminList(
+  user: { id?: string; email?: string | null } | null | undefined,
+  viewer: { id?: string; email?: string | null } | null | undefined
+): boolean {
+  if (!user || !isServiceAccountEmail(user.email)) return !!user;
+  if (!viewer) return false;
+  if (viewer.id && user.id && viewer.id === user.id) return true;
+  return isServiceAccountEmail(viewer.email);
+}
+
+export function filterUsersForAdminView<T extends { id?: string; email?: string | null }>(
+  users: T[],
+  viewer: { id?: string; email?: string | null } | null | undefined
+): T[] {
+  return users.filter((u) => shouldShowUserInAdminList(u, viewer));
+}

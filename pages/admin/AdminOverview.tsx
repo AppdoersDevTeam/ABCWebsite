@@ -4,7 +4,7 @@ import { VibrantCard } from '../../components/UI/VibrantCard';
 import { Calendar, MessageSquare, BookOpen, Users, ClipboardList, ArrowUpRight, UserCheck, X, Plus, Shield } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
-import { displayName } from '../../lib/constants';
+import { displayName, filterUsersForAdminView } from '../../lib/constants';
 import { User } from '../../types';
 import { SkeletonPageHeader, SkeletonCard, SkeletonUserCard, SkeletonStatsCard } from '../../components/UI/Skeleton';
 import { formatRelativeDateInTimezone, formatFullDateTimeInTimezone } from '../../lib/dateUtils';
@@ -400,6 +400,18 @@ export const AdminOverview = () => {
     }
   };
 
+  const visibleUsers = useMemo(
+    () => filterUsersForAdminView(allUsers, user),
+    [allUsers, user]
+  );
+
+  const visiblePendingUsers = useMemo(
+    () => filterUsersForAdminView(pendingUsers, user),
+    [pendingUsers, user]
+  );
+
+  const visiblePendingCount = visiblePendingUsers.length;
+
   const formatDate = (dateString: string | undefined, userTimezone?: string) => {
     // For admin views, display dates in the admin's current timezone
     return formatRelativeDateInTimezone(dateString, userTimezone);
@@ -408,11 +420,11 @@ export const AdminOverview = () => {
   const stats = useMemo(() => [
     { 
       label: 'Pending Approvals', 
-      value: pendingCount.toString(), 
+      value: visiblePendingCount.toString(), 
       icon: <UserCheck size={24} />, 
       path: '#pending-users', 
       color: 'text-gold', 
-      highlight: pendingCount > 0 
+      highlight: visiblePendingCount > 0 
     },
     { 
       label: 'New Prayer Requests (24h)', 
@@ -454,7 +466,7 @@ export const AdminOverview = () => {
       color: 'text-indigo-500',
       subtitle: isLoadingStats ? 'Loading...' : undefined
     },
-  ], [pendingCount, prayerRequests24h, nextService, lastNewsletterDate, isLoadingStats, teamMembersCount, rosterAssignmentsCount]);
+  ], [visiblePendingCount, prayerRequests24h, nextService, lastNewsletterDate, isLoadingStats, teamMembersCount, rosterAssignmentsCount]);
 
   console.log('AdminOverview - Rendering, user:', user, 'pendingCount:', pendingCount, 'isLoadingUsers:', isLoadingUsers);
 
@@ -553,9 +565,9 @@ export const AdminOverview = () => {
               <p className="text-neutral mt-1">Review and approve new user signups</p>
             </div>
           </div>
-          {pendingCount > 0 && (
+          {visiblePendingCount > 0 && (
             <span className="bg-gold text-charcoal px-4 py-2 rounded-full text-sm font-bold">
-              {pendingCount} {pendingCount === 1 ? 'pending user' : 'pending users'}
+              {visiblePendingCount} {visiblePendingCount === 1 ? 'pending user' : 'pending users'}
             </span>
           )}
         </div>
@@ -566,18 +578,18 @@ export const AdminOverview = () => {
               <SkeletonUserCard key={i} />
             ))}
           </div>
-        ) : pendingCount === 0 ? (
+        ) : visiblePendingCount === 0 ? (
           <div className="text-center py-12 bg-gray-50 rounded-[8px] border border-gray-100">
             <UserCheck size={48} className="text-gray-300 mx-auto mb-4" />
             <p className="text-neutral text-lg font-medium">No pending user approvals</p>
             <p className="text-neutral text-sm mt-2">All users have been reviewed</p>
             <div className="mt-6 space-y-3">
-              {allUsers.length > 0 && (
+              {visibleUsers.length > 0 && (
                 <button
                   onClick={() => setShowAllUsers(!showAllUsers)}
                   className="text-gold hover:text-charcoal font-bold text-sm underline block"
                 >
-                  {showAllUsers ? 'Hide' : 'Show'} all users ({allUsers.length})
+                  {showAllUsers ? 'Hide' : 'Show'} all users ({visibleUsers.length})
                 </button>
               )}
               <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-[4px]">
@@ -598,7 +610,7 @@ export const AdminOverview = () => {
           </div>
         ) : (
           <div className="space-y-4">
-            {pendingUsers.map((pendingUser) => (
+            {visiblePendingUsers.map((pendingUser) => (
               <div
                 key={pendingUser.id}
                 className="bg-white border-2 border-gray-200 p-6 rounded-[8px] hover:border-gold transition-all shadow-sm"
@@ -661,11 +673,11 @@ export const AdminOverview = () => {
         )}
 
         {/* Debug: Show All Users */}
-        {showAllUsers && allUsers.length > 0 && (
+        {showAllUsers && visibleUsers.length > 0 && (
           <div className="mt-8 pt-8 border-t border-gray-200">
             <h3 className="font-serif text-xl text-charcoal font-normal mb-4">All Users (Debug View)</h3>
             <div className="space-y-3">
-              {allUsers.map((u) => (
+              {visibleUsers.map((u) => (
                 <div
                   key={u.id}
                   className="bg-gray-50 border border-gray-200 p-4 rounded-[4px] text-sm"
@@ -700,7 +712,7 @@ export const AdminOverview = () => {
         <div className="glass-card bg-white/60 p-8 rounded-[8px] border border-gray-100">
           <h3 className="font-serif text-2xl mb-4 text-charcoal font-normal">Quick Actions</h3>
           <div className="space-y-3">
-            {pendingCount > 0 && (
+            {visiblePendingCount > 0 && (
               <a
                 href="#pending-users"
                 onClick={(e) => {
@@ -710,7 +722,7 @@ export const AdminOverview = () => {
                 className="block p-4 bg-white border-2 border-gold rounded-[4px] hover:border-gold hover:shadow-md transition-all"
               >
                 <span className="font-bold text-charcoal">Review Pending User Approvals</span>
-                <p className="text-sm text-neutral mt-1">{pendingCount} {pendingCount === 1 ? 'user' : 'users'} awaiting approval</p>
+                <p className="text-sm text-neutral mt-1">{visiblePendingCount} {visiblePendingCount === 1 ? 'user' : 'users'} awaiting approval</p>
               </a>
             )}
             <Link to="/admin/users" className="block p-4 bg-white border border-gray-100 rounded-[4px] hover:border-blue-300 hover:shadow-md transition-all">

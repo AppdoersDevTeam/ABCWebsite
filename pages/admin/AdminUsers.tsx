@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { Users, UserCheck, X, Shield, ShieldOff, Ban, Crown, KeyRound, AlertTriangle } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { displayName, displayInitial } from '../../lib/constants';
+import { displayName, displayInitial, filterUsersForAdminView } from '../../lib/constants';
 import { User } from '../../types';
 import { CreateUserProfile } from './CreateUserProfile';
 import { LinkDirectoryUserModal } from './LinkDirectoryUserModal';
@@ -217,14 +217,24 @@ export const AdminUsers = () => {
 
   const isSuperAdmin = user?.is_super_admin === true;
 
+  const visibleUsers = useMemo(
+    () => filterUsersForAdminView(allUsers, user),
+    [allUsers, user]
+  );
+
+  const visiblePendingCount = useMemo(
+    () => visibleUsers.filter((u) => !u.is_approved).length,
+    [visibleUsers]
+  );
+
   const formatDate = (dateString: string | undefined, userTimezone?: string) => {
     // For admin views, display dates in the admin's current timezone
     return formatRelativeDateInTimezone(dateString, userTimezone);
   };
 
   const directoryNeedsReviewCount = useMemo(() => {
-    return allUsers.filter((u) => !directoryByUserId[u.id]).length;
-  }, [allUsers, directoryByUserId]);
+    return visibleUsers.filter((u) => !directoryByUserId[u.id]).length;
+  }, [visibleUsers, directoryByUserId]);
 
   const tryAutoLinkDirectoryForUser = async (u: User): Promise<boolean> => {
     const emailNorm = (u.email || '').trim().toLowerCase();
@@ -305,13 +315,13 @@ export const AdminUsers = () => {
   const filteredUsers = () => {
     switch (filter) {
       case 'pending':
-        return allUsers.filter(u => !u.is_approved);
+        return visibleUsers.filter(u => !u.is_approved);
       case 'approved':
-        return allUsers.filter(u => u.is_approved);
+        return visibleUsers.filter(u => u.is_approved);
       case 'admins':
-        return allUsers.filter(u => u.role === 'admin');
+        return visibleUsers.filter(u => u.role === 'admin');
       default:
-        return allUsers;
+        return visibleUsers;
     }
   };
 
@@ -350,7 +360,7 @@ export const AdminUsers = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-neutral font-bold">Total Users</p>
-                <p className="text-3xl font-bold text-charcoal mt-2">{allUsers.length}</p>
+                <p className="text-3xl font-bold text-charcoal mt-2">{visibleUsers.length}</p>
               </div>
               <div className="p-3 bg-blue-100 rounded-full">
                 <Users size={24} className="text-blue-600" />
@@ -361,7 +371,7 @@ export const AdminUsers = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-neutral font-bold">Pending Approval</p>
-                <p className="text-3xl font-bold text-gold mt-2">{pendingCount}</p>
+                <p className="text-3xl font-bold text-gold mt-2">{visiblePendingCount}</p>
               </div>
               <div className="p-3 bg-yellow-100 rounded-full">
                 <UserCheck size={24} className="text-yellow-600" />
@@ -372,7 +382,7 @@ export const AdminUsers = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-neutral font-bold">Approved Users</p>
-                <p className="text-3xl font-bold text-green-600 mt-2">{allUsers.filter(u => u.is_approved).length}</p>
+                <p className="text-3xl font-bold text-green-600 mt-2">{visibleUsers.filter(u => u.is_approved).length}</p>
               </div>
               <div className="p-3 bg-green-100 rounded-full">
                 <UserCheck size={24} className="text-green-600" />
@@ -411,7 +421,7 @@ export const AdminUsers = () => {
               : 'text-neutral hover:text-charcoal'
           }`}
         >
-          All Users ({allUsers.length})
+          All Users ({visibleUsers.length})
         </button>
         <button
           onClick={() => setFilter('pending')}
@@ -421,7 +431,7 @@ export const AdminUsers = () => {
               : 'text-neutral hover:text-charcoal'
           }`}
         >
-          Pending ({pendingCount})
+          Pending ({visiblePendingCount})
         </button>
         <button
           onClick={() => setFilter('approved')}
@@ -431,7 +441,7 @@ export const AdminUsers = () => {
               : 'text-neutral hover:text-charcoal'
           }`}
         >
-          Approved ({allUsers.filter(u => u.is_approved).length})
+          Approved ({visibleUsers.filter(u => u.is_approved).length})
         </button>
         <button
           onClick={() => setFilter('admins')}
@@ -441,7 +451,7 @@ export const AdminUsers = () => {
               : 'text-neutral hover:text-charcoal'
           }`}
         >
-          Admins ({allUsers.filter(u => u.role === 'admin').length})
+          Admins ({visibleUsers.filter(u => u.role === 'admin').length})
         </button>
       </div>
 
