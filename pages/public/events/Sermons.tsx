@@ -296,8 +296,8 @@ export const Sermons = () => {
                       </div>
 
                       {/* Video Info */}
-                      <div className="p-6">
-                        <h3 className="text-xl font-serif font-normal text-charcoal mb-2 line-clamp-2 group-hover:text-gold transition-colors duration-300">
+                      <div className="p-4 sm:p-5 bg-white/90">
+                        <h3 className="text-sm sm:text-[1rem] font-serif font-normal text-charcoal mb-2 leading-snug line-clamp-3 break-words min-h-[3.75rem] group-hover:text-gold transition-colors duration-300">
                           {video.title}
                         </h3>
                         <div className="space-y-1 text-sm text-neutral group-hover:text-charcoal transition-colors">
