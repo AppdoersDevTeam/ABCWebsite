@@ -138,13 +138,13 @@ const AppRoutes = () => {
               <Route path="about/leadership/emily-white" element={<EmilyWhite />} />
               <Route path="about/leadership/:slug" element={<LeadershipBio />} />
               <Route path="events" element={<Events />} />
-              <Route path="events/:id" element={<EventDetail />} />
               <Route path="events/sermons" element={<Sermons />} />
               <Route path="events/sunday-service" element={<SundayService />} />
               <Route path="events/young-adults" element={<YoungAdults />} />
               <Route path="events/teens-youth" element={<TeensYouth />} />
               <Route path="events/community-lunch" element={<CommunityLunch />} />
               <Route path="events/kids-program" element={<KidsProgram />} />
+              <Route path="events/:id" element={<EventDetail />} />
               <Route path="im-new" element={<ImNew />} />
               <Route path="giving" element={<Giving />} />
               <Route path="need-prayer" element={<NeedPrayer />} />

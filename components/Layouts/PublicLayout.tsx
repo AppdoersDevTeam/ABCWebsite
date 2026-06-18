@@ -166,11 +166,11 @@ export const PublicLayout = () => {
       label: 'Events', 
       path: '/events',
       submenu: [
-        { label: 'Sunday Service', path: '/events#sunday-service', hash: 'sunday-service' },
-        { label: 'Young Adults', path: '/events#young-adults', hash: 'young-adults' },
-        { label: 'Teens & Youth', path: '/events#teens-youth', hash: 'teens-youth' },
-        { label: 'Community Lunch', path: '/events#community-lunch', hash: 'community-lunch' },
-        { label: 'Kids Program', path: '/events#kids-program', hash: 'kids-program' },
+        { label: 'Sunday Service', path: '/events/sunday-service', hash: '' },
+        { label: 'Young Adults', path: '/events/young-adults', hash: '' },
+        { label: 'Teens & Youth', path: '/events/teens-youth', hash: '' },
+        { label: 'Community Lunch', path: '/events/community-lunch', hash: '' },
+        { label: 'Kids Program', path: '/events/kids-program', hash: '' },
       ]
     },
     { 
@@ -551,10 +551,10 @@ export const PublicLayout = () => {
                 <li><Link to="/im-new#faq" className="text-white hover:text-gold transition-colors text-sm">FAQ</Link></li>
                 <li><Link to="/giving#direct-deposit" className="text-white hover:text-gold transition-colors text-sm">Direct Deposit</Link></li>
                 <li><Link to="/giving#credit-card" className="text-white hover:text-gold transition-colors text-sm">Credit Card</Link></li>
-                <li><Link to="/events#sunday-service" className="text-white hover:text-gold transition-colors text-sm">Sunday Service</Link></li>
-                <li><Link to="/events#young-adults" className="text-white hover:text-gold transition-colors text-sm">Young Adults</Link></li>
-                <li><Link to="/events#teens-youth" className="text-white hover:text-gold transition-colors text-sm">Teens & Youth</Link></li>
-                <li><Link to="/events#kids-program" className="text-white hover:text-gold transition-colors text-sm">Kids Program</Link></li>
+                <li><Link to="/events/sunday-service" className="text-white hover:text-gold transition-colors text-sm">Sunday Service</Link></li>
+                <li><Link to="/events/young-adults" className="text-white hover:text-gold transition-colors text-sm">Young Adults</Link></li>
+                <li><Link to="/events/teens-youth" className="text-white hover:text-gold transition-colors text-sm">Teens & Youth</Link></li>
+                <li><Link to="/events/kids-program" className="text-white hover:text-gold transition-colors text-sm">Kids Program</Link></li>
               </ul>
             </div>
 
