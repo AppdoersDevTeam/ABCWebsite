@@ -1,10 +1,12 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { ScrollReveal } from '../../components/UI/ScrollReveal';
+import { Modal } from '../../components/UI/Modal';
 import { CreditCard, Landmark, Gift, ArrowDownToLine } from 'lucide-react';
 
 export const Giving = () => {
   const heroRef = useRef<HTMLDivElement>(null);
+  const [showUnavailableModal, setShowUnavailableModal] = useState(false);
   
   return (
     <div className="space-y-0 overflow-hidden">
@@ -77,12 +79,16 @@ export const Giving = () => {
                   <span className="font-bold text-charcoal text-right">Ashburton Baptist</span>
                 </div>
                 <div className="flex justify-between border-b border-gray-200 pb-3">
-                  <span>BSB:</span>
-                  <span className="font-bold text-charcoal text-right">000-000</span>
+                  <span>Bank:</span>
+                  <span className="font-bold text-charcoal text-right">01</span>
+                </div>
+                <div className="flex justify-between border-b border-gray-200 pb-3">
+                  <span>Branch:</span>
+                  <span className="font-bold text-charcoal text-right">0834</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Number:</span>
-                  <span className="font-bold text-charcoal text-right">1234 5678</span>
+                  <span className="font-bold text-charcoal text-right">00014 99000</span>
                 </div>
               </div>
             </div>
@@ -95,7 +101,12 @@ export const Giving = () => {
               </div>
               <h3 className="text-2xl font-serif font-normal text-charcoal mb-4">Credit Card</h3>
               <p className="text-neutral mb-6">Secure online giving via Stripe. Set up recurring giving or make a one-time impact.</p>
-              <GlowingButton fullWidth size="sm" className="!rounded-full !bg-gold !text-white !border-gold transition-all duration-500 ease-out hover:scale-110 hover:shadow-2xl hover:shadow-gold/60 active:scale-95 hover:-translate-y-1">
+              <GlowingButton
+                fullWidth
+                size="sm"
+                className="!rounded-full !bg-gold !text-white !border-gold transition-all duration-500 ease-out hover:scale-110 hover:shadow-2xl hover:shadow-gold/60 active:scale-95 hover:-translate-y-1"
+                onClick={() => setShowUnavailableModal(true)}
+              >
                 Give Securely
               </GlowingButton>
             </div>
@@ -103,6 +114,21 @@ export const Giving = () => {
         </div>
         </div>
       </section>
+
+      <Modal
+        isOpen={showUnavailableModal}
+        onClose={() => setShowUnavailableModal(false)}
+        title="Coming Soon"
+      >
+        <p className="text-neutral text-lg text-center">
+          Sorry, this feature isn&apos;t available yet.
+        </p>
+        <div className="mt-6 flex justify-center">
+          <GlowingButton size="sm" onClick={() => setShowUnavailableModal(false)}>
+            OK
+          </GlowingButton>
+        </div>
+      </Modal>
     </div>
   );
 };
