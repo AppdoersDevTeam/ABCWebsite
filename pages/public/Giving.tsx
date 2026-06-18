@@ -73,22 +73,14 @@ export const Giving = () => {
               </div>
               <h3 className="text-2xl font-serif font-normal text-charcoal mb-4">Direct Deposit</h3>
               <p className="text-neutral mb-6">Give directly through bank transfer. Simple and secure.</p>
-              <div className="space-y-4 text-neutral text-base bg-gray-50 p-6 rounded-[8px] border border-gray-100">
-                <div className="flex justify-between border-b border-gray-200 pb-3">
-                  <span>Account:</span>
-                  <span className="font-bold text-charcoal text-right">Ashburton Baptist</span>
+              <div className="space-y-4 text-neutral text-base bg-gray-50 p-6 rounded-[8px] border border-gray-100 text-center">
+                <div>
+                  <p className="text-sm text-neutral mb-1">Account name</p>
+                  <p className="font-bold text-charcoal text-lg">Ashburton Baptist</p>
                 </div>
-                <div className="flex justify-between border-b border-gray-200 pb-3">
-                  <span>Bank:</span>
-                  <span className="font-bold text-charcoal text-right">01</span>
-                </div>
-                <div className="flex justify-between border-b border-gray-200 pb-3">
-                  <span>Branch:</span>
-                  <span className="font-bold text-charcoal text-right">0834</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Number:</span>
-                  <span className="font-bold text-charcoal text-right">00014 99000</span>
+                <div className="border-t border-gray-200 pt-4">
+                  <p className="text-sm text-neutral mb-1">Bank account number</p>
+                  <p className="font-bold text-charcoal text-lg tracking-wide">01 0834 00014 99000</p>
                 </div>
               </div>
             </div>
