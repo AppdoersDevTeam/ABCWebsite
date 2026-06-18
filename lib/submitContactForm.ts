@@ -8,7 +8,8 @@ export interface ChildEntry {
 export interface ContactFormData {
   firstName: string;
   lastName: string;
-  spouse?: string;
+  spouseFirstName?: string;
+  spouseLastName?: string;
   ageBracket?: string;
   email: string;
   phone: string;
@@ -55,7 +56,9 @@ function buildEmailBody(formData: ContactFormData): string {
     `First Name:   ${formData.firstName}`,
     `Last Name:    ${formData.lastName}`,
     `Full Name:    ${fullName}`,
-    `Spouse:       ${formData.spouse?.trim() || 'Not provided'}`,
+    `Spouse First: ${formData.spouseFirstName?.trim() || 'Not provided'}`,
+    `Spouse Last:  ${formData.spouseLastName?.trim() || 'Not provided'}`,
+    `Spouse Name:  ${[formData.spouseFirstName, formData.spouseLastName].filter(Boolean).join(' ').trim() || 'Not provided'}`,
     `Age:          ${formData.ageBracket?.trim() || 'Not provided'}`,
     `Email:        ${formData.email}`,
     `Phone:        ${formData.phone}`,

@@ -31,7 +31,8 @@ const initialChildren = [
 const initialFormData = {
   firstName: '',
   lastName: '',
-  spouse: '',
+  spouseFirstName: '',
+  spouseLastName: '',
   ageBracket: '',
   email: '',
   phone: '',
@@ -175,7 +176,7 @@ function CollapsibleSection({
         className={`grid transition-all duration-300 ease-in-out ${isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}
       >
         <div className="overflow-hidden">
-          <div className="px-4 pb-4 pt-0 space-y-4 border-t border-gray-100">{children}</div>
+          <div className="px-4 pb-4 pt-4 space-y-6 border-t border-gray-100">{children}</div>
         </div>
       </div>
     </div>
@@ -274,7 +275,8 @@ export const Contact = () => {
       const result = await submitContactForm({
         firstName: formData.firstName.trim(),
         lastName: formData.lastName.trim(),
-        spouse: formData.spouse.trim(),
+        spouseFirstName: formData.spouseFirstName.trim(),
+        spouseLastName: formData.spouseLastName.trim(),
         ageBracket: formData.ageBracket,
         email: formData.email.trim(),
         phone: formData.phone.trim(),
@@ -492,15 +494,29 @@ export const Contact = () => {
                       title="Additional details"
                       subtitle="Optional — spouse, age, address & children"
                     >
-                      <input
-                        type="text"
-                        placeholder="SPOUSE"
-                        className="w-full p-4 rounded-[8px] input-sun"
-                        value={formData.spouse}
-                        onChange={(e) => updateField('spouse', e.target.value)}
-                      />
+                      <div className="space-y-3">
+                        <span className="text-xs font-bold uppercase tracking-wider text-charcoal">
+                          Spouse
+                        </span>
+                        <div className="grid sm:grid-cols-2 gap-4">
+                          <input
+                            type="text"
+                            placeholder="FIRST NAME"
+                            className="w-full p-4 rounded-[8px] input-sun"
+                            value={formData.spouseFirstName}
+                            onChange={(e) => updateField('spouseFirstName', e.target.value)}
+                          />
+                          <input
+                            type="text"
+                            placeholder="LAST NAME"
+                            className="w-full p-4 rounded-[8px] input-sun"
+                            value={formData.spouseLastName}
+                            onChange={(e) => updateField('spouseLastName', e.target.value)}
+                          />
+                        </div>
+                      </div>
 
-                      <div className="space-y-2">
+                      <div className="space-y-3">
                         <span className="text-xs font-bold uppercase tracking-wider text-charcoal">
                           Age
                         </span>
@@ -527,7 +543,7 @@ export const Contact = () => {
                         </div>
                       </div>
 
-                      <div className="space-y-2">
+                      <div className="space-y-3">
                         <span className="text-xs font-bold uppercase tracking-wider text-charcoal">
                           Address
                         </span>
@@ -547,7 +563,7 @@ export const Contact = () => {
                         />
                       </div>
 
-                      <div className="space-y-2">
+                      <div className="space-y-3">
                         <span className="text-xs font-bold uppercase tracking-wider text-charcoal">
                           Children
                         </span>
