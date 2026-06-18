@@ -198,12 +198,7 @@ export const PublicLayout = () => {
     { 
       label: 'Contact', 
       path: '/contact',
-      submenu: [
-        { label: 'Visit Us', path: '/contact#visit', hash: 'visit' },
-        { label: 'Call Us', path: '/contact#call', hash: 'call' },
-        { label: 'Email Us', path: '/contact#email', hash: 'email' },
-        { label: 'Send Message', path: '/contact#message', hash: 'message' },
-      ]
+      submenu: []
     },
   ];
 
