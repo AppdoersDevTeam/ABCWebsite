@@ -30,8 +30,10 @@ export const useAutoSectionReveal = () => {
         });
       },
       {
-        threshold: 0.18,
-        rootMargin: '0px 0px -10% 0px',
+        // Use threshold 0 so tall sections (e.g. History timeline) reveal on mobile
+        // where viewport height can never show 18% of the full section.
+        threshold: 0,
+        rootMargin: '0px 0px -5% 0px',
       }
     );
 

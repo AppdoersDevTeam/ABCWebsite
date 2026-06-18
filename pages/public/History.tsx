@@ -101,7 +101,7 @@ export const History = () => {
         </div>
       </section>
       
-      <section className="section-plain py-12 md:py-20 relative z-10">
+      <section className="section-plain py-12 md:py-20 relative z-10" data-no-reveal>
         <div className="container mx-auto px-4 max-w-5xl">
         {/* Header Section */}
         <ScrollReveal direction="down" delay={0}>
