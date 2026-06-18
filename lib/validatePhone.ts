@@ -1,5 +1,7 @@
 const PHONE_INPUT_PATTERN = /^[+]?[\d\s().-]+$/;
 
+const LANDLINE_AREA_CODES = ['03', '04', '06', '07'] as const;
+
 export function sanitizePhoneInput(value: string): string {
   return value.replace(/[^\d\s().+-]/g, '');
 }
@@ -23,27 +25,36 @@ function getNationalNumber(phone: string): string | null {
   return null;
 }
 
+/** Mobile: begins with 02, 9–11 digits total (including 02). */
 function isValidNzMobile(national: string): boolean {
   return national.startsWith('02') && national.length >= 9 && national.length <= 11;
 }
 
+/** Landline: area 03/04/06/07/09 (not 090), 7 local digits after area code (9 digits total). */
 function isValidNzLandline(national: string): boolean {
   if (national.length !== 9) {
     return false;
   }
 
-  if (/^0[3467]\d{7}$/.test(national)) {
-    return true;
+  for (const code of LANDLINE_AREA_CODES) {
+    if (national.startsWith(code)) {
+      return /^\d{7}$/.test(national.slice(code.length));
+    }
   }
 
-  // 09 area codes, excluding 090 premium numbers.
-  return national.startsWith('09') && !national.startsWith('090');
+  if (national.startsWith('09') && !national.startsWith('090')) {
+    return /^\d{7}$/.test(national.slice(2));
+  }
+
+  return false;
 }
 
+/** Free phone: begins with 050 or 080, 10 digits total. */
 function isValidNzFreePhone(national: string): boolean {
   return (national.startsWith('050') || national.startsWith('080')) && national.length === 10;
 }
 
+/** Premium rate: begins with 090, 9–11 digits total. */
 function isValidNzPremiumRate(national: string): boolean {
   return national.startsWith('090') && national.length >= 9 && national.length <= 11;
 }
@@ -60,6 +71,15 @@ export function isValidNzPhoneNumber(phone: string): boolean {
     isValidNzMobile(national) ||
     isValidNzLandline(national)
   );
+}
+
+/** Convert a validated NZ number to E.164 for Supabase Auth (+64…). */
+export function normalizePhoneForAuth(phone: string): string | null {
+  const national = getNationalNumber(phone);
+  if (!national || !isValidNzPhoneNumber(phone)) {
+    return null;
+  }
+  return `+64${national.slice(1)}`;
 }
 
 /** @deprecated Use isValidNzPhoneNumber */

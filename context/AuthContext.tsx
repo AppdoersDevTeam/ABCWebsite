@@ -36,9 +36,7 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   loginWithEmail: (email: string, password: string) => Promise<void>;
-  loginWithPhone: (phone: string, password?: string) => Promise<void>;
-  signUpWithEmail: (email: string, password: string, firstName: string, lastName: string, phone?: string) => Promise<void>;
-  signUpWithPhone: (phone: string, password: string, firstName: string, lastName: string, email?: string) => Promise<void>;
+  signUpWithEmail: (email: string, password: string, firstName: string, lastName: string, phone?: string) => Promise<{ needsEmailVerification: boolean }>;
   signInWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
   isAuthenticated: boolean;
@@ -462,40 +460,9 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
     }
   };
 
-  const loginWithPhone = async (phone: string, password?: string) => {
-    setIsLoading(true);
-    try {
-      if (password) {
-        // Phone + password login
-        const { data, error } = await supabase.auth.signInWithPassword({
-          phone,
-          password,
-        });
-
-        if (error) throw error;
-
-        if (data.user) {
-          const userProfile = await fetchUserProfile(data.user);
-          if (!userProfile) {
-            throw new Error('Failed to fetch user profile');
-          }
-          setUser(userProfile);
-        }
-      } else {
-        // Phone OTP login
-        const { error } = await supabase.auth.signInWithOtp({
-          phone,
-        });
-
-        if (error) throw error;
-        // OTP sent, user will need to verify
-      }
-    } catch (error) {
-      console.error('Phone login error:', error);
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
+  const getSiteBaseUrl = () => {
+    const siteUrl = import.meta.env.VITE_SITE_URL || window.location.origin;
+    return siteUrl.replace(/\/$/, '');
   };
 
   const signUpWithEmail = async (email: string, password: string, firstName: string, lastName: string, phone?: string) => {
@@ -504,9 +471,10 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
       const userTimezone = getUserTimezone();
       const fullName = [firstName, lastName].filter(Boolean).join(' ');
       const { data, error } = await supabase.auth.signUp({
-        email,
+        email: email.trim().toLowerCase(),
         password,
         options: {
+          emailRedirectTo: `${getSiteBaseUrl()}/#/auth/callback`,
           data: {
             full_name: fullName,
             first_name: firstName,
@@ -519,10 +487,10 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
 
       if (error) throw error;
 
-      if (data.user) {
-        // User profile will be created in fetchUserProfile
+      const needsEmailVerification = !data.session && !!data.user;
+
+      if (data.user && data.session) {
         const userProfile = await fetchUserProfile(data.user);
-        // Ensure timezone is set in the user profile
         if (userProfile && !userProfile.user_timezone) {
           await supabase
             .from('users')
@@ -532,49 +500,10 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
         }
         setUser(userProfile);
       }
+
+      return { needsEmailVerification };
     } catch (error) {
       console.error('Sign up error:', error);
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const signUpWithPhone = async (phone: string, password: string, firstName: string, lastName: string, email?: string) => {
-    setIsLoading(true);
-    try {
-      const userTimezone = getUserTimezone();
-      const fullName = [firstName, lastName].filter(Boolean).join(' ');
-      const { data, error } = await supabase.auth.signUp({
-        phone,
-        password,
-        options: {
-          data: {
-            full_name: fullName,
-            first_name: firstName,
-            last_name: lastName,
-            email: email || null,
-            timezone: userTimezone,
-          },
-        },
-      });
-
-      if (error) throw error;
-
-      if (data.user) {
-        const userProfile = await fetchUserProfile(data.user);
-        // Ensure timezone is set in the user profile
-        if (userProfile && !userProfile.user_timezone) {
-          await supabase
-            .from('users')
-            .update({ user_timezone: userTimezone })
-            .eq('id', data.user.id);
-          userProfile.user_timezone = userTimezone;
-        }
-        setUser(userProfile);
-      }
-    } catch (error) {
-      console.error('Phone sign up error:', error);
       throw error;
     } finally {
       setIsLoading(false);
@@ -696,9 +625,7 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
         user,
         isLoading,
         loginWithEmail,
-        loginWithPhone,
         signUpWithEmail,
-        signUpWithPhone,
         signInWithGoogle,
         logout,
         isAuthenticated: !!user && user.is_approved,

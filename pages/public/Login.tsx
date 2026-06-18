@@ -2,13 +2,42 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { GlowingButton } from '../../components/UI/GlowingButton';
-import { Mail, Phone, Shield, User as UserIcon } from 'lucide-react';
+import { Shield, User as UserIcon } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { displayName } from '../../lib/constants';
+import {
+  getSignupSummaryError,
+  validateEmailSignupFields,
+  type SignupField,
+  type SignupFieldErrors,
+} from '../../lib/validateSignupFields';
+import { normalizePhoneForAuth, sanitizePhoneInput } from '../../lib/validatePhone';
+
+function fieldInputClass(hasError: boolean): string {
+  const base =
+    'appearance-none rounded-[4px] relative block w-full px-4 py-4 border bg-white text-charcoal placeholder-gray-400 focus:outline-none focus:ring-gold focus:z-10 shadow-sm';
+  return hasError
+    ? `${base} border-red-400 focus:border-red-500`
+    : `${base} border-gray-300 focus:border-gold`;
+}
+
+function FormField({
+  error,
+  children,
+}: {
+  error?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="space-y-1">
+      {children}
+      {error && <p className="text-xs text-red-600 px-1">{error}</p>}
+    </div>
+  );
+}
 
 export const Login = () => {
   const [isSignUp, setIsSignUp] = useState(false);
-  const [authMethod, setAuthMethod] = useState<'email' | 'phone'>('email');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
@@ -20,12 +49,56 @@ export const Login = () => {
   const [loginFlash, setLoginFlash] = useState<{ name: string; role: string } | null>(null);
   const [isResettingPassword, setIsResettingPassword] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
-  const { loginWithEmail, loginWithPhone, signUpWithEmail, signUpWithPhone, signInWithGoogle, isLoading, user, refreshUserProfile, sendPasswordReset } = useAuth();
+  const [fieldErrors, setFieldErrors] = useState<SignupFieldErrors>({});
+  const [awaitingEmailVerification, setAwaitingEmailVerification] = useState(false);
+  const {
+    loginWithEmail,
+    signUpWithEmail,
+    signInWithGoogle,
+    isLoading,
+    user,
+    refreshUserProfile,
+    sendPasswordReset,
+  } = useAuth();
   const navigate = useNavigate();
+
+  const clearFieldError = (field: SignupField) => {
+    setFieldErrors((prev) => {
+      if (!prev[field]) return prev;
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
+  };
+
+  const validateSignup = (): boolean => {
+    const errors = validateEmailSignupFields({
+      firstName,
+      lastName,
+      email,
+      phone,
+      password,
+    });
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      setError(getSignupSummaryError(errors));
+      return false;
+    }
+
+    setFieldErrors({});
+    setError(null);
+    return true;
+  };
+
+  const goToPendingApproval = () => {
+    setTimeout(() => {
+      navigate('/pending-approval', { replace: true });
+    }, 500);
+  };
 
   const getRedirectPath = (role: string, isApproved: boolean): string => {
     if (!isApproved) return '/pending-approval';
-    // Clear any leftover test override on fresh login
     sessionStorage.removeItem('testRoleOverride');
     return role === 'admin' ? '/admin' : '/dashboard';
   };
@@ -64,49 +137,41 @@ export const Login = () => {
       }
 
       if (isSignUp) {
-        if (authMethod === 'email') {
-          if (!email || !password || !firstName) {
-            setError('Please fill in all required fields');
-            return;
-          }
-          await signUpWithEmail(email, password, firstName, lastName, phone || undefined);
-          setSuccess('Account created! Please wait for admin approval.');
-          setTimeout(() => {
-            navigate('/pending-approval', { replace: true });
-          }, 500);
-        } else {
-          if (!phone || !password || !firstName) {
-            setError('Please fill in all required fields');
-            return;
-          }
-          await signUpWithPhone(phone, password, firstName, lastName, email || undefined);
-          setSuccess('Account created! Please wait for admin approval.');
-          setTimeout(() => {
-            navigate('/pending-approval', { replace: true });
-          }, 500);
+        if (!validateSignup()) {
+          return;
         }
+
+        const normalizedPhone = phone.trim()
+          ? normalizePhoneForAuth(phone) ?? undefined
+          : undefined;
+        const result = await signUpWithEmail(
+          email.trim(),
+          password,
+          firstName.trim(),
+          lastName.trim(),
+          normalizedPhone
+        );
+        if (result.needsEmailVerification) {
+          setAwaitingEmailVerification(true);
+          setSuccess(
+            `We sent a verification link to ${email.trim()}. Please check your inbox and click the link to confirm your email.`
+          );
+          return;
+        }
+        setSuccess('Account created! Please wait for admin approval.');
+        goToPendingApproval();
       } else {
-        // Handle login
         setIsLoggingIn(true);
         try {
-          if (authMethod === 'email') {
-            if (!email || !password) {
-              setError('Please enter email and password');
-              setIsLoggingIn(false);
-              return;
-            }
-            await loginWithEmail(email, password);
-          } else {
-            if (!phone || !password) {
-              setError('Please enter phone and password');
-              setIsLoggingIn(false);
-              return;
-            }
-            await loginWithPhone(phone, password);
+          if (!email || !password) {
+            setError('Please enter email and password');
+            setIsLoggingIn(false);
+            return;
           }
-          
+          await loginWithEmail(email, password);
+
           const { data: { session } } = await supabase.auth.getSession();
-          
+
           if (session?.user) {
             const profilePromise = supabase
               .from('users')
@@ -114,13 +179,13 @@ export const Login = () => {
               .eq('id', session.user.id)
               .single()
               .then(result => result.data);
-            
+
             const timeoutPromise = new Promise((resolve) => {
               setTimeout(() => resolve(null), 2000);
             });
-            
+
             const userData = await Promise.race([profilePromise, timeoutPromise]) as any;
-            
+
             const role = userData?.role || user?.role || 'member';
             const isApproved = userData?.is_approved ?? user?.is_approved ?? false;
             const nameToShow = displayName(userData || user);
@@ -128,11 +193,10 @@ export const Login = () => {
             setLoginFlash({ name: nameToShow, role });
 
             const redirectPath = getRedirectPath(role, isApproved);
-            
-            // Brief delay so the user sees the flash
+
             setTimeout(() => {
               navigate(redirectPath, { replace: true });
-              
+
               setTimeout(() => {
                 const currentHash = window.location.hash;
                 if (currentHash.includes('login') || currentHash === '#/') {
@@ -140,7 +204,7 @@ export const Login = () => {
                 }
               }, 500);
             }, 1200);
-            
+
             refreshUserProfile().catch(err => {
               console.warn('Login - Background profile refresh failed:', err);
             });
@@ -154,7 +218,6 @@ export const Login = () => {
     } catch (err: any) {
       console.error('Login error:', err);
       setIsLoggingIn(false);
-      // Redirect to error page instead of showing error in form
       navigate(`/login-error?error=login_failed`, { replace: true });
     }
   };
@@ -163,15 +226,12 @@ export const Login = () => {
     setError(null);
     try {
       await signInWithGoogle();
-      // OAuth will redirect, so we don't need to handle success here
     } catch (err: any) {
       console.error('Google sign-in error:', err);
-      // Redirect to error page
       navigate(`/login-error?error=oauth_failed`, { replace: true });
     }
   };
 
-  // Login flash overlay — shown briefly after successful login
   if (loginFlash) {
     return (
       <div className="min-h-[80vh] flex items-center justify-center px-4 relative pt-32 md:pt-40 pb-32 bg-[#A8B774]">
@@ -198,7 +258,7 @@ export const Login = () => {
             {isSignUp ? 'Create Account' : 'Member Login'}
           </h2>
           <p className="mt-2 text-sm text-neutral">
-            {isSignUp 
+            {isSignUp
               ? 'Sign up to access the directory, roster, and prayer wall.'
               : 'Access the directory, roster, and prayer wall.'
             }
@@ -217,34 +277,24 @@ export const Login = () => {
           </div>
         )}
 
-        {/* Auth Method Toggle */}
-        <div className="flex gap-2 p-1 bg-gray-100 rounded-[4px]">
-          <button
-            type="button"
-            onClick={() => setAuthMethod('email')}
-            className={`flex-1 py-2 px-4 rounded-[4px] text-sm font-bold transition-colors ${
-              authMethod === 'email'
-                ? 'bg-white text-charcoal shadow-sm'
-                : 'text-neutral hover:text-charcoal'
-            }`}
-          >
-            <Mail size={16} className="inline mr-2" />
-            Email
-          </button>
-          <button
-            type="button"
-            onClick={() => setAuthMethod('phone')}
-            className={`flex-1 py-2 px-4 rounded-[4px] text-sm font-bold transition-colors ${
-              authMethod === 'phone'
-                ? 'bg-white text-charcoal shadow-sm'
-                : 'text-neutral hover:text-charcoal'
-            }`}
-          >
-            <Phone size={16} className="inline mr-2" />
-            Phone
-          </button>
-        </div>
-
+        {awaitingEmailVerification ? (
+          <div className="space-y-4 text-sm text-neutral">
+            <p>
+              Check your inbox for a verification email. After confirming, you can sign in and wait for admin approval.
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setAwaitingEmailVerification(false);
+                setIsSignUp(false);
+                setSuccess(null);
+              }}
+              className="text-gold hover:text-charcoal font-bold"
+            >
+              Back to sign in
+            </button>
+          </div>
+        ) : (
         <form className="mt-4 space-y-6" onSubmit={handleSubmit}>
           {isResettingPassword && (
             <div className="bg-gray-50 border border-gray-200 rounded-[4px] p-4 space-y-3">
@@ -285,7 +335,7 @@ export const Login = () => {
 
           {isSignUp && (
             <div className="grid grid-cols-2 gap-3">
-              <div>
+              <FormField error={fieldErrors.firstName}>
                 <label htmlFor="first-name" className="block text-sm font-bold text-charcoal mb-2">
                   First Name *
                 </label>
@@ -293,14 +343,16 @@ export const Login = () => {
                   id="first-name"
                   name="first-name"
                   type="text"
-                  required={isSignUp}
-                  className="appearance-none rounded-[4px] relative block w-full px-4 py-4 border border-gray-300 bg-white text-charcoal placeholder-gray-400 focus:outline-none focus:ring-gold focus:border-gold focus:z-10 shadow-sm"
+                  className={fieldInputClass(!!fieldErrors.firstName)}
                   placeholder="John"
                   value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
+                  onChange={(e) => {
+                    setFirstName(e.target.value);
+                    clearFieldError('firstName');
+                  }}
                 />
-              </div>
-              <div>
+              </FormField>
+              <FormField error={fieldErrors.lastName}>
                 <label htmlFor="last-name" className="block text-sm font-bold text-charcoal mb-2">
                   Last Name
                 </label>
@@ -308,53 +360,40 @@ export const Login = () => {
                   id="last-name"
                   name="last-name"
                   type="text"
-                  className="appearance-none rounded-[4px] relative block w-full px-4 py-4 border border-gray-300 bg-white text-charcoal placeholder-gray-400 focus:outline-none focus:ring-gold focus:border-gold focus:z-10 shadow-sm"
+                  className={fieldInputClass(!!fieldErrors.lastName)}
                   placeholder="Doe"
                   value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
+                  onChange={(e) => {
+                    setLastName(e.target.value);
+                    clearFieldError('lastName');
+                  }}
                 />
-              </div>
+              </FormField>
             </div>
           )}
 
           {!isResettingPassword && (
-            authMethod === 'email' ? (
-              <div>
-                <label htmlFor="email-address" className="block text-sm font-bold text-charcoal mb-2">
-                  Email address
-                </label>
-                <input
-                  id="email-address"
-                  name="email"
-                  type="email"
-                  required
-                  className="appearance-none rounded-[4px] relative block w-full px-4 py-4 border border-gray-300 bg-white text-charcoal placeholder-gray-400 focus:outline-none focus:ring-gold focus:border-gold focus:z-10 shadow-sm"
-                  placeholder="Email address"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-            ) : (
-              <div>
-                <label htmlFor="phone" className="block text-sm font-bold text-charcoal mb-2">
-                  Phone Number
-                </label>
-                <input
-                  id="phone"
-                  name="phone"
-                  type="tel"
-                  required
-                  className="appearance-none rounded-[4px] relative block w-full px-4 py-4 border border-gray-300 bg-white text-charcoal placeholder-gray-400 focus:outline-none focus:ring-gold focus:border-gold focus:z-10 shadow-sm"
-                  placeholder="+1234567890"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                />
-              </div>
-            )
+            <FormField error={fieldErrors.email}>
+              <label htmlFor="email-address" className="block text-sm font-bold text-charcoal mb-2">
+                Email address
+              </label>
+              <input
+                id="email-address"
+                name="email"
+                type="email"
+                className={fieldInputClass(!!fieldErrors.email)}
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  clearFieldError('email');
+                }}
+              />
+            </FormField>
           )}
 
-          {isSignUp && authMethod === 'email' && (
-            <div>
+          {isSignUp && (
+            <FormField error={fieldErrors.phone}>
               <label htmlFor="phone-optional" className="block text-sm font-bold text-charcoal mb-2">
                 Phone Number (Optional)
               </label>
@@ -362,33 +401,19 @@ export const Login = () => {
                 id="phone-optional"
                 name="phone-optional"
                 type="tel"
-                className="appearance-none rounded-[4px] relative block w-full px-4 py-4 border border-gray-300 bg-white text-charcoal placeholder-gray-400 focus:outline-none focus:ring-gold focus:border-gold focus:z-10 shadow-sm"
-                placeholder="+1234567890"
+                className={fieldInputClass(!!fieldErrors.phone)}
+                placeholder="021 123 4567"
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                onChange={(e) => {
+                  setPhone(sanitizePhoneInput(e.target.value));
+                  clearFieldError('phone');
+                }}
               />
-            </div>
-          )}
-
-          {isSignUp && authMethod === 'phone' && (
-            <div>
-              <label htmlFor="email-optional" className="block text-sm font-bold text-charcoal mb-2">
-                Email (Optional)
-              </label>
-              <input
-                id="email-optional"
-                name="email-optional"
-                type="email"
-                className="appearance-none rounded-[4px] relative block w-full px-4 py-4 border border-gray-300 bg-white text-charcoal placeholder-gray-400 focus:outline-none focus:ring-gold focus:border-gold focus:z-10 shadow-sm"
-                placeholder="Email address"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
+            </FormField>
           )}
 
           {!isResettingPassword && (
-            <div>
+            <FormField error={fieldErrors.password}>
               <label htmlFor="password" className="block text-sm font-bold text-charcoal mb-2">
                 Password
               </label>
@@ -396,13 +421,15 @@ export const Login = () => {
                 id="password"
                 name="password"
                 type="password"
-                required
-                className="appearance-none rounded-[4px] relative block w-full px-4 py-4 border border-gray-300 bg-white text-charcoal placeholder-gray-400 focus:outline-none focus:ring-gold focus:border-gold focus:z-10 shadow-sm"
-                placeholder="Password"
+                className={fieldInputClass(!!fieldErrors.password)}
+                placeholder="At least 8 characters"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  clearFieldError('password');
+                }}
               />
-            </div>
+            </FormField>
           )}
 
           {!isSignUp && !isResettingPassword && (
@@ -424,18 +451,18 @@ export const Login = () => {
           )}
 
           <div>
-            <GlowingButton 
-                type="submit" 
-                fullWidth 
-                disabled={isLoading}
+            <GlowingButton
+              type="submit"
+              fullWidth
+              disabled={isLoading}
             >
-              {isLoading 
+              {isLoading
                 ? (isResettingPassword ? 'Sending...' : isSignUp ? 'Creating account...' : 'Signing in...')
                 : (isResettingPassword ? 'Send reset link' : isSignUp ? 'Sign up' : 'Sign in')
               }
             </GlowingButton>
           </div>
-          
+
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-gray-200"></div>
@@ -446,15 +473,15 @@ export const Login = () => {
           </div>
 
           <div>
-             <GlowingButton 
-               type="button" 
-               variant="outline" 
-               fullWidth 
-               onClick={handleGoogleSignIn}
-               disabled={isLoading}
-             >
-                Google
-             </GlowingButton>
+            <GlowingButton
+              type="button"
+              variant="outline"
+              fullWidth
+              onClick={handleGoogleSignIn}
+              disabled={isLoading}
+            >
+              Google
+            </GlowingButton>
           </div>
 
           <div className="text-center">
@@ -466,16 +493,19 @@ export const Login = () => {
                 setResetEmail('');
                 setError(null);
                 setSuccess(null);
+                setFieldErrors({});
+                setAwaitingEmailVerification(false);
               }}
               className="text-sm text-gold hover:text-charcoal font-bold"
             >
-              {isSignUp 
-                ? 'Already have an account? Sign in' 
+              {isSignUp
+                ? 'Already have an account? Sign in'
                 : "Don't have an account? Sign up"
               }
             </button>
           </div>
         </form>
+        )}
       </div>
     </div>
   );

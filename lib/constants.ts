@@ -6,6 +6,12 @@ export const ADMIN_EMAIL = 'devteam@appdoers.co.nz';
 export const SUPER_ADMIN_EMAIL = ADMIN_EMAIL;
 export const CONTACT_FORM_RECIPIENT = 'pastor@ashburtonbaptist.co.nz';
 
+export const CHURCH_NAME = 'Ashburton Baptist Church';
+export const CHURCH_OFFICE_EMAIL = 'office@ashburtonbaptist.co.nz';
+export const CHURCH_WEBSITE_URL = 'https://www.ashburtonbaptist.co.nz';
+export const CHURCH_LOGO_URL = `${CHURCH_WEBSITE_URL}/ABC%20Logo.png`;
+export const CHURCH_ADDRESS = '284 Havelock Street, Ashburton 7700';
+
 /** Build a display name from first + last, falling back to legacy name. */
 export function displayName(user: { first_name?: string; last_name?: string; name?: string } | null | undefined): string {
   if (!user) return 'User';
