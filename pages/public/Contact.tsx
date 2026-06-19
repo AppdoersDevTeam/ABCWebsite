@@ -523,7 +523,7 @@ export const Contact = () => {
                           aria-invalid={Boolean(fieldErrors.phone)}
                         />
                         {!fieldErrors.phone && (
-                          <p className="text-xs text-neutral px-1">
+                          <p className="text-[9px] sm:text-[10px] text-neutral px-1 whitespace-nowrap leading-tight tracking-tight">
                             Optional — e.g. 021 123 4567, 03-308 5409, or 0800 123 456
                           </p>
                         )}
