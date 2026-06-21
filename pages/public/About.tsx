@@ -247,30 +247,29 @@ export const About = () => {
               <Church className="text-gold mx-auto mb-6" size={64} />
               <h2 className="text-4xl md:text-5xl font-serif font-normal text-charcoal">What We Believe</h2>
               <span className="text-gold font-bold tracking-[0.3em] block text-base">Statement of Faith</span>
+              <p className="text-neutral leading-relaxed text-lg max-w-3xl mx-auto mt-6">
+                Our Articles of Faith express what Ashburton Baptist Church believes about God, Scripture,
+                salvation, the church, and Christian living — drawn from the Bible and affirmed by our congregation.
+              </p>
             </div>
           </ScrollReveal>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
-            {(
-              [
-                { primary: 'The Father', secondary: 'God' },
-                { primary: 'Jesus', secondary: 'Savior' },
-                { primary: 'The Holy Spirit', secondary: 'Power' },
-                { primary: 'The Bible', secondary: 'Authority' },
-              ] as const
-            ).map((item, i) => (
-              <ScrollReveal key={i} direction="up" delay={i * 100}>
-                <div className="glass-card rounded-[16px] p-6 bg-white/70 border border-white/50 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-center">
-                  <span className="text-2xl md:text-3xl font-serif font-normal text-charcoal block mb-2">
-                    {item.primary}
-                  </span>
-                  <span className="text-xs uppercase tracking-widest text-neutral font-bold">
-                    {item.secondary}
-                  </span>
-                </div>
-              </ScrollReveal>
-            ))}
-          </div>
+          <ScrollReveal direction="up" delay={150}>
+            <div className="glass-card rounded-[16px] p-8 md:p-12 bg-white/70 border border-white/50 shadow-sm hover:shadow-xl transition-all duration-300 max-w-4xl mx-auto text-center">
+              <p className="text-neutral leading-relaxed text-lg mb-2">
+                20 articles covering the Scriptures, the triune God, salvation, the church, ordinances,
+                last things, evangelism, stewardship, the family, and more — with supporting Scripture references throughout.
+              </p>
+              <p className="text-sm text-gold font-bold tracking-widest uppercase mb-8">Full text · No abridgement</p>
+              <Link
+                to="/about/beliefs"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-gold px-8 py-3.5 text-base font-normal text-white shadow-md shadow-gold/30 transition-colors duration-200 hover:bg-[#e5b800] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2"
+              >
+                Read Our Full Statement of Faith
+                <ArrowRight size={18} className="text-white" aria-hidden />
+              </Link>
+            </div>
+          </ScrollReveal>
         </div>
       </section>
 

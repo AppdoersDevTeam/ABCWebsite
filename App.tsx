@@ -10,6 +10,7 @@ import { Home } from './pages/public/Home';
 import { About } from './pages/public/About';
 import { History } from './pages/public/History';
 import { Vision } from './pages/public/Vision';
+import { StatementOfFaith } from './pages/public/StatementOfFaith';
 import { Events } from './pages/public/Events';
 import { EventDetail } from './pages/public/EventDetail';
 import { Sermons } from './pages/public/events/Sermons';
@@ -132,6 +133,7 @@ const AppRoutes = () => {
               <Route path="about" element={<About />} />
               <Route path="about/history" element={<History />} />
               <Route path="about/vision" element={<Vision />} />
+              <Route path="about/beliefs" element={<StatementOfFaith />} />
               <Route path="about/leadership/david-miller" element={<DavidMiller />} />
               <Route path="about/leadership/sarah-jenkins" element={<SarahJenkins />} />
               <Route path="about/leadership/michael-chen" element={<MichaelChen />} />

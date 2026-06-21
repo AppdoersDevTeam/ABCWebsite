@@ -152,7 +152,7 @@ export const PublicLayout = () => {
       path: '/about',
       submenu: [
         { label: 'Our Vision', path: '/about/vision', hash: '' },
-        { label: 'What We Believe', path: '/about#beliefs', hash: 'beliefs' },
+        { label: 'What We Believe', path: '/about/beliefs', hash: '' },
         { label: 'Leadership', path: '/about#leadership', hash: 'leadership' },
         { label: 'History', path: '/about/history', hash: '' },
       ]
