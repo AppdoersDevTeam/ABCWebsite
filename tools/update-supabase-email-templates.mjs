@@ -10,6 +10,7 @@
 
 const PROJECT_REF = process.env.SUPABASE_PROJECT_REF || 'zwxlccqhafdnvdohzxkg';
 const TOKEN = process.env.SUPABASE_ACCESS_TOKEN;
+const CHURCH_LOGO_URL = 'https://ashburtonbaptistchurch.vercel.app/abc-logo.png';
 
 const CONFIRM_SUBJECT = 'Welcome! One quick step to join our member community';
 
@@ -30,7 +31,7 @@ const CONFIRM_HTML = `<!DOCTYPE html>
           </tr>
           <tr>
             <td style="padding:36px 36px 20px;text-align:center;background-color:#ffffff;">
-              <img src="https://ashburtonbaptistchurch.vercel.app/ABC%20Logo.png" alt="Ashburton Baptist Church" width="110" style="display:block;margin:0 auto 20px;border:0;" />
+              <img src="${CHURCH_LOGO_URL}" alt="Ashburton Baptist Church" width="110" style="display:block;margin:0 auto 20px;border:0;" />
               <p style="margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:bold;letter-spacing:0.15em;text-transform:uppercase;color:#808080;">Ashburton Baptist Church</p>
               <h1 style="margin:0 0 12px;font-size:28px;line-height:1.25;color:#222222;font-weight:normal;">You&rsquo;re almost there!</h1>
               <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.5;color:#666666;font-style:italic;">Disciples of Jesus impacting Ashburton and the nations.</p>
@@ -100,7 +101,7 @@ const RECOVERY_HTML = `<!DOCTYPE html>
           </tr>
           <tr>
             <td style="padding:36px 36px 20px;text-align:center;background-color:#ffffff;">
-              <img src="https://ashburtonbaptistchurch.vercel.app/ABC%20Logo.png" alt="Ashburton Baptist Church" width="110" style="display:block;margin:0 auto 20px;border:0;" />
+              <img src="${CHURCH_LOGO_URL}" alt="Ashburton Baptist Church" width="110" style="display:block;margin:0 auto 20px;border:0;" />
               <p style="margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:bold;letter-spacing:0.15em;text-transform:uppercase;color:#808080;">Ashburton Baptist Church</p>
               <h1 style="margin:0;font-size:28px;line-height:1.25;color:#222222;font-weight:normal;">Reset your password</h1>
             </td>

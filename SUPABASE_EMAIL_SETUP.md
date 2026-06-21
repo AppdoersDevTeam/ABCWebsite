@@ -112,7 +112,7 @@ If App Passwords are not an option, use a transactional provider like [Resend](h
           </tr>
           <tr>
             <td style="padding:36px 36px 20px;text-align:center;background-color:#ffffff;">
-              <img src="https://ashburtonbaptistchurch.vercel.app/ABC%20Logo.png" alt="Ashburton Baptist Church" width="110" style="display:block;margin:0 auto 20px;border:0;" />
+              <img src="https://ashburtonbaptistchurch.vercel.app/abc-logo.png" alt="Ashburton Baptist Church" width="110" style="display:block;margin:0 auto 20px;border:0;" />
               <p style="margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:bold;letter-spacing:0.15em;text-transform:uppercase;color:#808080;">Ashburton Baptist Church</p>
               <h1 style="margin:0 0 12px;font-size:28px;line-height:1.25;color:#222222;font-weight:normal;">You&rsquo;re almost there!</h1>
               <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.5;color:#666666;font-style:italic;">Disciples of Jesus impacting Ashburton and the nations.</p>
@@ -211,7 +211,7 @@ Need to reset your password? We've got you
           </tr>
           <tr>
             <td style="padding:36px 36px 20px;text-align:center;background-color:#ffffff;">
-              <img src="https://ashburtonbaptistchurch.vercel.app/ABC%20Logo.png" alt="Ashburton Baptist Church" width="110" style="display:block;margin:0 auto 20px;border:0;" />
+              <img src="https://ashburtonbaptistchurch.vercel.app/abc-logo.png" alt="Ashburton Baptist Church" width="110" style="display:block;margin:0 auto 20px;border:0;" />
               <p style="margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:bold;letter-spacing:0.15em;text-transform:uppercase;color:#808080;">Ashburton Baptist Church</p>
               <h1 style="margin:0;font-size:28px;line-height:1.25;color:#222222;font-weight:normal;">Reset your password</h1>
             </td>
@@ -275,7 +275,7 @@ Need to reset your password? We've got you
 | Link goes to wrong site | Site URL and `VITE_SITE_URL` must match production domain |
 | Sign up again, no email | Supabase does not resend on duplicate signup — use **Resend confirmation email** on the login page (the app now does this automatically for unconfirmed accounts) |
 | “Success” but no email arrives | Supabase may rate-limit auth emails (default was **2 per hour** per project). Check **Authentication → Rate Limits** and increase **Email sent**; also verify custom SMTP in **Authentication → Emails → SMTP** |
-| Logo doesn’t show | Logo must be publicly reachable at `https://ashburtonbaptistchurch.vercel.app/ABC%20Logo.png` |
+| Logo doesn’t show | Logo must be publicly reachable at `https://ashburtonbaptistchurch.vercel.app/abc-logo.png` |
 | Lands in spam | Emails from Google Workspace usually deliver well; check the custom HTML template is saved |
 
 ---

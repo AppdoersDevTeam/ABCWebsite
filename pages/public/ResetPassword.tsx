@@ -1,7 +1,26 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
+import { completeRecoveryFromUrl, hasRecoveryParams } from '../../lib/authCallback';
 import { GlowingButton } from '../../components/UI/GlowingButton';
+
+/** Fix malformed HashRouter recovery URLs like `#/reset-password#access_token=...`. */
+function normalizeRecoveryUrl(): void {
+  const hash = window.location.hash || '';
+  if (!hash.includes('/reset-password')) return;
+
+  if (hash.includes('#access_token') || hash.includes('#type=recovery')) {
+    const parts = hash.split('#');
+    if (parts.length > 2) {
+      const route = parts[1];
+      const authParams = parts.slice(2).join('#');
+      const baseUrl = window.location.origin.replace(/\/$/, '');
+      const pathname = window.location.pathname.replace(/\/$/, '') || '';
+      const newUrl = `${baseUrl}${pathname}#${route}#${authParams}`;
+      window.history.replaceState({}, document.title, newUrl);
+    }
+  }
+}
 
 export const ResetPassword = () => {
   const navigate = useNavigate();
@@ -11,44 +30,44 @@ export const ResetPassword = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-
-  const hasRecoveryIndicators = useMemo(() => {
-    const search = window.location.search || '';
-    const hash = window.location.hash || '';
-    return (
-      search.includes('code=') ||
-      hash.includes('access_token=') ||
-      hash.includes('type=recovery') ||
-      hash.includes('type=magiclink')
-    );
-  }, []);
+  const recoveryLinkPresent = hasRecoveryParams();
 
   useEffect(() => {
     let cancelled = false;
 
     const init = async () => {
       setError(null);
-      try {
-        const url = new URL(window.location.href);
-        const code = url.searchParams.get('code');
+      normalizeRecoveryUrl();
 
-        // For PKCE flows, Supabase provides `code` and we must exchange it.
-        if (code) {
-          const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(window.location.href);
-          if (exchangeError) throw exchangeError;
+      try {
+        if (recoveryLinkPresent) {
+          const { error: recoveryError } = await completeRecoveryFromUrl();
+          if (recoveryError) {
+            throw new Error(recoveryError);
+          }
         }
 
         const { data: { session } } = await supabase.auth.getSession();
         if (!cancelled) {
-          if (!session && hasRecoveryIndicators) {
+          if (!session && recoveryLinkPresent) {
             setError('This reset link is invalid or has expired. Please request a new one.');
           }
           setIsReady(true);
         }
-      } catch (e: any) {
+      } catch (e: unknown) {
         console.error('ResetPassword init error:', e);
         if (!cancelled) {
-          setError('Unable to validate reset link. Please request a new one.');
+          const message = e instanceof Error ? e.message : '';
+          const lower = message.toLowerCase();
+          if (
+            lower.includes('expired') ||
+            lower.includes('invalid') ||
+            lower.includes('already been used')
+          ) {
+            setError('This reset link is invalid or has expired. Please request a new one.');
+          } else {
+            setError('Unable to validate reset link. Please request a new one.');
+          }
           setIsReady(true);
         }
       }
@@ -58,7 +77,7 @@ export const ResetPassword = () => {
     return () => {
       cancelled = true;
     };
-  }, [hasRecoveryIndicators]);
+  }, [recoveryLinkPresent]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -86,7 +105,7 @@ export const ResetPassword = () => {
       setTimeout(() => {
         navigate('/login', { replace: true });
       }, 1200);
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error('ResetPassword update error:', e);
       setError('Failed to update password. Please request a new reset link and try again.');
     } finally {
@@ -170,4 +189,3 @@ export const ResetPassword = () => {
     </div>
   );
 };
-
