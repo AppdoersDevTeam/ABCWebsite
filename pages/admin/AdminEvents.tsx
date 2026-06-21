@@ -7,7 +7,15 @@ import { supabase } from '../../lib/supabase';
 import { SkeletonPageHeader, SkeletonEventCard } from '../../components/UI/Skeleton';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { EventImage } from '../../components/UI/EventImage';
+import { EVENT_IMAGE, checkEventImageDimensions, readImageDimensions } from '../../lib/eventImageSpec';
 import { downloadEventRsvpsCsv, downloadEventRsvpsPdf } from '../../lib/exportEventRsvps';
+import {
+  buildEventDateTimePayload,
+  formatEventDateBadge,
+  formatEventTimeRange,
+  getEventStartDate,
+  parseTimeToInputValue,
+} from '../../lib/eventDateUtils';
 import metadata from '../../metadata.json';
 
 const DEFAULT_THUMB = '/ABC Logo.png';
@@ -22,15 +30,19 @@ const FALLBACK_CATEGORIES = [
   'Other',
 ] as const;
 
+const sortCategoriesAlphabetically = (categories: string[]) =>
+  [...categories].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+
 export const AdminEvents = () => {
   const churchName = (metadata as any)?.name ? String((metadata as any).name) : 'Church';
   const [events, setEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [categoryOptions, setCategoryOptions] = useState<string[]>([...FALLBACK_CATEGORIES]);
+  const [categoryOptions, setCategoryOptions] = useState<string[]>(sortCategoriesAlphabetically([...FALLBACK_CATEGORIES]));
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [imageDimensionError, setImageDimensionError] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isRsvpModalOpen, setIsRsvpModalOpen] = useState(false);
   const [rsvpEvent, setRsvpEvent] = useState<Event | null>(null);
@@ -39,8 +51,10 @@ export const AdminEvents = () => {
   const [rsvpSearch, setRsvpSearch] = useState('');
   const [formData, setFormData] = useState({ 
     title: '', 
-    date: '', 
-    time: '', 
+    start_date: '', 
+    end_date: '', 
+    start_time: '', 
+    end_time: '', 
     location: '', 
     category: '',
     image_url: '',
@@ -76,8 +90,7 @@ export const AdminEvents = () => {
     try {
       const { data, error } = await supabase
         .from('event_categories')
-        .select('name, is_active, sort_order')
-        .order('sort_order', { ascending: true })
+        .select('name, is_active')
         .order('name', { ascending: true });
 
       if (error) throw error;
@@ -89,28 +102,49 @@ export const AdminEvents = () => {
           .filter((n: any): n is string => typeof n === 'string' && n.trim().length > 0) || [];
 
       // Keep legacy behavior if table isn't seeded yet.
-      setCategoryOptions(names.length > 0 ? names : [...FALLBACK_CATEGORIES]);
+      setCategoryOptions(
+        sortCategoriesAlphabetically(names.length > 0 ? names : [...FALLBACK_CATEGORIES])
+      );
     } catch (e) {
       console.warn('AdminEvents - failed to load event_categories, using fallback list', e);
-      setCategoryOptions([...FALLBACK_CATEGORIES]);
+      setCategoryOptions(sortCategoriesAlphabetically([...FALLBACK_CATEGORIES]));
     }
   };
 
+  const isScheduleValid = () => {
+    if (
+      !formData.start_date ||
+      !formData.end_date ||
+      !formData.start_time ||
+      !formData.end_time
+    ) {
+      return false;
+    }
+    if (formData.end_date < formData.start_date) return false;
+    if (
+      formData.end_date === formData.start_date &&
+      formData.end_time < formData.start_time
+    ) {
+      return false;
+    }
+    return true;
+  };
+
   const handleCreate = async () => {
-    if (!formData.title || !formData.date || !formData.time || !formData.location) {
+    if (!formData.title || !formData.location || !isScheduleValid()) {
       return;
     }
 
     try {
       setIsUploading(true);
       const imageUrl = await runUpload();
+      const dateTimeFields = buildEventDateTimePayload(formData);
       const { data, error } = await supabase
         .from('events')
         .insert([
           {
             title: formData.title,
-            date: formData.date,
-            time: formData.time,
+            ...dateTimeFields,
             location: formData.location,
             category: formData.category || 'Other',
             image_url: imageUrl || null,
@@ -143,8 +177,10 @@ export const AdminEvents = () => {
     setEditingEvent(event);
     setFormData({
       title: event.title,
-      date: event.date,
-      time: event.time,
+      start_date: event.start_date || event.date,
+      end_date: event.end_date || event.start_date || event.date,
+      start_time: parseTimeToInputValue(event.start_time || event.time),
+      end_time: parseTimeToInputValue(event.end_time || event.start_time || event.time),
       location: event.location,
       category: event.category,
       image_url: event.image_url || '',
@@ -155,6 +191,7 @@ export const AdminEvents = () => {
     });
     setSelectedFile(null);
     setPreviewUrl(event.image_url || null);
+    setImageDimensionError(null);
     setIsModalOpen(true);
   };
 
@@ -164,12 +201,12 @@ export const AdminEvents = () => {
     try {
       setIsUploading(true);
       const imageUrl = await runUpload();
+      const dateTimeFields = buildEventDateTimePayload(formData);
       const { error } = await supabase
         .from('events')
         .update({
           title: formData.title,
-          date: formData.date,
-          time: formData.time,
+          ...dateTimeFields,
           location: formData.location,
           category: formData.category || 'Other',
           image_url: imageUrl || null,
@@ -222,8 +259,10 @@ export const AdminEvents = () => {
   const resetModal = () => {
     setFormData({
       title: '',
-      date: '',
-      time: '',
+      start_date: '',
+      end_date: '',
+      start_time: '',
+      end_time: '',
       location: '',
       category: '',
       image_url: '',
@@ -234,6 +273,7 @@ export const AdminEvents = () => {
     });
     setSelectedFile(null);
     setPreviewUrl(null);
+    setImageDimensionError(null);
   };
 
   const openRsvpModal = async (evt: Event) => {
@@ -284,18 +324,35 @@ export const AdminEvents = () => {
     return `event-rsvps-${safeTitle}-${yyyy}-${mm}-${dd}`;
   };
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       if (!file.type.startsWith('image/')) {
         alert('Please select an image file (PNG/JPG)');
         return;
       }
-      const maxSize = 2 * 1024 * 1024;
-      if (file.size > maxSize) {
+      if (file.size > EVENT_IMAGE.maxFileBytes) {
         alert('Image size must be less than 2MB');
         return;
       }
+
+      try {
+        const { width, height } = await readImageDimensions(file);
+        const check = checkEventImageDimensions(width, height);
+        if (!check.ok) {
+          setImageDimensionError(check.message);
+          setSelectedFile(null);
+          setPreviewUrl(null);
+          e.target.value = '';
+          return;
+        }
+      } catch {
+        alert('Could not read image. Try a different JPG or PNG.');
+        e.target.value = '';
+        return;
+      }
+
+      setImageDimensionError(null);
       setSelectedFile(file);
       const reader = new FileReader();
       reader.onloadend = () => setPreviewUrl(reader.result as string);
@@ -350,11 +407,6 @@ export const AdminEvents = () => {
     return imageUrl;
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  };
-
   if (isLoading) {
     return (
       <div className="space-y-8">
@@ -389,27 +441,24 @@ export const AdminEvents = () => {
       ) : (
         <div className="space-y-4">
           {events.map((evt) => {
-            const formattedDate = formatDate(evt.date);
-            const dateParts = formattedDate.split(' ');
+            const { day, month } = formatEventDateBadge(getEventStartDate(evt));
             const hasImage = !!evt.image_url?.trim();
             const audienceLabel = (evt.audience || 'members').charAt(0).toUpperCase() + (evt.audience || 'members').slice(1);
             return (
           <div key={evt.id} className="bg-white border border-gray-100 shadow-sm rounded-[12px] overflow-hidden hover:border-gold hover:shadow-md transition-all group relative">
             <div className="flex flex-col sm:flex-row">
               {/* Thumbnail */}
-              <div className="relative w-full sm:w-36 flex-shrink-0">
-                <div className="aspect-[16/10] sm:aspect-auto sm:h-full overflow-hidden">
+              <div className="relative w-full sm:w-40 flex-shrink-0 overflow-hidden aspect-[16/9]">
                   {hasImage ? (
                     <EventImage src={String(evt.image_url)} alt={evt.title} loading="lazy" />
                   ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-[#3a4a1f] via-[#4a5d2a] to-[#2d3a16] flex items-center justify-center min-h-[80px]">
+                    <div className="w-full h-full bg-gradient-to-br from-[#3a4a1f] via-[#4a5d2a] to-[#2d3a16] flex items-center justify-center">
                       <img src={DEFAULT_THUMB} alt="ABC" className="h-8 w-auto opacity-80" loading="lazy" />
                     </div>
                   )}
-                </div>
                 <div className="absolute top-2 left-2 bg-white/90 backdrop-blur rounded-full px-2 py-1 shadow-sm">
-                  <span className="text-[10px] font-bold text-neutral uppercase tracking-widest">{dateParts[0]}</span>
-                  <span className="ml-1 text-xs font-black text-charcoal">{dateParts[1]}</span>
+                  <span className="text-[10px] font-bold text-neutral uppercase tracking-widest">{month}</span>
+                  <span className="ml-1 text-xs font-black text-charcoal">{day}</span>
                 </div>
               </div>
 
@@ -420,7 +469,7 @@ export const AdminEvents = () => {
                     <h3 className="text-lg font-bold text-charcoal group-hover:text-gold transition-colors truncate">{evt.title}</h3>
                     <p className="text-neutral text-sm mt-1 flex items-center">
                       <span className="w-2 h-2 rounded-full bg-gold mr-2 flex-shrink-0"></span>
-                      {evt.time} &bull; {evt.location}
+                      {formatEventTimeRange(evt)} &bull; {evt.location}
                     </p>
                   </div>
 
@@ -500,22 +549,49 @@ export const AdminEvents = () => {
           </div>
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-bold text-charcoal mb-2">Date *</label>
+              <label className="block text-sm font-bold text-charcoal mb-2">Start Date *</label>
               <input
                 type="date"
-                value={formData.date}
-                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                value={formData.start_date}
+                onChange={(e) => {
+                  const startDate = e.target.value;
+                  setFormData((prev) => ({
+                    ...prev,
+                    start_date: startDate,
+                    end_date:
+                      !prev.end_date || prev.end_date < startDate ? startDate : prev.end_date,
+                  }));
+                }}
                 className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none"
               />
             </div>
             <div>
-              <label className="block text-sm font-bold text-charcoal mb-2">Time *</label>
+              <label className="block text-sm font-bold text-charcoal mb-2">End Date *</label>
               <input
-                type="text"
-                value={formData.time}
-                onChange={(e) => setFormData({ ...formData, time: e.target.value })}
+                type="date"
+                value={formData.end_date}
+                min={formData.start_date || undefined}
+                onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
                 className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none"
-                placeholder="e.g., 7:30 PM"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-charcoal mb-2">Start Time *</label>
+              <input
+                type="time"
+                value={formData.start_time}
+                onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
+                className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-charcoal mb-2">End Time *</label>
+              <input
+                type="time"
+                value={formData.end_time}
+                min={formData.start_date === formData.end_date ? formData.start_time || undefined : undefined}
+                onChange={(e) => setFormData({ ...formData, end_time: e.target.value })}
+                className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none"
               />
             </div>
           </div>
@@ -548,8 +624,8 @@ export const AdminEvents = () => {
           <div>
             <label className="block text-sm font-bold text-charcoal mb-2">Event Banner Image</label>
             <div className="rounded-[10px] border-2 border-dashed border-gray-200 hover:border-gold/50 transition-colors p-4">
-              <div className="flex items-center gap-4">
-                <div className="w-28 h-20 rounded-[8px] overflow-hidden border border-gray-200 bg-gray-50 flex-shrink-0">
+              <div className="flex items-start gap-4">
+                <div className="w-40 aspect-[16/9] rounded-[8px] overflow-hidden border border-gray-200 bg-gray-50 flex-shrink-0">
                   {(previewUrl || formData.image_url) ? (
                     <EventImage
                       src={previewUrl || formData.image_url || DEFAULT_THUMB}
@@ -577,8 +653,18 @@ export const AdminEvents = () => {
                     <p className="text-xs text-gold font-bold mt-1.5">{selectedFile.name}</p>
                   )}
                   <p className="text-xs text-neutral mt-1.5">
-                    PNG or JPG, max 2MB. {!selectedFile && !formData.image_url && 'Defaults to church logo if left empty.'}
+                    <span className="font-bold text-charcoal">{EVENT_IMAGE.sizeLabel} ({EVENT_IMAGE.ratioLabel})</span>
+                    {' '}· JPG or PNG · max 2MB
                   </p>
+                  <p className="text-xs text-neutral mt-1">
+                    One image fits the event page, calendar, and listings. Keep important text and graphics inside the centre safe area.
+                  </p>
+                  {imageDimensionError && (
+                    <p className="text-xs text-red-600 font-bold mt-2">{imageDimensionError}</p>
+                  )}
+                  {!selectedFile && !formData.image_url && (
+                    <p className="text-xs text-neutral mt-1">Defaults to church logo if left empty.</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -649,7 +735,7 @@ export const AdminEvents = () => {
             </button>
             <GlowingButton
               onClick={editingEvent ? handleUpdate : handleCreate}
-              disabled={!formData.title || !formData.date || !formData.time || !formData.location || isUploading}
+              disabled={!formData.title || !formData.location || !isScheduleValid() || isUploading}
             >
               {isUploading ? 'Uploading...' : editingEvent ? 'Update Event' : 'Add Event'}
             </GlowingButton>

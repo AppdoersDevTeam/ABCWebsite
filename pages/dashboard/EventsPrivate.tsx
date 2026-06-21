@@ -5,6 +5,11 @@ import { supabase } from '../../lib/supabase';
 import { Event } from '../../types';
 import { SkeletonPageHeader, SkeletonEventCard } from '../../components/UI/Skeleton';
 import { EventImage } from '../../components/UI/EventImage';
+import {
+  formatEventDateBadge,
+  formatEventTimeRange,
+  getEventStartDate,
+} from '../../lib/eventDateUtils';
 import { useAuth } from '../../context/AuthContext';
 
 const DEFAULT_THUMB = '/ABC Logo.png';
@@ -39,12 +44,7 @@ export const EventsPrivate = () => {
     }
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
-    return { day, month };
-  };
+  const formatDate = (dateString: string) => formatEventDateBadge(dateString);
 
   if (isLoading) {
     return (
@@ -77,7 +77,7 @@ export const EventsPrivate = () => {
       ) : (
         <div className="space-y-4">
           {events.map((evt) => {
-            const { day, month } = formatDate(evt.date);
+            const { day, month } = formatDate(getEventStartDate(evt));
             const hasImage = !!evt.image_url?.trim();
             return (
               <Link
@@ -87,21 +87,19 @@ export const EventsPrivate = () => {
               >
                 <div className="bg-white border border-gray-100 shadow-sm rounded-[14px] overflow-hidden hover:border-gold hover:shadow-md transition-all group">
                   <div className="flex flex-col sm:flex-row">
-                    <div className="relative w-full sm:w-52 flex-shrink-0 overflow-hidden">
-                      <div className="aspect-[16/10] sm:aspect-auto sm:h-full">
-                        {hasImage ? (
-                          <EventImage src={String(evt.image_url)} alt={evt.title} loading="lazy" />
-                        ) : (
-                          <div className="w-full h-full bg-gradient-to-br from-[#3a4a1f] via-[#4a5d2a] to-[#2d3a16] flex items-center justify-center min-h-[120px]">
-                            <img
-                              src={DEFAULT_THUMB}
-                              alt="ABC"
-                              className="h-10 w-auto opacity-80"
-                              loading="lazy"
-                            />
-                          </div>
-                        )}
-                      </div>
+                    <div className="relative w-full sm:w-56 flex-shrink-0 overflow-hidden aspect-[16/9]">
+                      {hasImage ? (
+                        <EventImage src={String(evt.image_url)} alt={evt.title} loading="lazy" />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-[#3a4a1f] via-[#4a5d2a] to-[#2d3a16] flex items-center justify-center">
+                          <img
+                            src={DEFAULT_THUMB}
+                            alt="ABC"
+                            className="h-10 w-auto opacity-80"
+                            loading="lazy"
+                          />
+                        </div>
+                      )}
                       <div className="absolute top-3 left-3 bg-white/90 backdrop-blur border border-white/60 rounded-full px-3 py-1.5 shadow-sm">
                         <span className="text-xs font-bold text-neutral uppercase tracking-widest">{month}</span>
                         <span className="ml-2 text-sm font-black text-charcoal">{day}</span>
@@ -115,7 +113,7 @@ export const EventsPrivate = () => {
                       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-sm text-neutral">
                         <span className="inline-flex items-center">
                           <Clock size={14} className="text-gold mr-1.5" />
-                          {evt.time}
+                          {formatEventTimeRange(evt)}
                         </span>
                         <span className="inline-flex items-center">
                           <MapPin size={14} className="text-gold mr-1.5" />

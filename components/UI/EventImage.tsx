@@ -7,21 +7,17 @@ interface EventImageProps {
   loading?: 'lazy' | 'eager';
 }
 
-/** Displays event flyer/photo without cropping; blurred fill behind contained image. */
+/** Event banner — expects 1920×1080 (16:9) uploads in 16:9 containers. */
 export const EventImage: React.FC<EventImageProps> = ({
   src,
   alt,
   className = '',
   loading = 'lazy',
 }) => (
-  <div className={`relative w-full h-full overflow-hidden bg-[#2d3a16] ${className}`}>
-    <img
-      src={src}
-      alt=""
-      aria-hidden
-      className="absolute inset-0 w-full h-full object-cover scale-110 blur-2xl opacity-50"
-      loading={loading}
-    />
-    <img src={src} alt={alt} className="relative z-10 w-full h-full object-contain" loading={loading} />
-  </div>
+  <img
+    src={src}
+    alt={alt}
+    className={`w-full h-full object-cover object-center ${className}`}
+    loading={loading}
+  />
 );

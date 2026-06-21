@@ -7,6 +7,11 @@ import type { Event } from '../../types';
 import { ScrollReveal } from '../../components/UI/ScrollReveal';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { EventImage } from '../../components/UI/EventImage';
+import {
+  formatEventDateRange,
+  formatEventDateRangeShort,
+  formatEventTimeRange,
+} from '../../lib/eventDateUtils';
 
 const DEFAULT_EVENT_BANNER = '/ABC Logo.png';
 
@@ -72,7 +77,7 @@ export const EventDetail = () => {
   if (isLoading) {
     return (
       <div className="space-y-0 overflow-hidden">
-        <div className="w-full aspect-[16/6] md:aspect-[16/5] bg-gray-100 animate-pulse" />
+        <div className="w-full aspect-[16/9] bg-gray-100 animate-pulse" />
         <div className="max-w-4xl mx-auto px-4 py-10 space-y-6">
           <div className="h-5 w-32 bg-gray-100 rounded animate-pulse" />
           <div className="grid md:grid-cols-3 gap-5">
@@ -216,18 +221,14 @@ export const EventDetail = () => {
     }
   };
 
-  const eventDateFormatted = new Date(event.date).toLocaleDateString('en-US', {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-  });
+  const eventDateFormatted = formatEventDateRange(event);
+  const eventTimeFormatted = formatEventTimeRange(event);
 
   return (
     <div className="space-y-0 overflow-hidden">
       {/* Hero Banner */}
       <section className="relative w-full">
-        <div className="w-full aspect-[16/6] md:aspect-[16/5] relative overflow-hidden">
+        <div className="w-full aspect-[16/9] relative overflow-hidden">
           {hasEventImage ? (
             <EventImage src={eventImageUrl} alt={event.title} loading="eager" />
           ) : (
@@ -261,7 +262,7 @@ export const EventDetail = () => {
                 {event.title}
               </h1>
               <p className="text-white/80 text-base md:text-lg">
-                {eventDateFormatted} &bull; {event.time} &bull; {event.location}
+                {eventDateFormatted} &bull; {eventTimeFormatted} &bull; {event.location}
               </p>
             </div>
           </div>
@@ -291,7 +292,7 @@ export const EventDetail = () => {
                     <h3 className="font-serif text-xl font-normal text-charcoal group-hover:text-gold transition-colors">Date</h3>
                   </div>
                   <p className="text-neutral text-sm leading-relaxed">
-                    {new Date(event.date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+                    {formatEventDateRangeShort(event)}
                   </p>
                 </div>
               </ScrollReveal>
@@ -304,7 +305,7 @@ export const EventDetail = () => {
                     </div>
                     <h3 className="font-serif text-xl font-normal text-charcoal group-hover:text-gold transition-colors">Time</h3>
                   </div>
-                  <p className="text-neutral text-sm">{event.time}</p>
+                  <p className="text-neutral text-sm">{eventTimeFormatted}</p>
                 </div>
               </ScrollReveal>
 
