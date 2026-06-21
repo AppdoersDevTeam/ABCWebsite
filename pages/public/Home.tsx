@@ -4,6 +4,7 @@ import { ArrowRight, Calendar, Heart, PlayCircle, Clock, MapPin, Users, Church, 
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { VibrantCard } from '../../components/UI/VibrantCard';
 import { ScrollReveal } from '../../components/UI/ScrollReveal';
+import { EventImage } from '../../components/UI/EventImage';
 import { supabase } from '../../lib/supabase';
 import { VISION_FOCUS_CARDS } from '../../lib/visionFocusCards';
 import { Event } from '../../types';
@@ -301,12 +302,7 @@ export const Home = () => {
                             <div className="glass-card bg-white/75 border border-white/55 shadow-sm rounded-[16px] overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-full flex flex-col">
                               <div className="relative aspect-[16/9] overflow-hidden">
                                 {hasImage ? (
-                                  <img
-                                    src={String(evt.image_url)}
-                                    alt={evt.title}
-                                    className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700"
-                                    loading="lazy"
-                                  />
+                                  <EventImage src={String(evt.image_url)} alt={evt.title} loading="lazy" />
                                 ) : (
                                   <div className="w-full h-full bg-gradient-to-br from-[#3a4a1f] via-[#4a5d2a] to-[#2d3a16] flex items-center justify-center">
                                     <img

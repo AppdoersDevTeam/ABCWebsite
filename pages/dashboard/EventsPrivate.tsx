@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { Event } from '../../types';
 import { SkeletonPageHeader, SkeletonEventCard } from '../../components/UI/Skeleton';
+import { EventImage } from '../../components/UI/EventImage';
 import { useAuth } from '../../context/AuthContext';
 
 const DEFAULT_THUMB = '/ABC Logo.png';
@@ -89,12 +90,7 @@ export const EventsPrivate = () => {
                     <div className="relative w-full sm:w-52 flex-shrink-0 overflow-hidden">
                       <div className="aspect-[16/10] sm:aspect-auto sm:h-full">
                         {hasImage ? (
-                          <img
-                            src={String(evt.image_url)}
-                            alt={evt.title}
-                            className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700"
-                            loading="lazy"
-                          />
+                          <EventImage src={String(evt.image_url)} alt={evt.title} loading="lazy" />
                         ) : (
                           <div className="w-full h-full bg-gradient-to-br from-[#3a4a1f] via-[#4a5d2a] to-[#2d3a16] flex items-center justify-center min-h-[120px]">
                             <img

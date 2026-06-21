@@ -6,6 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import type { Event } from '../../types';
 import { ScrollReveal } from '../../components/UI/ScrollReveal';
 import { GlowingButton } from '../../components/UI/GlowingButton';
+import { EventImage } from '../../components/UI/EventImage';
 
 const DEFAULT_EVENT_BANNER = '/ABC Logo.png';
 
@@ -228,7 +229,7 @@ export const EventDetail = () => {
       <section className="relative w-full">
         <div className="w-full aspect-[16/6] md:aspect-[16/5] relative overflow-hidden">
           {hasEventImage ? (
-            <img src={eventImageUrl} alt={event.title} className="w-full h-full object-cover object-center" />
+            <EventImage src={eventImageUrl} alt={event.title} loading="eager" />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-[#3a4a1f] via-[#4a5d2a] to-[#2d3a16] flex items-center justify-center">
               <img src={DEFAULT_EVENT_BANNER} alt="Ashburton Baptist Church" className="h-20 md:h-28 w-auto opacity-80" />

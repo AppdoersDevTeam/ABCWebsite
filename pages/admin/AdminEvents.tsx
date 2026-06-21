@@ -6,6 +6,7 @@ import type { Event, EventCategory } from '../../types';
 import { supabase } from '../../lib/supabase';
 import { SkeletonPageHeader, SkeletonEventCard } from '../../components/UI/Skeleton';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
+import { EventImage } from '../../components/UI/EventImage';
 import { downloadEventRsvpsCsv, downloadEventRsvpsPdf } from '../../lib/exportEventRsvps';
 import metadata from '../../metadata.json';
 
@@ -399,12 +400,7 @@ export const AdminEvents = () => {
               <div className="relative w-full sm:w-36 flex-shrink-0">
                 <div className="aspect-[16/10] sm:aspect-auto sm:h-full overflow-hidden">
                   {hasImage ? (
-                    <img
-                      src={String(evt.image_url)}
-                      alt={evt.title}
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                    />
+                    <EventImage src={String(evt.image_url)} alt={evt.title} loading="lazy" />
                   ) : (
                     <div className="w-full h-full bg-gradient-to-br from-[#3a4a1f] via-[#4a5d2a] to-[#2d3a16] flex items-center justify-center min-h-[80px]">
                       <img src={DEFAULT_THUMB} alt="ABC" className="h-8 w-auto opacity-80" loading="lazy" />
@@ -555,10 +551,10 @@ export const AdminEvents = () => {
               <div className="flex items-center gap-4">
                 <div className="w-28 h-20 rounded-[8px] overflow-hidden border border-gray-200 bg-gray-50 flex-shrink-0">
                   {(previewUrl || formData.image_url) ? (
-                    <img
+                    <EventImage
                       src={previewUrl || formData.image_url || DEFAULT_THUMB}
                       alt="Event preview"
-                      className="w-full h-full object-cover"
+                      loading="eager"
                     />
                   ) : (
                     <div className="w-full h-full bg-gradient-to-br from-[#3a4a1f] via-[#4a5d2a] to-[#2d3a16] flex items-center justify-center">
