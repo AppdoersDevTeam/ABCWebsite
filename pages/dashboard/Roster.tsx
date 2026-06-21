@@ -183,7 +183,7 @@ export const Roster = () => {
     return (
       <div className="space-y-8">
         <div className="border-b border-gray-200 pb-6">
-          <h1 className="text-4xl font-serif font-normal text-charcoal">Roster</h1>
+          <h1 className="text-2xl md:text-4xl font-serif font-normal text-charcoal">Roster</h1>
           <p className="text-neutral mt-1">View roster schedules.</p>
         </div>
         <div className="text-center py-12 bg-white border border-gray-100 rounded-[8px]">
@@ -203,7 +203,7 @@ export const Roster = () => {
   return (
     <div className="space-y-8">
       <div className="border-b border-gray-200 pb-6">
-        <h1 className="text-4xl font-serif font-normal text-charcoal">Roster</h1>
+        <h1 className="text-2xl md:text-4xl font-serif font-normal text-charcoal">Roster</h1>
         <p className="text-neutral mt-1">View roster schedules.</p>
       </div>
 
@@ -316,7 +316,7 @@ export const Roster = () => {
                 </>
               ) : (
                 <>
-                  <div className="flex items-center justify-between gap-3 mb-3">
+                  <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
                     <div className="flex items-center gap-2 text-gold">
                       <Calendar size={16} />
                       <span className="text-sm font-bold uppercase tracking-wider">
@@ -336,7 +336,7 @@ export const Roster = () => {
 
                   <iframe
                     src={selectedRoster.pdf_url}
-                    className="w-full h-[800px] rounded-[4px] border border-gray-200"
+                    className="w-full h-[50vh] min-h-[320px] md:h-[800px] rounded-[4px] border border-gray-200"
                     title={`Roster ${formatRangeShort(selectedRoster)}`}
                   />
                 </>

@@ -87,7 +87,7 @@ export const PendingApproval = () => {
     <div className="min-h-screen page-shell page-shell-image flex flex-col items-center justify-center p-4 relative overflow-hidden">
       <BackgroundBlobs />
       
-      <div className="page-shell-content max-w-lg w-full text-center glass-card bg-white/70 p-12 rounded-[16px] shadow-xl">
+      <div className="page-shell-content max-w-lg w-full text-center glass-card bg-white/70 p-6 sm:p-12 rounded-[16px] shadow-xl">
         
         {/* Animated Icon */}
         <div className={`w-24 h-24 bg-white border border-gray-200 rounded-full flex items-center justify-center mx-auto mb-8 shadow-lg ${isRevoked ? 'shadow-red-200' : 'shadow-gold/20'} animate-pulse-slow`}>
@@ -100,7 +100,7 @@ export const PendingApproval = () => {
 
         {isRevoked ? (
           <>
-            <h1 className="text-5xl font-serif font-normal text-charcoal mb-4">Access Revoked</h1>
+            <h1 className="text-3xl sm:text-5xl font-serif font-normal text-charcoal mb-4">Access Revoked</h1>
             <p className="text-xl text-neutral font-light mb-6 leading-relaxed">
               Your access to this website has been revoked by an administrator.
             </p>
@@ -120,7 +120,7 @@ export const PendingApproval = () => {
           </>
         ) : (
           <>
-            <h1 className="text-5xl font-serif font-normal text-charcoal mb-4">Access Pending</h1>
+            <h1 className="text-3xl sm:text-5xl font-serif font-normal text-charcoal mb-4">Access Pending</h1>
             <p className="text-xl text-neutral font-light mb-10 leading-relaxed">
               Your account is currently under administrative review.<br/> 
               We ensure our community stays safe and secure.

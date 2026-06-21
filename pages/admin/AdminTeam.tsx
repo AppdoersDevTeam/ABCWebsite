@@ -830,7 +830,7 @@ export const AdminTeam = () => {
             </div>
           </div>
 
-          <div className="flex items-end justify-between lg:justify-end gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
             <div className="text-xs text-neutral pb-1">
               Showing <span className="font-bold text-charcoal">{visibleMembers.length}</span> of{' '}
               <span className="font-bold text-charcoal">{members.length}</span>
@@ -1047,7 +1047,7 @@ export const AdminTeam = () => {
               </p>
             </div>
           )}
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 overscroll-x-contain">
             <table className="min-w-[900px] w-full text-left">
               <thead className="bg-white/60 sticky top-0">
                 <tr className="border-b border-gray-200">
@@ -1479,7 +1479,7 @@ export const AdminTeam = () => {
             </p>
           </div>
 
-          <div className="flex gap-3 justify-end pt-4">
+          <div className="flex flex-col-reverse sm:flex-row gap-3 justify-end pt-4">
             <button
               onClick={() => {
                 setIsModalOpen(false);

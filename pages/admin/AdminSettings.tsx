@@ -374,7 +374,7 @@ export const AdminSettings = () => {
       ) : tab === 'groups' ? (
         <div className="glass-card bg-white/80 border border-white/60 rounded-[12px] p-6 space-y-6">
           <div className="flex gap-2 flex-wrap items-end">
-            <div className="flex-1 min-w-[240px]">
+            <div className="flex-1 min-w-0 w-full sm:min-w-[240px]">
               <label className="block text-sm font-bold text-charcoal mb-2">New group</label>
               <input
                 value={newGroupName}
@@ -394,7 +394,7 @@ export const AdminSettings = () => {
             </button>
           </div>
 
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 overscroll-x-contain">
             <table className="min-w-[760px] w-full text-left">
               <thead className="bg-white/60">
                 <tr className="border-b border-gray-200">
@@ -475,7 +475,7 @@ export const AdminSettings = () => {
       ) : tab === 'job_roles' ? (
         <div className="glass-card bg-white/80 border border-white/60 rounded-[12px] p-6 space-y-6">
           <div className="flex gap-2 flex-wrap items-end">
-            <div className="flex-1 min-w-[240px]">
+            <div className="flex-1 min-w-0 w-full sm:min-w-[240px]">
               <label className="block text-sm font-bold text-charcoal mb-2">New job role</label>
               <input
                 value={newJobRoleName}
@@ -495,7 +495,7 @@ export const AdminSettings = () => {
             </button>
           </div>
 
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 overscroll-x-contain">
             <table className="min-w-[760px] w-full text-left">
               <thead className="bg-white/60">
                 <tr className="border-b border-gray-200">
@@ -576,7 +576,7 @@ export const AdminSettings = () => {
       ) : (
         <div className="glass-card bg-white/80 border border-white/60 rounded-[12px] p-6 space-y-6">
           <div className="flex gap-2 flex-wrap items-end">
-            <div className="flex-1 min-w-[240px]">
+            <div className="flex-1 min-w-0 w-full sm:min-w-[240px]">
               <label className="block text-sm font-bold text-charcoal mb-2">New category</label>
               <input
                 value={newCategoryName}
@@ -596,7 +596,7 @@ export const AdminSettings = () => {
             </button>
           </div>
 
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 overscroll-x-contain">
             <table className="min-w-[760px] w-full text-left">
               <thead className="bg-white/60">
                 <tr className="border-b border-gray-200">

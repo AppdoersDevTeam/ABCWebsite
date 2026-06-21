@@ -554,8 +554,8 @@ export const AdminOverview = () => {
       </div>
 
       {/* Pending User Approvals Section */}
-      <div id="pending-users" className="glass-card bg-white border border-gray-200 p-8 rounded-[8px] shadow-sm">
-        <div className="flex items-center justify-between mb-6">
+      <div id="pending-users" className="glass-card bg-white border border-gray-200 p-6 md:p-8 rounded-[8px] shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div className="flex items-center gap-3">
             <div className="p-3 bg-gold/10 rounded-full">
               <UserCheck size={24} className="text-gold" />
@@ -650,7 +650,7 @@ export const AdminOverview = () => {
                       </div>
                     </div>
                   </div>
-                  <div className="flex gap-3 flex-shrink-0">
+                  <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto flex-shrink-0">
                     <button
                       onClick={() => handleApproveUser(pendingUser.id)}
                       className="bg-gold text-charcoal px-6 py-3 rounded-[4px] font-bold hover:bg-gold/80 transition-colors shadow-sm flex items-center gap-2"

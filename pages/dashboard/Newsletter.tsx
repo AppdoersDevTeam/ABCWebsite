@@ -52,7 +52,7 @@ export const Newsletter = () => {
   return (
     <div className="space-y-8">
       <div className="border-b border-gray-200 pb-6">
-        <h1 className="text-4xl font-serif font-normal text-charcoal">Newsletters</h1>
+        <h1 className="text-2xl md:text-4xl font-serif font-normal text-charcoal">Newsletters</h1>
         <p className="text-neutral mt-1">Church life updates.</p>
       </div>
 
@@ -100,9 +100,9 @@ export const Newsletter = () => {
                   href={newsletter.pdf_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="bg-white border border-gray-200 p-4 flex justify-between items-center hover:shadow-md hover:border-gold cursor-pointer rounded-[4px] transition-all group"
+                  className="bg-white border border-gray-200 p-4 flex justify-between items-center gap-3 hover:shadow-md hover:border-gold cursor-pointer rounded-[4px] transition-all group min-w-0"
                 >
-                  <span className="text-neutral font-medium group-hover:text-charcoal">
+                  <span className="text-neutral font-medium group-hover:text-charcoal min-w-0 truncate">
                     {newsletter.title}
                   </span>
                   <Download size={16} className="text-neutral group-hover:text-gold" />

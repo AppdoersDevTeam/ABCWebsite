@@ -212,7 +212,7 @@ export const AdminNewsletter = () => {
                       e.stopPropagation();
                       handleDelete(newsletter.id);
                     }}
-                    className="p-1 text-neutral hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                    className="p-1 text-neutral hover:text-red-500 transition-colors opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
                   >
                     <Trash2 size={16} />
                   </button>
@@ -305,7 +305,7 @@ export const AdminNewsletter = () => {
               </label>
             </div>
           </div>
-          <div className="flex gap-3 justify-end pt-4">
+          <div className="flex flex-col-reverse sm:flex-row gap-3 justify-end pt-4">
             <button
               onClick={() => {
                 setIsUploadModalOpen(false);

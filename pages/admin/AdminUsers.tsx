@@ -412,10 +412,11 @@ export const AdminUsers = () => {
       )}
 
       {/* Filter Tabs */}
-      <div className="flex gap-2 border-b border-gray-200">
+      <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 border-b border-gray-200">
+        <div className="flex flex-nowrap min-w-0 gap-2">
         <button
           onClick={() => setFilter('all')}
-          className={`px-6 py-3 font-bold transition-colors ${
+          className={`px-4 sm:px-6 py-3 text-sm sm:text-base font-bold transition-colors whitespace-nowrap ${
             filter === 'all'
               ? 'text-charcoal border-b-2 border-gold'
               : 'text-neutral hover:text-charcoal'
@@ -425,7 +426,7 @@ export const AdminUsers = () => {
         </button>
         <button
           onClick={() => setFilter('pending')}
-          className={`px-6 py-3 font-bold transition-colors ${
+          className={`px-4 sm:px-6 py-3 text-sm sm:text-base font-bold transition-colors whitespace-nowrap ${
             filter === 'pending'
               ? 'text-charcoal border-b-2 border-gold'
               : 'text-neutral hover:text-charcoal'
@@ -435,7 +436,7 @@ export const AdminUsers = () => {
         </button>
         <button
           onClick={() => setFilter('approved')}
-          className={`px-6 py-3 font-bold transition-colors ${
+          className={`px-4 sm:px-6 py-3 text-sm sm:text-base font-bold transition-colors whitespace-nowrap ${
             filter === 'approved'
               ? 'text-charcoal border-b-2 border-gold'
               : 'text-neutral hover:text-charcoal'
@@ -445,7 +446,7 @@ export const AdminUsers = () => {
         </button>
         <button
           onClick={() => setFilter('admins')}
-          className={`px-6 py-3 font-bold transition-colors ${
+          className={`px-4 sm:px-6 py-3 text-sm sm:text-base font-bold transition-colors whitespace-nowrap ${
             filter === 'admins'
               ? 'text-charcoal border-b-2 border-gold'
               : 'text-neutral hover:text-charcoal'
@@ -453,6 +454,7 @@ export const AdminUsers = () => {
         >
           Admins ({visibleUsers.filter(u => u.role === 'admin').length})
         </button>
+        </div>
       </div>
 
       {/* Users List */}
@@ -535,7 +537,7 @@ export const AdminUsers = () => {
                     </div>
                   </div>
                 </div>
-                <div className="flex gap-2 flex-wrap flex-shrink-0">
+                <div className="flex gap-2 flex-wrap flex-shrink-0 max-lg:w-full">
                   <button
                     type="button"
                     onClick={() => setLinkModalUser(u)}

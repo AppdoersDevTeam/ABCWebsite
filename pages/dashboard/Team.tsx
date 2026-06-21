@@ -48,7 +48,7 @@ export const Team = () => {
   return (
     <div className="space-y-8">
       <div className="border-b border-gray-200 pb-6">
-         <h1 className="text-4xl font-serif font-normal text-charcoal">Directory</h1>
+         <h1 className="text-2xl md:text-4xl font-serif font-normal text-charcoal">Directory</h1>
          <p className="text-neutral mt-1">Staff and Leadership.</p>
       </div>
 
@@ -59,7 +59,7 @@ export const Team = () => {
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {members.map((member) => (
-            <VibrantCard key={member.id} className="flex items-center space-x-6 group bg-white shadow-sm hover:shadow-md hover:border-gold">
+            <VibrantCard key={member.id} className="flex flex-col sm:flex-row sm:items-center gap-4 sm:space-x-6 text-center sm:text-left group bg-white shadow-sm hover:shadow-md hover:border-gold">
               <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-gray-100 group-hover:border-gold transition-colors flex-shrink-0">
                 {member.img ? (
                   <img src={member.img} alt={member.name} className="w-full h-full object-cover" />

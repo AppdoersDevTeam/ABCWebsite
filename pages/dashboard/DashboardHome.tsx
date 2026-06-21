@@ -86,9 +86,9 @@ export const DashboardHome = () => {
 
   return (
     <div className="space-y-8">
-        <div className="flex justify-between items-end border-b border-gray-200 pb-6">
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 border-b border-gray-200 pb-6">
              <div>
-                <h1 className="text-4xl font-serif font-normal text-charcoal">Welcome, {displayName(user)}</h1>
+                <h1 className="text-2xl md:text-4xl font-serif font-normal text-charcoal">Welcome, {displayName(user)}</h1>
                 <p className="text-neutral mt-2">Here is what is happening in your community.</p>
              </div>
              <div className="hidden md:flex items-center gap-2">
@@ -157,10 +157,10 @@ export const DashboardHome = () => {
             </Link>
         </div>
 
-        <div className="glass-card bg-white/60 p-10 rounded-[8px] relative overflow-hidden">
+        <div className="glass-card bg-white/60 p-6 md:p-10 rounded-[8px] relative overflow-hidden">
              <div className="relative z-10">
-                <h3 className="font-serif text-3xl mb-4 text-charcoal font-normal">Verse of the Day</h3>
-                <p className="text-2xl text-charcoal/80 italic font-serif leading-relaxed max-w-3xl">
+                <h3 className="font-serif text-2xl md:text-3xl mb-4 text-charcoal font-normal">Verse of the Day</h3>
+                <p className="text-lg md:text-2xl text-charcoal/80 italic font-serif leading-relaxed max-w-3xl">
                     "For I know the plans I have for you," declares the Lord, "plans to prosper you and not to harm you, plans to give you hope and a future."
                 </p>
                 <p className="mt-6 text-charcoal font-black tracking-widest uppercase text-sm">Jeremiah 29:11</p>

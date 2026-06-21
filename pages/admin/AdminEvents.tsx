@@ -417,7 +417,7 @@ export const AdminEvents = () => {
     <div className="space-y-8">
       <div className="flex flex-col gap-4 border-b border-gray-200 pb-6 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-4xl font-serif font-normal text-charcoal">Events Management</h1>
+          <h1 className="text-2xl md:text-4xl font-serif font-normal text-charcoal">Events Management</h1>
           <p className="text-neutral mt-1">Create and manage church events and meetings.</p>
         </div>
         <GlowingButton size="sm" fullWidth className="sm:w-auto" onClick={openCreateModal}>
@@ -668,7 +668,7 @@ export const AdminEvents = () => {
             </select>
             <p className="text-xs text-neutral mt-1">Shown on the event detail page as “RSVP optional/required”.</p>
           </div>
-          <div className="flex gap-3 justify-end pt-4">
+          <div className="flex flex-col-reverse sm:flex-row gap-3 justify-end pt-4">
             <button
               onClick={() => {
                 setIsModalOpen(false);
@@ -701,7 +701,7 @@ export const AdminEvents = () => {
         title={rsvpEvent ? `RSVPs — ${rsvpEvent.title}` : 'RSVPs'}
       >
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <p className="text-sm text-neutral">
               Showing{' '}
               <span className="font-bold text-charcoal">{filteredRsvps.length}</span> of{' '}
@@ -762,7 +762,7 @@ export const AdminEvents = () => {
           ) : filteredRsvps.length === 0 ? (
             <p className="text-neutral text-sm">No RSVPs yet.</p>
           ) : (
-            <div className="max-h-80 overflow-auto border border-gray-100 rounded-[8px]">
+            <div className="max-h-80 overflow-x-auto overflow-y-auto border border-gray-100 rounded-[8px]">
               <table className="w-full text-left">
                 <thead className="bg-white sticky top-0">
                   <tr className="border-b border-gray-100">

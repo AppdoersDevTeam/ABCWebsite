@@ -475,7 +475,7 @@ export const AdminRoster = () => {
               key={rosterImage.id}
               className="glass-card bg-white/80 border border-white/60 rounded-[12px] p-6 hover:border-gold hover:shadow-md transition-all group relative overflow-hidden"
             >
-              <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+              <div className="absolute top-4 right-4 flex gap-2 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity z-10">
                 <button
                   onClick={() => openEditModal(rosterImage)}
                   className="p-2 bg-white border border-gray-200 rounded-[4px] text-neutral hover:text-gold hover:border-gold transition-colors shadow-sm"
@@ -640,7 +640,7 @@ export const AdminRoster = () => {
             </div>
           )}
 
-          <div className="flex gap-3 justify-end pt-4">
+          <div className="flex flex-col-reverse sm:flex-row gap-3 justify-end pt-4">
             <button
               onClick={() => {
                 setIsUploadModalOpen(false);
@@ -755,7 +755,7 @@ export const AdminRoster = () => {
             </div>
           )}
 
-          <div className="flex gap-3 justify-end pt-4">
+          <div className="flex flex-col-reverse sm:flex-row gap-3 justify-end pt-4">
             <button
               onClick={() => {
                 setIsEditModalOpen(false);

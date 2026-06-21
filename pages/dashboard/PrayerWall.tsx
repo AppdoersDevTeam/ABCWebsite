@@ -306,9 +306,9 @@ export const PrayerWall = () => {
           </div>
         ))}
       </div>
-      <div className="flex justify-between items-center border-b border-gray-200 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-gray-200 pb-6">
         <div>
-          <h1 className="text-4xl font-serif font-normal text-charcoal">Prayer Wall</h1>
+          <h1 className="text-2xl md:text-4xl font-serif font-normal text-charcoal">Prayer Wall</h1>
           <p className="text-neutral mt-1">Bear one another's burdens.</p>
         </div>
         <GlowingButton size="sm" onClick={() => setIsModalOpen(true)}>
@@ -360,10 +360,10 @@ export const PrayerWall = () => {
                     </div>
                   )}
                 </div>
-                <p className="text-charcoal leading-relaxed mb-6 text-lg font-light pl-12 border-l-2 border-gold/20">
+                <p className="text-charcoal leading-relaxed mb-6 text-lg font-light pl-4 md:pl-12 border-l-2 border-gold/20">
                   {req.content}
                 </p>
-                <div className="flex items-center border-t border-gray-100 pt-4 pl-12">
+                <div className="flex items-center border-t border-gray-100 pt-4 pl-4 md:pl-12">
                   <button
                     onClick={(e) => handlePrayingClick(req.id, e)}
                     disabled={!user}
@@ -427,7 +427,7 @@ export const PrayerWall = () => {
               placeholder="Share your prayer request..."
             />
           </div>
-          <div className="flex gap-3 justify-end pt-4">
+          <div className="flex flex-col-reverse sm:flex-row gap-3 justify-end pt-4">
             <button
               onClick={() => {
                 setIsEditModalOpen(false);
@@ -482,7 +482,7 @@ export const PrayerWall = () => {
               placeholder="Share your prayer request..."
             />
           </div>
-          <div className="flex gap-3 justify-end pt-4">
+          <div className="flex flex-col-reverse sm:flex-row gap-3 justify-end pt-4">
             <button
               onClick={() => setIsModalOpen(false)}
               className="px-6 py-2 border border-gray-200 rounded-[4px] text-charcoal hover:bg-gray-50 transition-colors"

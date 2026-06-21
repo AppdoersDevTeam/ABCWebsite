@@ -221,10 +221,10 @@ export const AdminPrayerWall = () => {
                   </button>
                 </div>
               </div>
-              <p className="text-charcoal leading-relaxed mb-6 text-lg font-light pl-12 border-l-2 border-gold/20">
+              <p className="text-charcoal leading-relaxed mb-6 text-lg font-light pl-4 md:pl-12 border-l-2 border-gold/20">
                 {req.content}
               </p>
-              <div className="flex items-center border-t border-gray-100 pt-4 pl-12">
+              <div className="flex items-center border-t border-gray-100 pt-4 pl-4 md:pl-12">
                 <div className="flex items-center text-sm text-neutral font-bold uppercase tracking-wider">
                   <Heart size={16} className="mr-2" /> Praying ({req.prayer_count})
                 </div>
@@ -285,7 +285,7 @@ export const AdminPrayerWall = () => {
               placeholder="Enter prayer request..."
             />
           </div>
-          <div className="flex gap-3 justify-end pt-4">
+          <div className="flex flex-col-reverse sm:flex-row gap-3 justify-end pt-4">
             <button
               onClick={() => {
                 setIsCreateModalOpen(false);
@@ -354,7 +354,7 @@ export const AdminPrayerWall = () => {
               placeholder="Enter prayer request..."
             />
           </div>
-          <div className="flex gap-3 justify-end pt-4">
+          <div className="flex flex-col-reverse sm:flex-row gap-3 justify-end pt-4">
             <button
               onClick={() => {
                 setIsEditModalOpen(false);
