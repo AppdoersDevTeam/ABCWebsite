@@ -622,7 +622,17 @@ export const AdminEvents = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-bold text-charcoal mb-2">Event Banner Image</label>
+            <label className="block text-sm font-bold text-charcoal mb-2">
+              Event Banner Image
+            </label>
+            <div className="mb-3 rounded-[8px] bg-gold/10 border border-gold/25 px-3 py-2.5">
+              <p className="text-sm font-bold text-charcoal">
+                Required size: {EVENT_IMAGE.sizeLabel} ({EVENT_IMAGE.ratioLabel} landscape)
+              </p>
+              <p className="text-xs text-neutral mt-1">
+                JPG or PNG · max 2MB · one image fits the event page, calendar, and listings
+              </p>
+            </div>
             <div className="rounded-[10px] border-2 border-dashed border-gray-200 hover:border-gold/50 transition-colors p-4">
               <div className="flex items-start gap-4">
                 <div className="w-40 aspect-[16/9] rounded-[8px] overflow-hidden border border-gray-200 bg-gray-50 flex-shrink-0">
@@ -652,18 +662,11 @@ export const AdminEvents = () => {
                   {selectedFile && (
                     <p className="text-xs text-gold font-bold mt-1.5">{selectedFile.name}</p>
                   )}
-                  <p className="text-xs text-neutral mt-1.5">
-                    <span className="font-bold text-charcoal">{EVENT_IMAGE.sizeLabel} ({EVENT_IMAGE.ratioLabel})</span>
-                    {' '}· JPG or PNG · max 2MB
-                  </p>
-                  <p className="text-xs text-neutral mt-1">
-                    One image fits the event page, calendar, and listings. Keep important text and graphics inside the centre safe area.
-                  </p>
                   {imageDimensionError && (
                     <p className="text-xs text-red-600 font-bold mt-2">{imageDimensionError}</p>
                   )}
                   {!selectedFile && !formData.image_url && (
-                    <p className="text-xs text-neutral mt-1">Defaults to church logo if left empty.</p>
+                    <p className="text-xs text-neutral mt-1.5">Defaults to church logo if left empty.</p>
                   )}
                 </div>
               </div>

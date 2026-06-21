@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, Users, Music, ArrowRight, Video, Clock, MapPin, ArrowDownToLine, Filter } from 'lucide-react';
+import { Calendar, Users, Music, ArrowRight, Video, ArrowDownToLine, Filter } from 'lucide-react';
 import { ScrollReveal } from '../../components/UI/ScrollReveal';
 import { supabase } from '../../lib/supabase';
 import { Event } from '../../types';
-import { GlowingButton } from '../../components/UI/GlowingButton';
-import { EventImage } from '../../components/UI/EventImage';
+import { EventCard } from '../../components/UI/EventCard';
 
 const ALL_CATEGORIES = [
   'All',
@@ -18,8 +17,6 @@ const ALL_CATEGORIES = [
   'Community Lunch',
   'Other',
 ] as const;
-
-const DEFAULT_THUMB = '/ABC Logo.png';
 
 export const Events = () => {
   const heroRef = useRef<HTMLDivElement>(null);
@@ -64,26 +61,6 @@ export const Events = () => {
     return ALL_CATEGORIES.filter((c) => c === 'All' || cats.has(c));
   }, [publicEvents]);
 
-  const formatEventDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
-    return { day, month };
-  };
-
-  const formatEventTime = (date: string, time: string) => {
-    const eventDate = new Date(date);
-    const today = new Date();
-    const diffTime = eventDate.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-    if (diffDays === 0) return `Today, ${time}`;
-    if (diffDays === 1) return `Tomorrow, ${time}`;
-    if (diffDays < 7) return `${diffDays} days, ${time}`;
-    
-    return `${eventDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}, ${time}`;
-  };
-
   const featuredEvents = [
     {
       id: 'sunday-service',
@@ -121,42 +98,6 @@ export const Events = () => {
       icon: <Users size={28} />
     }
   ];
-
-  const EventCardImage = ({ evt }: { evt: Event }) => {
-    const hasImage = !!evt.image_url?.trim();
-    const { day, month } = formatEventDate(evt.date);
-
-    return (
-      <div className="relative aspect-[16/9] overflow-hidden">
-        {hasImage ? (
-          <EventImage src={String(evt.image_url)} alt={evt.title} loading="lazy" />
-        ) : (
-          <div className="w-full h-full bg-gradient-to-br from-[#3a4a1f] via-[#4a5d2a] to-[#2d3a16] flex items-center justify-center">
-            <img
-              src={DEFAULT_THUMB}
-              alt="Ashburton Baptist Church"
-              className="h-14 md:h-16 w-auto opacity-90"
-              loading="lazy"
-            />
-          </div>
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
-
-        <div className="absolute top-4 left-4 inline-flex items-center gap-2 bg-white/90 backdrop-blur-md border border-white/60 rounded-full px-3 py-2 shadow-sm">
-          <span className="text-charcoal font-black text-sm leading-none">{day}</span>
-          <span className="text-neutral font-bold text-[11px] tracking-widest">{month}</span>
-        </div>
-
-        {evt.category && (
-          <div className="absolute bottom-4 left-4">
-            <span className="inline-flex items-center px-3 py-1 rounded-full bg-gold/90 text-white text-[11px] font-bold uppercase tracking-widest shadow-sm">
-              {evt.category}
-            </span>
-          </div>
-        )}
-      </div>
-    );
-  };
 
   return (
     <div className="space-y-0 overflow-hidden">
@@ -323,51 +264,7 @@ export const Events = () => {
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-6xl">
               {filteredEvents.map((evt, i) => (
                 <ScrollReveal key={evt.id} direction="up" delay={i * 90}>
-                  <Link to={`/events/${evt.id}`} className="group block h-full">
-                    <div className="glass-card bg-white/75 border border-white/55 shadow-sm rounded-[16px] overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-full flex flex-col">
-                      <EventCardImage evt={evt} />
-
-                      <div className="p-6 flex-1 flex flex-col">
-                        <h4 className="text-xl font-bold text-charcoal group-hover:text-gold transition-colors line-clamp-2">
-                          {evt.title}
-                        </h4>
-
-                        <div className="mt-4 space-y-2 flex-1">
-                          <div className="flex items-center text-sm text-neutral">
-                            <div className="w-9 h-9 bg-gold/10 rounded-full flex items-center justify-center mr-3 flex-shrink-0 group-hover:bg-gold transition-colors">
-                              <Clock size={16} className="text-gold group-hover:text-white" />
-                            </div>
-                            <span className="group-hover:text-charcoal transition-colors">
-                              {formatEventTime(evt.date, evt.time)}
-                            </span>
-                          </div>
-
-                          {evt.location && (
-                            <div className="flex items-center text-sm text-neutral">
-                              <div className="w-9 h-9 bg-gold/10 rounded-full flex items-center justify-center mr-3 flex-shrink-0 group-hover:bg-gold transition-colors">
-                                <MapPin size={16} className="text-gold group-hover:text-white" />
-                              </div>
-                              <span className="group-hover:text-charcoal transition-colors line-clamp-1">
-                                {evt.location}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="mt-5">
-                          <GlowingButton
-                            variant="outline"
-                            size="sm"
-                            fullWidth
-                            className="!rounded-full !bg-gold !text-white !border-gold transition-all duration-500 ease-out hover:scale-110 hover:shadow-2xl hover:shadow-gold/60 active:scale-95 hover:-translate-y-1 !normal-case !tracking-normal"
-                          >
-                            See More
-                            <ArrowRight size={18} className="ml-2 transition-transform duration-300 group-hover:translate-x-1" />
-                          </GlowingButton>
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
+                  <EventCard evt={evt} />
                 </ScrollReveal>
               ))}
             </div>

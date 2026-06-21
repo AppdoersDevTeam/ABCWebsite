@@ -1,18 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar as CalIcon, Clock, MapPin, ArrowRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Calendar as CalIcon } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Event } from '../../types';
-import { SkeletonPageHeader, SkeletonEventCard } from '../../components/UI/Skeleton';
-import { EventImage } from '../../components/UI/EventImage';
-import {
-  formatEventDateBadge,
-  formatEventTimeRange,
-  getEventStartDate,
-} from '../../lib/eventDateUtils';
+import { SkeletonPageHeader } from '../../components/UI/Skeleton';
+import { EventCard } from '../../components/UI/EventCard';
 import { useAuth } from '../../context/AuthContext';
-
-const DEFAULT_THUMB = '/ABC Logo.png';
 
 export const EventsPrivate = () => {
   const [events, setEvents] = useState<Event[]>([]);
@@ -44,15 +36,21 @@ export const EventsPrivate = () => {
     }
   };
 
-  const formatDate = (dateString: string) => formatEventDateBadge(dateString);
-
   if (isLoading) {
     return (
       <div className="space-y-8">
         <SkeletonPageHeader />
-        <div className="space-y-4">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <SkeletonEventCard key={i} />
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="rounded-[16px] overflow-hidden bg-white border border-gray-100 animate-pulse">
+              <div className="aspect-[16/9] bg-gray-100" />
+              <div className="p-6 space-y-3">
+                <div className="h-6 w-3/4 bg-gray-100 rounded" />
+                <div className="h-4 w-1/2 bg-gray-100 rounded" />
+                <div className="h-4 w-2/3 bg-gray-100 rounded" />
+                <div className="h-10 w-full bg-gray-100 rounded-full mt-4" />
+              </div>
+            </div>
           ))}
         </div>
       </div>
@@ -75,80 +73,10 @@ export const EventsPrivate = () => {
           <p className="text-neutral text-sm mt-1">Check back soon for new events.</p>
         </div>
       ) : (
-        <div className="space-y-4">
-          {events.map((evt) => {
-            const { day, month } = formatDate(getEventStartDate(evt));
-            const hasImage = !!evt.image_url?.trim();
-            return (
-              <Link
-                key={evt.id}
-                to={`/events/${evt.id}`}
-                className="block"
-              >
-                <div className="bg-white border border-gray-100 shadow-sm rounded-[14px] overflow-hidden hover:border-gold hover:shadow-md transition-all group">
-                  <div className="flex flex-col sm:flex-row">
-                    <div className="relative w-full sm:w-56 flex-shrink-0 overflow-hidden aspect-[16/9]">
-                      {hasImage ? (
-                        <EventImage src={String(evt.image_url)} alt={evt.title} loading="lazy" />
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-[#3a4a1f] via-[#4a5d2a] to-[#2d3a16] flex items-center justify-center">
-                          <img
-                            src={DEFAULT_THUMB}
-                            alt="ABC"
-                            className="h-10 w-auto opacity-80"
-                            loading="lazy"
-                          />
-                        </div>
-                      )}
-                      <div className="absolute top-3 left-3 bg-white/90 backdrop-blur border border-white/60 rounded-full px-3 py-1.5 shadow-sm">
-                        <span className="text-xs font-bold text-neutral uppercase tracking-widest">{month}</span>
-                        <span className="ml-2 text-sm font-black text-charcoal">{day}</span>
-                      </div>
-                    </div>
-
-                    <div className="flex-1 p-5 sm:p-6 flex flex-col">
-                      <h3 className="text-xl font-bold text-charcoal group-hover:text-gold transition-colors line-clamp-2">
-                        {evt.title}
-                      </h3>
-                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-sm text-neutral">
-                        <span className="inline-flex items-center">
-                          <Clock size={14} className="text-gold mr-1.5" />
-                          {formatEventTimeRange(evt)}
-                        </span>
-                        <span className="inline-flex items-center">
-                          <MapPin size={14} className="text-gold mr-1.5" />
-                          <span className="line-clamp-1">{evt.location}</span>
-                        </span>
-                      </div>
-                      {evt.description && (
-                        <p className="text-neutral text-sm mt-3 line-clamp-2">{evt.description}</p>
-                      )}
-                      <div className="flex flex-wrap items-center gap-2 mt-3">
-                        {evt.category && (
-                          <span className="inline-block text-[10px] bg-gold/10 text-gold px-2 py-1 rounded-full uppercase tracking-wider font-bold border border-gold/20">
-                            {evt.category}
-                          </span>
-                        )}
-                        {evt.is_public ? (
-                          <span className="inline-block text-[10px] bg-green-50 text-green-700 px-2 py-1 rounded-full uppercase tracking-wider font-bold border border-green-200">
-                            Public
-                          </span>
-                        ) : (
-                          <span className="inline-block text-[10px] bg-gray-50 text-gray-600 px-2 py-1 rounded-full uppercase tracking-wider font-bold border border-gray-200">
-                            {(evt.audience || 'members').charAt(0).toUpperCase() + (evt.audience || 'members').slice(1)}
-                          </span>
-                        )}
-                      </div>
-                      <div className="mt-auto pt-4 inline-flex items-center text-sm font-bold text-gold group-hover:text-charcoal transition-colors">
-                        See More
-                        <ArrowRight size={14} className="ml-1.5 transition-transform group-hover:translate-x-1" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {events.map((evt) => (
+            <EventCard key={evt.id} evt={evt} showVisibilityBadges />
+          ))}
         </div>
       )}
     </div>
