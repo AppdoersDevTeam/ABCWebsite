@@ -117,6 +117,14 @@ export function formatEventDateBadge(dateString: string): { day: string; month: 
   return { day, month };
 }
 
+/** Card row label, e.g. "Oct 12, 10:00 AM" */
+export function formatEventCardSchedule(event: Event): string {
+  const startDate = getEventStartDate(event);
+  const eventDate = new Date(`${startDate}T12:00:00`);
+  const datePart = eventDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  return `${datePart}, ${formatEventTimeRange(event)}`;
+}
+
 export function formatEventScheduleShort(event: Event): string {
   const startDate = getEventStartDate(event);
   const timeRange = formatEventTimeRange(event);
