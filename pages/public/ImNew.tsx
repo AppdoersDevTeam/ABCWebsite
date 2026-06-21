@@ -2,11 +2,13 @@ import React, { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { ScrollReveal } from '../../components/UI/ScrollReveal';
-import { Download, ChevronDown, MapPin, Heart, ArrowDownToLine, Clock } from 'lucide-react';
+import { Modal } from '../../components/UI/Modal';
+import { Download, ChevronDown, MapPin, Heart, ArrowDownToLine } from 'lucide-react';
 
 export const ImNew = () => {
   const heroRef = useRef<HTMLDivElement>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [showUnavailableModal, setShowUnavailableModal] = useState(false);
   
   return (
     <div className="space-y-0 overflow-hidden">
@@ -93,7 +95,11 @@ export const ImNew = () => {
               <p className="text-neutral">Everything you need to know about our community.</p>
               <p className="text-neutral mt-2">Service times, locations, ministries, and next steps to help you feel at home.</p>
             </div>
-            <GlowingButton variant="outline" className="!rounded-full !bg-gold !text-white !border-gold transition-all duration-500 ease-out hover:scale-110 hover:shadow-2xl hover:shadow-gold/60 active:scale-95 hover:-translate-y-1 w-full md:w-auto group">
+            <GlowingButton
+              variant="outline"
+              className="!rounded-full !bg-gold !text-white !border-gold transition-all duration-500 ease-out hover:scale-110 hover:shadow-2xl hover:shadow-gold/60 active:scale-95 hover:-translate-y-1 w-full md:w-auto group"
+              onClick={() => setShowUnavailableModal(true)}
+            >
               <Download size={18} className="mr-2 transition-all duration-300 group-hover:animate-bounce" />
               <span className="transition-all duration-300 group-hover:tracking-wider">Download PDF</span>
             </GlowingButton>
@@ -186,6 +192,21 @@ export const ImNew = () => {
           </ScrollReveal>
         </div>
       </section>
+
+      <Modal
+        isOpen={showUnavailableModal}
+        onClose={() => setShowUnavailableModal(false)}
+        title="Coming Soon"
+      >
+        <p className="text-neutral text-lg text-center">
+          Sorry, this feature isn&apos;t available yet.
+        </p>
+        <div className="mt-6 flex justify-center">
+          <GlowingButton size="sm" onClick={() => setShowUnavailableModal(false)}>
+            OK
+          </GlowingButton>
+        </div>
+      </Modal>
     </div>
   );
 };
