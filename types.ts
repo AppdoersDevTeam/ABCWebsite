@@ -48,8 +48,14 @@ export interface RosterImage {
 export interface Event {
   id: string;
   title: string;
+  /** Legacy primary date; kept in sync with start_date for ordering/filters. */
   date: string;
+  /** Legacy display time; kept in sync with start/end times. */
   time: string;
+  start_date: string;
+  end_date: string;
+  start_time: string;
+  end_time: string;
   location: string;
   category: string;
   image_url?: string | null;

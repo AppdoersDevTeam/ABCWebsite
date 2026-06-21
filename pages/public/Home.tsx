@@ -5,6 +5,11 @@ import { GlowingButton } from '../../components/UI/GlowingButton';
 import { VibrantCard } from '../../components/UI/VibrantCard';
 import { ScrollReveal } from '../../components/UI/ScrollReveal';
 import { EventImage } from '../../components/UI/EventImage';
+import {
+  formatEventDateBadge,
+  formatEventScheduleShort,
+  getEventStartDate,
+} from '../../lib/eventDateUtils';
 import { supabase } from '../../lib/supabase';
 import { VISION_FOCUS_CARDS } from '../../lib/visionFocusCards';
 import { Event } from '../../types';
@@ -69,26 +74,6 @@ export const Home = () => {
     } finally {
       setIsLoadingWhatsOn(false);
     }
-  };
-
-  const formatEventDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
-    return { day, month };
-  };
-
-  const formatEventTime = (date: string, time: string) => {
-    const eventDate = new Date(date);
-    const today = new Date();
-    const diffTime = eventDate.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-    if (diffDays === 0) return `Today, ${time}`;
-    if (diffDays === 1) return `Tomorrow, ${time}`;
-    if (diffDays < 7) return `${diffDays} days, ${time}`;
-    
-    return `${eventDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}, ${time}`;
   };
 
   const getCategoryIcon = (category: string) => {
@@ -294,7 +279,7 @@ export const Home = () => {
                      </div>
                   ) : (
                     upcomingEvents.map((evt, i) => {
-                      const { day, month } = formatEventDate(evt.date);
+                      const { day, month } = formatEventDateBadge(getEventStartDate(evt));
                       const hasImage = !!evt.image_url?.trim();
                       return (
                         <ScrollReveal key={evt.id} direction="up" delay={i * 90}>
@@ -340,7 +325,7 @@ export const Home = () => {
                                       <Clock size={16} className="text-gold group-hover:text-white" />
                                     </div>
                                     <span className="group-hover:text-charcoal transition-colors">
-                                      {formatEventTime(evt.date, evt.time)}
+                                      {formatEventScheduleShort(evt)}
                                     </span>
                                   </div>
 
