@@ -16,15 +16,14 @@ export interface FaithArticle {
 export const STATEMENT_OF_FAITH_INTRO = {
   churchName: "ASHBURTON BAPTIST CHURCH",
   title: "Statement of Faith",
-  draftLabel: "Draft Copy",
-  adopted: "The following Articles of Faith were adopted by Ashburton Baptist Church, Canterbury, New Zealand from the ??/??/????.",
+  adopted: "The following Articles of Faith were adopted by Ashburton Baptist Church, Canterbury, New Zealand.",
 } as const;
 
 export const STATEMENT_OF_FAITH_ARTICLES: FaithArticle[] = [
   {
     number: 1,
     title: "The Scriptures",
-    paragraphs: ["The Holy Bible is the authority, inspiration, and sufficiency of the Scriptures, consisting of the writings of the prophets and apostles, as the faithful revelation of God’s character, will, and redemptive purposes. It was written by men divinely inspired and is the record of God’s revelation of Himself to man. It is a perfect treasure of divine instruction. It has God for its author, salvation for its end, and truth, without any mixture of error, for its matter. Therefore, all Scripture is totally true and trustworthy. It reveals the principles by which God judges us, and therefore is, and will remain to the end of the world, the true centre of Christian union, and the supreme standard by which all human conduct, creeds, and religious opinions should be tried. All scripture is a testimony to Christ, who is Himself the focus of divine revelation.", "It is inerrant and infallible in its original manuscript which is to be taken as verbally inspired."],
+    paragraphs: ["The Holy Bible is the authority, inspiration, and sufficiency of the Scriptures, consisting of the writings of the prophets and apostles, as the faithful revelation of God’s character, will, and redemptive purposes. It was written by men divinely inspired and is the record of God’s revelation of Himself to man. It is a perfect treasure of divine instruction. It has God for its author, salvation for its end, and truth, without any mixture of error, for its matter. Therefore, all Scripture is totally true and trustworthy. It reveals the principles by which God judges us, and therefore is, and will remain to the end of the world, the true centre of Christian union, and the supreme standard by which all human conduct, creeds, and religious opinions should be tried. All scripture is a testimony to Messiah, who is Himself the focus of divine revelation.", "It is inerrant and infallible in its original manuscript which is to be taken as verbally inspired."],
     subsections: [
     ],
     scriptures: ["Exodus 24:4; Deuteronomy 4:1-2; 17:19; Joshua. 8:34; Psalms 19:7-10; 119:105; 119:11, 89, 105, 140; Isaiah 34:16; 40:8; 55:17-18; Jeremiah. 15:16; 36:1-32; Matthew 5:17-18; 22:29; Luke 21:33; 24:44-46; John 5:39; 16:13-15; 17:17; Acts 2:16; 17:11; Romans 15:4; 16:25- 26; 2 Timothy 3:15-17; Hebrews 1:1-2; 4:12; 1 Peter 1:25; 2 Peter 1:19-21."],
@@ -43,7 +42,7 @@ export const STATEMENT_OF_FAITH_ARTICLES: FaithArticle[] = [
       {
         label: "B.",
         title: "God the Son",
-        paragraphs: ["Christ is the eternal Son of God. In His incarnation as Jesus Christ, He was conceived of the Holy Spirit and born of the virgin Mary. Jesus perfectly revealed and did the will of God, taking upon Himself human nature with its demands and necessities and identifying Himself completely with mankind yet without sin. He honoured the divine law by His personal obedience, and in His substitutionary death on the cross, He made provision for the redemption of men from sin. He was raised from the dead with a glorified body and appeared to His disciples as the Person who was with them before His crucifixion. He ascended into heaven and is now exalted at the right hand of God where He is the One Mediator, fully God, fully man, in whose Person is effected the reconciliation between God and man. He will return in power and glory to judge the world and to consummate His redemptive mission. He now dwells in all believers as the living and ever-present Lord. He is the Messiah, the promised Son of David, the Seed of Abraham, the suffering Servant, and the eternal King."],
+        paragraphs: ["Christ is the eternal Son of God. In His incarnation as Jesus Christ, He was conceived of the Holy Spirit and born of the virgin Mary.  In fulfilment of prophecy. Jesus perfectly revealed and did the will of God, taking upon Himself human nature with its demands and necessities and identifying Himself completely with mankind yet without sin. He honoured the divine law by His personal obedience, and in His substitutionary death on the cross, He made provision for the redemption of men from sin. He was raised from the dead with a glorified body and appeared to His disciples as the Person who was with them before His crucifixion. He ascended into heaven and is now exalted at the right hand of God where He is the One Mediator, fully God, fully man, in whose Person is effected the reconciliation between God and man. He will return in power and glory to judge the world and to consummate His redemptive mission. He now dwells in all believers as the living and ever-present Lord. He is the Messiah, the promised Son of David, the Seed of Abraham, the suffering Servant, and the eternal King."],
         scriptures: ["Genesis 18:1ff.; Psalms 2:7ff; 110:1ff.; Isaiah 7:14; 53; Matthew 1:18-23; 3:17; 8:29; 11:27; 14:33; 16:16, 27; 17:5, 27; 28:1-6, 19; Mark 1:1; 3:11; Luke 1:35; 4:41; 22:70; 24:46; John 1:1-18, 29; 10:30, 38; 11:25-27; 12:44-50; 14:7-11; 16:15-16, 28; 17:1-5, 21-22; 20:1-20, 28; Acts 1:9; 2:22-24; 2:32-36; 7:55-56; 9:4-5, 20; Romans 1:3-4; 3:23-26; 5:6- 21; 8:1-3, 34; 10:4; 1 Corinthians 1:30; 2:2; 8:6; 15:1-8, 24-28; 2 Corinthians 5:19-21; 8:9; Galatians 4:4-5; Ephesians 1:20; 3:11; 4:7-10; Philippians 2:5-11; Colossians 1:13-22; 2:9; 1 Thessalonians 4:14-18; 1 Timothy 2:5-6; 3:16; Titus 2:13-14; Hebrews 1:1-3; 4:14-15; 7:14-28; 9:12-15, 24-28; 12:2; 13:8; 1 Peter 2:21-25; 3:22; 1 John 1:7- 9; 3:2; 4:14-15; 5:9; 2 John 7-9; Revelation 1:13-16; 5:9-14; 12:10-11; 13:8; 19:16."],
       },
       {
@@ -59,7 +58,7 @@ export const STATEMENT_OF_FAITH_ARTICLES: FaithArticle[] = [
         scriptures: ["Genesis 12:1–3; Genesis 15:1–21; Genesis 17:1–8; Genesis 26:2–5; Genesis 28:13–15; Exodus 2:24; Galatians 3:8–9; Jeremiah 31:31–34; Ezekiel 36:25–27; Matthew 26:28; Luke 22:20; Romans 1:4; Acts 2:24–36; Hebrews 8:6–13; Hebrews 9:15; Hebrews 10:14–18; 1 Corinthians 15:17–22."],
       },
       {
-        label: "D.",
+        label: "E.",
         title: "God’s Faithfulness to Israel",
         paragraphs: ["In His faithfulness to Israel, even when they turned their back on Him, God shows His good character, being true to His word, never forgetting the eternal promises to be their God and to give them a land."],
         scriptures: ["Leviticus 26:44–45; Deuteronomy 7:7–9; Psalm 105:8–11; Jeremiah 31:35–37; Ezekiel 36:22–28; Romans 11:1–2; Romans 11:28–29; 2 Samuel 7:12–16; Psalm 2:6–12; Psalm 110:1–4; Isaiah 9:6–7; Isaiah 11:1–10; Jeremiah 23:5–6; Luke 24:44."],
@@ -118,12 +117,6 @@ export const STATEMENT_OF_FAITH_ARTICLES: FaithArticle[] = [
     title: "God’s Purpose of Grace",
     paragraphs: ["Election is the gracious purpose of God, according to which He regenerates, justifies, sanctifies, and glorifies sinners. It is consistent with the free agency of man and comprehends all the means in connection with the end. It is a glorious display of God’s sovereign goodness, and is infinitely wise, holy, and unchangeable. It excludes boasting and promotes humility.", "All true believers endure to the end. Those whom God has accepted in Christ, and sanctified by His Spirit, will never fall away from the state of grace, but shall persevere to the end. Believers may fall into sin through neglect and temptation, whereby they grieve the Spirit, impair their graces and comforts, and bring reproach on the cause of Christ and temporal judgments on themselves; yet they shall be kept by the power of God through faith unto salvation."],
     subsections: [
-      {
-        label: "A.",
-        title: "The One Universal People of God",
-        paragraphs: ["We believe in one holy, universal people of God, the assembly of all who belong to Messiah, called to worship, discipleship, holiness, justice, mercy, and the proclamation of the gospel to all nations."],
-        scriptures: ["Matthew 28:18–20; Acts 2:42–47; Ephesians 4:1–16; Micah 6:8; James 1:27; 1 Peter 2:9–12; Revelation 7:9–10."],
-      },
     ],
     scriptures: ["Genesis 12:1-3; Exodus 19:5-8; 1 Samuel 8:4-7, 19-22; Isaiah 5:1-7; Jeremiah 31:31ff.; Matthew 16:18-19; 21:28-45; 24:22, 31; 25:34; Luke 1:68-79; 2:29-32; 19:41-44; 24:44-48; John 1:12-14; 3:16; 5:24; 6:44-45, 65; 10:27-29; 15:16; 17:6, 12, 17-18; Acts 20:32; Romans 5:9-10; 8:28-39; 10:12-15; 11:5-7, 26-36; 1 Corinthians 1:1-2; 15:24- 28; Ephesians 1:4-23; 2:1-10; 3:1-11; Colossians 1:12-14; 2 Thessalonians 2:13-14; 2 Timothy 1:12; 2:10, 19; Hebrews 11:39-12:2; James 1:12;1 Peter 1:2-5, 13; 2:4-10; 1 John 1:7-9; 2:19; 3:2."],
   },
@@ -137,6 +130,20 @@ export const STATEMENT_OF_FAITH_ARTICLES: FaithArticle[] = [
   },
   {
     number: 7,
+    title: "The Jews and Gentiles United in Messiah",
+    paragraphs: ["Gentiles who trust in Messiah are grafted into the covenant people of God, sharing in the rich root of the promises given to Israel. Together, believing Jews and Gentiles are made one new humanity in Messiah, heirs according to the promise, without distinction in worth, dignity, or access to God."],
+    subsections: [
+      {
+        label: "A.",
+        title: "The One Universal People of God",
+        paragraphs: ["We believe in one holy, universal people of God, the assembly of all who belong to Messiah, called to worship, discipleship, holiness, justice, mercy, and the proclamation of the gospel to all nations."],
+        scriptures: ["Matthew 28:18–20; Acts 2:42–47; Ephesians 4:1–16; Micah 6:8; James 1:27; 1 Peter 2:9–12; Revelation 7:9–10."],
+      },
+    ],
+    scriptures: ["Romans 11:17–24; Ephesians 2:11–22; Ephesians 3:4–6; Galatians 3:26–29; Colossians 3:11; 1 Peter 2:9–10; John 10:16."],
+  },
+  {
+    number: 8,
     title: "Baptism and the Lord’s Supper",
     paragraphs: ["Christian baptism is the immersion of a believer in water in the name of the Father, the Son, and the Holy Spirit. It is an act of obedience symbolizing the believer’s faith in a crucified, buried, and risen Savior; the believer’s death to sin; the burial of the old life; and the resurrection to walk in newness of life in Christ Jesus. It is a testimony to his faith in the final resurrection of the dead. Being a church ordinance, it is prerequisite to the privileges of church membership and to the Lord’s Supper.", "The Lord’s Supper is a symbolic act of obedience whereby members of the church, through partaking of the bread and the fruit of the vine, memorialize the death of the Redeemer and anticipate His second coming."],
     subsections: [
@@ -144,20 +151,12 @@ export const STATEMENT_OF_FAITH_ARTICLES: FaithArticle[] = [
     scriptures: ["Matthew 3:13-17; 26:26-30; 28:19-20; Mark 1:9-11; 14:22-26; Luke 3:21-22; 22:19-20; John 3:23; Acts 2:41-42; 8:35-39; 16:30-33; Acts 20:7; Romans 6:3-5; 1 Corinthians 10:16, 21; 11:23-29; Colossians 2:12."],
   },
   {
-    number: 8,
+    number: 9,
     title: "The Lord’s Day",
     paragraphs: ["The coming Day of the Lord, when God will intervene decisively in human history through the return of Jesus Christ to judge the living and the dead, punish wickedness, vindicate His righteousness, and establish the fullness of His everlasting Kingdom. This Day will bring judgment, wrath, and destruction upon the unrepentant, yet salvation, deliverance, and eternal joy for all who belong to Christ. It will culminate in the final judgment, the renewal of all things, and the creation of the new heavens and the new earth, where righteousness dwells and God will reign forever with His redeemed people. The bodily return of Jesus the Messiah, the resurrection of the dead, the final judgment, the restoration of all things, and the establishment of the new heavens and new earth, where God will dwell forever with His redeemed people."],
     subsections: [
     ],
     scriptures: ["Daniel 12:2; Joel 2:1–2; Joel 2:30–32; Amos 5:18–20; Isaiah 13:6–13; Zephaniah 1:14–18; Malachi 4:1–2; Matthew 24:29–31; Matthew 25:31–46; John 5:28–29; Acts 17:31; 1 Thessalonians 5:2–11; 2 Thessalonians 1:7–10; 2 Peter 3:10–13; Revelation 19:11–16; Revelation 20:11–15; Revelation 21:1–5."],
-  },
-  {
-    number: 9,
-    title: "Jews and Gentiles United in Messiah",
-    paragraphs: ["Gentiles who trust in Messiah are grafted into the covenant people of God, sharing in the rich root of the promises given to Israel. Together, believing Jews and Gentiles are made one new humanity in Messiah, heirs according to the promise, without distinction in worth, dignity, or access to God."],
-    subsections: [
-    ],
-    scriptures: ["Romans 11:17–24; Ephesians 2:11–22; Ephesians 3:4–6; Galatians 3:26–29; Colossians 3:11; 1 Peter 2:9–10; John 10:16."],
   },
   {
     number: 10,
@@ -266,9 +265,9 @@ export const STATEMENT_OF_FAITH_ARTICLES: FaithArticle[] = [
         label: "",
         title: "Of Christian Love",
         paragraphs: ["We believe that every person must be afforded compassion, love, kindness, respect, and dignity for the sake of the gospel. (Mark 12:28-31; Luke 6:31.) We believe that the most loving thing one can do is share the truth of what the Bible says about sinful behavior and the hope that the gospel brings (Romans 6:15-23). Hateful and harassing behavior or attitudes directed toward any individual are to be repudiated and are not in accord with Scripture, the message of the gospel, nor the doctrines of Ashburton Baptist Church."],
-        scriptures: ["Genesis 1:26-28; 2:15-25; 3:1-20; Exodus 20:12; Deuteronomy 6:4-9; Joshua 24:15; 1 Samuel 1:26 28; Psalms 51:5; 78:1-8; 127; 128; 139:13-16; Proverbs 1:8; 5:15-20; 6:20-22; 12:4; 13:24; 14:1; 17:6; 18:22; 22:6, 15; 23:13-14; 24:3; 29:15,17; 31:10-31; Ecclesiastes 4:9-12; 9:9; Malachi 2:14-16; Matthew 5:31-32; 18:2-5; 19:3-9; Mark 10:6- 12; Romans 1:18-32; 1 Corinthians 7:1-16; Ephesians 5:21-33; 6:1-4; Colossians 3:18- 21; 1 Timothy 5:8,14; 2 Timothy 1:3-5; Titus 2:3-5; Hebrews 13:4; 1 Peter 3:1-7."],
+        scriptures: [],
       },
     ],
-    scriptures: [],
+    scriptures: ["Genesis 1:26-28; 2:15-25; 3:1-20; Exodus 20:12; Deuteronomy 6:4-9; Joshua 24:15; 1 Samuel 1:26 28; Psalms 51:5; 78:1-8; 127; 128; 139:13-16; Proverbs 1:8; 5:15-20; 6:20-22; 12:4; 13:24; 14:1; 17:6; 18:22; 22:6, 15; 23:13-14; 24:3; 29:15,17; 31:10-31; Ecclesiastes 4:9-12; 9:9; Malachi 2:14-16; Matthew 5:31-32; 18:2-5; 19:3-9; Mark 10:6- 12; Romans 1:18-32; 1 Corinthians 7:1-16; Ephesians 5:21-33; 6:1-4; Colossians 3:18- 21; 1 Timothy 5:8,14; 2 Timothy 1:3-5; Titus 2:3-5; Hebrews 13:4; 1 Peter 3:1-7."],
   },
 ];

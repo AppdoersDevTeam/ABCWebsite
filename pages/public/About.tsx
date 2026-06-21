@@ -8,6 +8,7 @@ import { supabase } from '../../lib/supabase';
 import { TeamMember } from '../../types';
 import { inferProfileType } from '../../lib/teamMemberUtils';
 import { VISION_FOCUS_CARDS } from '../../lib/visionFocusCards';
+import { STATEMENT_OF_FAITH_ARTICLES } from '../../lib/statementOfFaith';
 
 interface LeadershipMember {
   name: string;
@@ -255,18 +256,18 @@ export const About = () => {
           </ScrollReveal>
 
           <ScrollReveal direction="up" delay={150}>
-            <div className="glass-card rounded-[16px] p-8 md:p-12 bg-white/70 border border-white/50 shadow-sm hover:shadow-xl transition-all duration-300 max-w-4xl mx-auto text-center">
-              <p className="text-neutral leading-relaxed text-lg mb-2">
-                20 articles covering the Scriptures, the triune God, salvation, the church, ordinances,
+            <div className="glass-card rounded-[16px] p-5 sm:p-8 md:p-12 bg-white/70 border border-white/50 shadow-sm hover:shadow-xl transition-all duration-300 max-w-4xl mx-auto text-center">
+              <p className="text-neutral leading-relaxed text-base sm:text-lg mb-2 px-1">
+                {STATEMENT_OF_FAITH_ARTICLES.length} articles covering the Scriptures, the triune God, salvation, the church, ordinances,
                 last things, evangelism, stewardship, the family, and more — with supporting Scripture references throughout.
               </p>
-              <p className="text-sm text-gold font-bold tracking-widest uppercase mb-8">Full text · No abridgement</p>
+              <p className="text-sm text-gold font-bold tracking-widest uppercase mb-8">Adopted Articles of Faith</p>
               <Link
                 to="/about/beliefs"
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-gold px-8 py-3.5 text-base font-normal text-white shadow-md shadow-gold/30 transition-colors duration-200 hover:bg-[#e5b800] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2"
+                className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-full bg-gold px-6 sm:px-8 py-3.5 text-sm sm:text-base font-normal text-white shadow-md shadow-gold/30 transition-colors duration-200 hover:bg-gold/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2"
               >
                 Read Our Full Statement of Faith
-                <ArrowRight size={18} className="text-white" aria-hidden />
+                <ArrowRight size={18} className="text-white shrink-0" aria-hidden />
               </Link>
             </div>
           </ScrollReveal>

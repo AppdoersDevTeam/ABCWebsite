@@ -1,5 +1,5 @@
-import re
 import json
+import re
 
 raw_path = r'scripts/statement-of-faith-raw.txt'
 out_path = r'lib/statementOfFaith.ts'
@@ -10,31 +10,41 @@ with open(raw_path, encoding='utf-8') as f:
 intro = {
     'churchName': paras[0],
     'title': paras[1],
-    'draftLabel': paras[2],
-    'adopted': paras[3],
+    'adopted': paras[2],
 }
 
-ARTICLE_TITLES = {
-    1: 'The Scriptures',
-    2: 'God',
-    3: 'Man',
-    4: 'Salvation',
-    5: 'God\u2019s Purpose of Grace',
-    6: 'The Church',
-    7: 'Baptism and the Lord\u2019s Supper',
-    8: 'The Lord\u2019s Day',
-    9: 'Jews and Gentiles United in Messiah',
-    10: 'The Kingdom',
-    11: 'Last Things',
-    12: 'Evangelism and Missions',
-    13: 'Education',
-    14: 'Stewardship',
-    15: 'Cooperation and Mutual Commitment',
-    16: 'The Christian and the Social Order',
-    17: 'Peace and War',
-    18: 'Religious Liberty',
-    19: 'The Family',
-    20: 'The Human Sexuality, Marriage, Gender Identity, And Christian Love',
+KNOWN_TITLES = sorted(
+    [
+        'The Human Sexuality, Marriage, Gender Identity, And Christian Love',
+        'The Jews and Gentiles United in Messiah',
+        'Cooperation and Mutual Commitment',
+        'The Christian and the Social Order',
+        "Baptism and the Lord\u2019s Supper",
+        "God\u2019s Purpose of Grace",
+        'Evangelism and Missions',
+        'Jews and Gentiles United in Messiah',
+        'Religious Liberty',
+        'The Scriptures',
+        'The Lord\u2019s Day',
+        'Last Things',
+        'The Kingdom',
+        'The Church',
+        'Stewardship',
+        'Salvation',
+        'Education',
+        'Peace and War',
+        'The Family',
+        'God',
+        'Man',
+    ],
+    key=len,
+    reverse=True,
+)
+
+GOD_SUBSECTION_TITLES = {
+    'A.': 'God the Father',
+    'B.': 'God the Son',
+    'C.': 'God the Holy Spirit',
 }
 
 
@@ -57,62 +67,65 @@ def is_scripture(p: str) -> bool:
     return False
 
 
-GOD_SUBSECTION_TITLES = {
-    'A.': 'God the Father',
-    'B.': 'God the Son',
-    'C.': 'God the Holy Spirit',
-}
+def extract_title_and_body(rest: str) -> tuple[str, str] | None:
+    for title in KNOWN_TITLES:
+        if rest == title:
+            return title, ''
+        if rest.startswith(title):
+            return title, rest[len(title) :].lstrip()
+    return None
 
 
 def split_article_start(p: str):
-    m = re.match(r'^(\d+)\.\s*(.+)$', p)
+    m = re.match(r'^\d+\.\s*(.+)$', p)
     if not m:
         return None
-    num = int(m.group(1))
-    rest = m.group(2)
-    title = ARTICLE_TITLES.get(num)
-    if not title:
-        return None
-    if rest.startswith(title):
-        body = rest[len(title) :].lstrip()
-    else:
-        # title may be concatenated without space (e.g. "GraceElection")
-        body = rest
-        for i in range(len(title), 0, -1):
-            prefix = title[:i]
-            if rest.startswith(prefix) and len(rest) > len(prefix):
-                body = rest[len(prefix) :].lstrip()
-                break
-    return num, title, body
+    return extract_title_and_body(m.group(1))
 
 
-def split_letter_subsection(label: str, rest: str) -> tuple[str, str, list[str]]:
-    """Return (title, body-as-paragraph-or-empty, paragraphs list)."""
+def split_letter_subsection(label: str, rest: str) -> tuple[str, str]:
     if label in GOD_SUBSECTION_TITLES:
         short = GOD_SUBSECTION_TITLES[label]
         if rest.startswith(short):
-            return short, rest[len(short) :].lstrip(), []
+            return short, rest[len(short) :].lstrip()
     if ' - ' in rest:
         sub_title, sub_body = rest.split(' - ', 1)
-        return sub_title.strip(), sub_body.strip(), []
-    # Salvation-style: entire block is paragraph content
-    if label in {'A.', 'B.', 'C.', 'D.'} and len(rest) > 60:
-        return '', rest, []
-    return rest, '', []
+        return sub_title.strip(), sub_body.strip()
+    if label in {'A.', 'B.', 'C.', 'D.', 'E.'} and len(rest) > 60:
+        return '', rest
+    return rest, ''
+
+
+def merge_continuations(paragraphs: list[str]) -> list[str]:
+    merged: list[str] = []
+    for para in paragraphs:
+        if not para:
+            continue
+        if merged and (
+            not merged[-1].rstrip().endswith(('.', '!', '?', ':'))
+            or para[0].islower()
+            or merged[-1].rstrip().endswith((' the', ' of the', ' in the', ' to the'))
+        ):
+            merged[-1] = merged[-1].rstrip() + ' ' + para.lstrip()
+        else:
+            merged.append(para)
+    return merged
 
 
 articles = []
 current = None
-i = 4
+article_counter = 0
+i = 3
 while i < len(paras):
     p = paras[i]
     art = split_article_start(p)
     if art:
         if current:
             articles.append(current)
-        num, title, body = art
+        title, body = art
+        article_counter += 1
         current = {
-            'number': num,
+            'number': article_counter,
             'title': title,
             'paragraphs': [body] if body else [],
             'subsections': [],
@@ -135,11 +148,11 @@ while i < len(paras):
                 'scriptures': [],
             }
         )
-    elif re.match(r'^[A-D]\.\s', p):
-        m = re.match(r'^([A-D])\.\s*(.+)$', p)
+    elif re.match(r'^[A-E]\.\s', p):
+        m = re.match(r'^([A-E])\.\s*(.+)$', p)
         label = m.group(1) + '.'
         rest = m.group(2)
-        sub_title, lead, _ = split_letter_subsection(label, rest)
+        sub_title, lead = split_letter_subsection(label, rest)
         paragraphs = [lead] if lead else []
         current['subsections'].append(
             {
@@ -174,22 +187,24 @@ while i < len(paras):
 if current:
     articles.append(current)
 
-# Salvation: scripture block after D belongs to the article, not subsection D
 for art in articles:
-    if art['number'] == 4 and art['subsections']:
+    art['paragraphs'] = merge_continuations(art['paragraphs'])
+    for sub in art['subsections']:
+        sub['paragraphs'] = merge_continuations(sub['paragraphs'])
+
+for art in articles:
+    if art['title'] == 'Salvation' and art['subsections']:
         last = art['subsections'][-1]
         if last['scriptures']:
             art['scriptures'].extend(last['scriptures'])
             last['scriptures'] = []
 
-# Article 20: final scripture block belongs at article level
 for art in articles:
-    if art['number'] == 20:
-        last_sub = art['subsections'][-1]
-        if last_sub['title'] == 'Of Christian Love' and last_sub['paragraphs']:
-            last_para = last_sub['paragraphs'][-1]
-            if last_para.startswith('Genesis '):
-                art['scriptures'].append(last_sub['paragraphs'].pop())
+    if art['title'] == 'The Human Sexuality, Marriage, Gender Identity, And Christian Love':
+        last_sub = art['subsections'][-1] if art['subsections'] else None
+        if last_sub and last_sub['title'] == 'Of Christian Love' and last_sub['scriptures']:
+            art['scriptures'].extend(last_sub['scriptures'])
+            last_sub['scriptures'] = []
 
 for art in articles:
     for sub in art['subsections']:
@@ -225,7 +240,6 @@ lines = [
     'export const STATEMENT_OF_FAITH_INTRO = {',
     f'  churchName: {ts_str(intro["churchName"])},',
     f'  title: {ts_str(intro["title"])},',
-    f'  draftLabel: {ts_str(intro["draftLabel"])},',
     f'  adopted: {ts_str(intro["adopted"])},',
     '} as const;',
     '',
@@ -264,3 +278,5 @@ with open(out_path, 'w', encoding='utf-8') as f:
     f.write('\n'.join(lines))
 
 print(f'Generated {len(articles)} articles')
+for art in articles:
+    print(f'  {art["number"]}. {art["title"]}')
