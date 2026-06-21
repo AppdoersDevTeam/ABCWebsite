@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
-import { completeRecoveryFromUrl, hasRecoveryParams } from '../../lib/authCallback';
+import {
+  clearRecoveryParamsFromUrl,
+  completeRecoveryFromUrl,
+  hasRecoveryParams,
+} from '../../lib/authCallback';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 
 /** Fix malformed HashRouter recovery URLs like `#/reset-password#access_token=...`. */
@@ -22,6 +26,8 @@ function normalizeRecoveryUrl(): void {
   }
 }
 
+const INIT_TIMEOUT_MS = 20000;
+
 export const ResetPassword = () => {
   const navigate = useNavigate();
   const [isReady, setIsReady] = useState(false);
@@ -30,37 +36,56 @@ export const ResetPassword = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const recoveryLinkPresent = hasRecoveryParams();
 
   useEffect(() => {
     let cancelled = false;
+
+    const finish = (message: string | null = null) => {
+      if (cancelled) return;
+      if (message) setError(message);
+      setIsReady(true);
+    };
 
     const init = async () => {
       setError(null);
       normalizeRecoveryUrl();
 
+      const recoveryLinkPresent = hasRecoveryParams();
+      if (!recoveryLinkPresent) {
+        finish();
+        return;
+      }
+
+      // Defer so AuthContext onAuthStateChange can release the Supabase auth lock first.
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      const timeoutId = setTimeout(() => {
+        if (!cancelled) {
+          finish('Password reset verification timed out. Please request a new reset link and try again.');
+        }
+      }, INIT_TIMEOUT_MS);
+
       try {
-        if (recoveryLinkPresent) {
-          const { error: recoveryError } = await completeRecoveryFromUrl();
-          if (recoveryError) {
-            throw new Error(recoveryError);
-          }
+        const { error: recoveryError } = await completeRecoveryFromUrl();
+        if (recoveryError) {
+          throw new Error(recoveryError);
         }
 
         const { data: { session } } = await supabase.auth.getSession();
-        if (!cancelled) {
-          if (!session && recoveryLinkPresent) {
-            setError('This reset link is invalid or has expired. Please request a new one.');
-          }
-          setIsReady(true);
+        if (!session) {
+          throw new Error('This reset link is invalid or has expired. Please request a new one.');
         }
+
+        clearRecoveryParamsFromUrl();
+        finish();
       } catch (e: unknown) {
         console.error('ResetPassword init error:', e);
-        if (!cancelled) {
-          const message = e instanceof Error ? e.message : 'Unable to validate reset link. Please request a new one.';
-          setError(message);
-          setIsReady(true);
-        }
+        const message = e instanceof Error
+          ? e.message
+          : 'Unable to validate reset link. Please request a new one.';
+        finish(message);
+      } finally {
+        clearTimeout(timeoutId);
       }
     };
 
@@ -68,7 +93,7 @@ export const ResetPassword = () => {
     return () => {
       cancelled = true;
     };
-  }, [recoveryLinkPresent]);
+  }, []);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();

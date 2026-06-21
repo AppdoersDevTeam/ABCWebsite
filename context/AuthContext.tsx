@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase';
 import { ADMIN_EMAIL, SUPER_ADMIN_EMAIL } from '../lib/constants';
 import { getUserTimezone } from '../lib/dateUtils';
 import { syncDirectoryUserLink } from '../lib/directoryUserLink';
-import { hasAuthCallbackParams, completeAuthCallbackFromUrl } from '../lib/authCallback';
+import { hasAuthCallbackParams, completeAuthCallbackFromUrl, isPasswordRecoveryUrl } from '../lib/authCallback';
 import { getAuthEmailRedirectUrl } from '../lib/authRedirect';
 import type { AuthError, Session, User as SupabaseUser } from '@supabase/supabase-js';
 
@@ -301,33 +301,36 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
       }
     });
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    // Listen for auth changes — defer async work to avoid blocking Supabase auth (deadlock with verifyOtp etc.)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log('AuthContext - Auth state changed:', event, session ? 'has session' : 'no session');
-      
-      // Handle different auth events
+
       if (event === 'SIGNED_OUT') {
-        console.log('AuthContext - User signed out, clearing user state');
         setUser(null);
         setIsLoading(false);
         return;
       }
-      
-      // INITIAL_SESSION is fired when Supabase has restored the session from storage
+
+      if (event === 'PASSWORD_RECOVERY') {
+        setIsLoading(false);
+        return;
+      }
+
       if (event === 'INITIAL_SESSION') {
-        console.log('AuthContext - Initial session restored from storage');
         initialSessionReceived = true;
         if (timeoutId) {
           clearTimeout(timeoutId);
           timeoutId = null;
         }
-        
-        if (session?.user) {
-          console.log('AuthContext - Session restored, fetching profile...');
-          // Keep loading true while fetching profile
-          setIsLoading(true);
-          
-          // Fetch profile (with cache enabled)
+
+        if (!session?.user) {
+          setUser(null);
+          setIsLoading(false);
+          return;
+        }
+
+        setIsLoading(true);
+        setTimeout(async () => {
           let userProfile: User | null = null;
           try {
             userProfile = await fetchUserProfile(session.user, true);
@@ -335,62 +338,20 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
             console.error('AuthContext - Error in profile fetch during INITIAL_SESSION, using fallback:', error);
             userProfile = buildFallbackUser(session.user);
           }
-          
+
+          if (!isMounted) return;
+
           if (userProfile) {
             setUser(userProfile);
           } else {
-            console.warn('AuthContext - User profile not found after session restore');
             setUser(null);
           }
-        } else {
-          console.log('AuthContext - No session restored');
-          setUser(null);
-        }
-        setIsLoading(false);
+          setIsLoading(false);
+        }, 0);
         return;
       }
-      
-      if (session?.user) {
-        console.log('AuthContext - Session user found, fetching profile...');
-        // Clear any existing timeout since we're actively fetching
-        if (timeoutId) {
-          clearTimeout(timeoutId);
-          timeoutId = null;
-        }
-        // Keep loading true while fetching profile
-        setIsLoading(true);
-        
-        // Fetch profile (with cache enabled)
-        let userProfile: User | null = null;
-        try {
-          userProfile = await fetchUserProfile(session.user, true);
-        } catch (error) {
-          console.error('AuthContext - Error in profile fetch, using fallback:', error);
-          userProfile = buildFallbackUser(session.user);
-        }
-        
-        console.log('AuthContext - Fetched profile from auth state change:', userProfile);
-        if (userProfile) {
-          setUser(userProfile);
-          // Mark initialization as complete and set loading to false
-          // This handles the case where SIGNED_IN fires before INITIAL_SESSION
-          if (!initialSessionReceived) {
-            initialSessionReceived = true;
-          }
-          setIsLoading(false);
-        } else {
-          console.warn('AuthContext - User profile is null, but session exists. User may need profile creation.');
-          // Don't set user to null if we have a session - this causes redirect loops
-          // The profile might be created by the trigger, so we'll keep the session
-          // Still mark as received to prevent timeout
-          if (!initialSessionReceived) {
-            initialSessionReceived = true;
-          }
-          setIsLoading(false);
-        }
-      } else if (event === 'TOKEN_REFRESHED') {
-        // Token refreshed - session should still exist
-        console.log('AuthContext - Token refreshed');
+
+      if (event === 'TOKEN_REFRESHED') {
         if (!initialSessionReceived) {
           initialSessionReceived = true;
           if (timeoutId) {
@@ -399,12 +360,41 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
           }
           setIsLoading(false);
         }
+        return;
       }
+
+      if (!session?.user) return;
+
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+        timeoutId = null;
+      }
+
+      setIsLoading(true);
+      setTimeout(async () => {
+        let userProfile: User | null = null;
+        try {
+          userProfile = await fetchUserProfile(session.user, true);
+        } catch (error) {
+          console.error('AuthContext - Error in profile fetch, using fallback:', error);
+          userProfile = buildFallbackUser(session.user);
+        }
+
+        if (!isMounted) return;
+
+        if (userProfile) {
+          setUser(userProfile);
+        }
+        if (!initialSessionReceived) {
+          initialSessionReceived = true;
+        }
+        setIsLoading(false);
+      }, 0);
     });
 
-    // Handle OAuth / email-confirmation callback params on initial load
+    // Handle OAuth / email-confirmation callback params on initial load (not password recovery)
     const handleOAuthCallback = async () => {
-      if (!hasAuthCallbackParams()) {
+      if (isPasswordRecoveryUrl() || !hasAuthCallbackParams()) {
         return;
       }
 

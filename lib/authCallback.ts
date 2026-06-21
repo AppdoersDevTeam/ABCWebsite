@@ -67,6 +67,15 @@ function isRecoveryType(type: string | null): boolean {
   return type === 'recovery' || type === 'magiclink';
 }
 
+export function isPasswordRecoveryUrl(href: string = window.location.href): boolean {
+  const params = parseAuthParamsFromUrl(href);
+  return (
+    href.includes('/reset-password') ||
+    !!params.tokenHash ||
+    isRecoveryType(params.type)
+  );
+}
+
 function mapRecoveryError(message: string): string {
   const lower = message.toLowerCase();
   if (
@@ -83,6 +92,18 @@ function mapRecoveryError(message: string): string {
   return message;
 }
 
+async function withTimeout<T>(promise: Promise<T>, timeoutMs: number, message: string): Promise<T> {
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timeoutId = setTimeout(() => reject(new Error(message)), timeoutMs);
+  });
+
+  try {
+    return await Promise.race([promise, timeoutPromise]);
+  } finally {
+    if (timeoutId) clearTimeout(timeoutId);
+  }
+}
 async function waitForRecoverySession(timeoutMs = 4000): Promise<boolean> {
   const { data: { session } } = await supabase.auth.getSession();
   if (session) return true;
@@ -105,6 +126,10 @@ async function waitForRecoverySession(timeoutMs = 4000): Promise<boolean> {
 
 /** Detect auth redirect params from email confirmation, OAuth, or magic links. */
 export function hasAuthCallbackParams(): boolean {
+  if (isPasswordRecoveryUrl()) {
+    return false;
+  }
+
   const params = parseAuthParamsFromUrl();
   return !!(
     params.code ||
@@ -165,6 +190,16 @@ export async function completeAuthCallbackFromUrl(): Promise<{ error: string | n
   return { error: null };
 }
 
+/** Remove auth params from the URL after a successful recovery exchange. */
+export function clearRecoveryParamsFromUrl(): void {
+  const url = new URL(window.location.href);
+  const hash = url.hash || '';
+  if (!hash.includes('/reset-password')) return;
+
+  const base = `${url.origin}${url.pathname}`;
+  window.history.replaceState({}, document.title, `${base}#/reset-password`);
+}
+
 /** Establish a recovery session from a password reset email link. */
 export async function completeRecoveryFromUrl(): Promise<{ error: string | null }> {
   const params = parseAuthParamsFromUrl();
@@ -174,11 +209,15 @@ export async function completeRecoveryFromUrl(): Promise<{ error: string | null 
   }
 
   // Preferred for email links: works in any browser (no PKCE verifier required).
-  if (params.tokenHash && isRecoveryType(params.type)) {
-    const { error } = await supabase.auth.verifyOtp({
-      token_hash: params.tokenHash,
-      type: 'recovery',
-    });
+  if (params.tokenHash && (isRecoveryType(params.type) || isPasswordRecoveryUrl())) {
+    const { error } = await withTimeout(
+      supabase.auth.verifyOtp({
+        token_hash: params.tokenHash,
+        type: 'recovery',
+      }),
+      15000,
+      'Password reset verification timed out. Please request a new reset link and try again.',
+    );
     if (error) {
       return { error: mapRecoveryError(error.message) };
     }
