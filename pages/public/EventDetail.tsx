@@ -229,13 +229,9 @@ export const EventDetail = () => {
       {/* Hero Banner */}
       <section className="relative w-full">
         <div className="w-full aspect-[16/9] relative overflow-hidden">
-          {hasEventImage ? (
-            <EventImage src={eventImageUrl} alt={event.title} loading="eager" />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-br from-[#3a4a1f] via-[#4a5d2a] to-[#2d3a16] flex items-center justify-center">
-              <img src={DEFAULT_EVENT_BANNER} alt="Ashburton Baptist Church" className="h-20 md:h-28 w-auto opacity-80" />
-            </div>
-          )}
+          <div className="w-full h-full bg-gradient-to-br from-[#3a4a1f] via-[#4a5d2a] to-[#2d3a16] flex items-center justify-center">
+            <img src={DEFAULT_EVENT_BANNER} alt="Ashburton Baptist Church" className="h-20 md:h-28 w-auto opacity-80" />
+          </div>
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
 
           <div className="absolute bottom-0 left-0 right-0 px-4 pb-8 md:pb-12">
@@ -280,6 +276,14 @@ export const EventDetail = () => {
               <ArrowLeft size={16} className="mr-2 transition-transform group-hover:-translate-x-1" />
               Back to Events
             </Link>
+
+            {hasEventImage && (
+              <ScrollReveal direction="up" delay={0}>
+                <div className="glass-card rounded-[16px] overflow-hidden border border-white/50 shadow-sm bg-white/70 aspect-[16/9]">
+                  <EventImage src={eventImageUrl} alt={event.title} loading="eager" />
+                </div>
+              </ScrollReveal>
+            )}
 
             {/* Event Details Grid */}
             <div className="grid md:grid-cols-3 gap-5">
