@@ -332,7 +332,7 @@ export const AdminEvents = () => {
         return;
       }
       if (file.size > EVENT_IMAGE.maxFileBytes) {
-        alert('Image size must be less than 2MB');
+        alert('Image size must be less than 5MB');
         return;
       }
 
@@ -630,7 +630,7 @@ export const AdminEvents = () => {
                 Required size: {EVENT_IMAGE.sizeLabel} ({EVENT_IMAGE.ratioLabel} landscape)
               </p>
               <p className="text-xs text-neutral mt-1">
-                JPG or PNG · max 2MB · one image fits the event page, calendar, and listings
+                JPG or PNG · max 5MB · one image fits the event page, calendar, and listings
               </p>
             </div>
             <div className="rounded-[10px] border-2 border-dashed border-gray-200 hover:border-gold/50 transition-colors p-4">

@@ -6,7 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import type { Event } from '../../types';
 import { ScrollReveal } from '../../components/UI/ScrollReveal';
 import { GlowingButton } from '../../components/UI/GlowingButton';
-import { EventImage } from '../../components/UI/EventImage';
+import { EventPosterImage } from '../../components/UI/EventPosterImage';
 import {
   formatEventDateRange,
   formatEventDateRangeShort,
@@ -279,8 +279,8 @@ export const EventDetail = () => {
 
             {hasEventImage && (
               <ScrollReveal direction="up" delay={0}>
-                <div className="glass-card rounded-[16px] overflow-hidden border border-white/50 shadow-sm bg-white/70 aspect-[16/9]">
-                  <EventImage src={eventImageUrl} alt={event.title} loading="eager" />
+                <div className="glass-card rounded-[16px] border border-white/50 shadow-sm bg-white/70 p-3 md:p-5">
+                  <EventPosterImage src={eventImageUrl} alt={event.title} />
                 </div>
               </ScrollReveal>
             )}

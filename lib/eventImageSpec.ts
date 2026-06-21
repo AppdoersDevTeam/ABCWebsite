@@ -6,10 +6,10 @@ export const EVENT_IMAGE = {
   aspectClass: 'aspect-[16/9]',
   ratioLabel: '16:9',
   sizeLabel: '1920 × 1080 px',
-  maxFileBytes: 2 * 1024 * 1024,
+  maxFileBytes: 5 * 1024 * 1024,
   minWidth: 1280,
   uploadHint:
-    'Use one image at 1920 × 1080 px (16:9 ratio). JPG or PNG, max 2MB. This same file fits the event page hero, calendar, and listings.',
+    'Use one image at 1920 × 1080 px (16:9 ratio). JPG or PNG, max 5MB. This same file fits the event page, calendar, and listings.',
 } as const;
 
 const RATIO_TOLERANCE = 0.02;
