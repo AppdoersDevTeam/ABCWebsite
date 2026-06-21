@@ -3,6 +3,8 @@ import { supabase } from './supabase';
 export type ParsedAuthParams = {
   code: string | null;
   accessToken: string | null;
+  refreshToken: string | null;
+  tokenHash: string | null;
   type: string | null;
   error: string | null;
 };
@@ -12,6 +14,8 @@ export function parseAuthParamsFromUrl(href: string = window.location.href): Par
   const url = new URL(href);
   let code = url.searchParams.get('code');
   let accessToken = url.searchParams.get('access_token');
+  let refreshToken = url.searchParams.get('refresh_token');
+  let tokenHash = url.searchParams.get('token_hash');
   let type = url.searchParams.get('type');
   let error = url.searchParams.get('error_description') || url.searchParams.get('error');
 
@@ -21,6 +25,8 @@ export function parseAuthParamsFromUrl(href: string = window.location.href): Par
     const params = new URLSearchParams(normalized);
     code = code || params.get('code');
     accessToken = accessToken || params.get('access_token');
+    refreshToken = refreshToken || params.get('refresh_token');
+    tokenHash = tokenHash || params.get('token_hash');
     type = type || params.get('type');
     error = error || params.get('error_description') || params.get('error');
   };
@@ -37,7 +43,7 @@ export function parseAuthParamsFromUrl(href: string = window.location.href): Par
     }
   }
 
-  return { code, accessToken, type, error };
+  return { code, accessToken, refreshToken, tokenHash, type, error };
 }
 
 /** Build a URL Supabase can exchange when `code` lives in the hash route query. */
@@ -57,7 +63,27 @@ function decodeAuthError(error: string): string {
   return decodeURIComponent(error.replace(/\+/g, ' '));
 }
 
-async function waitForRecoverySession(timeoutMs = 3000): Promise<boolean> {
+function isRecoveryType(type: string | null): boolean {
+  return type === 'recovery' || type === 'magiclink';
+}
+
+function mapRecoveryError(message: string): string {
+  const lower = message.toLowerCase();
+  if (
+    lower.includes('expired') ||
+    lower.includes('invalid') ||
+    lower.includes('already been used') ||
+    lower.includes('otp_expired')
+  ) {
+    return 'This reset link is invalid or has expired. Please request a new one.';
+  }
+  if (lower.includes('code verifier') || lower.includes('non-empty')) {
+    return 'This reset link must be opened in the same browser where you requested it, or please request a new reset email and open that link directly.';
+  }
+  return message;
+}
+
+async function waitForRecoverySession(timeoutMs = 4000): Promise<boolean> {
   const { data: { session } } = await supabase.auth.getSession();
   if (session) return true;
 
@@ -83,6 +109,7 @@ export function hasAuthCallbackParams(): boolean {
   return !!(
     params.code ||
     params.accessToken ||
+    params.tokenHash ||
     params.error ||
     params.type === 'signup' ||
     params.type === 'email'
@@ -95,8 +122,8 @@ export function hasRecoveryParams(): boolean {
   return !!(
     params.code ||
     params.accessToken ||
-    params.type === 'recovery' ||
-    params.type === 'magiclink'
+    params.tokenHash ||
+    isRecoveryType(params.type)
   );
 }
 
@@ -110,6 +137,17 @@ export async function completeAuthCallbackFromUrl(): Promise<{ error: string | n
 
   if (params.code) {
     const { error } = await supabase.auth.exchangeCodeForSession(buildCodeExchangeUrl());
+    if (error) {
+      return { error: error.message };
+    }
+    return { error: null };
+  }
+
+  if (params.accessToken && params.refreshToken) {
+    const { error } = await supabase.auth.setSession({
+      access_token: params.accessToken,
+      refresh_token: params.refreshToken,
+    });
     if (error) {
       return { error: error.message };
     }
@@ -132,21 +170,44 @@ export async function completeRecoveryFromUrl(): Promise<{ error: string | null 
   const params = parseAuthParamsFromUrl();
 
   if (params.error) {
-    return { error: decodeAuthError(params.error) };
+    return { error: mapRecoveryError(decodeAuthError(params.error)) };
+  }
+
+  // Preferred for email links: works in any browser (no PKCE verifier required).
+  if (params.tokenHash && isRecoveryType(params.type)) {
+    const { error } = await supabase.auth.verifyOtp({
+      token_hash: params.tokenHash,
+      type: 'recovery',
+    });
+    if (error) {
+      return { error: mapRecoveryError(error.message) };
+    }
+    return { error: null };
+  }
+
+  if (params.accessToken && params.refreshToken) {
+    const { error } = await supabase.auth.setSession({
+      access_token: params.accessToken,
+      refresh_token: params.refreshToken,
+    });
+    if (error) {
+      return { error: mapRecoveryError(error.message) };
+    }
+    return { error: null };
   }
 
   if (params.code) {
     const { error } = await supabase.auth.exchangeCodeForSession(buildCodeExchangeUrl());
     if (error) {
-      return { error: error.message };
+      return { error: mapRecoveryError(error.message) };
     }
     return { error: null };
   }
 
-  if (params.accessToken || params.type === 'recovery' || params.type === 'magiclink') {
+  if (params.accessToken || isRecoveryType(params.type)) {
     const hasSession = await waitForRecoverySession();
     if (!hasSession) {
-      return { error: 'Unable to establish recovery session' };
+      return { error: 'This reset link is invalid or has expired. Please request a new one.' };
     }
     return { error: null };
   }

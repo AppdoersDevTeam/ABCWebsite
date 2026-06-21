@@ -57,17 +57,8 @@ export const ResetPassword = () => {
       } catch (e: unknown) {
         console.error('ResetPassword init error:', e);
         if (!cancelled) {
-          const message = e instanceof Error ? e.message : '';
-          const lower = message.toLowerCase();
-          if (
-            lower.includes('expired') ||
-            lower.includes('invalid') ||
-            lower.includes('already been used')
-          ) {
-            setError('This reset link is invalid or has expired. Please request a new one.');
-          } else {
-            setError('Unable to validate reset link. Please request a new one.');
-          }
+          const message = e instanceof Error ? e.message : 'Unable to validate reset link. Please request a new one.';
+          setError(message);
           setIsReady(true);
         }
       }

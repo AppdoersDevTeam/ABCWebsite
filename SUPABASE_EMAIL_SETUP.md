@@ -191,7 +191,12 @@ Use matching branding for **Reset password** so forgot-password emails also look
 Need to reset your password? We've got you
 ```
 
-**Body:** Use the HTML below (uses `{{ .ConfirmationURL }}` for the reset link).
+**Body:** Use the HTML below. **Important:** use a `token_hash` link (not `{{ .ConfirmationURL }}`) so the reset works when the user opens the email in any browser or device.
+
+Reset link format (replace the domain if yours differs):
+```
+https://ashburtonbaptistchurch.vercel.app/#/reset-password?token_hash={{ .TokenHash }}&type=recovery
+```
 
 ```html
 <!DOCTYPE html>
@@ -223,12 +228,12 @@ Need to reset your password? We've got you
               <table role="presentation" cellspacing="0" cellpadding="0" style="margin:0 auto 28px;">
                 <tr>
                   <td align="center" style="border-radius:10px;background-color:#fbcb05;box-shadow:0 4px 14px rgba(251,203,5,0.45);">
-                    <a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:16px 36px;font-size:17px;font-weight:bold;color:#222222;text-decoration:none;font-family:Arial,Helvetica,sans-serif;">Reset my password &rarr;</a>
+                    <a href="https://ashburtonbaptistchurch.vercel.app/#/reset-password?token_hash={{ .TokenHash }}&amp;type=recovery" style="display:inline-block;padding:16px 36px;font-size:17px;font-weight:bold;color:#222222;text-decoration:none;font-family:Arial,Helvetica,sans-serif;">Reset my password &rarr;</a>
                   </td>
                 </tr>
               </table>
               <p style="margin:0 0 8px;font-size:13px;color:#808080;">Button not working? Copy and paste this link into your browser:</p>
-              <p style="margin:0 0 24px;font-size:13px;line-height:1.5;word-break:break-all;"><a href="{{ .ConfirmationURL }}" style="color:#222222;text-decoration:underline;">{{ .ConfirmationURL }}</a></p>
+              <p style="margin:0 0 24px;font-size:13px;line-height:1.5;word-break:break-all;"><a href="https://ashburtonbaptistchurch.vercel.app/#/reset-password?token_hash={{ .TokenHash }}&amp;type=recovery" style="color:#222222;text-decoration:underline;">https://ashburtonbaptistchurch.vercel.app/#/reset-password?token_hash={{ .TokenHash }}&amp;type=recovery</a></p>
               <p style="margin:0;font-size:13px;color:#999999;">If you didn&rsquo;t request a password reset, you can safely ignore this email — your password won&rsquo;t change.</p>
             </td>
           </tr>
@@ -272,7 +277,7 @@ Need to reset your password? We've got you
 | Email not delivered | Check Supabase **Authentication** → **Logs**; verify App Password is correct |
 | SMTP auth failed | Use App Password, not normal Google password; confirm 2-Step Verification is on |
 | App Passwords missing | Workspace admin may need to allow App Passwords for the org |
-| Link goes to wrong site | Site URL and `VITE_SITE_URL` must match production domain |
+| Reset link fails / “unable to validate” | Reset email must use `token_hash={{ .TokenHash }}&type=recovery`, not `{{ .ConfirmationURL }}` (PKCE links only work in the same browser). Re-run `node tools/update-supabase-email-templates.mjs` or update the **Reset password** template manually. |
 | Sign up again, no email | Supabase does not resend on duplicate signup — use **Resend confirmation email** on the login page (the app now does this automatically for unconfirmed accounts) |
 | “Success” but no email arrives | Supabase may rate-limit auth emails (default was **2 per hour** per project). Check **Authentication → Rate Limits** and increase **Email sent**; also verify custom SMTP in **Authentication → Emails → SMTP** |
 | Logo doesn’t show | Logo must be publicly reachable at `https://ashburtonbaptistchurch.vercel.app/abc-logo.png` |

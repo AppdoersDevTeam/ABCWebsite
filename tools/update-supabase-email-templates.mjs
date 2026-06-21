@@ -11,6 +11,9 @@
 const PROJECT_REF = process.env.SUPABASE_PROJECT_REF || 'zwxlccqhafdnvdohzxkg';
 const TOKEN = process.env.SUPABASE_ACCESS_TOKEN;
 const CHURCH_LOGO_URL = 'https://ashburtonbaptistchurch.vercel.app/abc-logo.png';
+const APP_SITE_URL = (process.env.VITE_SITE_URL || 'https://ashburtonbaptistchurch.vercel.app').replace(/\/$/, '');
+// token_hash links work in any browser; ConfirmationURL PKCE links require the same browser session.
+const RESET_PASSWORD_LINK = `${APP_SITE_URL}/#/reset-password?token_hash={{ .TokenHash }}&type=recovery`;
 
 const CONFIRM_SUBJECT = 'Welcome! One quick step to join our member community';
 
@@ -113,12 +116,12 @@ const RECOVERY_HTML = `<!DOCTYPE html>
               <table role="presentation" cellspacing="0" cellpadding="0" style="margin:0 auto 28px;">
                 <tr>
                   <td align="center" style="border-radius:10px;background-color:#fbcb05;box-shadow:0 4px 14px rgba(251,203,5,0.45);">
-                    <a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:16px 36px;font-size:17px;font-weight:bold;color:#222222;text-decoration:none;font-family:Arial,Helvetica,sans-serif;">Reset my password &rarr;</a>
+                    <a href="${RESET_PASSWORD_LINK}" style="display:inline-block;padding:16px 36px;font-size:17px;font-weight:bold;color:#222222;text-decoration:none;font-family:Arial,Helvetica,sans-serif;">Reset my password &rarr;</a>
                   </td>
                 </tr>
               </table>
               <p style="margin:0 0 8px;font-size:13px;color:#808080;">Button not working? Copy and paste this link into your browser:</p>
-              <p style="margin:0 0 24px;font-size:13px;line-height:1.5;word-break:break-all;"><a href="{{ .ConfirmationURL }}" style="color:#222222;text-decoration:underline;">{{ .ConfirmationURL }}</a></p>
+              <p style="margin:0 0 24px;font-size:13px;line-height:1.5;word-break:break-all;"><a href="${RESET_PASSWORD_LINK}" style="color:#222222;text-decoration:underline;">${RESET_PASSWORD_LINK}</a></p>
               <p style="margin:0;font-size:13px;color:#999999;">If you didn&rsquo;t request a password reset, you can safely ignore this email — your password won&rsquo;t change.</p>
             </td>
           </tr>
