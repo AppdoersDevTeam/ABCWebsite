@@ -15,6 +15,7 @@ interface StyledSelectProps {
   onChange: (value: string) => void;
   disabled?: boolean;
   icon?: React.ReactNode;
+  wrapLabels?: boolean;
 }
 
 export const StyledSelect: React.FC<StyledSelectProps> = ({
@@ -25,6 +26,7 @@ export const StyledSelect: React.FC<StyledSelectProps> = ({
   onChange,
   disabled = false,
   icon,
+  wrapLabels = false,
 }) => {
   const generatedId = useId();
   const selectId = id ?? generatedId;
@@ -109,13 +111,19 @@ export const StyledSelect: React.FC<StyledSelectProps> = ({
               role="option"
               aria-selected={isSelected}
               onClick={() => handleSelect(option.value)}
-              className={`flex w-full items-center justify-between gap-3 rounded-full px-4 py-2.5 text-left text-sm transition-all duration-200 ${
+              className={`flex w-full justify-between gap-3 px-4 py-2.5 text-left text-sm transition-all duration-200 ${
+                wrapLabels ? 'items-start rounded-xl' : 'items-center rounded-full'
+              } ${
                 isSelected
                   ? 'bg-gold text-white shadow-md shadow-gold/25'
                   : 'text-charcoal hover:bg-gold/10 hover:text-charcoal'
               }`}
             >
-              <span className="truncate font-semibold">{option.label}</span>
+              <span
+                className={`font-semibold ${wrapLabels ? 'whitespace-normal leading-snug' : 'truncate'}`}
+              >
+                {option.label}
+              </span>
               {isSelected && <Check size={16} className="flex-shrink-0" aria-hidden="true" />}
             </button>
           </li>

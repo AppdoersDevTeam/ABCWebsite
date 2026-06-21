@@ -16,7 +16,7 @@ export interface FaithArticle {
 export const STATEMENT_OF_FAITH_INTRO = {
   churchName: "ASHBURTON BAPTIST CHURCH",
   title: "Statement of Faith",
-  adopted: "The following Articles of Faith were adopted by Ashburton Baptist Church, Canterbury, New Zealand.",
+  adopted: "Ashburton Baptist Church - Statement of Faith",
 } as const;
 
 export const STATEMENT_OF_FAITH_ARTICLES: FaithArticle[] = [

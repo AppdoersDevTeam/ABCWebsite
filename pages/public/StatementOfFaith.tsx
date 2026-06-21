@@ -1,7 +1,9 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { ScrollText } from 'lucide-react';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { ScrollReveal } from '../../components/UI/ScrollReveal';
+import { StyledSelect } from '../../components/UI/StyledSelect';
 import {
   STATEMENT_OF_FAITH_ARTICLES,
   STATEMENT_OF_FAITH_INTRO,
@@ -14,7 +16,7 @@ import { parseScriptureReferences } from '../../lib/parseScriptureReferences';
 const BODY_TEXT = 'text-neutral leading-relaxed text-base break-words [overflow-wrap:anywhere]';
 
 const ScriptureBlock = ({ text }: { text: string }) => {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const references = useMemo(() => parseScriptureReferences(text), [text]);
 
   return (
@@ -175,20 +177,25 @@ export const StatementOfFaith = () => {
     }
   };
 
+  const articleSelectOptions = useMemo(
+    () =>
+      STATEMENT_OF_FAITH_ARTICLES.map((a) => ({
+        value: String(a.number),
+        label: `${a.number}. ${a.title}`,
+      })),
+    []
+  );
+
   const articleSelect = (
-    <select
+    <StyledSelect
       id="belief-article-select"
-      value={activeArticle}
-      onChange={(e) => goToArticle(Number(e.target.value))}
-      className="input-sun w-full min-h-[44px] rounded-xl px-4 py-2.5 text-sm text-charcoal font-medium shadow-sm"
-      aria-label="Select an article"
-    >
-      {STATEMENT_OF_FAITH_ARTICLES.map((a) => (
-        <option key={a.number} value={a.number}>
-          {a.number}. {a.title}
-        </option>
-      ))}
-    </select>
+      label="Select an article"
+      value={String(activeArticle)}
+      options={articleSelectOptions}
+      onChange={(value) => goToArticle(Number(value))}
+      icon={<ScrollText size={20} aria-hidden="true" />}
+      wrapLabels
+    />
   );
 
   const searchInput = (
@@ -225,8 +232,7 @@ export const StatementOfFaith = () => {
                 What We Believe
               </h1>
               <p className="text-white text-base font-raleway leading-relaxed max-w-2xl mx-auto px-1">
-                Explore our full Statement of Faith — {STATEMENT_OF_FAITH_ARTICLES.length} articles on who God is, what we believe, and how we live
-                as followers of Jesus.
+                Explore our full Statement of Faith
               </p>
             </ScrollReveal>
           </div>
@@ -244,16 +250,18 @@ export const StatementOfFaith = () => {
           </ScrollReveal>
 
           {/* Mobile & tablet — sticky controls */}
-          <div className="lg:hidden sticky top-[4.5rem] sm:top-20 z-20 -mx-4 sm:-mx-6 px-4 sm:px-6 py-3 mb-4 sm:mb-6 bg-white border-y border-gray-200 shadow-md space-y-2.5">
-            <div className="flex items-center justify-between gap-3 text-charcoal text-xs sm:text-sm">
-              <span className="font-semibold truncate">{current.title}</span>
-              <span className="shrink-0 tabular-nums font-bold text-gold">
-                {activeArticle} / {STATEMENT_OF_FAITH_ARTICLES.length}
-              </span>
+          <div className="lg:hidden sticky top-[4.5rem] sm:top-20 z-20 -mx-4 sm:-mx-6 px-4 sm:px-6 py-3 mb-4 sm:mb-6">
+            <div className="glass-card rounded-[16px] p-3 sm:p-4 bg-white/90 border border-white/50 shadow-md space-y-3">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-xs font-bold uppercase tracking-[0.2em] text-gold">Jump to article</p>
+                <span className="shrink-0 rounded-full bg-gold/15 px-2.5 py-0.5 text-xs tabular-nums font-bold text-gold">
+                  {activeArticle} / {STATEMENT_OF_FAITH_ARTICLES.length}
+                </span>
+              </div>
+              {articleSelect}
+              <div className="hidden sm:block">{searchInput}</div>
+              <ArticleNavButtons currentIndex={currentIndex} onPrev={goPrev} onNext={goNext} compact />
             </div>
-            {articleSelect}
-            <div className="hidden sm:block">{searchInput}</div>
-            <ArticleNavButtons currentIndex={currentIndex} onPrev={goPrev} onNext={goNext} compact />
           </div>
 
           <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-5 sm:gap-6 lg:gap-8">
