@@ -213,8 +213,8 @@ export const StatementOfFaith = () => {
       <section className="relative min-h-[45vh] sm:min-h-[50vh] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img
-            src="/ABC background01.png"
-            alt=""
+            src="/beliefs-hero.jpeg"
+            alt="Ashburton Baptist Church congregation"
             className="w-full h-full object-cover brightness-110 saturate-125 contrast-105"
           />
           <div className="absolute inset-0 bg-black/20" />
