@@ -5,8 +5,7 @@ import { Calendar as CalIcon, Edit, Trash2, Plus, Users, Image, Upload } from 'l
 import type { Event, EventCategory } from '../../types';
 import { supabase } from '../../lib/supabase';
 import { SkeletonPageHeader } from '../../components/UI/Skeleton';
-import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
-import { EventCard } from '../../components/UI/EventCard';
+import { EventsCalendarGrid, EventsCalendarGridSkeleton } from '../../components/dashboard/EventsCalendarGrid';
 import { EventImage } from '../../components/UI/EventImage';
 import { EVENT_IMAGE, checkEventImageDimensions, readImageDimensions } from '../../lib/eventImageSpec';
 import { downloadEventRsvpsCsv, downloadEventRsvpsPdf } from '../../lib/exportEventRsvps';
@@ -409,79 +408,65 @@ export const AdminEvents = () => {
     return (
       <div className="space-y-8">
         <SkeletonPageHeader />
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="rounded-[24px] overflow-hidden bg-white border border-gray-100 animate-pulse">
-              <div className="aspect-[16/9] bg-gray-100" />
-              <div className="bg-[#f2f2eb] p-6 space-y-3">
-                <div className="h-6 w-3/4 bg-gray-200 rounded" />
-                <div className="h-4 w-1/2 bg-gray-200 rounded" />
-                <div className="h-4 w-2/3 bg-gray-200 rounded" />
-                <div className="h-10 w-full bg-gray-200 rounded-full mt-4" />
-              </div>
-            </div>
-          ))}
-        </div>
+        <EventsCalendarGridSkeleton />
       </div>
     );
   }
 
   return (
     <div className="space-y-8">
-      <AdminPageHeader
-        title="Events Management"
-        subtitle="Create and manage church events and meetings."
-        icon={<CalIcon size={28} />}
-        rightSlot={
-          <GlowingButton size="sm" fullWidth className="md:w-auto" onClick={openCreateModal}>
-            <Plus size={16} className="mr-2" />
-            Add Event
-          </GlowingButton>
-        }
-      />
+      <div className="flex flex-col gap-4 border-b border-gray-200 pb-6 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="text-4xl font-serif font-normal text-charcoal">Events Management</h1>
+          <p className="text-neutral mt-1">Create and manage church events and meetings.</p>
+        </div>
+        <GlowingButton size="sm" fullWidth className="sm:w-auto" onClick={openCreateModal}>
+          <Plus size={16} className="mr-2" />
+          Add Event
+        </GlowingButton>
+      </div>
 
       {events.length === 0 ? (
-        <div className="text-center py-12 glass-card bg-white/80 border border-white/60 rounded-[12px]">
-          <p className="text-neutral">No events yet. Create your first event!</p>
+        <div className="text-center py-16">
+          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <CalIcon className="text-gray-300" size={28} />
+          </div>
+          <p className="text-neutral font-bold">No events yet.</p>
+          <p className="text-neutral text-sm mt-1">Create your first event to get started.</p>
         </div>
       ) : (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {events.map((evt) => (
-            <EventCard
-              key={evt.id}
-              evt={evt}
-              showVisibilityBadges
-              adminControls={
-                <>
-                  <button
-                    type="button"
-                    onClick={() => openRsvpModal(evt)}
-                    className="p-2 bg-white/95 border border-gray-200 rounded-full text-neutral hover:text-gold hover:border-gold shadow-sm transition-colors"
-                    title="View RSVPs"
-                  >
-                    <Users size={14} />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleEdit(evt)}
-                    className="p-2 bg-white/95 border border-gray-200 rounded-full text-neutral hover:text-gold hover:border-gold shadow-sm transition-colors"
-                    title="Edit"
-                  >
-                    <Edit size={14} />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(evt.id)}
-                    className="p-2 bg-white/95 border border-gray-200 rounded-full text-neutral hover:text-red-500 hover:border-red-200 shadow-sm transition-colors"
-                    title="Delete"
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                </>
-              }
-            />
-          ))}
-        </div>
+        <EventsCalendarGrid
+          events={events}
+          showVisibilityBadges
+          adminControlsForEvent={(evt) => (
+            <>
+              <button
+                type="button"
+                onClick={() => openRsvpModal(evt)}
+                className="p-2.5 bg-white border border-gray-200 rounded-full text-neutral hover:text-gold hover:border-gold shadow-sm transition-colors"
+                title="View RSVPs"
+              >
+                <Users size={15} />
+              </button>
+              <button
+                type="button"
+                onClick={() => handleEdit(evt)}
+                className="p-2.5 bg-white border border-gray-200 rounded-full text-neutral hover:text-gold hover:border-gold shadow-sm transition-colors"
+                title="Edit"
+              >
+                <Edit size={15} />
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDelete(evt.id)}
+                className="p-2.5 bg-white border border-gray-200 rounded-full text-neutral hover:text-red-500 hover:border-red-200 shadow-sm transition-colors"
+                title="Delete"
+              >
+                <Trash2 size={15} />
+              </button>
+            </>
+          )}
+        />
       )}
 
       {/* Create/Edit Modal */}
