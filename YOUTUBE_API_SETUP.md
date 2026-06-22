@@ -33,8 +33,7 @@ This guide will help you set up YouTube Data API v3 for embedding videos on your
    - Select **"HTTP referrers (web sites)"**
    - Add your website URLs:
      - `http://localhost:3000/*` (for development)
-     - `https://www.ashburtonbaptist.co.nz/*` (for production)
-     - `https://ashburtonbaptistchurch.vercel.app/*` (if using Vercel)
+     - `https://ashburtonbaptist.co.nz/*` (for production)
 5. Click **"Save"**
 
 ## Step 5: Add API Key to Your Project

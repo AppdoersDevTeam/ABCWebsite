@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://ashburtonbaptist.co.nz/sitemap.xml

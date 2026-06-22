@@ -1,0 +1,25 @@
+{
+  "name": "Ashburton Baptist Church",
+  "short_name": "ABC",
+  "description": "Disciples of Jesus impacting Ashburton and the nations.",
+  "lang": "en-NZ",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "theme_color": "#fbcb05",
+  "background_color": "#ffffff",
+  "icons": [
+    {
+      "src": "/abc-logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/abc-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

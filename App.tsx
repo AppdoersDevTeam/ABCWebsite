@@ -32,10 +32,6 @@ import { Privacy } from './pages/public/Privacy';
 import { ResetPassword } from './pages/public/ResetPassword';
 
 // Leadership Pages
-import { DavidMiller } from './pages/public/leadership/DavidMiller';
-import { SarahJenkins } from './pages/public/leadership/SarahJenkins';
-import { MichaelChen } from './pages/public/leadership/MichaelChen';
-import { EmilyWhite } from './pages/public/leadership/EmilyWhite';
 import { LeadershipBio } from './pages/public/leadership/LeadershipBio';
 
 // Dashboard Pages
@@ -134,10 +130,6 @@ const AppRoutes = () => {
               <Route path="about/history" element={<History />} />
               <Route path="about/vision" element={<Vision />} />
               <Route path="about/beliefs" element={<StatementOfFaith />} />
-              <Route path="about/leadership/david-miller" element={<DavidMiller />} />
-              <Route path="about/leadership/sarah-jenkins" element={<SarahJenkins />} />
-              <Route path="about/leadership/michael-chen" element={<MichaelChen />} />
-              <Route path="about/leadership/emily-white" element={<EmilyWhite />} />
               <Route path="about/leadership/:slug" element={<LeadershipBio />} />
               <Route path="events" element={<Events />} />
               <Route path="events/sermons" element={<Sermons />} />

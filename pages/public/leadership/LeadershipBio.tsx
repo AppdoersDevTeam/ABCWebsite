@@ -6,6 +6,7 @@ import { ArrowLeft, ArrowDownToLine } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
 import { TeamMember } from '../../../types';
 import { getDisplayRole, inferProfileType } from '../../../lib/teamMemberUtils';
+import { usePageMeta } from '../../../lib/usePageMeta';
 
 export const LeadershipBio = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -19,6 +20,17 @@ export const LeadershipBio = () => {
       fetchTeamMember(slug);
     }
   }, [slug]);
+
+  usePageMeta(
+    member
+      ? {
+          title: member.name,
+          description: member.description?.trim()
+            ? member.description.slice(0, 160)
+            : `${member.name}, ${getDisplayRole(member)} at Ashburton Baptist Church.`,
+        }
+      : { title: 'Our Leadership', description: 'Meet the leadership team at Ashburton Baptist Church.' }
+  );
 
   const fetchTeamMember = async (slugParam: string) => {
     try {

@@ -15,20 +15,18 @@ The website code already sets the correct redirect URL after confirmation (`/#/a
 2. Go to **Authentication** → **URL Configuration**
 3. Set **Site URL** to:
    ```
-   https://www.ashburtonbaptist.co.nz
+   https://ashburtonbaptist.co.nz
    ```
 4. Add these **Redirect URLs**:
    ```
-   https://www.ashburtonbaptist.co.nz/#/auth/callback
-   https://www.ashburtonbaptist.co.nz/#/reset-password
-   https://ashburtonbaptistchurch.vercel.app/#/auth/callback
-   https://ashburtonbaptistchurch.vercel.app/#/reset-password
-   http://localhost:5173/#/auth/callback
-   http://localhost:5173/#/reset-password
+   https://ashburtonbaptist.co.nz/#/auth/callback
+   https://ashburtonbaptist.co.nz/#/reset-password
+   http://localhost:3000/#/auth/callback
+   http://localhost:3000/#/reset-password
    ```
 5. Save
 
-Also set `VITE_SITE_URL` in Vercel to `https://www.ashburtonbaptist.co.nz` (no trailing slash) and redeploy.
+Also set `VITE_SITE_URL` in Vercel to `https://ashburtonbaptist.co.nz` (no trailing slash) and redeploy.
 
 ---
 
@@ -112,7 +110,7 @@ If App Passwords are not an option, use a transactional provider like [Resend](h
           </tr>
           <tr>
             <td style="padding:36px 36px 20px;text-align:center;background-color:#ffffff;">
-              <img src="https://ashburtonbaptistchurch.vercel.app/abc-logo.png" alt="Ashburton Baptist Church" width="110" style="display:block;margin:0 auto 20px;border:0;" />
+              <img src="https://ashburtonbaptist.co.nz/abc-logo.png" alt="Ashburton Baptist Church" width="110" style="display:block;margin:0 auto 20px;border:0;" />
               <p style="margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:bold;letter-spacing:0.15em;text-transform:uppercase;color:#808080;">Ashburton Baptist Church</p>
               <h1 style="margin:0 0 12px;font-size:28px;line-height:1.25;color:#222222;font-weight:normal;">You&rsquo;re almost there!</h1>
               <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.5;color:#666666;font-style:italic;">Disciples of Jesus impacting Ashburton and the nations.</p>
@@ -151,7 +149,7 @@ If App Passwords are not an option, use a transactional provider like [Resend](h
               <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;">
                 <a href="mailto:office@ashburtonbaptist.co.nz" style="color:#ffffff;text-decoration:none;">office@ashburtonbaptist.co.nz</a>
                 &nbsp;&middot;&nbsp;
-                <a href="https://www.ashburtonbaptist.co.nz" style="color:#ffffff;text-decoration:none;">ashburtonbaptist.co.nz</a>
+                <a href="https://ashburtonbaptist.co.nz" style="color:#ffffff;text-decoration:none;">ashburtonbaptist.co.nz</a>
               </p>
             </td>
           </tr>
@@ -195,7 +193,7 @@ Need to reset your password? We've got you
 
 Reset link format (replace the domain if yours differs):
 ```
-https://ashburtonbaptistchurch.vercel.app/#/reset-password?token_hash={{ .TokenHash }}&type=recovery
+https://ashburtonbaptist.co.nz/#/reset-password?token_hash={{ .TokenHash }}&type=recovery
 ```
 
 ```html
@@ -216,7 +214,7 @@ https://ashburtonbaptistchurch.vercel.app/#/reset-password?token_hash={{ .TokenH
           </tr>
           <tr>
             <td style="padding:36px 36px 20px;text-align:center;background-color:#ffffff;">
-              <img src="https://ashburtonbaptistchurch.vercel.app/abc-logo.png" alt="Ashburton Baptist Church" width="110" style="display:block;margin:0 auto 20px;border:0;" />
+              <img src="https://ashburtonbaptist.co.nz/abc-logo.png" alt="Ashburton Baptist Church" width="110" style="display:block;margin:0 auto 20px;border:0;" />
               <p style="margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:bold;letter-spacing:0.15em;text-transform:uppercase;color:#808080;">Ashburton Baptist Church</p>
               <h1 style="margin:0;font-size:28px;line-height:1.25;color:#222222;font-weight:normal;">Reset your password</h1>
             </td>
@@ -228,12 +226,12 @@ https://ashburtonbaptistchurch.vercel.app/#/reset-password?token_hash={{ .TokenH
               <table role="presentation" cellspacing="0" cellpadding="0" style="margin:0 auto 28px;">
                 <tr>
                   <td align="center" style="border-radius:10px;background-color:#fbcb05;box-shadow:0 4px 14px rgba(251,203,5,0.45);">
-                    <a href="https://ashburtonbaptistchurch.vercel.app/#/reset-password?token_hash={{ .TokenHash }}&amp;type=recovery" style="display:inline-block;padding:16px 36px;font-size:17px;font-weight:bold;color:#222222;text-decoration:none;font-family:Arial,Helvetica,sans-serif;">Reset my password &rarr;</a>
+                    <a href="https://ashburtonbaptist.co.nz/#/reset-password?token_hash={{ .TokenHash }}&amp;type=recovery" style="display:inline-block;padding:16px 36px;font-size:17px;font-weight:bold;color:#222222;text-decoration:none;font-family:Arial,Helvetica,sans-serif;">Reset my password &rarr;</a>
                   </td>
                 </tr>
               </table>
               <p style="margin:0 0 8px;font-size:13px;color:#808080;">Button not working? Copy and paste this link into your browser:</p>
-              <p style="margin:0 0 24px;font-size:13px;line-height:1.5;word-break:break-all;"><a href="https://ashburtonbaptistchurch.vercel.app/#/reset-password?token_hash={{ .TokenHash }}&amp;type=recovery" style="color:#222222;text-decoration:underline;">https://ashburtonbaptistchurch.vercel.app/#/reset-password?token_hash={{ .TokenHash }}&amp;type=recovery</a></p>
+              <p style="margin:0 0 24px;font-size:13px;line-height:1.5;word-break:break-all;"><a href="https://ashburtonbaptist.co.nz/#/reset-password?token_hash={{ .TokenHash }}&amp;type=recovery" style="color:#222222;text-decoration:underline;">https://ashburtonbaptist.co.nz/#/reset-password?token_hash={{ .TokenHash }}&amp;type=recovery</a></p>
               <p style="margin:0;font-size:13px;color:#999999;">If you didn&rsquo;t request a password reset, you can safely ignore this email — your password won&rsquo;t change.</p>
             </td>
           </tr>
@@ -244,7 +242,7 @@ https://ashburtonbaptistchurch.vercel.app/#/reset-password?token_hash={{ .TokenH
               <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;">
                 <a href="mailto:office@ashburtonbaptist.co.nz" style="color:#ffffff;text-decoration:none;">office@ashburtonbaptist.co.nz</a>
                 &nbsp;&middot;&nbsp;
-                <a href="https://www.ashburtonbaptist.co.nz" style="color:#ffffff;text-decoration:none;">ashburtonbaptist.co.nz</a>
+                <a href="https://ashburtonbaptist.co.nz" style="color:#ffffff;text-decoration:none;">ashburtonbaptist.co.nz</a>
               </p>
             </td>
           </tr>
@@ -280,7 +278,7 @@ https://ashburtonbaptistchurch.vercel.app/#/reset-password?token_hash={{ .TokenH
 | Reset link fails / “unable to validate” | Reset email must use `token_hash={{ .TokenHash }}&type=recovery`, not `{{ .ConfirmationURL }}` (PKCE links only work in the same browser). Re-run `node tools/update-supabase-email-templates.mjs` or update the **Reset password** template manually. |
 | Sign up again, no email | Supabase does not resend on duplicate signup — use **Resend confirmation email** on the login page (the app now does this automatically for unconfirmed accounts) |
 | “Success” but no email arrives | Supabase may rate-limit auth emails (default was **2 per hour** per project). Check **Authentication → Rate Limits** and increase **Email sent**; also verify custom SMTP in **Authentication → Emails → SMTP** |
-| Logo doesn’t show | Logo must be publicly reachable at `https://ashburtonbaptistchurch.vercel.app/abc-logo.png` |
+| Logo doesn’t show | Logo must be publicly reachable at `https://ashburtonbaptist.co.nz/abc-logo.png` |
 | Lands in spam | Emails from Google Workspace usually deliver well; check the custom HTML template is saved |
 
 ---

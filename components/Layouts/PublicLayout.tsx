@@ -5,6 +5,8 @@ import { GlowingButton } from '../UI/GlowingButton';
 import { useAuth } from '../../context/AuthContext';
 import { ScrollToTop } from '../ScrollToTop';
 import { useAutoSectionReveal } from '../UI/useAutoSectionReveal';
+import { usePageMeta } from '../../lib/usePageMeta';
+import { getRouteMeta, ROUTE_META } from '../../lib/seoConfig';
 
 export const PublicLayout = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -21,6 +23,13 @@ export const PublicLayout = () => {
   /** Individual leader biography URLs (not the About page leadership section). */
   const isLeadershipBioPage = /^\/about\/leadership\/.+/.test(location.pathname);
   useAutoSectionReveal();
+
+  // Per-route SEO title/description. Dynamic detail pages (event detail, leader
+  // bio) manage their own meta from fetched data, so the layout defers (null).
+  const isEventDetailPage =
+    location.pathname.startsWith('/events/') && !(location.pathname in ROUTE_META);
+  const managesOwnMeta = isLeadershipBioPage || isEventDetailPage;
+  usePageMeta(managesOwnMeta ? null : getRouteMeta(location.pathname));
 
   useEffect(() => {
     if (isLeadershipBioPage) {

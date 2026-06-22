@@ -12,6 +12,7 @@ import {
   formatEventDateRangeShort,
   formatEventTimeRange,
 } from '../../lib/eventDateUtils';
+import { usePageMeta } from '../../lib/usePageMeta';
 
 const DEFAULT_EVENT_BANNER = '/ABC Logo.png';
 
@@ -53,6 +54,17 @@ export const EventDetail = () => {
     return event?.image_url?.trim() ? String(event.image_url) : '';
   }, [event?.image_url]);
   const hasEventImage = !!eventImageUrl;
+
+  usePageMeta(
+    event
+      ? {
+          title: event.title,
+          description: event.description?.trim()
+            ? event.description.slice(0, 160)
+            : `${event.title} — an event at Ashburton Baptist Church.`,
+        }
+      : { title: 'Event', description: 'Event details at Ashburton Baptist Church.' }
+  );
 
   const needsAuthForPrivate = !!event && event.is_public === false;
   const isApproved = !!user && !!user.is_approved;

@@ -25,17 +25,15 @@ Your Google OAuth configuration should include:
 **Authorized JavaScript origins:**
 ```
 http://localhost:3000
-https://www.ashburtonbaptist.co.nz
-https://ashburtonbaptistchurch.vercel.app
+https://ashburtonbaptist.co.nz
 ```
 
 **Authorized redirect URIs:**
 ```
-http://localhost:3000
-https://www.ashburtonbaptist.co.nz/
-https://ashburtonbaptistchurch.vercel.app
 https://zwxlccqhafdnvdohzxkg.supabase.co/auth/v1/callback
 ```
+
+Note: The Supabase callback is the only redirect URI Google actually needs — Google sends the user back to Supabase, which then redirects to your app's `redirectTo` (the Site URL / `VITE_SITE_URL`).
 
 ### Step 3: Configure Supabase
 
@@ -51,7 +49,7 @@ https://zwxlccqhafdnvdohzxkg.supabase.co/auth/v1/callback
    ```
 6. **Important:** Set the **Site URL** in Supabase:
    - Go to **Settings** > **Authentication** > **URL Configuration**
-   - Set **Site URL** to your production URL (e.g., `https://ashburtonbaptistchurch.vercel.app` or `https://www.ashburtonbaptist.co.nz`)
+   - Set **Site URL** to your production URL: `https://ashburtonbaptist.co.nz`
    - This should NOT be `http://localhost:3000` for production
 
 ### Step 4: Configure Environment Variables in Vercel
@@ -62,7 +60,7 @@ To ensure OAuth redirects work correctly in production, you need to set the `VIT
 2. Navigate to **Settings** > **Environment Variables**
 3. Add a new environment variable:
    - **Name:** `VITE_SITE_URL`
-   - **Value:** Your production URL (e.g., `https://ashburtonbaptistchurch.vercel.app` or `https://www.ashburtonbaptist.co.nz`)
+   - **Value:** `https://ashburtonbaptist.co.nz`
    - **Environment:** Production (and Preview if you want it for preview deployments)
 4. **Important:** Do NOT include a trailing slash
 5. Redeploy your application after adding the variable

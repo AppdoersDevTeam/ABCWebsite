@@ -10,8 +10,8 @@
 
 const PROJECT_REF = process.env.SUPABASE_PROJECT_REF || 'zwxlccqhafdnvdohzxkg';
 const TOKEN = process.env.SUPABASE_ACCESS_TOKEN;
-const CHURCH_LOGO_URL = 'https://ashburtonbaptistchurch.vercel.app/abc-logo.png';
-const APP_SITE_URL = (process.env.VITE_SITE_URL || 'https://ashburtonbaptistchurch.vercel.app').replace(/\/$/, '');
+const CHURCH_LOGO_URL = 'https://ashburtonbaptist.co.nz/abc-logo.png';
+const APP_SITE_URL = (process.env.VITE_SITE_URL || 'https://ashburtonbaptist.co.nz').replace(/\/$/, '');
 // token_hash links work in any browser; ConfirmationURL PKCE links require the same browser session.
 const RESET_PASSWORD_LINK = `${APP_SITE_URL}/#/reset-password?token_hash={{ .TokenHash }}&type=recovery`;
 
@@ -73,7 +73,7 @@ const CONFIRM_HTML = `<!DOCTYPE html>
               <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;">
                 <a href="mailto:office@ashburtonbaptist.co.nz" style="color:#ffffff;text-decoration:none;">office@ashburtonbaptist.co.nz</a>
                 &nbsp;&middot;&nbsp;
-                <a href="https://www.ashburtonbaptist.co.nz" style="color:#ffffff;text-decoration:none;">ashburtonbaptist.co.nz</a>
+                <a href="https://ashburtonbaptist.co.nz" style="color:#ffffff;text-decoration:none;">ashburtonbaptist.co.nz</a>
               </p>
             </td>
           </tr>
@@ -132,7 +132,7 @@ const RECOVERY_HTML = `<!DOCTYPE html>
               <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;">
                 <a href="mailto:office@ashburtonbaptist.co.nz" style="color:#ffffff;text-decoration:none;">office@ashburtonbaptist.co.nz</a>
                 &nbsp;&middot;&nbsp;
-                <a href="https://www.ashburtonbaptist.co.nz" style="color:#ffffff;text-decoration:none;">ashburtonbaptist.co.nz</a>
+                <a href="https://ashburtonbaptist.co.nz" style="color:#ffffff;text-decoration:none;">ashburtonbaptist.co.nz</a>
               </p>
             </td>
           </tr>

@@ -15,8 +15,7 @@ Supabase uses its **Site URL** setting as the primary redirect destination. Even
 3. Navigate to **Settings** → **Authentication** → **URL Configuration**
 4. Find the **Site URL** field
 5. **Change it from `http://localhost:3000` to your production URL:**
-   - `https://ashburtonbaptistchurch.vercel.app` OR
-   - `https://www.ashburtonbaptist.co.nz` (if you have a custom domain)
+   - `https://ashburtonbaptist.co.nz`
 6. **DO NOT include a trailing slash**
 7. Click **Save**
 
@@ -29,9 +28,7 @@ Supabase uses its **Site URL** setting as the primary redirect destination. Even
 3. Go to **Settings** → **Environment Variables**
 4. Add a new variable:
    - **Key:** `VITE_SITE_URL`
-   - **Value:** Your production URL (same as Supabase Site URL)
-     - `https://ashburtonbaptistchurch.vercel.app` OR
-     - `https://www.ashburtonbaptist.co.nz`
+   - **Value:** `https://ashburtonbaptist.co.nz` (same as Supabase Site URL)
    - **Environment:** Production (and Preview if desired)
 5. **DO NOT include a trailing slash**
 6. Click **Save**
@@ -76,10 +73,10 @@ If it's still redirecting to localhost after the above steps:
 ## Common Mistakes
 
 ❌ **Wrong:** Site URL = `http://localhost:3000`  
-✅ **Right:** Site URL = `https://ashburtonbaptistchurch.vercel.app`
+✅ **Right:** Site URL = `https://ashburtonbaptist.co.nz`
 
-❌ **Wrong:** Site URL = `https://ashburtonbaptistchurch.vercel.app/` (trailing slash)  
-✅ **Right:** Site URL = `https://ashburtonbaptistchurch.vercel.app`
+❌ **Wrong:** Site URL = `https://ashburtonbaptist.co.nz/` (trailing slash)  
+✅ **Right:** Site URL = `https://ashburtonbaptist.co.nz`
 
 ❌ **Wrong:** Not redeploying after setting environment variable  
 ✅ **Right:** Always redeploy after changing environment variables
