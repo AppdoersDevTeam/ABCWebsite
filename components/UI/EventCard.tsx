@@ -21,7 +21,7 @@ export const EventCardImage: React.FC<EventCardImageProps> = ({ evt }) => {
   const dayNumber = parseInt(day, 10);
 
   return (
-    <div className="relative aspect-[16/9] overflow-hidden bg-white">
+    <div className="relative aspect-[16/9] overflow-hidden bg-white" style={{ aspectRatio: '16 / 9' }}>
       {hasImage ? (
         <EventImage src={String(evt.image_url)} alt={evt.title} loading="lazy" />
       ) : (

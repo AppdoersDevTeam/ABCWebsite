@@ -285,7 +285,7 @@ export const Home = () => {
                         <ScrollReveal key={evt.id} direction="up" delay={i * 90}>
                           <Link to={`/events/${evt.id}`} className="group block h-full">
                             <div className="glass-card bg-white/75 border border-white/55 shadow-sm rounded-[16px] overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-full flex flex-col">
-                              <div className="relative aspect-[16/9] overflow-hidden">
+                              <div className="relative aspect-[16/9] overflow-hidden" style={{ aspectRatio: '16 / 9' }}>
                                 {hasImage ? (
                                   <EventImage src={String(evt.image_url)} alt={evt.title} loading="lazy" />
                                 ) : (

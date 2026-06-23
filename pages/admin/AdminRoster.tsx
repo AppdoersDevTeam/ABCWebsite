@@ -121,6 +121,7 @@ export const AdminRoster = () => {
             )
           `
           )
+          .eq('is_archived', false)
           .in('team_member_groups.group_id', groupIds);
 
         if (leadersErr) throw leadersErr;

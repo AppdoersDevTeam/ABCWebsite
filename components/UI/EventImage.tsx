@@ -7,7 +7,7 @@ interface EventImageProps {
   loading?: 'lazy' | 'eager';
 }
 
-/** Event banner — expects 1920×1080 (16:9) uploads in 16:9 containers. */
+/** Event banner — fills 16:9 containers with object-cover (crops, never stretches). */
 export const EventImage: React.FC<EventImageProps> = ({
   src,
   alt,
@@ -18,6 +18,7 @@ export const EventImage: React.FC<EventImageProps> = ({
     src={src}
     alt={alt}
     className={`w-full h-full object-cover object-center ${className}`}
+    style={{ objectFit: 'cover', objectPosition: 'center' }}
     loading={loading}
   />
 );

@@ -228,7 +228,7 @@ export const Events = () => {
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-6xl">
               {Array.from({ length: 3 }).map((_, i) => (
                 <div key={i} className="rounded-[16px] overflow-hidden bg-white/10 animate-pulse">
-                  <div className="aspect-[16/9] bg-white/10" />
+                  <div className="aspect-[16/9] bg-white/10" style={{ aspectRatio: '16 / 9' }} />
                   <div className="p-6 space-y-3">
                     <div className="h-6 w-3/4 bg-white/10 rounded" />
                     <div className="h-4 w-1/2 bg-white/10 rounded" />

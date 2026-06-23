@@ -43,6 +43,7 @@ export const Roster = () => {
           `
           )
           .eq('user_id', user.id)
+          .eq('is_archived', false)
           .maybeSingle();
 
         if (tmErr) throw tmErr;
@@ -100,6 +101,7 @@ export const Roster = () => {
             )
           `
           )
+          .eq('is_archived', false)
           .in('team_member_groups.group_id', groupIds);
 
         if (leadersErr) throw leadersErr;

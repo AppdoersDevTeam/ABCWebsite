@@ -33,6 +33,7 @@ export const About = () => {
       const { data, error } = await supabase
         .from('team_members')
         .select('*')
+        .eq('is_archived', false)
         .order('name', { ascending: true });
 
       if (error) throw error;

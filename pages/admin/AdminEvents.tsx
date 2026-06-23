@@ -7,7 +7,7 @@ import { supabase } from '../../lib/supabase';
 import { SkeletonPageHeader } from '../../components/UI/Skeleton';
 import { EventsCalendarGrid, EventsCalendarGridSkeleton } from '../../components/dashboard/EventsCalendarGrid';
 import { EventImage } from '../../components/UI/EventImage';
-import { EVENT_IMAGE, checkEventImageDimensions, readImageDimensions } from '../../lib/eventImageSpec';
+import { EVENT_IMAGE } from '../../lib/eventImageSpec';
 import { downloadEventRsvpsCsv, downloadEventRsvpsPdf } from '../../lib/exportEventRsvps';
 import {
   buildEventDateTimePayload,
@@ -39,7 +39,6 @@ export const AdminEvents = () => {
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [imageDimensionError, setImageDimensionError] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isRsvpModalOpen, setIsRsvpModalOpen] = useState(false);
   const [rsvpEvent, setRsvpEvent] = useState<Event | null>(null);
@@ -188,7 +187,6 @@ export const AdminEvents = () => {
     });
     setSelectedFile(null);
     setPreviewUrl(event.image_url || null);
-    setImageDimensionError(null);
     setIsModalOpen(true);
   };
 
@@ -270,7 +268,6 @@ export const AdminEvents = () => {
     });
     setSelectedFile(null);
     setPreviewUrl(null);
-    setImageDimensionError(null);
   };
 
   const openRsvpModal = async (evt: Event) => {
@@ -321,7 +318,7 @@ export const AdminEvents = () => {
     return `event-rsvps-${safeTitle}-${yyyy}-${mm}-${dd}`;
   };
 
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       if (!file.type.startsWith('image/')) {
@@ -333,23 +330,6 @@ export const AdminEvents = () => {
         return;
       }
 
-      try {
-        const { width, height } = await readImageDimensions(file);
-        const check = checkEventImageDimensions(width, height);
-        if (!check.ok) {
-          setImageDimensionError(check.message);
-          setSelectedFile(null);
-          setPreviewUrl(null);
-          e.target.value = '';
-          return;
-        }
-      } catch {
-        alert('Could not read image. Try a different JPG or PNG.');
-        e.target.value = '';
-        return;
-      }
-
-      setImageDimensionError(null);
       setSelectedFile(file);
       const reader = new FileReader();
       reader.onloadend = () => setPreviewUrl(reader.result as string);
@@ -569,16 +549,12 @@ export const AdminEvents = () => {
               Event Banner Image
             </label>
             <div className="mb-3 rounded-[8px] bg-gold/10 border border-gold/25 px-3 py-2.5">
-              <p className="text-sm font-bold text-charcoal">
-                Required size: {EVENT_IMAGE.sizeLabel} ({EVENT_IMAGE.ratioLabel} landscape)
-              </p>
-              <p className="text-xs text-neutral mt-1">
-                JPG or PNG · max 5MB · one image fits the event page, calendar, and listings
-              </p>
+              <p className="text-sm font-bold text-charcoal">Use any photo — landscape works best</p>
+              <p className="text-xs text-neutral mt-1">{EVENT_IMAGE.uploadHint}</p>
             </div>
             <div className="rounded-[10px] border-2 border-dashed border-gray-200 hover:border-gold/50 transition-colors p-4">
               <div className="flex items-start gap-4">
-                <div className="w-40 aspect-[16/9] rounded-[8px] overflow-hidden border border-gray-200 bg-gray-50 flex-shrink-0">
+                <div className="w-40 aspect-[16/9] rounded-[8px] overflow-hidden border border-gray-200 bg-gray-50 flex-shrink-0" style={{ aspectRatio: '16 / 9' }}>
                   {(previewUrl || formData.image_url) ? (
                     <EventImage
                       src={previewUrl || formData.image_url || DEFAULT_THUMB}
@@ -604,9 +580,6 @@ export const AdminEvents = () => {
                   </label>
                   {selectedFile && (
                     <p className="text-xs text-gold font-bold mt-1.5">{selectedFile.name}</p>
-                  )}
-                  {imageDimensionError && (
-                    <p className="text-xs text-red-600 font-bold mt-2">{imageDimensionError}</p>
                   )}
                   {!selectedFile && !formData.image_url && (
                     <p className="text-xs text-neutral mt-1.5">Defaults to church logo if left empty.</p>

@@ -6,13 +6,13 @@ interface EventPosterImageProps {
   className?: string;
 }
 
-/** Full-size event poster — never upscales beyond the file's native resolution. */
+/** Full-size event poster — preserves the file's native aspect ratio, never distorts. */
 export const EventPosterImage: React.FC<EventPosterImageProps> = ({ src, alt, className = '' }) => (
-  <div className={`flex justify-center ${className}`}>
+  <div className={`text-center ${className}`}>
     <img
       src={src}
       alt={alt}
-      className="max-w-full w-auto h-auto max-h-[70vh] object-contain block rounded-[10px]"
+      className="inline-block mx-auto max-w-full max-h-[70vh] w-auto h-auto rounded-[10px]"
       loading="eager"
       decoding="async"
       fetchPriority="high"

@@ -1,4 +1,4 @@
-/** Canonical event banner spec — one size fits every event image slot on the site. */
+/** Display spec for event image slots (cards use 16:9 crop; detail page shows full photo). */
 export const EVENT_IMAGE = {
   width: 1920,
   height: 1080,
@@ -7,12 +7,9 @@ export const EVENT_IMAGE = {
   ratioLabel: '16:9',
   sizeLabel: '1920 × 1080 px',
   maxFileBytes: 5 * 1024 * 1024,
-  minWidth: 1280,
   uploadHint:
-    'Use one image at 1920 × 1080 px (16:9 ratio). JPG or PNG, max 5MB. This same file fits the event page, calendar, and listings.',
+    'Upload any photo. Landscape looks best in listings. JPG or PNG, max 5MB. Shown cropped in cards; full photo on the event page.',
 } as const;
-
-const RATIO_TOLERANCE = 0.02;
 
 export function checkEventImageDimensions(
   width: number,
@@ -20,21 +17,6 @@ export function checkEventImageDimensions(
 ): { ok: true } | { ok: false; message: string } {
   if (!width || !height) {
     return { ok: false, message: 'Could not read image dimensions.' };
-  }
-
-  const ratio = width / height;
-  if (Math.abs(ratio - EVENT_IMAGE.aspectRatio) > RATIO_TOLERANCE) {
-    return {
-      ok: false,
-      message: `Image must be ${EVENT_IMAGE.ratioLabel} (${EVENT_IMAGE.sizeLabel}). Yours is ${width} × ${height} px — resize before uploading.`,
-    };
-  }
-
-  if (width < EVENT_IMAGE.minWidth) {
-    return {
-      ok: false,
-      message: `Image is too small (${width} × ${height} px). Use at least ${EVENT_IMAGE.sizeLabel} for sharp display.`,
-    };
   }
 
   return { ok: true };

@@ -140,6 +140,10 @@ export interface TeamMember {
   baptism_date?: string | null;
   membership_start_date?: string | null;
   has_membership_chip?: boolean;
+  /** When true, hidden from public/private directory; admin-only Archived tab */
+  is_archived?: boolean;
+  archived_at?: string | null;
+  archived_by?: string | null;
   created_at?: string;
   updated_at?: string;
 }
@@ -171,6 +175,53 @@ export interface EventCategory {
   sort_order?: number | null;
   is_active?: boolean;
   created_at?: string;
+}
+
+export type AuditLogActorRole = 'admin' | 'member' | 'anonymous' | 'system';
+
+export type AuditLogCategory =
+  | 'auth'
+  | 'users'
+  | 'events'
+  | 'team'
+  | 'prayer'
+  | 'roster'
+  | 'newsletter'
+  | 'settings'
+  | 'rsvp'
+  | 'photos'
+  | 'system';
+
+export type AuditLogAction =
+  | 'create'
+  | 'update'
+  | 'delete'
+  | 'approve'
+  | 'reject'
+  | 'login'
+  | 'logout'
+  | 'signup'
+  | 'archive'
+  | 'unarchive'
+  | 'link'
+  | 'unlink'
+  | 'pray'
+  | 'export'
+  | 'login_failed';
+
+export interface AuditLog {
+  id: string;
+  created_at: string;
+  actor_id?: string | null;
+  actor_email?: string | null;
+  actor_label?: string | null;
+  actor_role: AuditLogActorRole;
+  action: string;
+  category: string;
+  entity_type?: string | null;
+  entity_id?: string | null;
+  summary: string;
+  details?: Record<string, unknown>;
 }
 
 export interface Database {
@@ -230,6 +281,11 @@ export interface Database {
         Row: EventCategory;
         Insert: Omit<EventCategory, 'id' | 'created_at'>;
         Update: Partial<Omit<EventCategory, 'id' | 'created_at'>>;
+      };
+      audit_logs: {
+        Row: AuditLog;
+        Insert: never;
+        Update: never;
       };
     };
   };

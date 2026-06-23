@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Calendar, Clock, MapPin, ArrowLeft, Users, FileText, Tag, CheckCircle } from 'lucide-react';
+import { Calendar, Clock, MapPin, ArrowLeft, Users, FileText, Tag, CheckCircle, ArrowDownToLine } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import type { Event } from '../../types';
@@ -13,8 +13,6 @@ import {
   formatEventTimeRange,
 } from '../../lib/eventDateUtils';
 import { usePageMeta } from '../../lib/usePageMeta';
-
-const DEFAULT_EVENT_BANNER = '/ABC Logo.png';
 
 export const EventDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -89,7 +87,7 @@ export const EventDetail = () => {
   if (isLoading) {
     return (
       <div className="space-y-0 overflow-hidden">
-        <div className="w-full aspect-[16/9] bg-gray-100 animate-pulse" />
+        <div className="w-full min-h-screen bg-gray-100 animate-pulse" />
         <div className="max-w-4xl mx-auto px-4 py-10 space-y-6">
           <div className="h-5 w-32 bg-gray-100 rounded animate-pulse" />
           <div className="grid md:grid-cols-3 gap-5">
@@ -238,42 +236,59 @@ export const EventDetail = () => {
 
   return (
     <div className="space-y-0 overflow-hidden">
-      {/* Hero Banner */}
-      <section className="relative w-full">
-        <div className="w-full aspect-[16/9] relative overflow-hidden">
-          <div className="w-full h-full bg-gradient-to-br from-[#3a4a1f] via-[#4a5d2a] to-[#2d3a16] flex items-center justify-center">
-            <img src={DEFAULT_EVENT_BANNER} alt="Ashburton Baptist Church" className="h-20 md:h-28 w-auto opacity-80" />
-          </div>
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+      {/* Hero Section */}
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+        {/* Background Image */}
+        <div className="absolute inset-0 z-0">
+          <img
+            src="/ABC background01.png"
+            alt="Ashburton Baptist Church"
+            className="w-full h-full object-cover brightness-110 saturate-125 contrast-105"
+          />
+          <div className="absolute inset-0 bg-black/20"></div>
+          <div className="absolute inset-0 bg-black/10"></div>
+          <div className="absolute inset-0 bg-gray-700/45"></div>
+        </div>
 
-          <div className="absolute bottom-0 left-0 right-0 px-4 pb-8 md:pb-12">
-            <div className="max-w-4xl mx-auto">
-              <div className="flex flex-wrap items-center gap-2 mb-4">
-                {event.category && (
-                  <span className="inline-flex items-center bg-gold/90 text-white rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-widest shadow-sm">
-                    {event.category}
-                  </span>
-                )}
-                {!event.is_public && (
-                  <span className="inline-flex items-center bg-white/20 backdrop-blur text-white rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-widest border border-white/30">
-                    Internal
-                  </span>
-                )}
-                <span className="inline-flex items-center bg-white/20 backdrop-blur text-white rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-widest border border-white/30">
-                  RSVP {rsvpMode}
+        {/* Hero Content */}
+        <div className="container relative z-10 px-4 mx-auto pt-[224px] md:pt-[256px] pb-24 md:pb-28">
+          <div className="max-w-4xl mx-auto text-center">
+            <div className="flex flex-wrap items-center justify-center gap-2 mb-6">
+              {event.category && (
+                <span className="inline-flex items-center bg-gold/90 text-white rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-widest shadow-sm">
+                  {event.category}
                 </span>
-              </div>
+              )}
+              {!event.is_public && (
+                <span className="inline-flex items-center bg-white/20 backdrop-blur text-white rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-widest border border-white/30">
+                  Internal
+                </span>
+              )}
+              <span className="inline-flex items-center bg-white/20 backdrop-blur text-white rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-widest border border-white/30">
+                RSVP {rsvpMode}
+              </span>
+            </div>
+            <ScrollReveal direction="up" delay={150}>
               <h1
-                className="text-white max-w-5xl mb-2"
-                style={{ fontFamily: 'Kaushan Script', fontSize: 'clamp(2rem, 5vw, 4.25rem)', lineHeight: '1.1' }}
+                className="text-white text-center max-w-5xl mx-auto mb-4 transition-all duration-1000 delay-250"
+                style={{ fontFamily: 'Kaushan Script', fontSize: 'clamp(2rem, 5vw, 4.25rem)', lineHeight: '1.2' }}
               >
                 {event.title}
               </h1>
-              <p className="text-white/80 text-base md:text-lg">
-                {eventDateFormatted} &bull; {eventTimeFormatted} &bull; {event.location}
+            </ScrollReveal>
+            <ScrollReveal direction="up" delay={200}>
+              <p className="text-base sm:text-lg md:text-[1.375rem] lg:text-[1.5625rem] leading-relaxed text-white text-center max-w-5xl mx-auto mb-6 transition-all duration-1000 delay-300 px-2 sm:px-0">
+                <span className="block font-raleway font-normal text-center">{eventDateFormatted}</span>
+                <span className="block mt-3 sm:mt-4 font-raleway font-normal text-center">{eventTimeFormatted}</span>
+                <span className="block mt-3 sm:mt-4 font-raleway font-normal text-center">{event.location}</span>
               </p>
-            </div>
+            </ScrollReveal>
           </div>
+        </div>
+
+        {/* Pulsing Down Arrow */}
+        <div className="absolute bottom-6 left-0 right-0 flex justify-center z-20 pulse-arrow animate-ping-pong">
+          <ArrowDownToLine size={32} className="text-gold" />
         </div>
       </section>
 

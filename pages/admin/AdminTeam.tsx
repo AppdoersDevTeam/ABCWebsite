@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { Modal } from '../../components/UI/Modal';
-import { CalendarDays, Edit, Trash2, User, Upload, X, UserPlus, Download, Search, ChevronDown } from 'lucide-react';
+import { CalendarDays, Edit, Trash2, User, Upload, X, UserPlus, Download, Search, ChevronDown, Archive, ArchiveRestore } from 'lucide-react';
 import type { Group, JobRole, TeamMember } from '../../types';
 import { supabase } from '../../lib/supabase';
 import { SkeletonPageHeader } from '../../components/UI/Skeleton';
@@ -125,6 +125,13 @@ function memberToForm(m: TeamMember): FormState {
   };
 }
 
+function formatArchivedDate(iso: string | null | undefined): string {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '—';
+  return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
 export const AdminTeam = () => {
   const [members, setMembers] = useState<TeamMember[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -146,6 +153,17 @@ export const AdminTeam = () => {
     'name' | 'email' | 'phone' | 'role' | 'baptism_date' | 'membership_start_date' | 'status' | 'groups' | 'job_roles'
   >('name');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
+  const [activeTab, setActiveTab] = useState<'active' | 'archived'>('active');
+  const [deleteTarget, setDeleteTarget] = useState<TeamMember | null>(null);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [archiveTarget, setArchiveTarget] = useState<TeamMember | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isArchiving, setIsArchiving] = useState(false);
+
+  const activeMembersList = useMemo(() => members.filter((m) => !m.is_archived), [members]);
+  const archivedMembersList = useMemo(() => members.filter((m) => m.is_archived), [members]);
+
+  const tabMembers = activeTab === 'active' ? activeMembersList : archivedMembersList;
 
   const anyGroupSelectedUI = useMemo(() => Object.values(selectedGroupIds).some(Boolean), [selectedGroupIds]);
   const anyJobRoleSelectedUI = useMemo(() => Object.values(selectedJobRoleIds).some(Boolean), [selectedJobRoleIds]);
@@ -155,7 +173,7 @@ export const AdminTeam = () => {
   );
 
   const filteredMembers = useMemo(() => {
-    return members.filter((m) => {
+    return tabMembers.filter((m) => {
       const pt = inferProfileType(m);
       if (!selectedProfileTypes[pt]) return false;
 
@@ -175,7 +193,7 @@ export const AdminTeam = () => {
 
       return true;
     });
-  }, [members, selectedProfileTypes, selectedGroupIds, selectedJobRoleIds]);
+  }, [tabMembers, selectedProfileTypes, selectedGroupIds, selectedJobRoleIds]);
 
   const visibleMembers = useMemo(() => {
     const q = searchText.trim().toLowerCase();
@@ -278,6 +296,27 @@ export const AdminTeam = () => {
   const selectAllGroups = () => setSelectedGroupIds({});
   const selectAllJobRoles = () => setSelectedJobRoleIds({});
 
+  const sortedArchivedMembers = useMemo(() => {
+    const q = searchText.trim().toLowerCase();
+    let list = archivedMembersList;
+    if (q) {
+      list = list.filter((m) => {
+        const haystack = [m.name ?? '', m.email ?? '', getDisplayRole(m) ?? ''].join(' ').toLowerCase();
+        return haystack.includes(q);
+      });
+    }
+    return [...list].sort((a, b) => {
+      const aT = a.archived_at ? Date.parse(a.archived_at) : 0;
+      const bT = b.archived_at ? Date.parse(b.archived_at) : 0;
+      if (bT !== aT) return bT - aT;
+      return (a.name ?? '').localeCompare(b.name ?? '', undefined, { sensitivity: 'base' });
+    });
+  }, [archivedMembersList, searchText]);
+
+  const deleteNameMatches =
+    deleteTarget != null &&
+    deleteConfirmText.trim().toLowerCase() === deleteTarget.name.trim().toLowerCase();
+
   const filenameBase = useMemo(() => {
     const d = new Date();
     const yyyy = d.getFullYear();
@@ -286,16 +325,16 @@ export const AdminTeam = () => {
     return `directory-people-${yyyy}-${mm}-${dd}`;
   }, []);
 
-  /** Normalized emails that appear on more than one directory row (data hygiene warning). */
+  /** Normalized emails that appear on more than one active directory row (data hygiene warning). */
   const duplicateEmails = useMemo(() => {
     const counts = new Map<string, number>();
-    for (const m of members) {
+    for (const m of activeMembersList) {
       const e = (m.email || '').trim().toLowerCase();
       if (!e) continue;
       counts.set(e, (counts.get(e) || 0) + 1);
     }
     return new Set([...counts.entries()].filter(([, n]) => n > 1).map(([e]) => e));
-  }, [members]);
+  }, [activeMembersList]);
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -707,20 +746,65 @@ export const AdminTeam = () => {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this team member?')) {
-      return;
-    }
+  const handleDelete = (member: TeamMember) => {
+    setDeleteTarget(member);
+    setDeleteConfirmText('');
+  };
 
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return;
+    const expected = deleteTarget.name.trim().toLowerCase();
+    if (deleteConfirmText.trim().toLowerCase() !== expected) return;
+
+    setIsDeleting(true);
     try {
-      const { error } = await supabase.from('team_members').delete().eq('id', id);
-
+      const { error } = await supabase.from('team_members').delete().eq('id', deleteTarget.id);
       if (error) throw error;
-
-      setMembers(members.filter((m) => m.id !== id));
+      setDeleteTarget(null);
+      setDeleteConfirmText('');
+      await fetchMembers();
     } catch (error: unknown) {
       console.error('Error deleting team member:', error);
       alert(getSupabaseErrorMessage(error) || 'Failed to delete team member');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleArchive = (member: TeamMember) => {
+    setArchiveTarget(member);
+  };
+
+  const handleArchiveConfirm = async () => {
+    if (!archiveTarget) return;
+    setIsArchiving(true);
+    try {
+      const { error } = await supabase
+        .from('team_members')
+        .update({ is_archived: true, archived_at: new Date().toISOString() })
+        .eq('id', archiveTarget.id);
+      if (error) throw error;
+      setArchiveTarget(null);
+      await fetchMembers();
+    } catch (error: unknown) {
+      console.error('Error archiving team member:', error);
+      alert(getSupabaseErrorMessage(error) || 'Failed to archive team member');
+    } finally {
+      setIsArchiving(false);
+    }
+  };
+
+  const handleUnarchive = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('team_members')
+        .update({ is_archived: false, archived_at: null, archived_by: null })
+        .eq('id', id);
+      if (error) throw error;
+      await fetchMembers();
+    } catch (error: unknown) {
+      console.error('Error unarchiving team member:', error);
+      alert(getSupabaseErrorMessage(error) || 'Failed to unarchive team member');
     }
   };
 
@@ -804,6 +888,31 @@ export const AdminTeam = () => {
         </div>
       )}
 
+      <div className="flex gap-2 border-b border-gray-200">
+        <button
+          type="button"
+          onClick={() => setActiveTab('active')}
+          className={`px-4 py-2 text-sm font-bold border-b-2 transition-colors ${
+            activeTab === 'active'
+              ? 'border-gold text-charcoal'
+              : 'border-transparent text-neutral hover:text-charcoal'
+          }`}
+        >
+          Active ({activeMembersList.length})
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('archived')}
+          className={`px-4 py-2 text-sm font-bold border-b-2 transition-colors ${
+            activeTab === 'archived'
+              ? 'border-gold text-charcoal'
+              : 'border-transparent text-neutral hover:text-charcoal'
+          }`}
+        >
+          Archived ({archivedMembersList.length})
+        </button>
+      </div>
+
       <div className="glass-card bg-white/80 border border-white/60 rounded-[12px] p-4 space-y-4">
         <div className="flex flex-col lg:flex-row gap-3 lg:items-center">
           <div className="flex-1">
@@ -815,7 +924,7 @@ export const AdminTeam = () => {
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
                 className="w-full pl-10 pr-10 py-3 rounded-[6px] border border-gray-200 focus:border-gold focus:outline-none bg-white"
-                placeholder="Search name, email, phone, role, groups, job roles…"
+                placeholder={activeTab === 'active' ? 'Search name, email, phone, role, groups, job roles…' : 'Search archived people…'}
               />
               {searchText.trim() && (
                 <button
@@ -832,9 +941,19 @@ export const AdminTeam = () => {
 
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
             <div className="text-xs text-neutral pb-1">
-              Showing <span className="font-bold text-charcoal">{visibleMembers.length}</span> of{' '}
-              <span className="font-bold text-charcoal">{members.length}</span>
+              {activeTab === 'active' ? (
+                <>
+                  Showing <span className="font-bold text-charcoal">{visibleMembers.length}</span> of{' '}
+                  <span className="font-bold text-charcoal">{activeMembersList.length}</span> active
+                </>
+              ) : (
+                <>
+                  Showing <span className="font-bold text-charcoal">{sortedArchivedMembers.length}</span> of{' '}
+                  <span className="font-bold text-charcoal">{archivedMembersList.length}</span> archived
+                </>
+              )}
             </div>
+            {activeTab === 'active' && (
             <div className="flex items-center gap-2">
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-neutral mb-1">Sort by</label>
@@ -863,6 +982,8 @@ export const AdminTeam = () => {
                 {sortDir === 'asc' ? 'A→Z' : 'Z→A'}
               </button>
             </div>
+            )}
+            {activeTab === 'active' && (
             <button
               type="button"
               onClick={clearFilters}
@@ -871,9 +992,12 @@ export const AdminTeam = () => {
             >
               Clear
             </button>
+            )}
           </div>
         </div>
 
+        {activeTab === 'active' && (
+        <>
         <div>
           <p className="text-sm font-bold text-charcoal mb-3">Profile type</p>
           <div className="flex flex-wrap gap-2">
@@ -1026,15 +1150,87 @@ export const AdminTeam = () => {
             )}
           </div>
         )}
+        </>
+        )}
       </div>
 
-      {members.length === 0 ? (
+      {activeTab === 'active' && activeMembersList.length === 0 ? (
         <div className="text-center py-12 glass-card bg-white/80 border border-white/60 rounded-[12px]">
           <p className="text-neutral">No team members yet. Add your first team member to get started.</p>
         </div>
-      ) : visibleMembers.length === 0 ? (
+      ) : activeTab === 'active' && visibleMembers.length === 0 ? (
         <div className="text-center py-12 glass-card bg-white/80 border border-white/60 rounded-[12px]">
           <p className="text-neutral">No results match the selected filters.</p>
+        </div>
+      ) : activeTab === 'archived' && archivedMembersList.length === 0 ? (
+        <div className="text-center py-12 glass-card bg-white/80 border border-white/60 rounded-[12px]">
+          <p className="text-neutral">No archived people.</p>
+        </div>
+      ) : activeTab === 'archived' && sortedArchivedMembers.length === 0 ? (
+        <div className="text-center py-12 glass-card bg-white/80 border border-white/60 rounded-[12px]">
+          <p className="text-neutral">No archived people match your search.</p>
+        </div>
+      ) : activeTab === 'archived' ? (
+        <div className="glass-card bg-white/80 border border-white/60 rounded-[12px] overflow-hidden">
+          <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 overscroll-x-contain">
+            <table className="min-w-[700px] w-full text-left">
+              <thead className="bg-white/60 sticky top-0">
+                <tr className="border-b border-gray-200">
+                  <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-neutral">Name</th>
+                  <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-neutral">Email</th>
+                  <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-neutral">Role</th>
+                  <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-neutral">Status</th>
+                  <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-neutral">Archived</th>
+                  <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-neutral w-[200px]">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sortedArchivedMembers.map((member, idx) => {
+                  const pt = inferProfileType(member);
+                  return (
+                    <tr
+                      key={member.id}
+                      className={`border-b border-gray-100 hover:bg-gold/5 transition-colors ${
+                        idx % 2 === 0 ? 'bg-white/40' : 'bg-white/20'
+                      }`}
+                    >
+                      <td className="px-4 py-3 font-bold text-charcoal">{member.name}</td>
+                      <td className="px-4 py-3 text-sm text-neutral">{member.email || '—'}</td>
+                      <td className="px-4 py-3 text-sm text-charcoal font-bold">{getDisplayRole(member)}</td>
+                      <td className="px-4 py-3">
+                        <span className="inline-flex items-center px-2 py-1 rounded-full bg-gold/10 text-gold text-[11px] font-bold uppercase tracking-wider">
+                          {PROFILE_LABEL[pt]}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-neutral">{formatArchivedDate(member.archived_at)}</td>
+                      <td className="px-4 py-3">
+                        <div className="flex gap-2 flex-wrap">
+                          <button
+                            type="button"
+                            onClick={() => handleUnarchive(member.id)}
+                            className="px-3 py-2 bg-white border border-gray-200 rounded-[4px] text-neutral hover:text-gold hover:border-gold transition-colors text-sm font-bold inline-flex items-center gap-2"
+                            title="Unarchive"
+                          >
+                            <ArchiveRestore size={16} />
+                            Unarchive
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDelete(member)}
+                            className="px-3 py-2 bg-white border border-red-200 rounded-[4px] text-red-600 hover:bg-red-50 transition-colors text-sm font-bold inline-flex items-center gap-2"
+                            title="Delete permanently"
+                          >
+                            <Trash2 size={16} />
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       ) : (
         <div className="glass-card bg-white/80 border border-white/60 rounded-[12px] overflow-hidden">
@@ -1107,7 +1303,7 @@ export const AdminTeam = () => {
                         </span>
                       </td>
                       <td className="px-4 py-3">
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 flex-wrap">
                           <button
                             onClick={() => handleEdit(member)}
                             className="px-3 py-2 bg-white border border-gray-200 rounded-[4px] text-neutral hover:text-gold hover:border-gold transition-colors text-sm font-bold inline-flex items-center gap-2"
@@ -1117,9 +1313,17 @@ export const AdminTeam = () => {
                             Edit
                           </button>
                           <button
-                            onClick={() => handleDelete(member.id)}
+                            onClick={() => handleArchive(member)}
+                            className="px-3 py-2 bg-white border border-gray-200 rounded-[4px] text-neutral hover:text-charcoal hover:border-gold transition-colors text-sm font-bold inline-flex items-center gap-2"
+                            title="Archive"
+                          >
+                            <Archive size={16} />
+                            Archive
+                          </button>
+                          <button
+                            onClick={() => handleDelete(member)}
                             className="px-3 py-2 bg-white border border-red-200 rounded-[4px] text-red-600 hover:bg-red-50 transition-colors text-sm font-bold inline-flex items-center gap-2"
-                            title="Delete"
+                            title="Delete permanently"
                           >
                             <Trash2 size={16} />
                             Delete
@@ -1495,6 +1699,91 @@ export const AdminTeam = () => {
             </GlowingButton>
           </div>
         </div>
+      </Modal>
+
+      <Modal
+        isOpen={deleteTarget != null}
+        onClose={() => {
+          if (isDeleting) return;
+          setDeleteTarget(null);
+          setDeleteConfirmText('');
+        }}
+        title="Delete person permanently?"
+      >
+        {deleteTarget && (
+          <div className="space-y-4">
+            <div className="rounded-[8px] border border-red-200 bg-red-50 p-4 text-sm text-red-900">
+              <p className="font-bold">This action is permanent and cannot be undone.</p>
+              <p className="mt-2">
+                All directory data for <span className="font-bold">{deleteTarget.name}</span> will be removed from the
+                database, including groups, job roles, and any linked profile information.
+              </p>
+            </div>
+            <p className="text-sm text-neutral">
+              To confirm, type the person&apos;s name exactly: <span className="font-bold text-charcoal">{deleteTarget.name}</span>
+            </p>
+            <input
+              type="text"
+              value={deleteConfirmText}
+              onChange={(e) => setDeleteConfirmText(e.target.value)}
+              className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-red-400 focus:outline-none"
+              placeholder={deleteTarget.name}
+              autoComplete="off"
+            />
+            <div className="flex flex-col-reverse sm:flex-row gap-3 justify-end pt-2">
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={() => {
+                  setDeleteTarget(null);
+                  setDeleteConfirmText('');
+                }}
+                className="px-6 py-2 border border-gray-200 rounded-[4px] text-charcoal hover:bg-gray-50 transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={!deleteNameMatches || isDeleting}
+                onClick={handleDeleteConfirm}
+                className="px-6 py-2 rounded-[4px] font-bold text-white bg-red-600 hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isDeleting ? 'Deleting…' : 'Delete permanently'}
+              </button>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      <Modal
+        isOpen={archiveTarget != null}
+        onClose={() => {
+          if (isArchiving) return;
+          setArchiveTarget(null);
+        }}
+        title="Archive person?"
+      >
+        {archiveTarget && (
+          <div className="space-y-4">
+            <p className="text-sm text-neutral">
+              <span className="font-bold text-charcoal">{archiveTarget.name}</span> will be hidden from the public site,
+              member directory, and rosters. Only admins can view archived people and restore them later.
+            </p>
+            <div className="flex flex-col-reverse sm:flex-row gap-3 justify-end pt-2">
+              <button
+                type="button"
+                disabled={isArchiving}
+                onClick={() => setArchiveTarget(null)}
+                className="px-6 py-2 border border-gray-200 rounded-[4px] text-charcoal hover:bg-gray-50 transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <GlowingButton onClick={handleArchiveConfirm} disabled={isArchiving}>
+                {isArchiving ? 'Archiving…' : 'Archive'}
+              </GlowingButton>
+            </div>
+          </div>
+        )}
       </Modal>
     </div>
   );
