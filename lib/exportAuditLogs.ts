@@ -26,7 +26,7 @@ function downloadBlob(filename: string, blob: Blob) {
 }
 
 export function downloadAuditLogsCsv(rows: AuditLog[], filenameBase: string) {
-  const headers = ['Date', 'Summary', 'Category', 'Action', 'Actor', 'Email', 'Role', 'Entity', 'Entity ID'];
+  const headers = ['Date', 'Summary', 'Category', 'Action', 'User', 'Email', 'Role', 'Entity', 'Entity ID'];
   const lines = [
     headers.join(','),
     ...rows.map((r) =>

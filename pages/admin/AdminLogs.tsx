@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ScrollText, Search, Download, ChevronDown, ChevronRight, RefreshCw } from 'lucide-react';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { GlowingButton } from '../../components/UI/GlowingButton';
-import { StyledSelect } from '../../components/UI/StyledSelect';
 import { supabase } from '../../lib/supabase';
 import type { AuditLog, AuditLogCategory } from '../../types';
 import { formatFullDateTimeInTimezone } from '../../lib/dateUtils';
@@ -10,6 +9,9 @@ import { downloadAuditLogsCsv } from '../../lib/exportAuditLogs';
 import { SkeletonPageHeader } from '../../components/UI/Skeleton';
 
 const PAGE_SIZE = 50;
+
+const FILTER_INPUT_CLASS =
+  'w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-charcoal focus:outline-none focus:ring-2 focus:ring-gold/40';
 
 const CATEGORY_OPTIONS: { value: string; label: string }[] = [
   { value: '', label: 'All categories' },
@@ -241,25 +243,41 @@ export const AdminLogs = () => {
       <div className="glass-card bg-white/80 border border-white/60 rounded-[12px] overflow-hidden">
         <div className="p-4 md:p-5 border-b border-gray-100 space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-            <StyledSelect
-              label="Category"
-              value={categoryFilter}
-              onChange={setCategoryFilter}
-              options={CATEGORY_OPTIONS}
-            />
-            <StyledSelect
-              label="Action"
-              value={actionFilter}
-              onChange={setActionFilter}
-              options={ACTION_OPTIONS}
-            />
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-neutral mb-1.5">Category</label>
+              <select
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                className={FILTER_INPUT_CLASS}
+              >
+                {CATEGORY_OPTIONS.map((opt) => (
+                  <option key={opt.value || 'all'} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-neutral mb-1.5">Action</label>
+              <select
+                value={actionFilter}
+                onChange={(e) => setActionFilter(e.target.value)}
+                className={FILTER_INPUT_CLASS}
+              >
+                {ACTION_OPTIONS.map((opt) => (
+                  <option key={opt.value || 'all'} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </div>
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-neutral mb-1.5">From</label>
               <input
                 type="date"
                 value={dateFrom}
                 onChange={(e) => setDateFrom(e.target.value)}
-                className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-charcoal focus:outline-none focus:ring-2 focus:ring-gold/40"
+                className={FILTER_INPUT_CLASS}
               />
             </div>
             <div>
@@ -268,7 +286,7 @@ export const AdminLogs = () => {
                 type="date"
                 value={dateTo}
                 onChange={(e) => setDateTo(e.target.value)}
-                className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-charcoal focus:outline-none focus:ring-2 focus:ring-gold/40"
+                className={FILTER_INPUT_CLASS}
               />
             </div>
             <div>
@@ -280,7 +298,7 @@ export const AdminLogs = () => {
                   placeholder="Summary or email…"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full rounded-lg border border-gray-200 bg-white pl-9 pr-3 py-2 text-sm text-charcoal focus:outline-none focus:ring-2 focus:ring-gold/40"
+                  className={`${FILTER_INPUT_CLASS} pl-9 pr-3`}
                 />
               </div>
             </div>
@@ -332,7 +350,7 @@ export const AdminLogs = () => {
                       Summary
                     </th>
                     <th className="px-3 py-2.5 text-xs font-bold uppercase tracking-wider text-neutral whitespace-nowrap">
-                      Actor
+                      User
                     </th>
                     <th className="px-3 py-2.5 text-xs font-bold uppercase tracking-wider text-neutral whitespace-nowrap">
                       Role
