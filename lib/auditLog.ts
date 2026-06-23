@@ -19,18 +19,18 @@ export async function logAuditEvent(input: LogAuditEventInput): Promise<void> {
       p_entity_type: input.entityType ?? null,
       p_entity_id: input.entityId ?? null,
       p_summary: input.summary,
-      p_details: input.details ?? {},
+      p_details: { ...(input.details ?? {}), source: 'client' },
       p_actor_role_override: input.actorRoleOverride ?? null,
     });
     if (error) {
-      console.warn('[auditLog]', error.message);
+      console.warn('[auditLog]', error.message, input);
     }
   } catch (err) {
-    console.warn('[auditLog] failed to write log', err);
+    console.warn('[auditLog] failed to write log', err, input);
   }
 }
 
-/** Fire-and-forget wrapper — never blocks UI */
+/** Fire-and-forget wrapper — prefer await logAuditEvent in admin handlers */
 export function logAuditEventSafe(input: LogAuditEventInput): void {
   void logAuditEvent(input);
 }

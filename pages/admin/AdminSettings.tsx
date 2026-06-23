@@ -3,7 +3,7 @@ import { Settings, Tag, Briefcase, Plus, Save, Trash2 } from 'lucide-react';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { supabase } from '../../lib/supabase';
 import type { EventCategory, Group, JobRole } from '../../types';
-import { logAuditEventSafe } from '../../lib/auditLog';
+import { logAuditEvent } from '../../lib/auditLog';
 
 type Tab = 'groups' | 'job_roles' | 'event_categories';
 
@@ -85,7 +85,7 @@ export const AdminSettings = () => {
       const payload = { name, slug: slugify(name), is_active: true };
       const { data, error } = await supabase.from('groups').insert([payload]).select('*').single();
       if (error) throw error;
-      logAuditEventSafe({ action: 'create', category: 'settings', entityType: 'groups', entityId: (data as Group).id, summary: `Created group "${name}"` });
+      await logAuditEvent({ action: 'create', category: 'settings', entityType: 'groups', entityId: (data as Group).id, summary: `Created group "${name}"` });
       setGroups((prev) => [...prev, data as Group]);
       setSavedGroups((prev) => [...prev, data as Group]);
       setNewGroupName('');
@@ -102,7 +102,7 @@ export const AdminSettings = () => {
       const payload = { name, slug: slugify(name), is_active: true };
       const { data, error } = await supabase.from('job_roles').insert([payload]).select('*').single();
       if (error) throw error;
-      logAuditEventSafe({ action: 'create', category: 'settings', entityType: 'job_roles', entityId: (data as JobRole).id, summary: `Created job role "${name}"` });
+      await logAuditEvent({ action: 'create', category: 'settings', entityType: 'job_roles', entityId: (data as JobRole).id, summary: `Created job role "${name}"` });
       setJobRoles((prev) => [...prev, data as JobRole]);
       setSavedJobRoles((prev) => [...prev, data as JobRole]);
       setNewJobRoleName('');
@@ -124,7 +124,7 @@ export const AdminSettings = () => {
         .select('*')
         .single();
       if (error) throw error;
-      logAuditEventSafe({ action: 'create', category: 'settings', entityType: 'event_categories', entityId: (data as EventCategory).id, summary: `Created event category "${name}"` });
+      await logAuditEvent({ action: 'create', category: 'settings', entityType: 'event_categories', entityId: (data as EventCategory).id, summary: `Created event category "${name}"` });
       setEventCategories((prev) => {
         const next = data as EventCategory;
         const exists = prev.some((x) => x.id === next.id);
@@ -149,7 +149,7 @@ export const AdminSettings = () => {
       const payload: Partial<Group> = { name: g.name?.trim() || '', slug: slugify(g.name || ''), is_active: g.is_active !== false };
       const { error } = await supabase.from('groups').update(payload).eq('id', id);
       if (error) throw error;
-      logAuditEventSafe({ action: 'update', category: 'settings', entityType: 'groups', entityId: id, summary: `Updated group "${payload.name}"` });
+      await logAuditEvent({ action: 'update', category: 'settings', entityType: 'groups', entityId: id, summary: `Updated group "${payload.name}"` });
       setGroups((prev) => prev.map((x) => (x.id === id ? { ...x, ...payload } : x)));
       setSavedGroups((prev) => prev.map((x) => (x.id === id ? { ...x, ...payload } : x)));
     } catch (e) {
@@ -165,7 +165,7 @@ export const AdminSettings = () => {
       const payload: Partial<JobRole> = { name: r.name?.trim() || '', slug: slugify(r.name || ''), is_active: r.is_active !== false };
       const { error } = await supabase.from('job_roles').update(payload).eq('id', id);
       if (error) throw error;
-      logAuditEventSafe({ action: 'update', category: 'settings', entityType: 'job_roles', entityId: id, summary: `Updated job role "${payload.name}"` });
+      await logAuditEvent({ action: 'update', category: 'settings', entityType: 'job_roles', entityId: id, summary: `Updated job role "${payload.name}"` });
       setJobRoles((prev) => prev.map((x) => (x.id === id ? { ...x, ...payload } : x)));
       setSavedJobRoles((prev) => prev.map((x) => (x.id === id ? { ...x, ...payload } : x)));
     } catch (e) {
@@ -185,7 +185,7 @@ export const AdminSettings = () => {
       };
       const { error } = await supabase.from('event_categories').update(payload).eq('id', id);
       if (error) throw error;
-      logAuditEventSafe({ action: 'update', category: 'settings', entityType: 'event_categories', entityId: id, summary: `Updated event category "${payload.name}"` });
+      await logAuditEvent({ action: 'update', category: 'settings', entityType: 'event_categories', entityId: id, summary: `Updated event category "${payload.name}"` });
       setEventCategories((prev) => prev.map((x) => (x.id === id ? { ...x, ...payload } : x)));
       setSavedEventCategories((prev) => prev.map((x) => (x.id === id ? { ...x, ...payload } : x)));
     } catch (e) {
@@ -200,7 +200,7 @@ export const AdminSettings = () => {
     try {
       const { error } = await supabase.from('groups').delete().eq('id', id);
       if (error) throw error;
-      logAuditEventSafe({ action: 'delete', category: 'settings', entityType: 'groups', entityId: id, summary: `Deleted group "${g?.name || id}"` });
+      await logAuditEvent({ action: 'delete', category: 'settings', entityType: 'groups', entityId: id, summary: `Deleted group "${g?.name || id}"` });
       setGroups((prev) => prev.filter((g) => g.id !== id));
       setSavedGroups((prev) => prev.filter((g) => g.id !== id));
     } catch (e) {
@@ -215,7 +215,7 @@ export const AdminSettings = () => {
     try {
       const { error } = await supabase.from('job_roles').delete().eq('id', id);
       if (error) throw error;
-      logAuditEventSafe({ action: 'delete', category: 'settings', entityType: 'job_roles', entityId: id, summary: `Deleted job role "${r?.name || id}"` });
+      await logAuditEvent({ action: 'delete', category: 'settings', entityType: 'job_roles', entityId: id, summary: `Deleted job role "${r?.name || id}"` });
       setJobRoles((prev) => prev.filter((r) => r.id !== id));
       setSavedJobRoles((prev) => prev.filter((r) => r.id !== id));
     } catch (e) {
@@ -230,7 +230,7 @@ export const AdminSettings = () => {
     try {
       const { error } = await supabase.from('event_categories').delete().eq('id', id);
       if (error) throw error;
-      logAuditEventSafe({ action: 'delete', category: 'settings', entityType: 'event_categories', entityId: id, summary: `Deleted event category "${c?.name || id}"` });
+      await logAuditEvent({ action: 'delete', category: 'settings', entityType: 'event_categories', entityId: id, summary: `Deleted event category "${c?.name || id}"` });
       setEventCategories((prev) => prev.filter((c) => c.id !== id));
       setSavedEventCategories((prev) => prev.filter((c) => c.id !== id));
     } catch (e) {

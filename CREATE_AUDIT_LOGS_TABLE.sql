@@ -115,9 +115,7 @@ REVOKE ALL ON FUNCTION public.log_audit_event(TEXT, TEXT, TEXT, TEXT, TEXT, JSON
 GRANT EXECUTE ON FUNCTION public.log_audit_event(TEXT, TEXT, TEXT, TEXT, TEXT, JSONB, TEXT) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.log_audit_event(TEXT, TEXT, TEXT, TEXT, TEXT, JSONB, TEXT) TO anon;
 
--- Step 4 (optional): DB triggers for safety-net logging are omitted in v1
--- to avoid duplicate entries alongside client-side log_audit_event calls.
--- Enable later if needed via audit_log_row_change() + per-table triggers.
+-- Step 4: Also run ADD_AUDIT_LOG_TRIGGERS.sql for database-level logging on all data tables.
 
 GRANT SELECT ON public.audit_logs TO authenticated;
 GRANT ALL ON public.audit_logs TO postgres, service_role;

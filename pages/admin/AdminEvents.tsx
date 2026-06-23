@@ -13,7 +13,7 @@ import {
   buildEventDateTimePayload,
   parseTimeToInputValue,
 } from '../../lib/eventDateUtils';
-import { logAuditEventSafe } from '../../lib/auditLog';
+import { logAuditEvent } from '../../lib/auditLog';
 import metadata from '../../metadata.json';
 
 const DEFAULT_THUMB = '/ABC Logo.png';
@@ -156,7 +156,7 @@ export const AdminEvents = () => {
 
       if (error) throw error;
 
-      logAuditEventSafe({
+      await logAuditEvent({
         action: 'create',
         category: 'events',
         entityType: 'events',
@@ -224,7 +224,7 @@ export const AdminEvents = () => {
 
       if (error) throw error;
 
-      logAuditEventSafe({
+      await logAuditEvent({
         action: 'update',
         category: 'events',
         entityType: 'events',
@@ -258,7 +258,7 @@ export const AdminEvents = () => {
 
       if (error) throw error;
 
-      logAuditEventSafe({
+      await logAuditEvent({
         action: 'delete',
         category: 'events',
         entityType: 'events',

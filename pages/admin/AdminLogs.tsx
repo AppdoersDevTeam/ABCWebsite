@@ -1,11 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { ScrollText, Search, Download, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react';
+import { ScrollText, Search, Download, ChevronDown, ChevronRight, RefreshCw } from 'lucide-react';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { StyledSelect } from '../../components/UI/StyledSelect';
 import { supabase } from '../../lib/supabase';
 import type { AuditLog, AuditLogCategory } from '../../types';
-import { formatFullDateTimeInTimezone, formatRelativeDateInTimezone } from '../../lib/dateUtils';
+import { formatFullDateTimeInTimezone } from '../../lib/dateUtils';
 import { downloadAuditLogsCsv } from '../../lib/exportAuditLogs';
 import { SkeletonPageHeader } from '../../components/UI/Skeleton';
 
@@ -58,12 +58,26 @@ const CATEGORY_COLORS: Record<string, string> = {
   system: 'bg-slate-100 text-slate-700',
 };
 
+const CATEGORY_LABELS: Record<string, string> = {
+  auth: 'Auth',
+  users: 'Users',
+  events: 'Events',
+  team: 'Team',
+  prayer: 'Prayer',
+  roster: 'Roster',
+  newsletter: 'Newsletter',
+  settings: 'Settings',
+  rsvp: 'RSVP',
+  photos: 'Photos',
+  system: 'System',
+};
+
 function actorDisplay(log: AuditLog): string {
   if (log.actor_label) return log.actor_label;
   if (log.actor_email) return log.actor_email;
-  if (log.actor_role === 'anonymous') return 'Anonymous visitor';
+  if (log.actor_role === 'anonymous') return 'Visitor';
   if (log.actor_role === 'system') return 'System';
-  return 'Unknown';
+  return '—';
 }
 
 function roleLabel(role: string): string {
@@ -74,17 +88,21 @@ function roleLabel(role: string): string {
   return role;
 }
 
+function actionLabel(action: string): string {
+  return action.replace(/_/g, ' ');
+}
+
 function DetailsPanel({ details }: { details?: Record<string, unknown> }) {
   if (!details || Object.keys(details).length === 0) {
-    return <p className="text-sm text-neutral italic">No additional details.</p>;
+    return <span className="text-sm text-neutral italic">No additional details.</span>;
   }
   return (
-    <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 text-sm">
+    <dl className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-2 text-sm">
       {Object.entries(details).map(([key, value]) => (
         <div key={key} className="min-w-0">
-          <dt className="text-neutral font-medium capitalize">{key.replace(/_/g, ' ')}</dt>
+          <dt className="text-neutral font-medium capitalize text-xs">{key.replace(/_/g, ' ')}</dt>
           <dd className="text-charcoal break-words">
-            {typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value ?? '')}
+            {typeof value === 'object' ? JSON.stringify(value) : String(value ?? '')}
           </dd>
         </div>
       ))}
@@ -116,15 +134,9 @@ export const AdminLogs = () => {
         .order('created_at', { ascending: false })
         .range(pageNum * PAGE_SIZE, pageNum * PAGE_SIZE + PAGE_SIZE - 1);
 
-      if (categoryFilter) {
-        query = query.eq('category', categoryFilter);
-      }
-      if (actionFilter) {
-        query = query.eq('action', actionFilter);
-      }
-      if (dateFrom) {
-        query = query.gte('created_at', new Date(dateFrom).toISOString());
-      }
+      if (categoryFilter) query = query.eq('category', categoryFilter);
+      if (actionFilter) query = query.eq('action', actionFilter);
+      if (dateFrom) query = query.gte('created_at', new Date(dateFrom).toISOString());
       if (dateTo) {
         const end = new Date(dateTo);
         end.setHours(23, 59, 59, 999);
@@ -163,6 +175,7 @@ export const AdminLogs = () => {
 
   const handleRefresh = () => {
     setPage(0);
+    setExpandedId(null);
     void fetchLogs(0, false);
   };
 
@@ -201,6 +214,10 @@ export const AdminLogs = () => {
     return `${logs.length}${hasMore ? '+' : ''} log${logs.length === 1 ? '' : 's'}`;
   }, [logs.length, hasMore, isLoading]);
 
+  const toggleExpand = (id: string) => {
+    setExpandedId((prev) => (prev === id ? null : id));
+  };
+
   return (
     <div className="space-y-6 pb-12">
       <AdminPageHeader
@@ -221,156 +238,189 @@ export const AdminLogs = () => {
         }
       />
 
-      <div className="glass-card bg-white/80 border border-white/60 rounded-[12px] p-4 md:p-6 space-y-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-          <StyledSelect
-            label="Category"
-            value={categoryFilter}
-            onChange={setCategoryFilter}
-            options={CATEGORY_OPTIONS}
-          />
-          <StyledSelect
-            label="Action"
-            value={actionFilter}
-            onChange={setActionFilter}
-            options={ACTION_OPTIONS}
-          />
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-neutral mb-1.5">From</label>
-            <input
-              type="date"
-              value={dateFrom}
-              onChange={(e) => setDateFrom(e.target.value)}
-              className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-charcoal focus:outline-none focus:ring-2 focus:ring-gold/40"
+      <div className="glass-card bg-white/80 border border-white/60 rounded-[12px] overflow-hidden">
+        <div className="p-4 md:p-5 border-b border-gray-100 space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+            <StyledSelect
+              label="Category"
+              value={categoryFilter}
+              onChange={setCategoryFilter}
+              options={CATEGORY_OPTIONS}
             />
-          </div>
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-neutral mb-1.5">To</label>
-            <input
-              type="date"
-              value={dateTo}
-              onChange={(e) => setDateTo(e.target.value)}
-              className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-charcoal focus:outline-none focus:ring-2 focus:ring-gold/40"
+            <StyledSelect
+              label="Action"
+              value={actionFilter}
+              onChange={setActionFilter}
+              options={ACTION_OPTIONS}
             />
-          </div>
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-neutral mb-1.5">Search</label>
-            <div className="relative">
-              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral" />
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-neutral mb-1.5">From</label>
               <input
-                type="search"
-                placeholder="Summary or email…"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-lg border border-gray-200 bg-white pl-9 pr-3 py-2 text-sm text-charcoal focus:outline-none focus:ring-2 focus:ring-gold/40"
+                type="date"
+                value={dateFrom}
+                onChange={(e) => setDateFrom(e.target.value)}
+                className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-charcoal focus:outline-none focus:ring-2 focus:ring-gold/40"
               />
             </div>
-          </div>
-        </div>
-        {resultSummary && <p className="text-xs text-neutral">{resultSummary}</p>}
-      </div>
-
-      {error && (
-        <div className="rounded-[12px] border border-red-200 bg-red-50 p-4 text-sm text-red-800">
-          {error}
-          {error.toLowerCase().includes('audit_logs') && (
-            <p className="mt-2 text-red-700">Run CREATE_AUDIT_LOGS_TABLE.sql in Supabase if the table is missing.</p>
-          )}
-        </div>
-      )}
-
-      {isLoading && logs.length === 0 ? (
-        <div className="space-y-4">
-          <SkeletonPageHeader />
-          {[0, 1, 2].map((i) => (
-            <div key={i} className="h-24 bg-gray-100 rounded-[12px] animate-pulse" />
-          ))}
-        </div>
-      ) : logs.length === 0 ? (
-        <div className="glass-card bg-white/80 border border-white/60 rounded-[12px] p-10 text-center">
-          <ScrollText size={40} className="mx-auto text-gold/60 mb-4" />
-          <p className="font-bold text-charcoal">No logs yet</p>
-          <p className="text-neutral text-sm mt-2 max-w-md mx-auto">
-            Activity is recorded from when this feature was enabled. Perform actions on the site and they will appear here.
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {logs.map((log) => {
-            const isExpanded = expandedId === log.id;
-            const cat = log.category as AuditLogCategory;
-            const badgeClass = CATEGORY_COLORS[cat] || 'bg-gray-100 text-gray-700';
-            return (
-              <div
-                key={log.id}
-                className="glass-card bg-white/80 border border-white/60 rounded-[12px] overflow-hidden"
-              >
-                <button
-                  type="button"
-                  className="w-full text-left p-4 md:p-5 hover:bg-white/50 transition-colors"
-                  onClick={() => setExpandedId(isExpanded ? null : log.id)}
-                >
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div className="flex-1 min-w-0 space-y-2">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span
-                          className={`inline-flex text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${badgeClass}`}
-                        >
-                          {log.category}
-                        </span>
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-neutral">
-                          {log.action.replace(/_/g, ' ')}
-                        </span>
-                        <span
-                          className="text-xs text-neutral"
-                          title={formatFullDateTimeInTimezone(log.created_at)}
-                        >
-                          {formatRelativeDateInTimezone(log.created_at)}
-                        </span>
-                      </div>
-                      <p className="text-charcoal font-medium leading-snug">{log.summary}</p>
-                      <p className="text-sm text-neutral">
-                        {actorDisplay(log)}
-                        <span className="mx-1.5 text-gray-300">·</span>
-                        {roleLabel(log.actor_role)}
-                        {log.actor_email && log.actor_label && (
-                          <span className="text-neutral/80"> ({log.actor_email})</span>
-                        )}
-                      </p>
-                    </div>
-                    <span className="text-neutral shrink-0 mt-1">
-                      {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-                    </span>
-                  </div>
-                </button>
-                {isExpanded && (
-                  <div className="border-t border-gray-100 px-4 md:px-5 py-4 bg-gray-50/50">
-                    <p className="text-xs text-neutral mb-3">
-                      {formatFullDateTimeInTimezone(log.created_at)}
-                      {log.entity_type && (
-                        <>
-                          {' '}
-                          · {log.entity_type}
-                          {log.entity_id ? ` #${log.entity_id.slice(0, 8)}…` : ''}
-                        </>
-                      )}
-                    </p>
-                    <DetailsPanel details={log.details} />
-                  </div>
-                )}
-              </div>
-            );
-          })}
-
-          {hasMore && (
-            <div className="flex justify-center pt-4">
-              <GlowingButton variant="outline" onClick={handleLoadMore} disabled={isLoading}>
-                {isLoading ? 'Loading…' : 'Load more'}
-              </GlowingButton>
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-neutral mb-1.5">To</label>
+              <input
+                type="date"
+                value={dateTo}
+                onChange={(e) => setDateTo(e.target.value)}
+                className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-charcoal focus:outline-none focus:ring-2 focus:ring-gold/40"
+              />
             </div>
-          )}
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-neutral mb-1.5">Search</label>
+              <div className="relative">
+                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral" />
+                <input
+                  type="search"
+                  placeholder="Summary or email…"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full rounded-lg border border-gray-200 bg-white pl-9 pr-3 py-2 text-sm text-charcoal focus:outline-none focus:ring-2 focus:ring-gold/40"
+                />
+              </div>
+            </div>
+          </div>
+          {resultSummary && <p className="text-xs text-neutral">{resultSummary}</p>}
         </div>
-      )}
+
+        {error && (
+          <div className="mx-4 md:mx-5 mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+            {error}
+            {error.toLowerCase().includes('audit_logs') && (
+              <p className="mt-1 text-red-700">Run CREATE_AUDIT_LOGS_TABLE.sql in Supabase if the table is missing.</p>
+            )}
+          </div>
+        )}
+
+        {isLoading && logs.length === 0 ? (
+          <div className="p-6 space-y-3">
+            <SkeletonPageHeader />
+            {[0, 1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-10 bg-gray-100 rounded animate-pulse" />
+            ))}
+          </div>
+        ) : logs.length === 0 ? (
+          <div className="p-10 text-center">
+            <ScrollText size={36} className="mx-auto text-gold/60 mb-3" />
+            <p className="font-bold text-charcoal">No logs yet</p>
+            <p className="text-neutral text-sm mt-2 max-w-md mx-auto">
+              Activity is recorded from when this feature was enabled.
+            </p>
+          </div>
+        ) : (
+          <>
+            <div className="overflow-x-auto overscroll-x-contain">
+              <table className="min-w-[900px] w-full text-left text-sm">
+                <thead className="bg-white/60 sticky top-0 z-10">
+                  <tr className="border-b border-gray-200">
+                    <th className="w-8 px-2 py-2.5" aria-hidden="true" />
+                    <th className="px-3 py-2.5 text-xs font-bold uppercase tracking-wider text-neutral whitespace-nowrap">
+                      When
+                    </th>
+                    <th className="px-3 py-2.5 text-xs font-bold uppercase tracking-wider text-neutral whitespace-nowrap">
+                      Category
+                    </th>
+                    <th className="px-3 py-2.5 text-xs font-bold uppercase tracking-wider text-neutral whitespace-nowrap">
+                      Action
+                    </th>
+                    <th className="px-3 py-2.5 text-xs font-bold uppercase tracking-wider text-neutral min-w-[240px]">
+                      Summary
+                    </th>
+                    <th className="px-3 py-2.5 text-xs font-bold uppercase tracking-wider text-neutral whitespace-nowrap">
+                      Actor
+                    </th>
+                    <th className="px-3 py-2.5 text-xs font-bold uppercase tracking-wider text-neutral whitespace-nowrap">
+                      Role
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {logs.map((log, idx) => {
+                    const isExpanded = expandedId === log.id;
+                    const cat = log.category as AuditLogCategory;
+                    const badgeClass = CATEGORY_COLORS[cat] || 'bg-gray-100 text-gray-700';
+                    const hasDetails = log.details && Object.keys(log.details).length > 0;
+                    return (
+                      <React.Fragment key={log.id}>
+                        <tr
+                          className={`border-b border-gray-100 transition-colors cursor-pointer hover:bg-gold/5 ${
+                            isExpanded ? 'bg-gold/10' : idx % 2 === 0 ? 'bg-white/40' : 'bg-white/20'
+                          }`}
+                          onClick={() => toggleExpand(log.id)}
+                        >
+                          <td className="px-2 py-2 text-neutral">
+                            {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                          </td>
+                          <td
+                            className="px-3 py-2 text-charcoal whitespace-nowrap tabular-nums"
+                            title={formatFullDateTimeInTimezone(log.created_at)}
+                          >
+                            {formatFullDateTimeInTimezone(log.created_at)}
+                          </td>
+                          <td className="px-3 py-2 whitespace-nowrap">
+                            <span
+                              className={`inline-flex text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${badgeClass}`}
+                            >
+                              {CATEGORY_LABELS[cat] || log.category}
+                            </span>
+                          </td>
+                          <td className="px-3 py-2 text-neutral whitespace-nowrap capitalize">
+                            {actionLabel(log.action)}
+                          </td>
+                          <td className="px-3 py-2 text-charcoal font-medium leading-snug max-w-md">
+                            <span className="line-clamp-2">{log.summary}</span>
+                          </td>
+                          <td className="px-3 py-2 text-charcoal whitespace-nowrap max-w-[160px] truncate" title={actorDisplay(log)}>
+                            {actorDisplay(log)}
+                          </td>
+                          <td className="px-3 py-2 text-neutral whitespace-nowrap">
+                            {roleLabel(log.actor_role)}
+                          </td>
+                        </tr>
+                        {isExpanded && (
+                          <tr className="border-b border-gray-100 bg-gray-50/80">
+                            <td colSpan={7} className="px-4 py-3">
+                              <div className="text-xs text-neutral mb-2 flex flex-wrap gap-x-4 gap-y-1">
+                                {log.actor_email && log.actor_label && (
+                                  <span>Email: {log.actor_email}</span>
+                                )}
+                                {log.entity_type && (
+                                  <span>
+                                    Entity: {log.entity_type}
+                                    {log.entity_id ? ` · ${log.entity_id}` : ''}
+                                  </span>
+                                )}
+                              </div>
+                              {hasDetails ? (
+                                <DetailsPanel details={log.details} />
+                              ) : (
+                                <span className="text-sm text-neutral italic">No additional details.</span>
+                              )}
+                            </td>
+                          </tr>
+                        )}
+                      </React.Fragment>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {hasMore && (
+              <div className="flex justify-center border-t border-gray-100 p-4">
+                <GlowingButton variant="outline" onClick={handleLoadMore} disabled={isLoading}>
+                  {isLoading ? 'Loading…' : 'Load more'}
+                </GlowingButton>
+              </div>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 };

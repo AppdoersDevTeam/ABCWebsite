@@ -68,6 +68,7 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode }) => {
                 when this feature was enabled.
               </li>
               <li>Filter by category, action, date, or search by email or summary. Export filtered results to CSV for records.</li>
+              <li>Database changes (groups, events, directory, etc.) are recorded automatically — you may occasionally see two entries for the same action (app + database).</li>
               <li>Contact form submissions are not stored in logs (email only). Logs cannot be edited or deleted in the portal.</li>
             </Section>
 
