@@ -62,6 +62,15 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode }) => {
               <li>Not every login needs a Directory row—only link when they should appear in ministry lists or see group rosters.</li>
             </Section>
 
+            <Section title="Logs">
+              <li>
+                Security and compliance audit trail: sign-ins, sign-ups, admin changes, member activity, and RSVPs from
+                when this feature was enabled.
+              </li>
+              <li>Filter by category, action, date, or search by email or summary. Export filtered results to CSV for records.</li>
+              <li>Contact form submissions are not stored in logs (email only). Logs cannot be edited or deleted in the portal.</li>
+            </Section>
+
             <Section title="Prayer Wall (admin)">
               <li>Moderate prayer requests: review what members post, hide or remove items if needed, and keep the wall respectful.</li>
               <li>See the same prayer activity members see, with tools appropriate to your admin role.</li>

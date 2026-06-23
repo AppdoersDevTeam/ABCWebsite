@@ -8,6 +8,7 @@ import { PrayerRequest } from '../../types';
 import { SkeletonPageHeader, SkeletonPrayerCard } from '../../components/UI/Skeleton';
 import { getUserTimezone, formatRelativeDateInTimezone } from '../../lib/dateUtils';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
+import { logAuditEventSafe } from '../../lib/auditLog';
 
 export const AdminPrayerWall = () => {
   const [requests, setRequests] = useState<PrayerRequest[]>([]);
@@ -62,6 +63,14 @@ export const AdminPrayerWall = () => {
 
       if (error) throw error;
 
+      logAuditEventSafe({
+        action: 'create',
+        category: 'prayer',
+        entityType: 'prayer_requests',
+        entityId: data.id,
+        summary: `Admin posted a prayer request${formData.isAnonymous ? ' (anonymous)' : ''}`,
+      });
+
       setRequests([data, ...requests]);
       setFormData({ name: '', content: '', isAnonymous: false, isConfidential: false });
       setIsCreateModalOpen(false);
@@ -98,6 +107,14 @@ export const AdminPrayerWall = () => {
 
       if (error) throw error;
 
+      logAuditEventSafe({
+        action: 'update',
+        category: 'prayer',
+        entityType: 'prayer_requests',
+        entityId: editingRequest.id,
+        summary: 'Admin updated a prayer request',
+      });
+
       // Refresh requests
       fetchPrayerRequests();
       setFormData({ name: '', content: '', isAnonymous: false, isConfidential: false });
@@ -133,6 +150,14 @@ export const AdminPrayerWall = () => {
         .eq('id', id);
 
       if (error) throw error;
+
+      logAuditEventSafe({
+        action: 'delete',
+        category: 'prayer',
+        entityType: 'prayer_requests',
+        entityId: id,
+        summary: 'Admin deleted a prayer request',
+      });
 
       // Remove from local state and refresh from database to ensure consistency
       setRequests(requests.filter(req => req.id !== id));

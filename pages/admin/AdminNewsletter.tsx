@@ -6,6 +6,7 @@ import { supabase } from '../../lib/supabase';
 import { Newsletter as NewsletterType } from '../../types';
 import { SkeletonPageHeader, SkeletonCard } from '../../components/UI/Skeleton';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
+import { logAuditEventSafe } from '../../lib/auditLog';
 
 export const AdminNewsletter = () => {
   const [newsletters, setNewsletters] = useState<NewsletterType[]>([]);
@@ -82,6 +83,14 @@ export const AdminNewsletter = () => {
 
       if (dbError) throw dbError;
 
+      logAuditEventSafe({
+        action: 'create',
+        category: 'newsletter',
+        entityType: 'newsletters',
+        entityId: data.id,
+        summary: `Uploaded newsletter ${uploadData.month} ${uploadData.year}`,
+      });
+
       setNewsletters([data, ...newsletters]);
       setUploadData({ month: '', year: '', description: '', file: null });
       setIsUploadModalOpen(false);
@@ -114,6 +123,14 @@ export const AdminNewsletter = () => {
       const { error } = await supabase.from('newsletters').delete().eq('id', id);
 
       if (error) throw error;
+
+      logAuditEventSafe({
+        action: 'delete',
+        category: 'newsletter',
+        entityType: 'newsletters',
+        entityId: id,
+        summary: `Deleted newsletter ${newsletter?.title || id}`,
+      });
 
       setNewsletters(newsletters.filter(nl => nl.id !== id));
     } catch (error) {

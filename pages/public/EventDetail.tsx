@@ -13,6 +13,7 @@ import {
   formatEventTimeRange,
 } from '../../lib/eventDateUtils';
 import { usePageMeta } from '../../lib/usePageMeta';
+import { logAuditEventSafe } from '../../lib/auditLog';
 
 export const EventDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -221,6 +222,15 @@ export const EventDetail = () => {
       }
 
       setRsvpStatus('success');
+      logAuditEventSafe({
+        action: 'create',
+        category: 'rsvp',
+        entityType: 'event_rsvps',
+        entityId: event.id,
+        summary: `${name} RSVP'd for "${event.title}"`,
+        details: { email, event_id: event.id },
+        actorRoleOverride: user ? undefined : 'anonymous',
+      });
     } catch (e: unknown) {
       console.error('Error submitting RSVP:', e);
       setRsvpStatus('error');

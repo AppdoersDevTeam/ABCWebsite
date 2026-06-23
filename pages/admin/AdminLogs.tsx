@@ -209,11 +209,11 @@ export const AdminLogs = () => {
         icon={<ScrollText size={28} className="text-gold" />}
         rightSlot={
           <div className="flex flex-wrap gap-2">
-            <GlowingButton variant="secondary" onClick={handleRefresh} disabled={isLoading}>
+            <GlowingButton variant="outline" onClick={handleRefresh} disabled={isLoading}>
               <RefreshCw size={16} className={isLoading ? 'animate-spin' : ''} />
               Refresh
             </GlowingButton>
-            <GlowingButton variant="secondary" onClick={() => void handleExport()}>
+            <GlowingButton variant="outline" onClick={() => void handleExport()}>
               <Download size={16} />
               Export CSV
             </GlowingButton>
@@ -364,7 +364,7 @@ export const AdminLogs = () => {
 
           {hasMore && (
             <div className="flex justify-center pt-4">
-              <GlowingButton variant="secondary" onClick={handleLoadMore} disabled={isLoading}>
+              <GlowingButton variant="outline" onClick={handleLoadMore} disabled={isLoading}>
                 {isLoading ? 'Loading…' : 'Load more'}
               </GlowingButton>
             </div>

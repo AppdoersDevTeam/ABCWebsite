@@ -4,6 +4,7 @@ import type { User } from '../../types';
 import { Modal } from '../../components/UI/Modal';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { displayName } from '../../lib/constants';
+import { logAuditEventSafe } from '../../lib/auditLog';
 import { Search, Link2, Unlink } from 'lucide-react';
 
 type DirRow = {
@@ -111,6 +112,14 @@ export const LinkDirectoryUserModal: React.FC<LinkDirectoryUserModalProps> = ({
         .update({ user_id: targetUser.id, created_from_user_sync: false })
         .eq('id', selectedId);
       if (error) throw error;
+      logAuditEventSafe({
+        action: 'link',
+        category: 'users',
+        entityType: 'team_members',
+        entityId: selectedId,
+        summary: `Linked directory person "${row.name}" to login ${targetUser.email}`,
+        details: { user_id: targetUser.id, directory_id: selectedId },
+      });
       alert('Directory link saved.');
       onSuccess();
       onClose();
@@ -131,6 +140,13 @@ export const LinkDirectoryUserModal: React.FC<LinkDirectoryUserModalProps> = ({
     try {
       const { error } = await supabase.from('team_members').update({ user_id: null }).eq('user_id', targetUser.id);
       if (error) throw error;
+      logAuditEventSafe({
+        action: 'unlink',
+        category: 'users',
+        entityType: 'users',
+        entityId: targetUser.id,
+        summary: `Removed directory link for ${targetUser.email}`,
+      });
       alert('Link removed.');
       onSuccess();
       onClose();

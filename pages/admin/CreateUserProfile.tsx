@@ -3,6 +3,7 @@ import { supabase } from '../../lib/supabase';
 import { User } from '../../types';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { Modal } from '../../components/UI/Modal';
+import { logAuditEventSafe } from '../../lib/auditLog';
 
 interface CreateUserProfileProps {
   isOpen: boolean;
@@ -96,6 +97,13 @@ export const CreateUserProfile: React.FC<CreateUserProfileProps> = ({ isOpen, on
       }
 
       console.log('User profile created:', data);
+      logAuditEventSafe({
+        action: 'create',
+        category: 'users',
+        entityType: 'users',
+        entityId: userId,
+        summary: `Admin created user profile for ${email.toLowerCase()}`,
+      });
       alert('User profile created successfully! They can now be approved.');
       setEmail('');
       setFirstName('');

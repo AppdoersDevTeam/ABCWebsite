@@ -6,6 +6,7 @@ import type { Group, JobRole, RosterImage, TeamMember } from '../../types';
 import { supabase } from '../../lib/supabase';
 import { SkeletonPageHeader } from '../../components/UI/Skeleton';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
+import { logAuditEventSafe } from '../../lib/auditLog';
 
 type RosterRow = RosterImage & { groups?: Pick<Group, 'id' | 'name'> | null };
 
@@ -282,6 +283,14 @@ export const AdminRoster = () => {
       }
 
       await fetchRosterImages();
+      logAuditEventSafe({
+        action: 'update',
+        category: 'roster',
+        entityType: 'roster_images',
+        entityId: editingRoster.id,
+        summary: 'Updated roster PDF',
+        details: { date_from: editDateFrom, date_to: editDateTo },
+      });
       setIsEditModalOpen(false);
       setEditingRoster(null);
       setEditFile(null);
@@ -384,6 +393,14 @@ export const AdminRoster = () => {
 
       // Refresh the list
       await fetchRosterImages();
+
+      logAuditEventSafe({
+        action: existing && !checkError ? 'update' : 'create',
+        category: 'roster',
+        entityType: 'roster_images',
+        entityId: result?.id,
+        summary: `Uploaded roster PDF for ${group.name} (${dateFrom} – ${dateTo})`,
+      });
       
       setSelectedFile(null);
       setPreviewUrl(null);
@@ -428,6 +445,14 @@ export const AdminRoster = () => {
       const { error } = await supabase.from('roster_images').delete().eq('id', id);
 
       if (error) throw error;
+
+      logAuditEventSafe({
+        action: 'delete',
+        category: 'roster',
+        entityType: 'roster_images',
+        entityId: id,
+        summary: 'Deleted roster PDF',
+      });
 
       setRosterImages(rosterImages.filter(img => img.id !== id));
     } catch (error: any) {

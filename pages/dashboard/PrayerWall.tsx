@@ -8,6 +8,8 @@ import { useAuth } from '../../context/AuthContext';
 import { PrayerRequest } from '../../types';
 import { SkeletonPageHeader, SkeletonPrayerCard } from '../../components/UI/Skeleton';
 import { getUserTimezone, formatRelativeDateInTimezone } from '../../lib/dateUtils';
+import { logAuditEventSafe } from '../../lib/auditLog';
+import { displayName } from '../../lib/constants';
 
 export const PrayerWall = () => {
   const { user } = useAuth();
@@ -88,6 +90,14 @@ export const PrayerWall = () => {
 
       if (error) throw error;
 
+      logAuditEventSafe({
+        action: 'create',
+        category: 'prayer',
+        entityType: 'prayer_requests',
+        entityId: data.id,
+        summary: `${user ? displayName(user) : formData.name || 'Member'} submitted a prayer request${formData.isAnonymous ? ' (anonymous)' : ''}`,
+      });
+
       setRequests([data, ...requests]);
       setFormData({ name: '', content: '', isAnonymous: false });
       setIsModalOpen(false);
@@ -121,6 +131,14 @@ export const PrayerWall = () => {
         .eq('id', editingRequest.id);
 
       if (error) throw error;
+
+      logAuditEventSafe({
+        action: 'update',
+        category: 'prayer',
+        entityType: 'prayer_requests',
+        entityId: editingRequest.id,
+        summary: `${user ? displayName(user) : 'Member'} updated their prayer request`,
+      });
 
       // Refresh requests
       await fetchPrayerRequests();
@@ -156,6 +174,14 @@ export const PrayerWall = () => {
         .eq('id', id);
 
       if (error) throw error;
+
+      logAuditEventSafe({
+        action: 'delete',
+        category: 'prayer',
+        entityType: 'prayer_requests',
+        entityId: id,
+        summary: `${user ? displayName(user) : 'Member'} deleted a prayer request`,
+      });
 
       // Refresh requests
       await fetchPrayerRequests();
@@ -225,6 +251,14 @@ export const PrayerWall = () => {
           next.delete(requestId);
           return next;
         });
+        logAuditEventSafe({
+          action: 'update',
+          category: 'prayer',
+          entityType: 'prayer_requests',
+          entityId: requestId,
+          summary: `${displayName(user)} removed their prayer for a request`,
+          details: { pray: false },
+        });
       } else {
         // Trigger falling hearts animation across the whole page
         triggerFallingHearts();
@@ -259,6 +293,13 @@ export const PrayerWall = () => {
         }
 
         setPrayingFor(prev => new Set(prev).add(requestId));
+        logAuditEventSafe({
+          action: 'pray',
+          category: 'prayer',
+          entityType: 'prayer_requests',
+          entityId: requestId,
+          summary: `${displayName(user)} is praying for a request`,
+        });
       }
 
       // Refresh requests and user prayer counts to get updated state
