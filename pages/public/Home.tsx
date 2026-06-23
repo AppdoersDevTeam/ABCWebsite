@@ -143,7 +143,7 @@ export const Home = () => {
 
             <ScrollReveal direction="up" delay={400}>
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-24">
-                <Link to="/events" className="group">
+                <Link to="/events/sermons" className="group">
                   <GlowingButton variant="outline" size="md" className="!px-6 !py-[14px] !border-gold !bg-gold/20 !text-white hover:!bg-gold hover:!text-white !rounded-full transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:scale-110 hover:!border-gold active:scale-95 hover:-translate-y-1 !normal-case">
                     <MonitorPlay size={18} className="mr-2 text-gold transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] group-hover:h-5 group-hover:w-5 group-hover:translate-x-1 group-hover:text-white" />
                     <span className="text-white font-normal text-base leading-6 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] group-hover:font-semibold group-hover:tracking-wider">Watch Online</span>

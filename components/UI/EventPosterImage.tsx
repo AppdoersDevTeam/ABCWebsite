@@ -12,7 +12,7 @@ export const EventPosterImage: React.FC<EventPosterImageProps> = ({ src, alt, cl
     <img
       src={src}
       alt={alt}
-      className="max-w-full w-auto h-auto block"
+      className="max-w-full w-auto h-auto max-h-[70vh] object-contain block rounded-[10px]"
       loading="eager"
       decoding="async"
       fetchPriority="high"
