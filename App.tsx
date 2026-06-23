@@ -54,6 +54,7 @@ import { AdminEvents } from './pages/admin/AdminEvents';
 import { AdminRoster } from './pages/admin/AdminRoster';
 import { AdminSettings } from './pages/admin/AdminSettings';
 import { AdminHelp } from './pages/admin/Help';
+import { AdminLogs } from './pages/admin/AdminLogs';
 
 // Protected Route Component
 const ProtectedRoute = () => {
@@ -180,6 +181,7 @@ const AppRoutes = () => {
               <Route element={<AdminLayout />}>
                 <Route index element={<AdminOverview />} />
                 <Route path="users" element={<AdminUsers />} />
+                <Route path="logs" element={<AdminLogs />} />
                 <Route path="prayer" element={<AdminPrayerWall />} />
                 <Route path="newsletter" element={<AdminNewsletter />} />
                 <Route path="team" element={<AdminTeam />} />

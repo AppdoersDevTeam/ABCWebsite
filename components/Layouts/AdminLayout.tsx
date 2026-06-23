@@ -14,7 +14,8 @@ import {
   UserCog,
   ArrowRightLeft,
   Settings,
-  HelpCircle
+  HelpCircle,
+  ScrollText
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { displayName, displayInitial } from '../../lib/constants';
@@ -37,6 +38,7 @@ export const AdminLayout = () => {
   const navItems = [
     { label: 'Overview', path: '/admin', icon: <Home size={20} /> },
     { label: 'User Management', path: '/admin/users', icon: <UserCog size={20} /> },
+    { label: 'Logs', path: '/admin/logs', icon: <ScrollText size={20} /> },
     { label: 'Prayer Wall', path: '/admin/prayer', icon: <MessageSquare size={20} /> },
     { label: 'Newsletters', path: '/admin/newsletter', icon: <BookOpen size={20} /> },
     { label: 'Directory / People', path: '/admin/team', icon: <Users size={20} /> },

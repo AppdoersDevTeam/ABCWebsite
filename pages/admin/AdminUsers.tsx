@@ -10,6 +10,7 @@ import { SkeletonPageHeader, SkeletonStatsCard, SkeletonUserCard } from '../../c
 import { formatRelativeDateInTimezone } from '../../lib/dateUtils';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { GlowingButton } from '../../components/UI/GlowingButton';
+import { logAuditEventSafe } from '../../lib/auditLog';
 
 export const AdminUsers = () => {
   const { user, sendPasswordReset } = useAuth();
@@ -107,6 +108,15 @@ export const AdminUsers = () => {
         .eq('id', userId);
 
       if (error) throw error;
+      const target = allUsers.find((u) => u.id === userId);
+      logAuditEventSafe({
+        action: 'approve',
+        category: 'users',
+        entityType: 'users',
+        entityId: userId,
+        summary: `Approved signup for ${target?.email || userId}`,
+        details: { email: target?.email },
+      });
       alert('User approved successfully');
       fetchUsers();
     } catch (error) {
@@ -127,6 +137,15 @@ export const AdminUsers = () => {
         .eq('id', userId);
 
       if (deleteError) throw deleteError;
+      const target = allUsers.find((u) => u.id === userId);
+      logAuditEventSafe({
+        action: 'reject',
+        category: 'users',
+        entityType: 'users',
+        entityId: userId,
+        summary: `Rejected and removed signup for ${target?.email || userId}`,
+        details: { email: target?.email },
+      });
       alert('User rejected and removed');
       fetchUsers();
     } catch (error) {
@@ -147,6 +166,14 @@ export const AdminUsers = () => {
         .eq('id', userId);
 
       if (error) throw error;
+      logAuditEventSafe({
+        action: 'update',
+        category: 'users',
+        entityType: 'users',
+        entityId: userId,
+        summary: `Revoked approval for ${userName}`,
+        details: { field: 'is_approved', value: false },
+      });
       alert('User approval revoked successfully');
       fetchUsers();
     } catch (error) {
@@ -167,6 +194,14 @@ export const AdminUsers = () => {
         .eq('id', userId);
 
       if (error) throw error;
+      logAuditEventSafe({
+        action: 'update',
+        category: 'users',
+        entityType: 'users',
+        entityId: userId,
+        summary: `Granted admin access to ${userName}`,
+        details: { field: 'role', value: 'admin' },
+      });
       alert(`${userName} is now an admin`);
       fetchUsers();
     } catch (error) {
@@ -187,6 +222,14 @@ export const AdminUsers = () => {
         .eq('id', userId);
 
       if (error) throw error;
+      logAuditEventSafe({
+        action: 'update',
+        category: 'users',
+        entityType: 'users',
+        entityId: userId,
+        summary: `Revoked admin access from ${userName}`,
+        details: { field: 'role', value: 'member' },
+      });
       alert(`${userName} is now a member`);
       fetchUsers();
     } catch (error) {

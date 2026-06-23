@@ -5,7 +5,7 @@ import { ADMIN_EMAIL, SUPER_ADMIN_EMAIL } from '../lib/constants';
 import { getUserTimezone } from '../lib/dateUtils';
 import { syncDirectoryUserLink } from '../lib/directoryUserLink';
 import { hasAuthCallbackParams, completeAuthCallbackFromUrl, isPasswordRecoveryUrl } from '../lib/authCallback';
-import { getAuthEmailRedirectUrl } from '../lib/authRedirect';
+import { logAuditEventSafe } from '../lib/auditLog';
 import type { AuthError, Session, User as SupabaseUser } from '@supabase/supabase-js';
 
 function splitName(fullName: string): { first_name: string; last_name: string } {
@@ -418,6 +418,14 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
             userProfile.user_timezone = userTimezone;
           }
           setUser(userProfile);
+          logAuditEventSafe({
+            action: 'login',
+            category: 'auth',
+            entityType: 'users',
+            entityId: userProfile.id,
+            summary: `${userProfile.email} signed in via OAuth or email confirmation`,
+            details: { method: 'oauth_or_callback' },
+          });
         }
       }
     };
@@ -453,9 +461,24 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
           throw new Error('Failed to fetch or create user profile. Please contact support.');
         }
         setUser(userProfile);
+        logAuditEventSafe({
+          action: 'login',
+          category: 'auth',
+          entityType: 'users',
+          entityId: userProfile.id,
+          summary: `${userProfile.email} signed in with email and password`,
+          details: { method: 'email' },
+        });
       }
     } catch (error) {
       console.error('Login error:', error);
+      logAuditEventSafe({
+        action: 'login_failed',
+        category: 'auth',
+        summary: `Failed login attempt for ${email}`,
+        details: { method: 'email', email },
+        actorRoleOverride: 'anonymous',
+      });
       throw error;
     } finally {
       setIsLoading(false);
@@ -529,6 +552,17 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
         setUser(userProfile);
       }
 
+      if (data.user) {
+        logAuditEventSafe({
+          action: 'signup',
+          category: 'auth',
+          entityType: 'users',
+          entityId: data.user.id,
+          summary: `New account signup: ${email.trim().toLowerCase()}`,
+          details: { method: 'email', needsEmailVerification },
+        });
+      }
+
       return { needsEmailVerification, emailAlreadyRegistered, resentConfirmation };
     } catch (error) {
       console.error('Sign up error:', error);
@@ -588,6 +622,13 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
         console.error('signInWithGoogle - Supabase OAuth error:', error);
         throw error;
       }
+
+      logAuditEventSafe({
+        action: 'login',
+        category: 'auth',
+        summary: 'Google sign-in initiated',
+        details: { method: 'google', step: 'redirect' },
+      });
     } catch (error) {
       console.error('Google sign in error:', error);
       throw error;
@@ -598,7 +639,18 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
 
   const logout = async () => {
     setIsLoading(true);
+    const currentUser = user;
     try {
+      if (currentUser) {
+        logAuditEventSafe({
+          action: 'logout',
+          category: 'auth',
+          entityType: 'users',
+          entityId: currentUser.id,
+          summary: `${currentUser.email} signed out`,
+          details: { method: 'manual' },
+        });
+      }
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       setUser(null);

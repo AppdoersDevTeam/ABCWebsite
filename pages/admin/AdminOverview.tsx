@@ -9,6 +9,7 @@ import { User } from '../../types';
 import { SkeletonPageHeader, SkeletonCard, SkeletonUserCard, SkeletonStatsCard } from '../../components/UI/Skeleton';
 import { formatRelativeDateInTimezone, formatFullDateTimeInTimezone } from '../../lib/dateUtils';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
+import { logAuditEventSafe } from '../../lib/auditLog';
 
 export const AdminOverview = () => {
   const { user } = useAuth();
@@ -107,6 +108,15 @@ export const AdminOverview = () => {
         .eq('id', userId);
 
       if (error) throw error;
+      const target = pendingUsers.find((u) => u.id === userId) || allUsers.find((u) => u.id === userId);
+      logAuditEventSafe({
+        action: 'approve',
+        category: 'users',
+        entityType: 'users',
+        entityId: userId,
+        summary: `Approved signup for ${target?.email || userId}`,
+        details: { email: target?.email },
+      });
       fetchPendingUsers();
     } catch (error) {
       console.error('Error approving user:', error);
@@ -120,14 +130,22 @@ export const AdminOverview = () => {
     }
 
     try {
-      // Delete the user from users table
-      // Note: To delete from auth.users, you'll need to use Supabase Admin API with service role
+      const target = pendingUsers.find((u) => u.id === userId) || allUsers.find((u) => u.id === userId);
       const { error: deleteError } = await supabase
         .from('users')
         .delete()
         .eq('id', userId);
 
       if (deleteError) throw deleteError;
+
+      logAuditEventSafe({
+        action: 'reject',
+        category: 'users',
+        entityType: 'users',
+        entityId: userId,
+        summary: `Rejected and removed signup for ${target?.email || userId}`,
+        details: { email: target?.email },
+      });
 
       fetchPendingUsers();
     } catch (error) {

@@ -8,6 +8,8 @@ import { SkeletonPageHeader } from '../../components/UI/Skeleton';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { buildStoredRole, getDisplayRole, inferProfileType } from '../../lib/teamMemberUtils';
 import { downloadDirectoryCsv, downloadDirectoryPdf } from '../../lib/exportDirectoryPeople';
+import { logAuditEventSafe } from '../../lib/auditLog';
+import { useAuth } from '../../context/AuthContext';
 import metadata from '../../metadata.json';
 
 type ProfileType = 'staff' | 'attendee' | 'member';
@@ -133,6 +135,7 @@ function formatArchivedDate(iso: string | null | undefined): string {
 }
 
 export const AdminTeam = () => {
+  const { user } = useAuth();
   const [members, setMembers] = useState<TeamMember[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [groups, setGroups] = useState<Group[]>([]);
@@ -660,6 +663,15 @@ export const AdminTeam = () => {
         console.warn('Join-table save failed (run ADD_GROUPS_AND_JOB_ROLES.sql in Supabase).', joinErr);
       }
 
+      logAuditEventSafe({
+        action: 'create',
+        category: 'team',
+        entityType: 'team_members',
+        entityId: created.id,
+        summary: `Added directory person "${trimmed.name}"`,
+        details: { profile_type: trimmed.profile_type },
+      });
+
       await fetchMembers();
       resetModal();
       setIsModalOpen(false);
@@ -733,6 +745,14 @@ export const AdminTeam = () => {
         console.warn('Join-table save failed (run ADD_GROUPS_AND_JOB_ROLES.sql in Supabase).', joinErr);
       }
 
+      logAuditEventSafe({
+        action: 'update',
+        category: 'team',
+        entityType: 'team_members',
+        entityId: editingMember.id,
+        summary: `Updated directory person "${trimmed.name}"`,
+      });
+
       await fetchMembers();
       resetModal();
       setEditingMember(null);
@@ -760,6 +780,13 @@ export const AdminTeam = () => {
     try {
       const { error } = await supabase.from('team_members').delete().eq('id', deleteTarget.id);
       if (error) throw error;
+      logAuditEventSafe({
+        action: 'delete',
+        category: 'team',
+        entityType: 'team_members',
+        entityId: deleteTarget.id,
+        summary: `Permanently deleted directory person "${deleteTarget.name}"`,
+      });
       setDeleteTarget(null);
       setDeleteConfirmText('');
       await fetchMembers();
@@ -781,9 +808,20 @@ export const AdminTeam = () => {
     try {
       const { error } = await supabase
         .from('team_members')
-        .update({ is_archived: true, archived_at: new Date().toISOString() })
+        .update({
+          is_archived: true,
+          archived_at: new Date().toISOString(),
+          archived_by: user?.id || null,
+        })
         .eq('id', archiveTarget.id);
       if (error) throw error;
+      logAuditEventSafe({
+        action: 'archive',
+        category: 'team',
+        entityType: 'team_members',
+        entityId: archiveTarget.id,
+        summary: `Archived directory person "${archiveTarget.name}"`,
+      });
       setArchiveTarget(null);
       await fetchMembers();
     } catch (error: unknown) {
@@ -796,11 +834,19 @@ export const AdminTeam = () => {
 
   const handleUnarchive = async (id: string) => {
     try {
+      const member = members.find((m) => m.id === id);
       const { error } = await supabase
         .from('team_members')
         .update({ is_archived: false, archived_at: null, archived_by: null })
         .eq('id', id);
       if (error) throw error;
+      logAuditEventSafe({
+        action: 'unarchive',
+        category: 'team',
+        entityType: 'team_members',
+        entityId: id,
+        summary: `Restored directory person "${member?.name || id}" from archive`,
+      });
       await fetchMembers();
     } catch (error: unknown) {
       console.error('Error unarchiving team member:', error);

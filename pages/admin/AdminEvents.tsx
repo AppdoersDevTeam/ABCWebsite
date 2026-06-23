@@ -13,6 +13,7 @@ import {
   buildEventDateTimePayload,
   parseTimeToInputValue,
 } from '../../lib/eventDateUtils';
+import { logAuditEventSafe } from '../../lib/auditLog';
 import metadata from '../../metadata.json';
 
 const DEFAULT_THUMB = '/ABC Logo.png';
@@ -155,6 +156,15 @@ export const AdminEvents = () => {
 
       if (error) throw error;
 
+      logAuditEventSafe({
+        action: 'create',
+        category: 'events',
+        entityType: 'events',
+        entityId: data.id,
+        summary: `Created event "${formData.title}"`,
+        details: { title: formData.title, is_public: formData.is_public },
+      });
+
       setEvents([...events, data]);
       resetModal();
       setIsModalOpen(false);
@@ -214,6 +224,15 @@ export const AdminEvents = () => {
 
       if (error) throw error;
 
+      logAuditEventSafe({
+        action: 'update',
+        category: 'events',
+        entityType: 'events',
+        entityId: editingEvent.id,
+        summary: `Updated event "${formData.title}"`,
+        details: { title: formData.title },
+      });
+
       fetchEvents();
       resetModal();
       setIsModalOpen(false);
@@ -234,9 +253,18 @@ export const AdminEvents = () => {
     }
 
     try {
+      const evt = events.find((e) => e.id === id);
       const { error } = await supabase.from('events').delete().eq('id', id);
 
       if (error) throw error;
+
+      logAuditEventSafe({
+        action: 'delete',
+        category: 'events',
+        entityType: 'events',
+        entityId: id,
+        summary: `Deleted event "${evt?.title || id}"`,
+      });
 
       setEvents(events.filter(e => e.id !== id));
     } catch (error) {
