@@ -20,6 +20,12 @@ const PROFILE_LABEL: Record<ProfileType, string> = {
   member: 'Member',
 };
 
+const MAX_DIRECTORY_PHONE_DIGITS = 17;
+
+function countPhoneDigits(phone: string): number {
+  return (phone.match(/\d/g) || []).length;
+}
+
 const STAFF_ROLE_OPTIONS = [
   'Administrator',
   'Associated Pastor',
@@ -491,6 +497,9 @@ export const AdminTeam = () => {
     if (!trimmed.phone) return 'Phone is required.';
     const phoneRegex = /^[0-9\s\-()]+$/;
     if (!phoneRegex.test(trimmed.phone)) return 'Phone number can only contain numbers, spaces, hyphens, and parentheses.';
+    if (countPhoneDigits(trimmed.phone) > MAX_DIRECTORY_PHONE_DIGITS) {
+      return `Phone number cannot exceed ${MAX_DIRECTORY_PHONE_DIGITS} digits.`;
+    }
     if (trimmed.description.length > 1500) return 'Description must not exceed 1500 characters.';
 
     if (trimmed.profile_type === 'staff' && formData.job_role_ids.length === 0) {
@@ -1520,12 +1529,13 @@ export const AdminTeam = () => {
               value={formData.phone}
               onChange={(e) => {
                 const value = e.target.value;
-                if (/^[0-9\s\-()]*$/.test(value)) {
+                if (/^[0-9\s\-()]*$/.test(value) && countPhoneDigits(value) <= MAX_DIRECTORY_PHONE_DIGITS) {
                   setFormData({ ...formData, phone: value });
                 }
               }}
               className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none"
               placeholder="03-308 5409"
+              title={`Up to ${MAX_DIRECTORY_PHONE_DIGITS} digits`}
             />
           </div>
 
