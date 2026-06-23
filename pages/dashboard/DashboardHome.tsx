@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { displayName } from '../../lib/constants';
 import { VibrantCard } from '../../components/UI/VibrantCard';
 import { Calendar, MessageSquare, BookOpen, ArrowUpRight } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { getVerseOfTheDay } from '../../lib/getVerseOfTheDay';
 
 export const DashboardHome = () => {
   const { user } = useAuth();
@@ -12,6 +13,7 @@ export const DashboardHome = () => {
   const [nextService, setNextService] = useState<string | null>(null);
   const [lastNewsletterDate, setLastNewsletterDate] = useState<string | null>(null);
   const [isLoadingStats, setIsLoadingStats] = useState(true);
+  const verseOfTheDay = useMemo(() => getVerseOfTheDay(), []);
 
   useEffect(() => {
     fetchStats();
@@ -161,9 +163,9 @@ export const DashboardHome = () => {
              <div className="relative z-10">
                 <h3 className="font-serif text-2xl md:text-3xl mb-4 text-charcoal font-normal">Verse of the Day</h3>
                 <p className="text-lg md:text-2xl text-charcoal/80 italic font-serif leading-relaxed max-w-3xl">
-                    "For I know the plans I have for you," declares the Lord, "plans to prosper you and not to harm you, plans to give you hope and a future."
+                    &ldquo;{verseOfTheDay.text}&rdquo;
                 </p>
-                <p className="mt-6 text-charcoal font-black tracking-widest uppercase text-sm">Jeremiah 29:11</p>
+                <p className="mt-6 text-charcoal font-black tracking-widest uppercase text-sm">{verseOfTheDay.reference}</p>
              </div>
         </div>
     </div>
