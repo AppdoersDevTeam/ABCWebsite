@@ -33,7 +33,6 @@ values
   ('Young Adults', 'young-adults', 40, true),
   ('Teens & Youth', 'teens-youth', 45, true),
   ('Kids Programme', 'kids-programme', 50, true),
-  ('Community Lunch', 'community-lunch', 60, true),
   ('Other', 'other', 999, true)
 on conflict do nothing;
 

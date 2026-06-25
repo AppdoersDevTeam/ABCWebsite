@@ -178,7 +178,6 @@ export const PublicLayout = () => {
         { label: 'Sunday Service', path: '/events/sunday-service', hash: '' },
         { label: 'Young Adults', path: '/events/young-adults', hash: '' },
         { label: 'Teens & Youth', path: '/events/teens-youth', hash: '' },
-        { label: 'Community Lunch', path: '/events/community-lunch', hash: '' },
         { label: 'Kids Program', path: '/events/kids-program', hash: '' },
       ]
     },

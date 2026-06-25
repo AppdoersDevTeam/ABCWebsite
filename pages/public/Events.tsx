@@ -14,7 +14,6 @@ const ALL_CATEGORIES = [
   'Young Adults',
   'Teens & Youth',
   'Kids Programme',
-  'Community Lunch',
   'Other',
 ] as const;
 
@@ -82,13 +81,6 @@ export const Events = () => {
       description: 'A welcoming space for teens to grow in faith and build friendships. Every Tuesday at 7:00 PM.',
       link: '/events/teens-youth',
       icon: <Users size={28} />
-    },
-    {
-      id: 'community-lunch',
-      title: 'Community Lunch',
-      description: 'Share a meal and build relationships with our church community.',
-      link: '/events/community-lunch',
-      icon: <Calendar size={28} />
     },
     {
       id: 'kids-program',

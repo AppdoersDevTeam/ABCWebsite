@@ -65,11 +65,6 @@ export const ROUTE_META: Record<string, PageMeta> = {
     description:
       'Our teens and youth ministry at Ashburton Baptist Church — a place for young people to belong, have fun, and grow in faith.',
   },
-  '/events/community-lunch': {
-    title: 'Community Lunch',
-    description:
-      'Share a meal with us at the Ashburton Baptist Church community lunch — everyone is welcome at the table.',
-  },
   '/events/kids-program': {
     title: 'Kids Program',
     description:

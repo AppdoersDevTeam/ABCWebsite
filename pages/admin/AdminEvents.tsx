@@ -24,7 +24,6 @@ const FALLBACK_CATEGORIES = [
   'Young Adults',
   'Teens & Youth',
   'Kids Programme',
-  'Community Lunch',
   'Other',
 ] as const;
 
