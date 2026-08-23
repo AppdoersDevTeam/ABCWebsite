@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@marsidev/react-turnstile": "^1.6.0",
     "@supabase/supabase-js": "^2.39.0",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.7",

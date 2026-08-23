@@ -35,6 +35,7 @@ const ACTION_OPTIONS: { value: string; label: string }[] = [
   { value: 'delete', label: 'Delete' },
   { value: 'approve', label: 'Approve' },
   { value: 'reject', label: 'Reject' },
+  { value: 'email_inquiry', label: 'Email inquiry' },
   { value: 'login', label: 'Login' },
   { value: 'login_failed', label: 'Login failed' },
   { value: 'logout', label: 'Logout' },

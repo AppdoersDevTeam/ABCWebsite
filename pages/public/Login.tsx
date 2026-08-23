@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { GlowingButton } from '../../components/UI/GlowingButton';
+import { TurnstileField, type TurnstileFieldHandle } from '../../components/UI/TurnstileField';
 import { Shield, User as UserIcon } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { displayName } from '../../lib/constants';
@@ -54,6 +55,8 @@ export const Login = () => {
   const [awaitingEmailVerification, setAwaitingEmailVerification] = useState(false);
   const [pendingVerificationEmail, setPendingVerificationEmail] = useState('');
   const [isResendingConfirmation, setIsResendingConfirmation] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const turnstileRef = useRef<TurnstileFieldHandle>(null);
   const {
     loginWithEmail,
     signUpWithEmail,
@@ -66,6 +69,19 @@ export const Login = () => {
   } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
+  const resetCaptcha = () => {
+    setCaptchaToken(null);
+    turnstileRef.current?.reset();
+  };
+
+  const requireCaptcha = (): string | null => {
+    if (!captchaToken) {
+      setError('Please complete the CAPTCHA before continuing.');
+      return null;
+    }
+    return captchaToken;
+  };
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -140,6 +156,9 @@ export const Login = () => {
     setError(null);
     setSuccess(null);
 
+    const token = requireCaptcha();
+    if (!token) return;
+
     try {
       if (isResettingPassword) {
         const normalizedEmail = (resetEmail || email || '').trim();
@@ -152,10 +171,11 @@ export const Login = () => {
           return;
         }
 
-        await sendPasswordReset(normalizedEmail);
+        await sendPasswordReset(normalizedEmail, token);
         setSuccess('Password reset email sent. Please check your inbox.');
         setIsResettingPassword(false);
         setResetEmail('');
+        resetCaptcha();
         return;
       }
 
@@ -172,8 +192,10 @@ export const Login = () => {
           password,
           firstName.trim(),
           lastName.trim(),
-          normalizedPhone
+          normalizedPhone,
+          token
         );
+        resetCaptcha();
         const verificationEmail = email.trim().toLowerCase();
         setPendingVerificationEmail(verificationEmail);
 
@@ -215,7 +237,8 @@ export const Login = () => {
             setIsLoggingIn(false);
             return;
           }
-          await loginWithEmail(email, password);
+          await loginWithEmail(email, password, token);
+          resetCaptcha();
 
           const { data: { session } } = await supabase.auth.getSession();
 
@@ -265,7 +288,17 @@ export const Login = () => {
     } catch (err: any) {
       console.error('Login error:', err);
       setIsLoggingIn(false);
+      resetCaptcha();
       const message = (err?.message || '').toLowerCase();
+
+      if (
+        message.includes('captcha') ||
+        message.includes('turnstile') ||
+        message.includes('verification failed')
+      ) {
+        setError('CAPTCHA verification failed. Please try again.');
+        return;
+      }
 
       if (message.includes('email not confirmed')) {
         setPendingVerificationEmail(email.trim().toLowerCase());
@@ -298,15 +331,29 @@ export const Login = () => {
       return;
     }
 
+    const token = requireCaptcha();
+    if (!token) return;
+
     setIsResendingConfirmation(true);
     setError(null);
     try {
-      await resendSignupConfirmation(targetEmail);
+      await resendSignupConfirmation(targetEmail, token);
+      resetCaptcha();
       setPendingVerificationEmail(targetEmail);
       setEmail(targetEmail);
       setSuccess(`A new confirmation email was sent to ${targetEmail}. Click the link once, then sign in here.`);
     } catch (err: any) {
       console.error('Resend confirmation error:', err);
+      resetCaptcha();
+      const message = (err?.message || '').toLowerCase();
+      if (
+        message.includes('captcha') ||
+        message.includes('turnstile') ||
+        message.includes('verification failed')
+      ) {
+        setError('CAPTCHA verification failed. Please try again.');
+        return;
+      }
       setError(getAuthEmailErrorMessage(err));
     } finally {
       setIsResendingConfirmation(false);
@@ -395,11 +442,17 @@ export const Login = () => {
                 />
               </FormField>
             )}
+            <TurnstileField
+              ref={turnstileRef}
+              onToken={setCaptchaToken}
+              onExpire={() => setCaptchaToken(null)}
+              onError={() => setCaptchaToken(null)}
+            />
             <div className="flex flex-col gap-2">
               <GlowingButton
                 type="button"
                 fullWidth
-                disabled={isResendingConfirmation}
+                disabled={isResendingConfirmation || !captchaToken}
                 onClick={handleResendConfirmation}
               >
                 {isResendingConfirmation ? 'Sending...' : 'Resend confirmation email'}
@@ -411,6 +464,7 @@ export const Login = () => {
                   setIsSignUp(false);
                   setSuccess(null);
                   setError(null);
+                  resetCaptcha();
                 }}
                 className="text-gold hover:text-charcoal font-bold"
               >
@@ -449,6 +503,7 @@ export const Login = () => {
                     setResetEmail('');
                     setError(null);
                     setSuccess(null);
+                    resetCaptcha();
                   }}
                 >
                   Back to sign in
@@ -567,6 +622,7 @@ export const Login = () => {
                   setPendingVerificationEmail(email.trim().toLowerCase());
                   setError(null);
                   setSuccess(null);
+                  resetCaptcha();
                 }}
               >
                 Need a confirmation email?
@@ -580,6 +636,7 @@ export const Login = () => {
                   setResetEmail(email);
                   setError(null);
                   setSuccess(null);
+                  resetCaptcha();
                 }}
               >
                 Forgot password?
@@ -587,11 +644,18 @@ export const Login = () => {
             </div>
           )}
 
+          <TurnstileField
+            ref={turnstileRef}
+            onToken={setCaptchaToken}
+            onExpire={() => setCaptchaToken(null)}
+            onError={() => setCaptchaToken(null)}
+          />
+
           <div>
             <GlowingButton
               type="submit"
               fullWidth
-              disabled={isLoading}
+              disabled={isLoading || !captchaToken}
             >
               {isLoading
                 ? (isResettingPassword ? 'Sending...' : isSignUp ? 'Creating account...' : 'Signing in...')
@@ -633,6 +697,7 @@ export const Login = () => {
                 setFieldErrors({});
                 setAwaitingEmailVerification(false);
                 setPendingVerificationEmail('');
+                resetCaptcha();
               }}
               className="text-sm text-gold hover:text-charcoal font-bold"
             >

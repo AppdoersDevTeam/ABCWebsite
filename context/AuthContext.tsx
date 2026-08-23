@@ -6,6 +6,7 @@ import { getUserTimezone } from '../lib/dateUtils';
 import { syncDirectoryUserLink } from '../lib/directoryUserLink';
 import { hasAuthCallbackParams, completeAuthCallbackFromUrl, isPasswordRecoveryUrl } from '../lib/authCallback';
 import { logAuditEventSafe } from '../lib/auditLog';
+import { getAuthEmailRedirectUrl } from '../lib/authRedirect';
 import type { AuthError, Session, User as SupabaseUser } from '@supabase/supabase-js';
 
 function splitName(fullName: string): { first_name: string; last_name: string } {
@@ -43,13 +44,20 @@ export type SignUpResult = {
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
-  loginWithEmail: (email: string, password: string) => Promise<void>;
-  signUpWithEmail: (email: string, password: string, firstName: string, lastName: string, phone?: string) => Promise<SignUpResult>;
-  resendSignupConfirmation: (email: string) => Promise<void>;
+  loginWithEmail: (email: string, password: string, captchaToken: string) => Promise<void>;
+  signUpWithEmail: (
+    email: string,
+    password: string,
+    firstName: string,
+    lastName: string,
+    phone: string | undefined,
+    captchaToken: string
+  ) => Promise<SignUpResult>;
+  resendSignupConfirmation: (email: string, captchaToken: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
   isAuthenticated: boolean;
-  sendPasswordReset: (email: string) => Promise<void>;
+  sendPasswordReset: (email: string, captchaToken: string) => Promise<void>;
   refreshUserProfile: () => Promise<void>;
 }
 
@@ -441,12 +449,13 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
     };
   }, []);
 
-  const loginWithEmail = async (email: string, password: string) => {
+  const loginWithEmail = async (email: string, password: string, captchaToken: string) => {
     setIsLoading(true);
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
+        options: { captchaToken },
       });
 
       if (error) throw error;
@@ -493,18 +502,26 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
   const getSignupConfirmationRedirect = () =>
     getAuthEmailRedirectUrl('/auth/callback');
 
-  const resendSignupConfirmation = async (email: string) => {
+  const resendSignupConfirmation = async (email: string, captchaToken: string) => {
     const { error } = await supabase.auth.resend({
       type: 'signup',
       email: email.trim().toLowerCase(),
       options: {
         emailRedirectTo: getSignupConfirmationRedirect(),
+        captchaToken,
       },
     });
     if (error) throw error;
   };
 
-  const signUpWithEmail = async (email: string, password: string, firstName: string, lastName: string, phone?: string) => {
+  const signUpWithEmail = async (
+    email: string,
+    password: string,
+    firstName: string,
+    lastName: string,
+    phone: string | undefined,
+    captchaToken: string
+  ) => {
     setIsLoading(true);
     try {
       const userTimezone = getUserTimezone();
@@ -514,6 +531,7 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
         password,
         options: {
           emailRedirectTo: getSignupConfirmationRedirect(),
+          captchaToken,
           data: {
             full_name: fullName,
             first_name: firstName,
@@ -529,12 +547,8 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
       const emailAlreadyRegistered =
         !!data.user && (data.user.identities?.length ?? 0) === 0;
       const isAlreadyConfirmed = !!data.user?.email_confirmed_at;
-      let resentConfirmation = false;
-
-      if (emailAlreadyRegistered && data.user && !isAlreadyConfirmed) {
-        await resendSignupConfirmation(email);
-        resentConfirmation = true;
-      }
+      // Turnstile tokens are single-use; do not auto-resend here — user gets a fresh challenge on Resend.
+      const resentConfirmation = false;
 
       const needsEmailVerification =
         (!data.session && !!data.user && !emailAlreadyRegistered) ||
@@ -662,10 +676,11 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
     }
   };
 
-  const sendPasswordReset = async (email: string) => {
+  const sendPasswordReset = async (email: string, captchaToken: string) => {
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: getAuthEmailRedirectUrl('/reset-password'),
+        captchaToken,
       });
 
       if (error) throw error;

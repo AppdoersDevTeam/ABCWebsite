@@ -1,0 +1,5 @@
+# Minimal Supabase config for Edge Functions in this repo.
+# Project ref: zwxlccqhafdnvdohzxkg (ABC Website)
+
+[functions.notify-user-approved]
+verify_jwt = true

@@ -280,6 +280,69 @@ https://ashburtonbaptist.co.nz/#/reset-password?token_hash={{ .TokenHash }}&type
 | “Success” but no email arrives | Supabase may rate-limit auth emails (default was **2 per hour** per project). Check **Authentication → Rate Limits** and increase **Email sent**; also verify custom SMTP in **Authentication → Emails → SMTP** |
 | Logo doesn’t show | Logo must be publicly reachable at `https://ashburtonbaptist.co.nz/abc-logo.png` |
 | Lands in spam | Emails from Google Workspace usually deliver well; check the custom HTML template is saved |
+| Approval email not sent | Edge Function secrets missing (`RESEND_API_KEY`), Resend domain not verified, or function not deployed — see **Approval email** below |
+
+---
+
+## Approval email (member approved)
+
+When an admin approves a signup (Admin Overview or Admin Users), the app calls the Supabase Edge Function `notify-user-approved`, which sends a branded “you’re approved — log in now” email via the **Resend API**.
+
+This is separate from Auth SMTP (confirm signup / reset password). Auth templates cannot send custom approval mail.
+
+### Prerequisites
+
+1. Resend account with domain **`ashburtonbaptist.co.nz`** verified (same as the Resend SMTP alternative above)
+2. API key from [resend.com/api-keys](https://resend.com/api-keys)
+
+### Set Edge Function secrets
+
+In Supabase Dashboard → **Edge Functions** → **Secrets** (or CLI), set:
+
+| Secret | Value |
+|--------|--------|
+| `RESEND_API_KEY` | Your Resend API key |
+| `SITE_URL` | `https://ashburtonbaptist.co.nz` (no trailing slash) |
+| `APPROVAL_FROM_EMAIL` | Optional. Default: `Ashburton Baptist Church <office@ashburtonbaptist.co.nz>` |
+
+`SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` are provided automatically to Edge Functions.
+
+CLI example:
+
+```powershell
+supabase secrets set RESEND_API_KEY="re_xxx" SITE_URL="https://ashburtonbaptist.co.nz" --project-ref zwxlccqhafdnvdohzxkg
+```
+
+### Deploy / redeploy the function
+
+Source: `supabase/functions/notify-user-approved/index.ts`
+
+```powershell
+supabase functions deploy notify-user-approved --project-ref zwxlccqhafdnvdohzxkg
+```
+
+The function is already deployed once for project **ABC Website** (`zwxlccqhafdnvdohzxkg`). Redeploy after editing the source.
+
+### Behaviour
+
+- Only admins can invoke the function (JWT + `users.role` / super-admin check)
+- Email is sent after `is_approved` is set to `true`
+- Client skips the call when the user was already approved (avoids duplicate mail on re-approve)
+- If email fails, approval still succeeds; the admin UI shows a soft warning
+
+---
+
+## Intro inquiry email (pending signups)
+
+Admins can email unknown pending signups from **Admin Overview** or **Admin Users** (Email next to Approve / Reject). A compose modal opens with an editable template; send uses Resend from the church office with `Reply-To: office@ashburtonbaptist.co.nz`.
+
+Source: `supabase/functions/notify-user-intro-inquiry/index.ts`
+
+```powershell
+supabase functions deploy notify-user-intro-inquiry --project-ref zwxlccqhafdnvdohzxkg
+```
+
+Uses the same secrets as approval mail (`RESEND_API_KEY`, optional `APPROVAL_FROM_EMAIL`).
 
 ---
 
@@ -307,3 +370,4 @@ If Google App Passwords are not available:
 - Default Supabase email is for testing only (rate-limited, generic branding).
 - Production sites should always use custom SMTP on the church domain.
 - Template variables are documented in Supabase: [Email Templates](https://supabase.com/docs/guides/auth/auth-email-templates).
+- Approval emails use Resend’s HTTP API from an Edge Function, not Auth SMTP.

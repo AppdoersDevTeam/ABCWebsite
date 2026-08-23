@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+.hub-session.json
+.hub-ticket-time.json
+supabase/.temp/

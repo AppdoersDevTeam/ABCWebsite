@@ -1,16 +1,20 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { Users, UserCheck, X, Shield, ShieldOff, Ban, Crown, KeyRound, AlertTriangle } from 'lucide-react';
+import { Users, UserCheck, X, Shield, ShieldOff, Ban, Crown, KeyRound, AlertTriangle, Mail } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { displayName, displayInitial, filterUsersForAdminView } from '../../lib/constants';
 import { User } from '../../types';
 import { CreateUserProfile } from './CreateUserProfile';
 import { LinkDirectoryUserModal } from './LinkDirectoryUserModal';
+import { IntroInquiryEmailModal } from './IntroInquiryEmailModal';
 import { SkeletonPageHeader, SkeletonStatsCard, SkeletonUserCard } from '../../components/UI/Skeleton';
 import { formatRelativeDateInTimezone } from '../../lib/dateUtils';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { GlowingButton } from '../../components/UI/GlowingButton';
+import { Modal } from '../../components/UI/Modal';
+import { TurnstileField, type TurnstileFieldHandle } from '../../components/UI/TurnstileField';
 import { logAuditEventSafe } from '../../lib/auditLog';
+import { notifyUserApproved } from '../../lib/notifyUserApproved';
 
 export const AdminUsers = () => {
   const { user, sendPasswordReset } = useAuth();
@@ -23,7 +27,12 @@ export const AdminUsers = () => {
     Record<string, { id: string; created_from_user_sync?: boolean | null }>
   >({});
   const [linkModalUser, setLinkModalUser] = useState<User | null>(null);
+  const [emailModalUser, setEmailModalUser] = useState<User | null>(null);
   const [isRelinking, setIsRelinking] = useState(false);
+  const [passwordResetEmail, setPasswordResetEmail] = useState<string | null>(null);
+  const [passwordResetCaptcha, setPasswordResetCaptcha] = useState<string | null>(null);
+  const [isSendingPasswordReset, setIsSendingPasswordReset] = useState(false);
+  const passwordResetTurnstileRef = useRef<TurnstileFieldHandle>(null);
 
   useEffect(() => {
     fetchUsers();
@@ -102,13 +111,15 @@ export const AdminUsers = () => {
     }
 
     try {
+      const target = allUsers.find((u) => u.id === userId);
+      const wasUnapproved = target ? !target.is_approved : true;
+
       const { error } = await supabase
         .from('users')
         .update({ is_approved: true })
         .eq('id', userId);
 
       if (error) throw error;
-      const target = allUsers.find((u) => u.id === userId);
       logAuditEventSafe({
         action: 'approve',
         category: 'users',
@@ -117,7 +128,17 @@ export const AdminUsers = () => {
         summary: `Approved signup for ${target?.email || userId}`,
         details: { email: target?.email },
       });
-      alert('User approved successfully');
+
+      let emailNote = '';
+      if (wasUnapproved) {
+        const notifyResult = await notifyUserApproved(userId);
+        if (!notifyResult.ok) {
+          emailNote =
+            ' User was approved, but the confirmation email may not have been sent.';
+        }
+      }
+
+      alert(`User approved successfully.${emailNote}`);
       fetchUsers();
     } catch (error) {
       console.error('Error approving user:', error);
@@ -188,6 +209,9 @@ export const AdminUsers = () => {
     }
 
     try {
+      const target = allUsers.find((u) => u.id === userId);
+      const wasUnapproved = target ? !target.is_approved : false;
+
       const { error } = await supabase
         .from('users')
         .update({ role: 'admin', is_approved: true })
@@ -202,7 +226,17 @@ export const AdminUsers = () => {
         summary: `Granted admin access to ${userName}`,
         details: { field: 'role', value: 'admin' },
       });
-      alert(`${userName} is now an admin`);
+
+      let emailNote = '';
+      if (wasUnapproved) {
+        const notifyResult = await notifyUserApproved(userId);
+        if (!notifyResult.ok) {
+          emailNote =
+            ' They are an admin now, but the approval confirmation email may not have been sent.';
+        }
+      }
+
+      alert(`${userName} is now an admin.${emailNote}`);
       fetchUsers();
     } catch (error) {
       console.error('Error making user admin:', error);
@@ -238,23 +272,41 @@ export const AdminUsers = () => {
     }
   };
 
-  const handleSendPasswordReset = async (email: string | null | undefined) => {
+  const openPasswordReset = (email: string | null | undefined) => {
     const normalizedEmail = (email || '').trim();
     if (!normalizedEmail) {
       alert('This user does not have an email address on file.');
       return;
     }
+    setPasswordResetCaptcha(null);
+    setPasswordResetEmail(normalizedEmail);
+  };
 
-    if (!window.confirm(`Send password reset link to ${normalizedEmail}?`)) {
+  const closePasswordReset = () => {
+    setPasswordResetEmail(null);
+    setPasswordResetCaptcha(null);
+    passwordResetTurnstileRef.current?.reset();
+  };
+
+  const handleSendPasswordReset = async () => {
+    if (!passwordResetEmail) return;
+    if (!passwordResetCaptcha) {
+      alert('Please complete the CAPTCHA before sending the reset email.');
       return;
     }
 
+    setIsSendingPasswordReset(true);
     try {
-      await sendPasswordReset(normalizedEmail);
+      await sendPasswordReset(passwordResetEmail, passwordResetCaptcha);
       alert('Password reset email sent. Ask the user to check their inbox.');
+      closePasswordReset();
     } catch (error) {
       console.error('Error sending password reset email:', error);
+      setPasswordResetCaptcha(null);
+      passwordResetTurnstileRef.current?.reset();
       alert('Failed to send password reset email');
+    } finally {
+      setIsSendingPasswordReset(false);
     }
   };
 
@@ -591,7 +643,7 @@ export const AdminUsers = () => {
                   </button>
                   {/* Password reset */}
                   <button
-                    onClick={() => handleSendPasswordReset(u.email)}
+                    onClick={() => openPasswordReset(u.email)}
                     className="bg-white border-2 border-gray-200 text-charcoal px-4 py-2 rounded-[4px] font-bold hover:border-gold hover:text-gold transition-colors shadow-sm flex items-center gap-2 text-sm"
                     title="Send a password reset email"
                   >
@@ -647,16 +699,27 @@ export const AdminUsers = () => {
                     </button>
                   )}
 
-                  {/* Reject Button (only for pending users) */}
+                  {/* Email / Reject (only for pending users) */}
                   {!u.is_approved && (
-                    <button
-                      onClick={() => handleRejectUser(u.id)}
-                      className="bg-white border-2 border-red-200 text-red-600 px-4 py-2 rounded-[4px] font-bold hover:bg-red-50 transition-colors shadow-sm flex items-center gap-2 text-sm"
-                      title="Reject and delete user"
-                    >
-                      <X size={16} />
-                      Reject
-                    </button>
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => setEmailModalUser(u)}
+                        className="bg-white border-2 border-gray-200 text-charcoal px-4 py-2 rounded-[4px] font-bold hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-2 text-sm"
+                        title="Email this person"
+                      >
+                        <Mail size={16} />
+                        Email
+                      </button>
+                      <button
+                        onClick={() => handleRejectUser(u.id)}
+                        className="bg-white border-2 border-red-200 text-red-600 px-4 py-2 rounded-[4px] font-bold hover:bg-red-50 transition-colors shadow-sm flex items-center gap-2 text-sm"
+                        title="Reject and delete user"
+                      >
+                        <X size={16} />
+                        Reject
+                      </button>
+                    </>
                   )}
                 </div>
               </div>
@@ -673,6 +736,47 @@ export const AdminUsers = () => {
           void fetchUsers();
         }}
       />
+
+      <IntroInquiryEmailModal
+        isOpen={!!emailModalUser}
+        onClose={() => setEmailModalUser(null)}
+        targetUser={emailModalUser}
+      />
+
+      <Modal
+        isOpen={!!passwordResetEmail}
+        onClose={closePasswordReset}
+        title="Send password reset"
+      >
+        <div className="space-y-4 p-2">
+          <p className="text-sm text-neutral">
+            Send a password reset link to <strong className="text-charcoal">{passwordResetEmail}</strong>.
+            Complete the CAPTCHA to continue.
+          </p>
+          <TurnstileField
+            ref={passwordResetTurnstileRef}
+            onToken={setPasswordResetCaptcha}
+            onExpire={() => setPasswordResetCaptcha(null)}
+            onError={() => setPasswordResetCaptcha(null)}
+          />
+          <div className="flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={closePasswordReset}
+              className="px-4 py-2 text-sm font-bold text-neutral hover:text-charcoal"
+            >
+              Cancel
+            </button>
+            <GlowingButton
+              type="button"
+              disabled={isSendingPasswordReset || !passwordResetCaptcha}
+              onClick={handleSendPasswordReset}
+            >
+              {isSendingPasswordReset ? 'Sending...' : 'Send reset email'}
+            </GlowingButton>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };

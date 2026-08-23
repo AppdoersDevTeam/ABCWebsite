@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { VibrantCard } from '../../components/UI/VibrantCard';
-import { Calendar, MessageSquare, BookOpen, Users, ClipboardList, ArrowUpRight, UserCheck, X, Plus, Shield } from 'lucide-react';
+import { Calendar, MessageSquare, BookOpen, Users, ClipboardList, ArrowUpRight, UserCheck, X, Plus, Shield, Mail } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { displayName, filterUsersForAdminView } from '../../lib/constants';
@@ -10,6 +10,8 @@ import { SkeletonPageHeader, SkeletonCard, SkeletonUserCard, SkeletonStatsCard }
 import { formatRelativeDateInTimezone, formatFullDateTimeInTimezone } from '../../lib/dateUtils';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { logAuditEventSafe } from '../../lib/auditLog';
+import { notifyUserApproved } from '../../lib/notifyUserApproved';
+import { IntroInquiryEmailModal } from './IntroInquiryEmailModal';
 
 export const AdminOverview = () => {
   const { user } = useAuth();
@@ -18,6 +20,7 @@ export const AdminOverview = () => {
   const [isLoadingUsers, setIsLoadingUsers] = useState(true);
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [showAllUsers, setShowAllUsers] = useState(false);
+  const [emailModalUser, setEmailModalUser] = useState<User | null>(null);
   const [prayerRequests24h, setPrayerRequests24h] = useState(0);
   const [nextService, setNextService] = useState<string | null>(null);
   const [lastNewsletterDate, setLastNewsletterDate] = useState<string | null>(null);
@@ -102,13 +105,16 @@ export const AdminOverview = () => {
     }
 
     try {
+      const target =
+        pendingUsers.find((u) => u.id === userId) || allUsers.find((u) => u.id === userId);
+      const wasUnapproved = target ? !target.is_approved : true;
+
       const { error } = await supabase
         .from('users')
         .update({ is_approved: true })
         .eq('id', userId);
 
       if (error) throw error;
-      const target = pendingUsers.find((u) => u.id === userId) || allUsers.find((u) => u.id === userId);
       logAuditEventSafe({
         action: 'approve',
         category: 'users',
@@ -117,6 +123,17 @@ export const AdminOverview = () => {
         summary: `Approved signup for ${target?.email || userId}`,
         details: { email: target?.email },
       });
+
+      let emailNote = '';
+      if (wasUnapproved) {
+        const notifyResult = await notifyUserApproved(userId);
+        if (!notifyResult.ok) {
+          emailNote =
+            ' User was approved, but the confirmation email may not have been sent.';
+        }
+      }
+
+      alert(`User approved successfully.${emailNote}`);
       fetchPendingUsers();
     } catch (error) {
       console.error('Error approving user:', error);
@@ -677,6 +694,15 @@ export const AdminOverview = () => {
                       Approve
                     </button>
                     <button
+                      type="button"
+                      onClick={() => setEmailModalUser(pendingUser)}
+                      className="bg-white border-2 border-gray-200 text-charcoal px-6 py-3 rounded-[4px] font-bold hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-2"
+                      title="Email this person"
+                    >
+                      <Mail size={18} />
+                      Email
+                    </button>
+                    <button
                       onClick={() => handleRejectUser(pendingUser.id)}
                       className="bg-white border-2 border-red-200 text-red-600 px-6 py-3 rounded-[4px] font-bold hover:bg-red-50 transition-colors shadow-sm flex items-center gap-2"
                     >
@@ -798,6 +824,12 @@ export const AdminOverview = () => {
           )}
         </div>
       </div>
+
+      <IntroInquiryEmailModal
+        isOpen={!!emailModalUser}
+        onClose={() => setEmailModalUser(null)}
+        targetUser={emailModalUser}
+      />
     </div>
   );
 };
