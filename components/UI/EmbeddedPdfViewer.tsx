@@ -1,5 +1,11 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { GlobalWorkerOptions, getDocument, type PDFDocumentProxy, type RenderTask } from 'pdfjs-dist';
+import {
+  GlobalWorkerOptions,
+  getDocument,
+  type PDFDocumentLoadingTask,
+  type PDFDocumentProxy,
+  type RenderTask,
+} from 'pdfjs-dist';
 import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
 GlobalWorkerOptions.workerSrc = pdfWorker;
@@ -71,6 +77,7 @@ export const EmbeddedPdfViewer: React.FC<EmbeddedPdfViewerProps> = ({
 
     const generation = ++renderGeneration.current;
     let cancelled = false;
+    let loadingTask: PDFDocumentLoadingTask | null = null;
     let pdfDoc: PDFDocumentProxy | null = null;
     const renderTasks: RenderTask[] = [];
     const objectUrls: PageImage[] = [];
@@ -84,7 +91,7 @@ export const EmbeddedPdfViewer: React.FC<EmbeddedPdfViewerProps> = ({
       });
 
       try {
-        const loadingTask = getDocument({ url: src, withCredentials: false });
+        loadingTask = getDocument({ url: src, withCredentials: false });
         pdfDoc = await loadingTask.promise;
 
         if (cancelled || generation !== renderGeneration.current) return;
@@ -151,8 +158,13 @@ export const EmbeddedPdfViewer: React.FC<EmbeddedPdfViewerProps> = ({
           // ignore cancel errors
         }
       });
-      if (pdfDoc) {
-        pdfDoc.destroy();
+      // pdfjs-dist v6 removed PDFDocumentProxy.destroy(); tear down via loadingTask.
+      if (loadingTask) {
+        try {
+          loadingTask.destroy();
+        } catch {
+          // ignore teardown errors during unmount
+        }
       }
       revokePageUrls(objectUrls);
     };
