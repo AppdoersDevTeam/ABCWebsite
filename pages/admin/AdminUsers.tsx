@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { Users, UserCheck, X, Shield, ShieldOff, Ban, Crown, KeyRound, AlertTriangle, Mail } from 'lucide-react';
+import { Users, UserCheck, X, Shield, ShieldOff, Ban, Crown, KeyRound, AlertTriangle, Mail, ChevronDown, Link2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { displayName, displayInitial, filterUsersForAdminView } from '../../lib/constants';
 import { User } from '../../types';
@@ -32,12 +32,38 @@ export const AdminUsers = () => {
   const [passwordResetEmail, setPasswordResetEmail] = useState<string | null>(null);
   const [passwordResetCaptcha, setPasswordResetCaptcha] = useState<string | null>(null);
   const [isSendingPasswordReset, setIsSendingPasswordReset] = useState(false);
+  const [actionsMenuUserId, setActionsMenuUserId] = useState<string | null>(null);
   const passwordResetTurnstileRef = useRef<TurnstileFieldHandle>(null);
+  const actionsMenuRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     fetchUsers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (!actionsMenuUserId) return;
+
+    const handlePointerDown = (event: MouseEvent) => {
+      if (
+        actionsMenuRef.current &&
+        !actionsMenuRef.current.contains(event.target as Node)
+      ) {
+        setActionsMenuUserId(null);
+      }
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setActionsMenuUserId(null);
+    };
+
+    document.addEventListener('mousedown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [actionsMenuUserId]);
 
   const fetchUsers = async () => {
     console.log('AdminUsers - fetchUsers called');
@@ -632,64 +658,10 @@ export const AdminUsers = () => {
                     </div>
                   </div>
                 </div>
-                <div className="flex gap-2 flex-wrap flex-shrink-0 max-lg:w-full">
-                  <button
-                    type="button"
-                    onClick={() => setLinkModalUser(u)}
-                    className="bg-blue-100 border-2 border-blue-300 text-blue-700 px-4 py-2 rounded-[4px] font-bold hover:bg-blue-200 transition-colors shadow-sm text-sm"
-                    title="Link this website user to a Directory person"
-                  >
-                    Link Directory
-                  </button>
-                  {/* Password reset */}
-                  <button
-                    onClick={() => openPasswordReset(u.email)}
-                    className="bg-white border-2 border-gray-200 text-charcoal px-4 py-2 rounded-[4px] font-bold hover:border-gold hover:text-gold transition-colors shadow-sm flex items-center gap-2 text-sm"
-                    title="Send a password reset email"
-                  >
-                    <KeyRound size={16} />
-                    Reset Password
-                  </button>
-
-                  {/* Role Management — super admin only, cannot change own role or other super admins */}
-                  {isSuperAdmin && u.id !== user?.id && !u.is_super_admin && (
-                    <>
-                      {u.role === 'member' ? (
-                        <button
-                          onClick={() => handleMakeAdmin(u.id, displayName(u))}
-                          className="bg-purple-100 border-2 border-purple-300 text-purple-700 px-4 py-2 rounded-[4px] font-bold hover:bg-purple-200 transition-colors shadow-sm flex items-center gap-2 text-sm"
-                          title="Promote to admin"
-                        >
-                          <Shield size={16} />
-                          Make Admin
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => handleRevokeAdmin(u.id, displayName(u))}
-                          className="bg-orange-100 border-2 border-orange-300 text-orange-700 px-4 py-2 rounded-[4px] font-bold hover:bg-orange-200 transition-colors shadow-sm flex items-center gap-2 text-sm"
-                          title="Demote to member"
-                        >
-                          <ShieldOff size={16} />
-                          Revoke Admin
-                        </button>
-                      )}
-                    </>
-                  )}
-
-                  {/* Approval Management */}
-                  {u.is_approved ? (
-                    u.id !== user?.id && !u.is_super_admin && (
-                      <button
-                        onClick={() => handleRevokeApproval(u.id, displayName(u))}
-                        className="bg-red-100 border-2 border-red-300 text-red-700 px-4 py-2 rounded-[4px] font-bold hover:bg-red-200 transition-colors shadow-sm flex items-center gap-2 text-sm"
-                        title="Revoke user approval"
-                      >
-                        <Ban size={16} />
-                        Revoke Access
-                      </button>
-                    )
-                  ) : (
+                <div className="flex items-center gap-2 flex-shrink-0 self-start md:self-center">
+                  {!u.is_approved && (
                     <button
+                      type="button"
                       onClick={() => handleApproveUser(u.id)}
                       className="bg-gold text-charcoal px-4 py-2 rounded-[4px] font-bold hover:bg-gold/80 transition-colors shadow-sm flex items-center gap-2 text-sm"
                       title="Approve user"
@@ -699,28 +671,144 @@ export const AdminUsers = () => {
                     </button>
                   )}
 
-                  {/* Email / Reject (only for pending users) */}
-                  {!u.is_approved && (
-                    <>
-                      <button
-                        type="button"
-                        onClick={() => setEmailModalUser(u)}
-                        className="bg-white border-2 border-gray-200 text-charcoal px-4 py-2 rounded-[4px] font-bold hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-2 text-sm"
-                        title="Email this person"
+                  <div
+                    className="relative"
+                    ref={actionsMenuUserId === u.id ? actionsMenuRef : undefined}
+                  >
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setActionsMenuUserId((current) =>
+                          current === u.id ? null : u.id
+                        )
+                      }
+                      className="bg-white border-2 border-gray-200 text-charcoal px-4 py-2 rounded-[4px] font-bold hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-2 text-sm"
+                      aria-expanded={actionsMenuUserId === u.id}
+                      aria-haspopup="menu"
+                    >
+                      Actions
+                      <ChevronDown
+                        size={16}
+                        className={`transition-transform ${
+                          actionsMenuUserId === u.id ? 'rotate-180' : ''
+                        }`}
+                      />
+                    </button>
+
+                    {actionsMenuUserId === u.id && (
+                      <div
+                        role="menu"
+                        className="absolute right-0 top-full mt-2 z-30 w-56 rounded-[8px] border border-gray-200 bg-white py-1 shadow-lg"
                       >
-                        <Mail size={16} />
-                        Email
-                      </button>
-                      <button
-                        onClick={() => handleRejectUser(u.id)}
-                        className="bg-white border-2 border-red-200 text-red-600 px-4 py-2 rounded-[4px] font-bold hover:bg-red-50 transition-colors shadow-sm flex items-center gap-2 text-sm"
-                        title="Reject and delete user"
-                      >
-                        <X size={16} />
-                        Reject
-                      </button>
-                    </>
-                  )}
+                        <button
+                          type="button"
+                          role="menuitem"
+                          className="w-full flex items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-charcoal hover:bg-gray-50"
+                          onClick={() => {
+                            setActionsMenuUserId(null);
+                            setLinkModalUser(u);
+                          }}
+                        >
+                          <Link2 size={16} className="text-blue-600" />
+                          Link Directory
+                        </button>
+
+                        <button
+                          type="button"
+                          role="menuitem"
+                          className="w-full flex items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-charcoal hover:bg-gray-50"
+                          onClick={() => {
+                            setActionsMenuUserId(null);
+                            openPasswordReset(u.email);
+                          }}
+                        >
+                          <KeyRound size={16} />
+                          Reset Password
+                        </button>
+
+                        {!u.is_approved && (
+                          <button
+                            type="button"
+                            role="menuitem"
+                            className="w-full flex items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-charcoal hover:bg-gray-50"
+                            onClick={() => {
+                              setActionsMenuUserId(null);
+                              setEmailModalUser(u);
+                            }}
+                          >
+                            <Mail size={16} />
+                            Email
+                          </button>
+                        )}
+
+                        {isSuperAdmin &&
+                          u.id !== user?.id &&
+                          !u.is_super_admin &&
+                          (u.role === 'member' ? (
+                            <button
+                              type="button"
+                              role="menuitem"
+                              className="w-full flex items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-purple-700 hover:bg-purple-50"
+                              onClick={() => {
+                                setActionsMenuUserId(null);
+                                void handleMakeAdmin(u.id, displayName(u));
+                              }}
+                            >
+                              <Shield size={16} />
+                              Make Admin
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              role="menuitem"
+                              className="w-full flex items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-orange-700 hover:bg-orange-50"
+                              onClick={() => {
+                                setActionsMenuUserId(null);
+                                void handleRevokeAdmin(u.id, displayName(u));
+                              }}
+                            >
+                              <ShieldOff size={16} />
+                              Revoke Admin
+                            </button>
+                          ))}
+
+                        {u.is_approved &&
+                          u.id !== user?.id &&
+                          !u.is_super_admin && (
+                            <button
+                              type="button"
+                              role="menuitem"
+                              className="w-full flex items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-red-600 hover:bg-red-50 border-t border-gray-100 mt-1"
+                              onClick={() => {
+                                setActionsMenuUserId(null);
+                                void handleRevokeApproval(
+                                  u.id,
+                                  displayName(u)
+                                );
+                              }}
+                            >
+                              <Ban size={16} />
+                              Revoke Access
+                            </button>
+                          )}
+
+                        {!u.is_approved && (
+                          <button
+                            type="button"
+                            role="menuitem"
+                            className="w-full flex items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-red-600 hover:bg-red-50 border-t border-gray-100 mt-1"
+                            onClick={() => {
+                              setActionsMenuUserId(null);
+                              void handleRejectUser(u.id);
+                            }}
+                          >
+                            <X size={16} />
+                            Reject
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
