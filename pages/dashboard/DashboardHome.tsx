@@ -114,8 +114,8 @@ export const DashboardHome = () => {
     <div className="space-y-8">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 border-b border-gray-200 pb-6">
              <div>
-                <h1 className="text-xl md:text-2xl font-serif font-normal text-charcoal">Welcome, {displayName(user)}</h1>
-                <p className="text-neutral mt-1 text-sm">Here is what is happening in your community.</p>
+                <h1 className="text-2xl md:text-3xl font-serif font-normal text-charcoal">Welcome, {displayName(user)}</h1>
+                <p className="text-neutral mt-2 text-base">Here is what is happening in your community.</p>
              </div>
              <div className="hidden md:flex items-center gap-2">
                  <span className="text-xs font-bold text-charcoal bg-gold px-4 py-2 rounded-full border border-gold uppercase tracking-widest shadow-sm">
@@ -124,10 +124,10 @@ export const DashboardHome = () => {
              </div>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
             <Link to="/dashboard/events" className="block">
               <OverviewStatCard
-                icon={<Calendar size={18} />}
+                icon={<Calendar size={20} />}
                 iconClassName="bg-green-50 text-green-600"
                 label="Next Service"
                 value={isLoadingStats ? '...' : (nextService || 'Sunday')}
@@ -138,7 +138,7 @@ export const DashboardHome = () => {
 
             <Link to="/dashboard/prayer" className="block">
               <OverviewStatCard
-                icon={<MessageSquare size={18} />}
+                icon={<MessageSquare size={20} />}
                 iconClassName="bg-blue-50 text-blue-600"
                 label="Prayer Wall"
                 value={isLoadingStats ? '...' : prayerRequests24h}
@@ -153,7 +153,7 @@ export const DashboardHome = () => {
 
             <Link to="/dashboard/newsletter" className="block">
               <OverviewStatCard
-                icon={<BookOpen size={18} />}
+                icon={<BookOpen size={20} />}
                 iconClassName="bg-orange-50 text-orange-600"
                 label="Newsletter"
                 value={isLoadingStats ? '...' : (lastNewsletterDate || 'None')}
@@ -166,10 +166,11 @@ export const DashboardHome = () => {
 
             <Link to="/dashboard/devotional" className="block">
               <OverviewStatCard
-                icon={<BookOpen size={18} />}
+                icon={<BookOpen size={20} />}
                 iconClassName="bg-purple-50 text-purple-600"
                 label="Devotional of the Week"
                 value={isLoadingStats ? '...' : (lastDevotionalLabel || 'None')}
+                valueSize="title"
                 valueClassName="line-clamp-2"
                 description={
                   isLoadingStats
@@ -186,7 +187,7 @@ export const DashboardHome = () => {
 
             <Link to="/dashboard/sermons" className="block">
               <OverviewStatCard
-                icon={<Youtube size={18} />}
+                icon={<Youtube size={20} />}
                 iconClassName="bg-red-50 text-red-600"
                 label="Watch Sermons"
                 value="YouTube"
@@ -196,9 +197,9 @@ export const DashboardHome = () => {
             </Link>
         </div>
 
-        <div className="glass-card bg-white/60 p-5 md:p-8 rounded-[8px] relative overflow-hidden">
+        <div className="glass-card bg-white/60 p-6 md:p-9 rounded-[8px] relative overflow-hidden">
              <div className="relative z-10">
-                <h3 className="font-serif text-lg md:text-xl mb-3 text-charcoal font-normal">Verse of the Day</h3>
+                <h3 className="font-serif text-xl md:text-2xl mb-4 text-charcoal font-normal">Verse of the Day</h3>
                 <p className="text-base md:text-lg text-charcoal/80 italic font-serif leading-relaxed max-w-3xl">
                     &ldquo;{verseOfTheDay.text}&rdquo;
                 </p>

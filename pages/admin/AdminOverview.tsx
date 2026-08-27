@@ -504,7 +504,7 @@ export const AdminOverview = () => {
     { 
       label: 'Pending Approvals', 
       value: visiblePendingCount.toString(), 
-      icon: <UserCheck size={18} />, 
+      icon: <UserCheck size={20} />, 
       path: '#pending-users', 
       color: 'text-gold', 
       highlight: visiblePendingCount > 0 
@@ -512,7 +512,7 @@ export const AdminOverview = () => {
     { 
       label: 'New Prayer Requests (24h)', 
       value: isLoadingStats ? '...' : prayerRequests24h.toString(), 
-      icon: <MessageSquare size={18} />, 
+      icon: <MessageSquare size={20} />, 
       path: '/admin/prayer', 
       color: 'text-blue-500',
       subtitle: isLoadingStats ? 'Loading...' : undefined
@@ -520,7 +520,7 @@ export const AdminOverview = () => {
     { 
       label: 'Next Service', 
       value: isLoadingStats ? '...' : (nextService || 'Sunday 10AM'), 
-      icon: <Calendar size={18} />, 
+      icon: <Calendar size={20} />, 
       path: '/admin/events', 
       color: 'text-green-500',
       subtitle: isLoadingStats ? 'Loading...' : undefined
@@ -528,7 +528,7 @@ export const AdminOverview = () => {
     { 
       label: 'Last Newsletter', 
       value: isLoadingStats ? '...' : (lastNewsletterDate || 'None'), 
-      icon: <BookOpen size={18} />,
+      icon: <BookOpen size={20} />,
       path: '/admin/newsletter',
       color: 'text-orange-500',
       subtitle: isLoadingStats ? 'Loading...' : undefined
@@ -536,7 +536,7 @@ export const AdminOverview = () => {
     { 
       label: 'Last Devotional', 
       value: isLoadingStats ? '...' : (lastDevotionalDate || 'None'), 
-      icon: <BookOpen size={18} />,
+      icon: <BookOpen size={20} />,
       path: '/admin/devotional',
       color: 'text-emerald-500',
       subtitle: isLoadingStats ? 'Loading...' : undefined
@@ -544,7 +544,7 @@ export const AdminOverview = () => {
     { 
       label: 'Team Members', 
       value: isLoadingStats ? '...' : teamMembersCount.toString(), 
-      icon: <Users size={18} />, 
+      icon: <Users size={20} />, 
       path: '/admin/team', 
       color: 'text-purple-500',
       subtitle: isLoadingStats ? 'Loading...' : undefined
@@ -552,7 +552,7 @@ export const AdminOverview = () => {
     { 
       label: 'Roster Assignments', 
       value: isLoadingStats ? '...' : rosterAssignmentsCount.toString(), 
-      icon: <ClipboardList size={18} />, 
+      icon: <ClipboardList size={20} />, 
       path: '/admin/roster', 
       color: 'text-indigo-500',
       subtitle: isLoadingStats ? 'Loading...' : undefined
@@ -590,7 +590,7 @@ export const AdminOverview = () => {
       />
 
       {/* Stats Grid */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
         {stats.map((stat, i) => {
           const description =
             stat.label === 'Next Service' && nextService && !isLoadingStats
@@ -805,9 +805,9 @@ export const AdminOverview = () => {
 
       {/* Quick Actions */}
       <div className="grid md:grid-cols-2 gap-6">
-        <div className="glass-card bg-white/60 p-5 md:p-6 rounded-[8px] border border-gray-100">
-          <h3 className="font-serif text-lg mb-3 text-charcoal font-normal">Quick Actions</h3>
-          <div className="space-y-2">
+        <div className="glass-card bg-white/60 p-6 md:p-7 rounded-[8px] border border-gray-100">
+          <h3 className="font-serif text-xl mb-4 text-charcoal font-normal">Quick Actions</h3>
+          <div className="space-y-3">
             {visiblePendingCount > 0 && (
               <a
                 href="#pending-users"
@@ -815,37 +815,37 @@ export const AdminOverview = () => {
                   e.preventDefault();
                   document.getElementById('pending-users')?.scrollIntoView({ behavior: 'smooth' });
                 }}
-                className="block p-3 bg-white border-2 border-gold rounded-[4px] hover:border-gold hover:shadow-md transition-all"
+                className="block p-4 bg-white border-2 border-gold rounded-[4px] hover:border-gold hover:shadow-md transition-all"
               >
-                <span className="font-semibold text-sm text-charcoal">Review Pending User Approvals</span>
-                <p className="text-xs text-neutral mt-0.5">{visiblePendingCount} {visiblePendingCount === 1 ? 'user' : 'users'} awaiting approval</p>
+                <span className="font-semibold text-base text-charcoal">Review Pending User Approvals</span>
+                <p className="text-sm text-neutral mt-1">{visiblePendingCount} {visiblePendingCount === 1 ? 'user' : 'users'} awaiting approval</p>
               </a>
             )}
-            <Link to="/admin/users" className="block p-3 bg-white border border-gray-100 rounded-[4px] hover:border-blue-300 hover:shadow-md transition-all">
-              <span className="font-semibold text-sm text-charcoal">Manage All Users</span>
-              <p className="text-xs text-neutral mt-0.5">View and manage user roles and permissions</p>
+            <Link to="/admin/users" className="block p-4 bg-white border border-gray-100 rounded-[4px] hover:border-blue-300 hover:shadow-md transition-all">
+              <span className="font-semibold text-base text-charcoal">Manage All Users</span>
+              <p className="text-sm text-neutral mt-1">View and manage user roles and permissions</p>
             </Link>
-            <Link to="/admin/prayer" className="block p-3 bg-white border border-gray-100 rounded-[4px] hover:border-gold hover:shadow-md transition-all">
-              <span className="font-semibold text-sm text-charcoal">Review New Prayer Requests</span>
-              <p className="text-xs text-neutral mt-0.5">{pendingPrayerRequestsCount > 0 ? `${pendingPrayerRequestsCount} recent request${pendingPrayerRequestsCount === 1 ? '' : 's'}` : 'No recent requests'}</p>
+            <Link to="/admin/prayer" className="block p-4 bg-white border border-gray-100 rounded-[4px] hover:border-gold hover:shadow-md transition-all">
+              <span className="font-semibold text-base text-charcoal">Review New Prayer Requests</span>
+              <p className="text-sm text-neutral mt-1">{pendingPrayerRequestsCount > 0 ? `${pendingPrayerRequestsCount} recent request${pendingPrayerRequestsCount === 1 ? '' : 's'}` : 'No recent requests'}</p>
             </Link>
-            <Link to="/admin/events" className="block p-3 bg-white border border-gray-100 rounded-[4px] hover:border-gold hover:shadow-md transition-all">
-              <span className="font-semibold text-sm text-charcoal">Add New Event</span>
-              <p className="text-xs text-neutral mt-0.5">Create upcoming church event</p>
+            <Link to="/admin/events" className="block p-4 bg-white border border-gray-100 rounded-[4px] hover:border-gold hover:shadow-md transition-all">
+              <span className="font-semibold text-base text-charcoal">Add New Event</span>
+              <p className="text-sm text-neutral mt-1">Create upcoming church event</p>
             </Link>
-            <Link to="/admin/newsletter" className="block p-3 bg-white border border-gray-100 rounded-[4px] hover:border-gold hover:shadow-md transition-all">
-              <span className="font-semibold text-sm text-charcoal">Upload Newsletter</span>
-              <p className="text-xs text-neutral mt-0.5">Share latest church updates</p>
+            <Link to="/admin/newsletter" className="block p-4 bg-white border border-gray-100 rounded-[4px] hover:border-gold hover:shadow-md transition-all">
+              <span className="font-semibold text-base text-charcoal">Upload Newsletter</span>
+              <p className="text-sm text-neutral mt-1">Share latest church updates</p>
             </Link>
-            <Link to="/admin/devotional" className="block p-3 bg-white border border-gray-100 rounded-[4px] hover:border-gold hover:shadow-md transition-all">
-              <span className="font-semibold text-sm text-charcoal">Upload Devotional</span>
-              <p className="text-xs text-neutral mt-0.5">Publish this week&apos;s weekly PDF</p>
+            <Link to="/admin/devotional" className="block p-4 bg-white border border-gray-100 rounded-[4px] hover:border-gold hover:shadow-md transition-all">
+              <span className="font-semibold text-base text-charcoal">Upload Devotional</span>
+              <p className="text-sm text-neutral mt-1">Publish this week&apos;s weekly PDF</p>
             </Link>
           </div>
         </div>
 
-        <div className="glass-card bg-white/60 p-5 md:p-6 rounded-[8px] border border-gray-100">
-          <h3 className="font-serif text-lg mb-3 text-charcoal font-normal">Recent Activity</h3>
+        <div className="glass-card bg-white/60 p-6 md:p-7 rounded-[8px] border border-gray-100">
+          <h3 className="font-serif text-xl mb-4 text-charcoal font-normal">Recent Activity</h3>
           {isLoadingActivities ? (
             <div className="space-y-4">
               {Array.from({ length: 3 }).map((_, i) => (
@@ -872,7 +872,7 @@ export const AdminOverview = () => {
                   <div className="w-2 h-2 rounded-full bg-gold mt-2"></div>
                   <div>
                     <p className="text-sm text-charcoal font-medium leading-snug">{activity.title}</p>
-                    <p className="text-xs text-neutral">{formatRelativeDateInTimezone(activity.date)}</p>
+                    <p className="text-xs text-neutral mt-0.5">{formatRelativeDateInTimezone(activity.date)}</p>
                   </div>
                 </div>
               ))}
