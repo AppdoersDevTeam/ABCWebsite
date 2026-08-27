@@ -535,12 +535,14 @@ export const AdminUsers = () => {
         </div>
       )}
 
-      {/* Filter Tabs */}
+      {/* Filter Tabs — inline color so tab labels stay readable on light page shell */}
       <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 border-b border-gray-200">
         <div className="flex flex-nowrap min-w-0 gap-2">
         <button
+          type="button"
           onClick={() => setFilter('all')}
-          className={`px-4 sm:px-6 py-3 text-sm sm:text-base font-bold transition-colors whitespace-nowrap text-black ${
+          style={{ color: filter === 'all' ? '#111111' : '#333333' }}
+          className={`px-4 sm:px-6 py-3 text-sm sm:text-base font-bold transition-opacity whitespace-nowrap ${
             filter === 'all'
               ? 'border-b-2 border-gold'
               : 'opacity-70 hover:opacity-100'
@@ -549,8 +551,10 @@ export const AdminUsers = () => {
           All Users ({visibleUsers.length})
         </button>
         <button
+          type="button"
           onClick={() => setFilter('pending')}
-          className={`px-4 sm:px-6 py-3 text-sm sm:text-base font-bold transition-colors whitespace-nowrap text-black ${
+          style={{ color: filter === 'pending' ? '#111111' : '#333333' }}
+          className={`px-4 sm:px-6 py-3 text-sm sm:text-base font-bold transition-opacity whitespace-nowrap ${
             filter === 'pending'
               ? 'border-b-2 border-gold'
               : 'opacity-70 hover:opacity-100'
@@ -559,8 +563,10 @@ export const AdminUsers = () => {
           Pending ({visiblePendingCount})
         </button>
         <button
+          type="button"
           onClick={() => setFilter('approved')}
-          className={`px-4 sm:px-6 py-3 text-sm sm:text-base font-bold transition-colors whitespace-nowrap text-black ${
+          style={{ color: filter === 'approved' ? '#111111' : '#333333' }}
+          className={`px-4 sm:px-6 py-3 text-sm sm:text-base font-bold transition-opacity whitespace-nowrap ${
             filter === 'approved'
               ? 'border-b-2 border-gold'
               : 'opacity-70 hover:opacity-100'
@@ -569,8 +575,10 @@ export const AdminUsers = () => {
           Approved ({visibleUsers.filter(u => u.is_approved).length})
         </button>
         <button
+          type="button"
           onClick={() => setFilter('admins')}
-          className={`px-4 sm:px-6 py-3 text-sm sm:text-base font-bold transition-colors whitespace-nowrap text-black ${
+          style={{ color: filter === 'admins' ? '#111111' : '#333333' }}
+          className={`px-4 sm:px-6 py-3 text-sm sm:text-base font-bold transition-opacity whitespace-nowrap ${
             filter === 'admins'
               ? 'border-b-2 border-gold'
               : 'opacity-70 hover:opacity-100'
