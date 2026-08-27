@@ -8,12 +8,16 @@ import { ScrollReveal } from '../../components/UI/ScrollReveal';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { EventPosterImage } from '../../components/UI/EventPosterImage';
 import {
-  formatEventDateRange,
-  formatEventDateRangeShort,
-  formatEventTimeRange,
+  getEventDateCardDisplay,
+  getEventScheduleDisplay,
+  getEventTimeCardDisplay,
 } from '../../lib/eventDateUtils';
 import { usePageMeta } from '../../lib/usePageMeta';
 import { logAuditEventSafe } from '../../lib/auditLog';
+
+/** Light-card body copy — use text-charcoal + a single size class; responsive sizes break custom colors on Tailwind CDN. */
+const CARD_BODY_TEXT = 'text-charcoal leading-relaxed text-sm';
+const DESCRIPTION_TEXT = 'text-charcoal leading-relaxed text-base break-words whitespace-pre-line';
 
 export const EventDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -241,8 +245,9 @@ export const EventDetail = () => {
     }
   };
 
-  const eventDateFormatted = formatEventDateRange(event);
-  const eventTimeFormatted = formatEventTimeRange(event);
+  const scheduleDisplay = getEventScheduleDisplay(event);
+  const dateCardDisplay = getEventDateCardDisplay(event);
+  const timeCardDisplay = getEventTimeCardDisplay(event);
 
   return (
     <div className="space-y-0 overflow-hidden">
@@ -288,8 +293,21 @@ export const EventDetail = () => {
             </ScrollReveal>
             <ScrollReveal direction="up" delay={200}>
               <p className="text-base sm:text-lg md:text-[1.375rem] lg:text-[1.5625rem] leading-relaxed text-white text-center max-w-5xl mx-auto mb-6 transition-all duration-1000 delay-300 px-2 sm:px-0">
-                <span className="block font-raleway font-normal text-center">{eventDateFormatted}</span>
-                <span className="block mt-3 sm:mt-4 font-raleway font-normal text-center">{eventTimeFormatted}</span>
+                {scheduleDisplay.type === 'multi-day' ? (
+                  <>
+                    <span className="block font-raleway font-normal text-center">
+                      <span className="font-semibold">Starts</span> · {scheduleDisplay.start}
+                    </span>
+                    <span className="block mt-3 sm:mt-4 font-raleway font-normal text-center">
+                      <span className="font-semibold">Ends</span> · {scheduleDisplay.end}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span className="block font-raleway font-normal text-center">{scheduleDisplay.date}</span>
+                    <span className="block mt-3 sm:mt-4 font-raleway font-normal text-center">{scheduleDisplay.time}</span>
+                  </>
+                )}
                 <span className="block mt-3 sm:mt-4 font-raleway font-normal text-center">{event.location}</span>
               </p>
             </ScrollReveal>
@@ -332,9 +350,20 @@ export const EventDetail = () => {
                     </div>
                     <h3 className="font-serif text-xl font-normal text-charcoal group-hover:text-gold transition-colors">Date</h3>
                   </div>
-                  <p className="text-neutral text-sm leading-relaxed">
-                    {formatEventDateRangeShort(event)}
-                  </p>
+                  <div className={`${CARD_BODY_TEXT} space-y-2`}>
+                    {dateCardDisplay.type === 'multi-day' ? (
+                      <>
+                        <p>
+                          <span className="font-semibold text-charcoal">Starts:</span> {dateCardDisplay.start}
+                        </p>
+                        <p>
+                          <span className="font-semibold text-charcoal">Ends:</span> {dateCardDisplay.end}
+                        </p>
+                      </>
+                    ) : (
+                      <p>{dateCardDisplay.text}</p>
+                    )}
+                  </div>
                 </div>
               </ScrollReveal>
 
@@ -346,7 +375,20 @@ export const EventDetail = () => {
                     </div>
                     <h3 className="font-serif text-xl font-normal text-charcoal group-hover:text-gold transition-colors">Time</h3>
                   </div>
-                  <p className="text-neutral text-sm">{eventTimeFormatted}</p>
+                  <div className={`${CARD_BODY_TEXT} space-y-2`}>
+                    {timeCardDisplay.type === 'multi-day' ? (
+                      <>
+                        <p>
+                          <span className="font-semibold text-charcoal">Starts:</span> {timeCardDisplay.start}
+                        </p>
+                        <p>
+                          <span className="font-semibold text-charcoal">Ends:</span> {timeCardDisplay.end}
+                        </p>
+                      </>
+                    ) : (
+                      <p>{timeCardDisplay.text}</p>
+                    )}
+                  </div>
                 </div>
               </ScrollReveal>
 
@@ -358,7 +400,7 @@ export const EventDetail = () => {
                     </div>
                     <h3 className="font-serif text-xl font-normal text-charcoal group-hover:text-gold transition-colors">Location</h3>
                   </div>
-                  <p className="text-neutral text-sm break-words">{event.location}</p>
+                  <p className={`${CARD_BODY_TEXT} break-words`}>{event.location}</p>
                 </div>
               </ScrollReveal>
             </div>
@@ -367,7 +409,7 @@ export const EventDetail = () => {
             <ScrollReveal direction="up" delay={80}>
               <div className="glass-card rounded-[16px] p-8 md:p-10 border border-white/50 shadow-sm bg-white/70">
                 <h2 className="text-2xl md:text-3xl font-serif font-normal text-charcoal mb-5">About This Event</h2>
-                <p className="text-neutral text-base md:text-lg leading-relaxed break-words whitespace-pre-line">
+                <p className={DESCRIPTION_TEXT}>
                   {event.description?.trim() ? event.description : 'No description has been added for this event yet.'}
                 </p>
               </div>
@@ -383,7 +425,7 @@ export const EventDetail = () => {
                     </div>
                     <div>
                       <h3 className="font-serif text-xl font-normal text-charcoal">RSVP</h3>
-                      <p className="text-neutral text-sm mt-0.5">{rsvpMode === 'required' ? 'RSVP is required for this event.' : 'RSVP is optional.'}</p>
+                      <p className={`${CARD_BODY_TEXT} mt-0.5`}>{rsvpMode === 'required' ? 'RSVP is required for this event.' : 'RSVP is optional.'}</p>
                     </div>
                   </div>
 
@@ -412,7 +454,7 @@ export const EventDetail = () => {
                           <CheckCircle className="text-green-600" size={32} />
                         </div>
                         <p className="text-lg font-bold text-charcoal">You're RSVPed!</p>
-                        <p className="text-neutral text-sm mt-1">We look forward to seeing you there.</p>
+                        <p className={`${CARD_BODY_TEXT} mt-1`}>We look forward to seeing you there.</p>
                       </div>
                     ) : (
                       <>

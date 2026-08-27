@@ -16,6 +16,101 @@ export function getEventEndTime(event: Event): string {
   return event.end_time || event.start_time || event.time;
 }
 
+export function isMultiDayEvent(event: Event): boolean {
+  return getEventStartDate(event) !== getEventEndDate(event);
+}
+
+function formatDateCompact(dateString: string): string {
+  return new Date(`${dateString}T12:00:00`).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+  });
+}
+
+function formatDateLong(dateString: string, includeYear = true): string {
+  const options: Intl.DateTimeFormatOptions = {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+    ...(includeYear ? { year: 'numeric' } : {}),
+  };
+  return new Date(`${dateString}T12:00:00`).toLocaleDateString('en-US', options);
+}
+
+export function formatEventDateTimePoint(
+  event: Event,
+  point: 'start' | 'end',
+  style: 'compact' | 'long' | 'card-date' | 'card-time' = 'compact'
+): string {
+  const date = point === 'start' ? getEventStartDate(event) : getEventEndDate(event);
+  const time = formatTimeForDisplay(
+    point === 'start' ? getEventStartTime(event) : getEventEndTime(event)
+  );
+
+  switch (style) {
+    case 'long':
+      return `${formatDateLong(date)} · ${time}`;
+    case 'card-date':
+      return formatDateLong(date, false);
+    case 'card-time':
+      return isMultiDayEvent(event) ? `${time} (${formatDateCompact(date)})` : time;
+    default:
+      return `${formatDateCompact(date)}, ${time}`;
+  }
+}
+
+export type EventScheduleDisplay =
+  | { type: 'single-day'; date: string; time: string }
+  | { type: 'multi-day'; start: string; end: string };
+
+export function getEventScheduleDisplay(event: Event): EventScheduleDisplay {
+  if (isMultiDayEvent(event)) {
+    return {
+      type: 'multi-day',
+      start: formatEventDateTimePoint(event, 'start', 'long'),
+      end: formatEventDateTimePoint(event, 'end', 'long'),
+    };
+  }
+
+  return {
+    type: 'single-day',
+    date: formatEventDateRange(event),
+    time: formatEventTimeRange(event),
+  };
+}
+
+export type EventDateCardDisplay =
+  | { type: 'single-day'; text: string }
+  | { type: 'multi-day'; start: string; end: string };
+
+export function getEventDateCardDisplay(event: Event): EventDateCardDisplay {
+  if (isMultiDayEvent(event)) {
+    return {
+      type: 'multi-day',
+      start: formatEventDateTimePoint(event, 'start', 'card-date'),
+      end: formatEventDateTimePoint(event, 'end', 'card-date'),
+    };
+  }
+
+  return { type: 'single-day', text: formatEventDateRangeShort(event) };
+}
+
+export type EventTimeCardDisplay =
+  | { type: 'single-day'; text: string }
+  | { type: 'multi-day'; start: string; end: string };
+
+export function getEventTimeCardDisplay(event: Event): EventTimeCardDisplay {
+  if (isMultiDayEvent(event)) {
+    return {
+      type: 'multi-day',
+      start: formatEventDateTimePoint(event, 'start', 'card-time'),
+      end: formatEventDateTimePoint(event, 'end', 'card-time'),
+    };
+  }
+
+  return { type: 'single-day', text: formatEventTimeRange(event) };
+}
+
 /** Normalize stored time values to HH:MM for `<input type="time">`. */
 export function parseTimeToInputValue(time: string): string {
   if (!time) return '';
@@ -70,11 +165,7 @@ export function formatEventDateRange(
     return new Date(`${start}T12:00:00`).toLocaleDateString('en-US', defaultOptions);
   }
 
-  const startFormatted = new Date(`${start}T12:00:00`).toLocaleDateString('en-US', {
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-  });
+  const startFormatted = new Date(`${start}T12:00:00`).toLocaleDateString('en-US', defaultOptions);
   const endFormatted = new Date(`${end}T12:00:00`).toLocaleDateString('en-US', defaultOptions);
   return `${startFormatted} – ${endFormatted}`;
 }
@@ -91,15 +182,13 @@ export function formatEventDateRangeShort(event: Event): string {
     });
   }
 
-  const startFormatted = new Date(`${start}T12:00:00`).toLocaleDateString('en-US', {
-    month: 'long',
-    day: 'numeric',
-  });
-  const endFormatted = new Date(`${end}T12:00:00`).toLocaleDateString('en-US', {
+  const dateOptions: Intl.DateTimeFormatOptions = {
     weekday: 'long',
     month: 'long',
     day: 'numeric',
-  });
+  };
+  const startFormatted = new Date(`${start}T12:00:00`).toLocaleDateString('en-US', dateOptions);
+  const endFormatted = new Date(`${end}T12:00:00`).toLocaleDateString('en-US', dateOptions);
   return `${startFormatted} – ${endFormatted}`;
 }
 
@@ -117,15 +206,21 @@ export function formatEventDateBadge(dateString: string): { day: string; month: 
   return { day, month };
 }
 
-/** Card row label, e.g. "Oct 12, 10:00 AM" */
+/** Card row label, e.g. "Oct 12, 10:00 AM" or "Oct 2, 5:00 PM – Oct 4, 2:00 PM" */
 export function formatEventCardSchedule(event: Event): string {
+  if (isMultiDayEvent(event)) {
+    return `${formatEventDateTimePoint(event, 'start', 'compact')} – ${formatEventDateTimePoint(event, 'end', 'compact')}`;
+  }
+
   const startDate = getEventStartDate(event);
-  const eventDate = new Date(`${startDate}T12:00:00`);
-  const datePart = eventDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  return `${datePart}, ${formatEventTimeRange(event)}`;
+  return `${formatDateCompact(startDate)}, ${formatEventTimeRange(event)}`;
 }
 
 export function formatEventScheduleShort(event: Event): string {
+  if (isMultiDayEvent(event)) {
+    return formatEventCardSchedule(event);
+  }
+
   const startDate = getEventStartDate(event);
   const timeRange = formatEventTimeRange(event);
   const eventDate = new Date(`${startDate}T12:00:00`);
@@ -139,7 +234,7 @@ export function formatEventScheduleShort(event: Event): string {
   if (diffDays === 1) return `Tomorrow, ${timeRange}`;
   if (diffDays > 1 && diffDays < 7) return `${diffDays} days, ${timeRange}`;
 
-  return `${eventDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}, ${timeRange}`;
+  return `${formatDateCompact(startDate)}, ${timeRange}`;
 }
 
 export function buildEventDateTimePayload(form: {
