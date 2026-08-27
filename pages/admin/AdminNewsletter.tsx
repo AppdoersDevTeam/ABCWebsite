@@ -8,6 +8,58 @@ import { Newsletter as NewsletterType } from '../../types';
 import { SkeletonPageHeader, SkeletonCard } from '../../components/UI/Skeleton';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { logAuditEventSafe } from '../../lib/auditLog';
+import {
+  ADMIN_DRAFT_KEYS,
+  clearFormDraft,
+  readFormDraft,
+  writeFormDraft,
+  type NewsletterEditDraft,
+  type NewsletterUploadDraft,
+} from '../../lib/adminFormDraft';
+
+type NewsletterUploadForm = {
+  month: string;
+  year: string;
+  description: string;
+  file: File | null;
+  pendingFileName?: string;
+};
+
+type NewsletterEditForm = {
+  month: string;
+  year: string;
+  file: File | null;
+  pendingFileName?: string;
+};
+
+function emptyUploadForm(): NewsletterUploadForm {
+  return { month: '', year: '', description: '', file: null };
+}
+
+function emptyEditForm(): NewsletterEditForm {
+  return { month: '', year: '', file: null };
+}
+
+function uploadFormFromDraft(draft: NewsletterUploadDraft | null): NewsletterUploadForm {
+  if (!draft) return emptyUploadForm();
+  return {
+    month: draft.month,
+    year: draft.year,
+    description: draft.description,
+    file: null,
+    pendingFileName: draft.fileName,
+  };
+}
+
+function editFormFromDraft(draft: NewsletterEditDraft | null): NewsletterEditForm {
+  if (!draft) return emptyEditForm();
+  return {
+    month: draft.month,
+    year: draft.year,
+    file: null,
+    pendingFileName: draft.fileName,
+  };
+}
 
 function storagePathFromPublicUrl(pdfUrl: string, bucket: string): string | null {
   const marker = `/object/public/${bucket}/`;
@@ -19,22 +71,35 @@ function storagePathFromPublicUrl(pdfUrl: string, bucket: string): string | null
 }
 
 export const AdminNewsletter = () => {
+  const savedUploadDraft = readFormDraft<NewsletterUploadDraft>(ADMIN_DRAFT_KEYS.newsletterUpload);
+  const savedEditDraft = readFormDraft<NewsletterEditDraft>(ADMIN_DRAFT_KEYS.newsletterEdit);
+
   const [newsletters, setNewsletters] = useState<NewsletterType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-  const [uploadData, setUploadData] = useState({ month: '', year: '', description: '', file: null as File | null });
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(() => savedUploadDraft?.open ?? false);
+  const [uploadData, setUploadData] = useState<NewsletterUploadForm>(() => uploadFormFromDraft(savedUploadDraft));
   const [isUploading, setIsUploading] = useState(false);
   const [viewing, setViewing] = useState<NewsletterType | null>(null);
   const [editing, setEditing] = useState<NewsletterType | null>(null);
-  const [editData, setEditData] = useState({ month: '', year: '', file: null as File | null });
+  const [editData, setEditData] = useState<NewsletterEditForm>(() => editFormFromDraft(savedEditDraft));
   const [isSaving, setIsSaving] = useState(false);
+  const pendingEditIdRef = React.useRef(savedEditDraft?.open ? savedEditDraft.id : null);
+
+  const closeUploadModal = () => {
+    clearFormDraft(ADMIN_DRAFT_KEYS.newsletterUpload);
+    setIsUploadModalOpen(false);
+    setUploadData(emptyUploadForm());
+  };
 
   const resetEditForm = () => {
+    clearFormDraft(ADMIN_DRAFT_KEYS.newsletterEdit);
+    pendingEditIdRef.current = null;
     setEditing(null);
-    setEditData({ month: '', year: '', file: null });
+    setEditData(emptyEditForm());
   };
 
   const openEdit = (item: NewsletterType) => {
+    pendingEditIdRef.current = item.id;
     setEditing(item);
     setEditData({
       month: item.month,
@@ -46,6 +111,46 @@ export const AdminNewsletter = () => {
   useEffect(() => {
     fetchNewsletters();
   }, []);
+
+  useEffect(() => {
+    const pendingId = pendingEditIdRef.current;
+    if (!pendingId || editing) return;
+    const item = newsletters.find((nl) => nl.id === pendingId);
+    if (item) setEditing(item);
+  }, [newsletters, editing]);
+
+  useEffect(() => {
+    if (
+      !isUploadModalOpen &&
+      !uploadData.month &&
+      !uploadData.year &&
+      !uploadData.description &&
+      !uploadData.pendingFileName
+    ) {
+      clearFormDraft(ADMIN_DRAFT_KEYS.newsletterUpload);
+      return;
+    }
+
+    writeFormDraft<NewsletterUploadDraft>(ADMIN_DRAFT_KEYS.newsletterUpload, {
+      open: isUploadModalOpen,
+      month: uploadData.month,
+      year: uploadData.year,
+      description: uploadData.description,
+      fileName: uploadData.file?.name ?? uploadData.pendingFileName,
+    });
+  }, [isUploadModalOpen, uploadData]);
+
+  useEffect(() => {
+    if (!editing) return;
+
+    writeFormDraft<NewsletterEditDraft>(ADMIN_DRAFT_KEYS.newsletterEdit, {
+      open: true,
+      id: editing.id,
+      month: editData.month,
+      year: editData.year,
+      fileName: editData.file?.name ?? editData.pendingFileName,
+    });
+  }, [editing, editData]);
 
   useEffect(() => {
     if (viewing) {
@@ -72,13 +177,13 @@ export const AdminNewsletter = () => {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setUploadData({ ...uploadData, file: e.target.files[0] });
+      setUploadData({ ...uploadData, file: e.target.files[0], pendingFileName: undefined });
     }
   };
 
   const handleEditFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setEditData({ ...editData, file: e.target.files[0] });
+      setEditData({ ...editData, file: e.target.files[0], pendingFileName: undefined });
     }
   };
 
@@ -129,8 +234,7 @@ export const AdminNewsletter = () => {
       });
 
       setNewsletters([data, ...newsletters]);
-      setUploadData({ month: '', year: '', description: '', file: null });
-      setIsUploadModalOpen(false);
+      closeUploadModal();
       alert('Newsletter uploaded successfully!');
     } catch (error: any) {
       console.error('Error uploading newsletter:', error);
@@ -245,7 +349,7 @@ export const AdminNewsletter = () => {
 
   const latestNewsletter = newsletters[0];
 
-  if (isLoading) {
+  if (isLoading && !isUploadModalOpen) {
     return (
       <div className="space-y-8">
         <SkeletonPageHeader />
@@ -388,10 +492,7 @@ export const AdminNewsletter = () => {
 
       <Modal
         isOpen={isUploadModalOpen}
-        onClose={() => {
-          setIsUploadModalOpen(false);
-          setUploadData({ month: '', year: '', description: '', file: null });
-        }}
+        onClose={closeUploadModal}
         title="Upload Newsletter"
         closeOnBackdropClick={false}
         preventClose={isUploading}
@@ -436,6 +537,11 @@ export const AdminNewsletter = () => {
           </div>
           <div>
             <label className="block text-sm font-bold text-charcoal mb-2">PDF File *</label>
+            {uploadData.pendingFileName && !uploadData.file && (
+              <p className="text-xs text-amber-700 mb-2">
+                Previously selected: {uploadData.pendingFileName}. Please select the PDF again.
+              </p>
+            )}
             <div className="border-2 border-dashed border-gray-300 rounded-[4px] p-6 text-center hover:border-gold transition-colors">
               <input
                 type="file"
@@ -452,7 +558,7 @@ export const AdminNewsletter = () => {
                     <button
                       onClick={(e) => {
                         e.preventDefault();
-                        setUploadData({ ...uploadData, file: null });
+                        setUploadData({ ...uploadData, file: null, pendingFileName: undefined });
                       }}
                       className="text-xs text-red-500 hover:text-red-700"
                     >
@@ -471,10 +577,7 @@ export const AdminNewsletter = () => {
           </div>
           <div className="flex flex-col-reverse sm:flex-row gap-3 justify-end pt-4">
             <button
-              onClick={() => {
-                setIsUploadModalOpen(false);
-                setUploadData({ month: '', year: '', description: '', file: null });
-              }}
+              onClick={closeUploadModal}
               className="px-6 py-2 border border-gray-200 rounded-[4px] text-charcoal hover:bg-gray-50 transition-colors"
             >
               Cancel
@@ -522,6 +625,11 @@ export const AdminNewsletter = () => {
           </div>
           <div>
             <label className="block text-sm font-bold text-charcoal mb-2">Replace PDF (optional)</label>
+            {editData.pendingFileName && !editData.file && (
+              <p className="text-xs text-amber-700 mb-2">
+                Previously selected: {editData.pendingFileName}. Please select the PDF again.
+              </p>
+            )}
             <div className="border-2 border-dashed border-gray-300 rounded-[4px] p-6 text-center hover:border-gold transition-colors">
               <input
                 type="file"
@@ -539,7 +647,7 @@ export const AdminNewsletter = () => {
                       type="button"
                       onClick={(e) => {
                         e.preventDefault();
-                        setEditData({ ...editData, file: null });
+                        setEditData({ ...editData, file: null, pendingFileName: undefined });
                       }}
                       className="text-xs text-red-500 hover:text-red-700"
                     >

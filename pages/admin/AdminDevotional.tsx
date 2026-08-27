@@ -8,6 +8,60 @@ import { Devotional as DevotionalType } from '../../types';
 import { SkeletonPageHeader, SkeletonCard } from '../../components/UI/Skeleton';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { logAuditEventSafe } from '../../lib/auditLog';
+import {
+  ADMIN_DRAFT_KEYS,
+  clearFormDraft,
+  readFormDraft,
+  writeFormDraft,
+  type DevotionalEditDraft,
+  type DevotionalUploadDraft,
+} from '../../lib/adminFormDraft';
+
+type DevotionalUploadForm = {
+  title: string;
+  subtitle: string;
+  weekDate: string;
+  file: File | null;
+  pendingFileName?: string;
+};
+
+type DevotionalEditForm = {
+  title: string;
+  subtitle: string;
+  weekDate: string;
+  file: File | null;
+  pendingFileName?: string;
+};
+
+function emptyUploadForm(): DevotionalUploadForm {
+  return { title: '', subtitle: '', weekDate: '', file: null };
+}
+
+function emptyEditForm(): DevotionalEditForm {
+  return { title: '', subtitle: '', weekDate: '', file: null };
+}
+
+function uploadFormFromDraft(draft: DevotionalUploadDraft | null): DevotionalUploadForm {
+  if (!draft) return emptyUploadForm();
+  return {
+    title: draft.title,
+    subtitle: draft.subtitle,
+    weekDate: draft.weekDate,
+    file: null,
+    pendingFileName: draft.fileName,
+  };
+}
+
+function editFormFromDraft(draft: DevotionalEditDraft | null): DevotionalEditForm {
+  if (!draft) return emptyEditForm();
+  return {
+    title: draft.title,
+    subtitle: draft.subtitle,
+    weekDate: draft.weekDate,
+    file: null,
+    pendingFileName: draft.fileName,
+  };
+}
 
 function storagePathFromPublicUrl(pdfUrl: string, bucket: string): string | null {
   const marker = `/object/public/${bucket}/`;
@@ -25,22 +79,35 @@ function formatWeekDate(weekDate: string): string {
 }
 
 export const AdminDevotional = () => {
+  const savedUploadDraft = readFormDraft<DevotionalUploadDraft>(ADMIN_DRAFT_KEYS.devotionalUpload);
+  const savedEditDraft = readFormDraft<DevotionalEditDraft>(ADMIN_DRAFT_KEYS.devotionalEdit);
+
   const [devotionals, setDevotionals] = useState<DevotionalType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-  const [uploadData, setUploadData] = useState({ title: '', subtitle: '', weekDate: '', file: null as File | null });
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(() => savedUploadDraft?.open ?? false);
+  const [uploadData, setUploadData] = useState<DevotionalUploadForm>(() => uploadFormFromDraft(savedUploadDraft));
   const [isUploading, setIsUploading] = useState(false);
   const [viewing, setViewing] = useState<DevotionalType | null>(null);
   const [editing, setEditing] = useState<DevotionalType | null>(null);
-  const [editData, setEditData] = useState({ title: '', subtitle: '', weekDate: '', file: null as File | null });
+  const [editData, setEditData] = useState<DevotionalEditForm>(() => editFormFromDraft(savedEditDraft));
   const [isSaving, setIsSaving] = useState(false);
+  const pendingEditIdRef = React.useRef(savedEditDraft?.open ? savedEditDraft.id : null);
+
+  const closeUploadModal = () => {
+    clearFormDraft(ADMIN_DRAFT_KEYS.devotionalUpload);
+    setIsUploadModalOpen(false);
+    setUploadData(emptyUploadForm());
+  };
 
   const resetEditForm = () => {
+    clearFormDraft(ADMIN_DRAFT_KEYS.devotionalEdit);
+    pendingEditIdRef.current = null;
     setEditing(null);
-    setEditData({ title: '', subtitle: '', weekDate: '', file: null });
+    setEditData(emptyEditForm());
   };
 
   const openEdit = (item: DevotionalType) => {
+    pendingEditIdRef.current = item.id;
     setEditing(item);
     setEditData({
       title: item.title,
@@ -53,6 +120,47 @@ export const AdminDevotional = () => {
   useEffect(() => {
     fetchDevotionals();
   }, []);
+
+  useEffect(() => {
+    const pendingId = pendingEditIdRef.current;
+    if (!pendingId || editing) return;
+    const item = devotionals.find((d) => d.id === pendingId);
+    if (item) setEditing(item);
+  }, [devotionals, editing]);
+
+  useEffect(() => {
+    if (
+      !isUploadModalOpen &&
+      !uploadData.title &&
+      !uploadData.subtitle &&
+      !uploadData.weekDate &&
+      !uploadData.pendingFileName
+    ) {
+      clearFormDraft(ADMIN_DRAFT_KEYS.devotionalUpload);
+      return;
+    }
+
+    writeFormDraft<DevotionalUploadDraft>(ADMIN_DRAFT_KEYS.devotionalUpload, {
+      open: isUploadModalOpen,
+      title: uploadData.title,
+      subtitle: uploadData.subtitle,
+      weekDate: uploadData.weekDate,
+      fileName: uploadData.file?.name ?? uploadData.pendingFileName,
+    });
+  }, [isUploadModalOpen, uploadData]);
+
+  useEffect(() => {
+    if (!editing) return;
+
+    writeFormDraft<DevotionalEditDraft>(ADMIN_DRAFT_KEYS.devotionalEdit, {
+      open: true,
+      id: editing.id,
+      title: editData.title,
+      subtitle: editData.subtitle,
+      weekDate: editData.weekDate,
+      fileName: editData.file?.name ?? editData.pendingFileName,
+    });
+  }, [editing, editData]);
 
   useEffect(() => {
     if (viewing) {
@@ -79,13 +187,13 @@ export const AdminDevotional = () => {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setUploadData({ ...uploadData, file: e.target.files[0] });
+      setUploadData({ ...uploadData, file: e.target.files[0], pendingFileName: undefined });
     }
   };
 
   const handleEditFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setEditData({ ...editData, file: e.target.files[0] });
+      setEditData({ ...editData, file: e.target.files[0], pendingFileName: undefined });
     }
   };
 
@@ -137,8 +245,7 @@ export const AdminDevotional = () => {
       });
 
       setDevotionals([data, ...devotionals].sort((a, b) => b.week_date.localeCompare(a.week_date)));
-      setUploadData({ title: '', subtitle: '', weekDate: '', file: null });
-      setIsUploadModalOpen(false);
+      closeUploadModal();
       alert('Devotional uploaded successfully!');
     } catch (error: any) {
       console.error('Error uploading devotional:', error);
@@ -257,7 +364,7 @@ export const AdminDevotional = () => {
 
   const latest = devotionals[0];
 
-  if (isLoading) {
+  if (isLoading && !isUploadModalOpen) {
     return (
       <div className="space-y-8">
         <SkeletonPageHeader />
@@ -415,10 +522,7 @@ export const AdminDevotional = () => {
 
       <Modal
         isOpen={isUploadModalOpen}
-        onClose={() => {
-          setIsUploadModalOpen(false);
-          setUploadData({ title: '', subtitle: '', weekDate: '', file: null });
-        }}
+        onClose={closeUploadModal}
         title="Upload Devotional"
         closeOnBackdropClick={false}
         preventClose={isUploading}
@@ -455,6 +559,11 @@ export const AdminDevotional = () => {
           </div>
           <div>
             <label className="block text-sm font-bold text-charcoal mb-2">PDF File *</label>
+            {uploadData.pendingFileName && !uploadData.file && (
+              <p className="text-xs text-amber-700 mb-2">
+                Previously selected: {uploadData.pendingFileName}. Please select the PDF again.
+              </p>
+            )}
             <div className="border-2 border-dashed border-gray-300 rounded-[4px] p-6 text-center hover:border-gold transition-colors">
               <input
                 type="file"
@@ -471,7 +580,7 @@ export const AdminDevotional = () => {
                     <button
                       onClick={(e) => {
                         e.preventDefault();
-                        setUploadData({ ...uploadData, file: null });
+                        setUploadData({ ...uploadData, file: null, pendingFileName: undefined });
                       }}
                       className="text-xs text-red-500 hover:text-red-700"
                     >
@@ -490,10 +599,7 @@ export const AdminDevotional = () => {
           </div>
           <div className="flex flex-col-reverse sm:flex-row gap-3 justify-end pt-4">
             <button
-              onClick={() => {
-                setIsUploadModalOpen(false);
-                setUploadData({ title: '', subtitle: '', weekDate: '', file: null });
-              }}
+              onClick={closeUploadModal}
               className="px-6 py-2 border border-gray-200 rounded-[4px] text-charcoal hover:bg-gray-50 transition-colors"
             >
               Cancel
@@ -545,6 +651,11 @@ export const AdminDevotional = () => {
           </div>
           <div>
             <label className="block text-sm font-bold text-charcoal mb-2">Replace PDF (optional)</label>
+            {editData.pendingFileName && !editData.file && (
+              <p className="text-xs text-amber-700 mb-2">
+                Previously selected: {editData.pendingFileName}. Please select the PDF again.
+              </p>
+            )}
             <div className="border-2 border-dashed border-gray-300 rounded-[4px] p-6 text-center hover:border-gold transition-colors">
               <input
                 type="file"
@@ -562,7 +673,7 @@ export const AdminDevotional = () => {
                       type="button"
                       onClick={(e) => {
                         e.preventDefault();
-                        setEditData({ ...editData, file: null });
+                        setEditData({ ...editData, file: null, pendingFileName: undefined });
                       }}
                       className="text-xs text-red-500 hover:text-red-700"
                     >
