@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Upload, Trash2, Eye, X, Pencil } from 'lucide-react';
+import { FileText, Upload, Trash2, Eye, Pencil } from 'lucide-react';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { Modal } from '../../components/UI/Modal';
-import { EmbeddedPdfViewer } from '../../components/UI/EmbeddedPdfViewer';
+import { DocumentReaderPanel } from '../../components/UI/DocumentReaderPanel';
 import { supabase } from '../../lib/supabase';
 import { Newsletter as NewsletterType } from '../../types';
 import { SkeletonPageHeader, SkeletonCard } from '../../components/UI/Skeleton';
@@ -46,6 +46,12 @@ export const AdminNewsletter = () => {
   useEffect(() => {
     fetchNewsletters();
   }, []);
+
+  useEffect(() => {
+    if (viewing) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [viewing]);
 
   const fetchNewsletters = async () => {
     try {
@@ -258,7 +264,7 @@ export const AdminNewsletter = () => {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 md:space-y-8 min-w-0">
       <AdminPageHeader
         title="Newsletter Management"
         subtitle="Upload and manage church newsletters."
@@ -271,24 +277,38 @@ export const AdminNewsletter = () => {
         }
       />
 
-      <div className="grid md:grid-cols-3 gap-6">
-        <div className="md:col-span-2">
+      {viewing && (
+        <div className="md:hidden">
+          <DocumentReaderPanel
+            label="Reading"
+            title={viewing.title}
+            pdfUrl={viewing.pdf_url}
+            pdfTitle={viewing.title}
+            onClose={() => setViewing(null)}
+          />
+        </div>
+      )}
+
+      <div className={`grid md:grid-cols-3 gap-4 md:gap-6 ${viewing ? 'hidden md:grid' : ''}`}>
+        <div className="md:col-span-2 min-w-0">
           <div className="bg-gold p-1 rounded-t-[8px] w-fit">
             <span className="text-charcoal font-bold text-xs px-4 uppercase tracking-widest">Latest</span>
           </div>
-          <div className="glass-card p-8 md:p-16 text-center rounded-[8px] rounded-tl-none border-t-0 bg-white shadow-lg">
-            <FileText size={64} className="text-gold mx-auto mb-6" />
-            <h2 className="text-3xl md:text-4xl font-serif text-charcoal mb-2 font-normal">
+          <div className="glass-card p-5 sm:p-8 md:p-16 text-center rounded-[8px] rounded-tl-none border-t-0 bg-white shadow-lg">
+            <FileText className="text-gold mx-auto mb-4 md:mb-6 w-12 h-12 sm:w-16 sm:h-16" />
+            <h2 className="text-xl sm:text-2xl md:text-4xl font-serif text-charcoal mb-2 font-normal break-words">
               {latestNewsletter?.title || 'No Newsletter'}
             </h2>
             {latestNewsletter && (
-              <p className="text-neutral mb-8 font-medium">{latestNewsletter.month} {latestNewsletter.year}</p>
+              <p className="text-neutral mb-6 md:mb-8 font-medium text-sm md:text-base">
+                {latestNewsletter.month} {latestNewsletter.year}
+              </p>
             )}
             {latestNewsletter ? (
               <button
                 type="button"
                 onClick={() => setViewing(latestNewsletter)}
-                className="bg-charcoal text-white px-8 py-3 rounded-[4px] font-bold uppercase tracking-wider hover:bg-gold hover:text-charcoal transition-colors shadow-lg inline-flex items-center gap-2"
+                className="bg-charcoal text-white px-6 py-3 rounded-[4px] font-bold uppercase tracking-wider hover:bg-gold hover:text-charcoal transition-colors shadow-lg inline-flex items-center justify-center gap-2 w-full sm:w-auto min-h-[44px]"
               >
                 <Eye size={18} />
                 Read Online
@@ -299,13 +319,13 @@ export const AdminNewsletter = () => {
           </div>
         </div>
 
-        <div>
+        <div className="min-w-0">
           <h3 className="text-charcoal font-bold uppercase tracking-widest text-xs mb-4">Archive</h3>
           <div className="space-y-3">
             {newsletters.map((newsletter) => (
               <div
                 key={newsletter.id}
-                className={`glass-card bg-white/80 border p-4 flex justify-between items-center gap-2 rounded-[10px] transition-all group ${
+                className={`glass-card bg-white/80 border p-3 sm:p-4 flex justify-between items-center gap-2 rounded-[10px] transition-all group min-w-0 ${
                   viewing?.id === newsletter.id ? 'border-gold shadow-md' : 'border-white/60 hover:shadow-md hover:border-gold'
                 }`}
               >
@@ -316,11 +336,11 @@ export const AdminNewsletter = () => {
                 >
                   {newsletter.title}
                 </button>
-                <div className="flex items-center gap-1 shrink-0">
+                <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
                   <button
                     type="button"
                     onClick={() => setViewing(newsletter)}
-                    className="p-1 text-neutral hover:text-gold transition-colors"
+                    className="p-2 text-neutral hover:text-gold transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
                     aria-label={`Read ${newsletter.title}`}
                   >
                     <Eye size={16} />
@@ -331,7 +351,7 @@ export const AdminNewsletter = () => {
                       e.stopPropagation();
                       openEdit(newsletter);
                     }}
-                    className="p-1 text-neutral hover:text-gold transition-colors opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
+                    className="p-2 text-neutral hover:text-gold transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
                     aria-label={`Edit ${newsletter.title}`}
                   >
                     <Pencil size={16} />
@@ -342,7 +362,7 @@ export const AdminNewsletter = () => {
                       e.stopPropagation();
                       handleDelete(newsletter.id);
                     }}
-                    className="p-1 text-neutral hover:text-red-500 transition-colors opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
+                    className="p-2 text-neutral hover:text-red-500 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
                     aria-label={`Delete ${newsletter.title}`}
                   >
                     <Trash2 size={16} />
@@ -355,22 +375,14 @@ export const AdminNewsletter = () => {
       </div>
 
       {viewing && (
-        <div className="space-y-3">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <h3 className="text-charcoal font-bold uppercase tracking-widest text-xs">Reading</h3>
-              <p className="text-lg font-serif text-charcoal">{viewing.title}</p>
-            </div>
-            <button
-              type="button"
-              onClick={() => setViewing(null)}
-              className="inline-flex items-center gap-2 px-3 py-2 text-sm font-bold text-neutral hover:text-charcoal border border-gray-200 rounded-[4px] hover:bg-gray-50"
-            >
-              <X size={16} />
-              Close
-            </button>
-          </div>
-          <EmbeddedPdfViewer key={viewing.pdf_url} src={viewing.pdf_url} title={viewing.title} />
+        <div className="hidden md:block">
+          <DocumentReaderPanel
+            label="Reading"
+            title={viewing.title}
+            pdfUrl={viewing.pdf_url}
+            pdfTitle={viewing.title}
+            onClose={() => setViewing(null)}
+          />
         </div>
       )}
 

@@ -40,6 +40,7 @@ export const EmbeddedPdfViewer: React.FC<EmbeddedPdfViewerProps> = ({
   const [pages, setPages] = useState<PageImage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [containerWidth, setContainerWidth] = useState(0);
   const renderGeneration = useRef(0);
   const pagesRef = useRef<PageImage[]>([]);
 
@@ -52,7 +53,21 @@ export const EmbeddedPdfViewer: React.FC<EmbeddedPdfViewerProps> = ({
   }, [pages]);
 
   useEffect(() => {
-    if (!src) return;
+    const element = scrollRef.current;
+    if (!element) return;
+
+    const updateWidth = () => {
+      setContainerWidth(Math.max(Math.round(element.clientWidth), 0));
+    };
+
+    updateWidth();
+    const observer = new ResizeObserver(updateWidth);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!src || containerWidth < 200) return;
 
     const generation = ++renderGeneration.current;
     let cancelled = false;
@@ -74,7 +89,7 @@ export const EmbeddedPdfViewer: React.FC<EmbeddedPdfViewerProps> = ({
 
         if (cancelled || generation !== renderGeneration.current) return;
 
-        const containerWidth = Math.max(scrollRef.current?.clientWidth ?? 800, 280) - 32;
+        const pageWidth = Math.max(containerWidth - 16, 260);
         const dpr = Math.min(window.devicePixelRatio || 1, 2);
         const nextPages: PageImage[] = [];
 
@@ -83,7 +98,7 @@ export const EmbeddedPdfViewer: React.FC<EmbeddedPdfViewerProps> = ({
 
           const page = await pdfDoc.getPage(pageNumber);
           const baseViewport = page.getViewport({ scale: 1 });
-          const scale = containerWidth / baseViewport.width;
+          const scale = pageWidth / baseViewport.width;
           const viewport = page.getViewport({ scale: scale * dpr });
 
           const canvas = document.createElement('canvas');
@@ -141,7 +156,7 @@ export const EmbeddedPdfViewer: React.FC<EmbeddedPdfViewerProps> = ({
       }
       revokePageUrls(objectUrls);
     };
-  }, [src]);
+  }, [src, containerWidth]);
 
   useEffect(() => {
     return () => {
@@ -151,7 +166,7 @@ export const EmbeddedPdfViewer: React.FC<EmbeddedPdfViewerProps> = ({
 
   return (
     <div
-      className={`w-full rounded-[4px] border border-gray-200 overflow-hidden bg-gray-50 ${className}`}
+      className={`w-full min-w-0 rounded-[4px] border border-gray-200 overflow-hidden bg-gray-50 ${className}`}
       role="region"
       aria-label={title}
       onContextMenu={preventCopy}
@@ -164,14 +179,14 @@ export const EmbeddedPdfViewer: React.FC<EmbeddedPdfViewerProps> = ({
     >
       <div
         ref={scrollRef}
-        className="relative w-full h-[50vh] min-h-[320px] md:h-[75vh] overflow-y-auto overflow-x-hidden p-4 select-none"
-        style={{ WebkitUserSelect: 'none', userSelect: 'none' }}
+        className="relative w-full min-w-0 h-[65dvh] min-h-[280px] sm:h-[55vh] md:h-[70vh] overflow-y-auto overflow-x-hidden px-2 py-3 sm:p-4 select-none touch-pan-y"
+        style={{ WebkitUserSelect: 'none', userSelect: 'none', WebkitOverflowScrolling: 'touch' }}
       >
         {isLoading && (
           <p className="text-center text-neutral text-sm py-12">Loading document…</p>
         )}
         {error && !isLoading && (
-          <p className="text-center text-red-600 text-sm py-12">{error}</p>
+          <p className="text-center text-red-600 text-sm py-12 px-2">{error}</p>
         )}
         {!isLoading && !error &&
           pages.map((page) => (
@@ -180,7 +195,7 @@ export const EmbeddedPdfViewer: React.FC<EmbeddedPdfViewerProps> = ({
               src={page.url}
               alt=""
               draggable={false}
-              className="block mx-auto mb-4 max-w-full h-auto pointer-events-none"
+              className="block mx-auto mb-3 sm:mb-4 w-full max-w-full h-auto pointer-events-none"
             />
           ))}
       </div>
