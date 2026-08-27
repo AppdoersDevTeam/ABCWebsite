@@ -13,6 +13,18 @@ export const CHURCH_WEBSITE_URL = 'https://ashburtonbaptist.co.nz';
 export const CHURCH_LOGO_URL = 'https://ashburtonbaptist.co.nz/abc-logo.png';
 export const CHURCH_ADDRESS = '284 Havelock Street, Ashburton 7700';
 
+/** Soften stored ALL CAPS titles for overview cards and lists. */
+export function formatDisplayTitle(text: string | null | undefined): string {
+  if (!text) return '';
+  const letters = text.replace(/[^a-zA-Z]/g, '');
+  if (letters.length >= 3 && letters === letters.toUpperCase()) {
+    return text
+      .toLowerCase()
+      .replace(/(^|[\s\-–—:/(])\w/g, (match) => match.toUpperCase());
+  }
+  return text;
+}
+
 /** Build a display name from first + last, falling back to legacy name. */
 export function displayName(user: { first_name?: string; last_name?: string; name?: string } | null | undefined): string {
   if (!user) return 'User';

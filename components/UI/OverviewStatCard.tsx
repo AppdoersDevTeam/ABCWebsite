@@ -36,16 +36,16 @@ export const OverviewStatCard: React.FC<OverviewStatCardProps> = ({
       >
         {icon}
       </div>
-      <p className="text-xs font-semibold uppercase tracking-wider text-neutral/70 mb-1.5">{label}</p>
+      <p className="text-[11px] font-medium text-neutral/70 mb-1">{label}</p>
       <div
-        className={`text-xl md:text-2xl font-serif leading-snug mb-1 ${highlight ? 'text-gold' : 'text-charcoal'} ${valueClassName}`}
+        className={`text-sm md:text-base font-serif font-normal leading-snug mb-1 normal-case ${highlight ? 'text-gold' : 'text-charcoal'} ${valueClassName}`}
       >
         {value}
       </div>
       {description ? (
-        <p className="text-xs text-neutral leading-relaxed mb-3 min-h-[2.5rem]">{description}</p>
+        <p className="text-[11px] text-neutral/80 leading-relaxed mb-2 min-h-[2rem]">{description}</p>
       ) : (
-        <div className="mb-3 min-h-[2.5rem]" />
+        <div className="mb-2 min-h-[2rem]" />
       )}
       <div className="pt-3 border-t border-gray-100">
         <span className="text-gold font-semibold text-xs">{footerLabel}</span>

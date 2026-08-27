@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { displayName } from '../../lib/constants';
+import { displayName, formatDisplayTitle } from '../../lib/constants';
 import { OverviewStatCard } from '../../components/UI/OverviewStatCard';
 import { Calendar, MessageSquare, BookOpen, Youtube } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
@@ -40,7 +40,7 @@ export const DashboardHome = () => {
         // Newsletter query
         supabase
           .from('newsletters')
-          .select('created_at, month, year')
+          .select('created_at, month, year, title')
           .order('created_at', { ascending: false })
           .limit(1),
 
@@ -80,7 +80,9 @@ export const DashboardHome = () => {
       // Process newsletter
       if (newsletterResult.status === 'fulfilled' && !newsletterResult.value.error && newsletterResult.value.data && newsletterResult.value.data.length > 0) {
         const newsletter = newsletterResult.value.data[0];
-        if (newsletter.month && newsletter.year) {
+        if (newsletter.title) {
+          setLastNewsletterDate(formatDisplayTitle(newsletter.title));
+        } else if (newsletter.month && newsletter.year) {
           setLastNewsletterDate(`${newsletter.month} ${newsletter.year}`);
         } else {
           const lastNewsletter = new Date(newsletter.created_at);
@@ -95,8 +97,8 @@ export const DashboardHome = () => {
         devotionalResult.value.data.length > 0
       ) {
         const d = devotionalResult.value.data[0];
-        setLastDevotionalLabel(d.title || null);
-        setLastDevotionalSubtitle(d.subtitle || null);
+        setLastDevotionalLabel(d.title ? formatDisplayTitle(d.title) : null);
+        setLastDevotionalSubtitle(d.subtitle ? formatDisplayTitle(d.subtitle) : null);
       } else {
         setLastDevotionalLabel(null);
         setLastDevotionalSubtitle(null);
@@ -112,8 +114,8 @@ export const DashboardHome = () => {
     <div className="space-y-8">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 border-b border-gray-200 pb-6">
              <div>
-                <h1 className="text-2xl md:text-4xl font-serif font-normal text-charcoal">Welcome, {displayName(user)}</h1>
-                <p className="text-neutral mt-2">Here is what is happening in your community.</p>
+                <h1 className="text-xl md:text-2xl font-serif font-normal text-charcoal">Welcome, {displayName(user)}</h1>
+                <p className="text-neutral mt-1 text-sm">Here is what is happening in your community.</p>
              </div>
              <div className="hidden md:flex items-center gap-2">
                  <span className="text-xs font-bold text-charcoal bg-gold px-4 py-2 rounded-full border border-gold uppercase tracking-widest shadow-sm">
@@ -168,7 +170,7 @@ export const DashboardHome = () => {
                 iconClassName="bg-purple-50 text-purple-600"
                 label="Devotional of the Week"
                 value={isLoadingStats ? '...' : (lastDevotionalLabel || 'None')}
-                valueClassName="text-lg md:text-xl line-clamp-2"
+                valueClassName="line-clamp-2"
                 description={
                   isLoadingStats
                     ? 'Loading...'
