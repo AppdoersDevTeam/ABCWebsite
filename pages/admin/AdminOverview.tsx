@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { VibrantCard } from '../../components/UI/VibrantCard';
-import { Calendar, MessageSquare, BookOpen, Users, ClipboardList, ArrowUpRight, UserCheck, X, Plus, Shield, Mail } from 'lucide-react';
+import { OverviewStatCard } from '../../components/UI/OverviewStatCard';
+import { Calendar, MessageSquare, BookOpen, Users, ClipboardList, UserCheck, X, Plus, Shield, Mail } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { displayName, filterUsersForAdminView } from '../../lib/constants';
@@ -504,7 +504,7 @@ export const AdminOverview = () => {
     { 
       label: 'Pending Approvals', 
       value: visiblePendingCount.toString(), 
-      icon: <UserCheck size={24} />, 
+      icon: <UserCheck size={18} />, 
       path: '#pending-users', 
       color: 'text-gold', 
       highlight: visiblePendingCount > 0 
@@ -512,7 +512,7 @@ export const AdminOverview = () => {
     { 
       label: 'New Prayer Requests (24h)', 
       value: isLoadingStats ? '...' : prayerRequests24h.toString(), 
-      icon: <MessageSquare size={24} />, 
+      icon: <MessageSquare size={18} />, 
       path: '/admin/prayer', 
       color: 'text-blue-500',
       subtitle: isLoadingStats ? 'Loading...' : undefined
@@ -520,7 +520,7 @@ export const AdminOverview = () => {
     { 
       label: 'Next Service', 
       value: isLoadingStats ? '...' : (nextService || 'Sunday 10AM'), 
-      icon: <Calendar size={24} />, 
+      icon: <Calendar size={18} />, 
       path: '/admin/events', 
       color: 'text-green-500',
       subtitle: isLoadingStats ? 'Loading...' : undefined
@@ -528,23 +528,23 @@ export const AdminOverview = () => {
     { 
       label: 'Last Newsletter', 
       value: isLoadingStats ? '...' : (lastNewsletterDate || 'None'), 
-      icon: <BookOpen size={24} />, 
-      path: '/admin/newsletter', 
+      icon: <BookOpen size={18} />,
+      path: '/admin/newsletter',
       color: 'text-orange-500',
       subtitle: isLoadingStats ? 'Loading...' : undefined
     },
     { 
       label: 'Last Devotional', 
       value: isLoadingStats ? '...' : (lastDevotionalDate || 'None'), 
-      icon: <BookOpen size={24} />, 
-      path: '/admin/devotional', 
+      icon: <BookOpen size={18} />,
+      path: '/admin/devotional',
       color: 'text-emerald-500',
       subtitle: isLoadingStats ? 'Loading...' : undefined
     },
     { 
       label: 'Team Members', 
       value: isLoadingStats ? '...' : teamMembersCount.toString(), 
-      icon: <Users size={24} />, 
+      icon: <Users size={18} />, 
       path: '/admin/team', 
       color: 'text-purple-500',
       subtitle: isLoadingStats ? 'Loading...' : undefined
@@ -552,7 +552,7 @@ export const AdminOverview = () => {
     { 
       label: 'Roster Assignments', 
       value: isLoadingStats ? '...' : rosterAssignmentsCount.toString(), 
-      icon: <ClipboardList size={24} />, 
+      icon: <ClipboardList size={18} />, 
       path: '/admin/roster', 
       color: 'text-indigo-500',
       subtitle: isLoadingStats ? 'Loading...' : undefined
@@ -590,41 +590,34 @@ export const AdminOverview = () => {
       />
 
       {/* Stats Grid */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
         {stats.map((stat, i) => {
-          const content = (
-            <VibrantCard className={`group cursor-pointer bg-white hover:shadow-lg hover:border-gold transition-all ${stat.highlight ? 'border-2 border-gold' : ''}`}>
-              <div className="absolute top-4 right-4 text-gray-400 group-hover:text-gold transition-colors">
-                <ArrowUpRight />
-              </div>
-              <div className={`mb-4 text-charcoal p-4 bg-gray-50 rounded-full w-16 h-16 flex items-center justify-center group-hover:bg-gold transition-colors ${stat.color} ${stat.highlight ? 'bg-gold/20' : ''}`}>
-                {stat.icon}
-              </div>
-              <h3 className="font-bold text-xl mb-2 text-charcoal">{stat.label}</h3>
-              <p className={`text-4xl font-serif font-normal mb-1 ${stat.highlight ? 'text-gold' : 'text-charcoal'}`}>{stat.value}</p>
-              {stat.subtitle && (
-                <p className="text-sm text-neutral mb-2">{stat.subtitle}</p>
-              )}
-              {stat.label === 'Next Service' && nextService && !isLoadingStats && (
-                <p className="text-sm text-neutral mt-1">Every Sunday at 10:00 AM</p>
-              )}
-              {stat.label === 'Last Newsletter' && lastNewsletterDate && !isLoadingStats && (
-                <p className="text-sm text-neutral mt-1">Uploaded {lastNewsletterDate}</p>
-              )}
-              {stat.label === 'Last Devotional' && lastDevotionalDate && !isLoadingStats && (
-                <p className="text-sm text-neutral mt-1">Week of {lastDevotionalDate}</p>
-              )}
-              <div className="pt-4 border-t border-gray-100">
-                <span className="text-gold font-bold text-sm">Manage →</span>
-              </div>
-            </VibrantCard>
+          const description =
+            stat.label === 'Next Service' && nextService && !isLoadingStats
+              ? 'Every Sunday at 10:00 AM'
+              : stat.label === 'Last Newsletter' && lastNewsletterDate && !isLoadingStats
+                ? `Uploaded ${lastNewsletterDate}`
+                : stat.label === 'Last Devotional' && lastDevotionalDate && !isLoadingStats
+                  ? `Week of ${lastDevotionalDate}`
+                  : stat.subtitle;
+
+          const card = (
+            <OverviewStatCard
+              icon={stat.icon}
+              iconClassName={`${stat.color} bg-gray-50`}
+              label={stat.label}
+              value={stat.value}
+              description={description}
+              footerLabel="Manage →"
+              highlight={stat.highlight}
+            />
           );
 
           if (stat.path.startsWith('#')) {
             return (
-              <a 
-                key={i} 
-                href={stat.path} 
+              <a
+                key={i}
+                href={stat.path}
                 onClick={(e) => {
                   e.preventDefault();
                   const element = document.getElementById(stat.path.substring(1));
@@ -634,14 +627,14 @@ export const AdminOverview = () => {
                 }}
                 className="block"
               >
-                {content}
+                {card}
               </a>
             );
           }
 
           return (
             <Link key={i} to={stat.path} className="block">
-              {content}
+              {card}
             </Link>
           );
         })}
@@ -812,9 +805,9 @@ export const AdminOverview = () => {
 
       {/* Quick Actions */}
       <div className="grid md:grid-cols-2 gap-6">
-        <div className="glass-card bg-white/60 p-8 rounded-[8px] border border-gray-100">
-          <h3 className="font-serif text-2xl mb-4 text-charcoal font-normal">Quick Actions</h3>
-          <div className="space-y-3">
+        <div className="glass-card bg-white/60 p-5 md:p-6 rounded-[8px] border border-gray-100">
+          <h3 className="font-serif text-lg mb-3 text-charcoal font-normal">Quick Actions</h3>
+          <div className="space-y-2">
             {visiblePendingCount > 0 && (
               <a
                 href="#pending-users"
@@ -822,37 +815,37 @@ export const AdminOverview = () => {
                   e.preventDefault();
                   document.getElementById('pending-users')?.scrollIntoView({ behavior: 'smooth' });
                 }}
-                className="block p-4 bg-white border-2 border-gold rounded-[4px] hover:border-gold hover:shadow-md transition-all"
+                className="block p-3 bg-white border-2 border-gold rounded-[4px] hover:border-gold hover:shadow-md transition-all"
               >
-                <span className="font-bold text-charcoal">Review Pending User Approvals</span>
-                <p className="text-sm text-neutral mt-1">{visiblePendingCount} {visiblePendingCount === 1 ? 'user' : 'users'} awaiting approval</p>
+                <span className="font-semibold text-sm text-charcoal">Review Pending User Approvals</span>
+                <p className="text-xs text-neutral mt-0.5">{visiblePendingCount} {visiblePendingCount === 1 ? 'user' : 'users'} awaiting approval</p>
               </a>
             )}
-            <Link to="/admin/users" className="block p-4 bg-white border border-gray-100 rounded-[4px] hover:border-blue-300 hover:shadow-md transition-all">
-              <span className="font-bold text-charcoal">Manage All Users</span>
-              <p className="text-sm text-neutral mt-1">View and manage user roles and permissions</p>
+            <Link to="/admin/users" className="block p-3 bg-white border border-gray-100 rounded-[4px] hover:border-blue-300 hover:shadow-md transition-all">
+              <span className="font-semibold text-sm text-charcoal">Manage All Users</span>
+              <p className="text-xs text-neutral mt-0.5">View and manage user roles and permissions</p>
             </Link>
-            <Link to="/admin/prayer" className="block p-4 bg-white border border-gray-100 rounded-[4px] hover:border-gold hover:shadow-md transition-all">
-              <span className="font-bold text-charcoal">Review New Prayer Requests</span>
-              <p className="text-sm text-neutral mt-1">{pendingPrayerRequestsCount > 0 ? `${pendingPrayerRequestsCount} recent request${pendingPrayerRequestsCount === 1 ? '' : 's'}` : 'No recent requests'}</p>
+            <Link to="/admin/prayer" className="block p-3 bg-white border border-gray-100 rounded-[4px] hover:border-gold hover:shadow-md transition-all">
+              <span className="font-semibold text-sm text-charcoal">Review New Prayer Requests</span>
+              <p className="text-xs text-neutral mt-0.5">{pendingPrayerRequestsCount > 0 ? `${pendingPrayerRequestsCount} recent request${pendingPrayerRequestsCount === 1 ? '' : 's'}` : 'No recent requests'}</p>
             </Link>
-            <Link to="/admin/events" className="block p-4 bg-white border border-gray-100 rounded-[4px] hover:border-gold hover:shadow-md transition-all">
-              <span className="font-bold text-charcoal">Add New Event</span>
-              <p className="text-sm text-neutral mt-1">Create upcoming church event</p>
+            <Link to="/admin/events" className="block p-3 bg-white border border-gray-100 rounded-[4px] hover:border-gold hover:shadow-md transition-all">
+              <span className="font-semibold text-sm text-charcoal">Add New Event</span>
+              <p className="text-xs text-neutral mt-0.5">Create upcoming church event</p>
             </Link>
-            <Link to="/admin/newsletter" className="block p-4 bg-white border border-gray-100 rounded-[4px] hover:border-gold hover:shadow-md transition-all">
-              <span className="font-bold text-charcoal">Upload Newsletter</span>
-              <p className="text-sm text-neutral mt-1">Share latest church updates</p>
+            <Link to="/admin/newsletter" className="block p-3 bg-white border border-gray-100 rounded-[4px] hover:border-gold hover:shadow-md transition-all">
+              <span className="font-semibold text-sm text-charcoal">Upload Newsletter</span>
+              <p className="text-xs text-neutral mt-0.5">Share latest church updates</p>
             </Link>
-            <Link to="/admin/devotional" className="block p-4 bg-white border border-gray-100 rounded-[4px] hover:border-gold hover:shadow-md transition-all">
-              <span className="font-bold text-charcoal">Upload Devotional</span>
-              <p className="text-sm text-neutral mt-1">Publish this week&apos;s weekly PDF</p>
+            <Link to="/admin/devotional" className="block p-3 bg-white border border-gray-100 rounded-[4px] hover:border-gold hover:shadow-md transition-all">
+              <span className="font-semibold text-sm text-charcoal">Upload Devotional</span>
+              <p className="text-xs text-neutral mt-0.5">Publish this week&apos;s weekly PDF</p>
             </Link>
           </div>
         </div>
 
-        <div className="glass-card bg-white/60 p-8 rounded-[8px] border border-gray-100">
-          <h3 className="font-serif text-2xl mb-4 text-charcoal font-normal">Recent Activity</h3>
+        <div className="glass-card bg-white/60 p-5 md:p-6 rounded-[8px] border border-gray-100">
+          <h3 className="font-serif text-lg mb-3 text-charcoal font-normal">Recent Activity</h3>
           {isLoadingActivities ? (
             <div className="space-y-4">
               {Array.from({ length: 3 }).map((_, i) => (
@@ -878,7 +871,7 @@ export const AdminOverview = () => {
                 >
                   <div className="w-2 h-2 rounded-full bg-gold mt-2"></div>
                   <div>
-                    <p className="text-sm text-charcoal font-bold">{activity.title}</p>
+                    <p className="text-sm text-charcoal font-medium leading-snug">{activity.title}</p>
                     <p className="text-xs text-neutral">{formatRelativeDateInTimezone(activity.date)}</p>
                   </div>
                 </div>

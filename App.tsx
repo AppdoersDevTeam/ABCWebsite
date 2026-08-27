@@ -40,6 +40,7 @@ import { PendingApproval } from './pages/dashboard/PendingApproval';
 import { PrayerWall } from './pages/dashboard/PrayerWall';
 import { Newsletter } from './pages/dashboard/Newsletter';
 import { Devotional } from './pages/dashboard/Devotional';
+import { Sermons as DashboardSermons } from './pages/dashboard/Sermons';
 import { Team } from './pages/dashboard/Team';
 import { EventsPrivate } from './pages/dashboard/EventsPrivate';
 import { DashboardHelp } from './pages/dashboard/Help';
@@ -170,6 +171,7 @@ const AppRoutes = () => {
                 <Route path="prayer" element={<PrayerWall />} />
                 <Route path="newsletter" element={<Newsletter />} />
                 <Route path="devotional" element={<Devotional />} />
+                <Route path="sermons" element={<DashboardSermons />} />
                 <Route path="team" element={<Team />} />
                 <Route path="events" element={<EventsPrivate />} />
                 <Route path="roster" element={<Roster />} />

@@ -2,8 +2,8 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { displayName } from '../../lib/constants';
-import { VibrantCard } from '../../components/UI/VibrantCard';
-import { Calendar, MessageSquare, BookOpen, ArrowUpRight } from 'lucide-react';
+import { OverviewStatCard } from '../../components/UI/OverviewStatCard';
+import { Calendar, MessageSquare, BookOpen, Youtube } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { getVerseOfTheDay } from '../../lib/getVerseOfTheDay';
 
@@ -122,97 +122,85 @@ export const DashboardHome = () => {
              </div>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
             <Link to="/dashboard/events" className="block">
-              <VibrantCard className="group cursor-pointer bg-white hover:shadow-lg hover:border-gold transition-all">
-                <div className="absolute top-4 right-4 text-gray-400 group-hover:text-gold transition-colors"><ArrowUpRight /></div>
-                <div className="mb-4 p-4 bg-green-50 text-green-600 rounded-full w-16 h-16 flex items-center justify-center group-hover:bg-gold group-hover:text-white transition-colors">
-                    <Calendar size={32} />
-                </div>
-                <h3 className="font-bold text-xl mb-2 text-charcoal">Next Service</h3>
-                <p className="text-4xl font-serif font-normal mb-1 text-charcoal">
-                  {isLoadingStats ? '...' : (nextService || 'Sunday')}
-                </p>
-                <p className="text-neutral mb-4">
-                  {isLoadingStats ? 'Loading...' : 'Every Sunday at 10:00 AM'}
-                </p>
-                <div className="pt-4 border-t border-gray-100">
-                    <span className="text-gold font-bold text-sm">View Events →</span>
-                </div>
-              </VibrantCard>
+              <OverviewStatCard
+                icon={<Calendar size={18} />}
+                iconClassName="bg-green-50 text-green-600"
+                label="Next Service"
+                value={isLoadingStats ? '...' : (nextService || 'Sunday')}
+                description={isLoadingStats ? 'Loading...' : 'Every Sunday at 10:00 AM'}
+                footerLabel="View Events →"
+              />
             </Link>
 
             <Link to="/dashboard/prayer" className="block">
-              <VibrantCard className="group cursor-pointer bg-white hover:shadow-lg hover:border-gold transition-all">
-                 <div className="absolute top-4 right-4 text-gray-400 group-hover:text-gold transition-colors"><ArrowUpRight /></div>
-                 <div className="mb-4 p-4 bg-blue-50 text-blue-600 rounded-full w-16 h-16 flex items-center justify-center group-hover:bg-gold group-hover:text-white transition-colors">
-                    <MessageSquare size={32} />
-                </div>
-                <h3 className="font-bold text-xl mb-2 text-charcoal">Prayer Wall</h3>
-                <p className="text-4xl font-serif font-normal mb-1 text-charcoal">
-                  {isLoadingStats ? '...' : prayerRequests24h}
-                </p>
-                <p className="text-neutral mb-4">
-                  {isLoadingStats ? 'Loading...' : prayerRequests24h === 1 ? 'new request' : 'new requests'} in the last 24 hours
-                </p>
-                 <div className="pt-4 border-t border-gray-100">
-                    <span className="text-gold font-bold text-sm">View Requests →</span>
-                </div>
-              </VibrantCard>
+              <OverviewStatCard
+                icon={<MessageSquare size={18} />}
+                iconClassName="bg-blue-50 text-blue-600"
+                label="Prayer Wall"
+                value={isLoadingStats ? '...' : prayerRequests24h}
+                description={
+                  isLoadingStats
+                    ? 'Loading...'
+                    : `${prayerRequests24h === 1 ? 'new request' : 'new requests'} in the last 24 hours`
+                }
+                footerLabel="View Requests →"
+              />
             </Link>
 
             <Link to="/dashboard/newsletter" className="block">
-              <VibrantCard className="group cursor-pointer bg-white hover:shadow-lg hover:border-gold transition-all">
-                 <div className="absolute top-4 right-4 text-gray-400 group-hover:text-gold transition-colors"><ArrowUpRight /></div>
-                 <div className="mb-4 p-4 bg-orange-50 text-orange-600 rounded-full w-16 h-16 flex items-center justify-center group-hover:bg-gold group-hover:text-white transition-colors">
-                    <BookOpen size={32} />
-                </div>
-                <h3 className="font-bold text-xl mb-2 text-charcoal">Newsletter</h3>
-                <p className="text-4xl font-serif font-normal mb-1 text-charcoal">
-                  {isLoadingStats ? '...' : (lastNewsletterDate || 'None')}
-                </p>
-                <p className="text-neutral mb-4">
-                  {isLoadingStats ? 'Loading...' : lastNewsletterDate ? 'Latest edition' : 'No newsletters yet'}
-                </p>
-                 <div className="pt-4 border-t border-gray-100">
-                    <span className="text-gold font-bold text-sm">Read Now →</span>
-                </div>
-              </VibrantCard>
+              <OverviewStatCard
+                icon={<BookOpen size={18} />}
+                iconClassName="bg-orange-50 text-orange-600"
+                label="Newsletter"
+                value={isLoadingStats ? '...' : (lastNewsletterDate || 'None')}
+                description={
+                  isLoadingStats ? 'Loading...' : lastNewsletterDate ? 'Latest edition' : 'No newsletters yet'
+                }
+                footerLabel="Read Now →"
+              />
             </Link>
 
             <Link to="/dashboard/devotional" className="block">
-              <VibrantCard className="group cursor-pointer bg-white hover:shadow-lg hover:border-gold transition-all">
-                 <div className="absolute top-4 right-4 text-gray-400 group-hover:text-gold transition-colors"><ArrowUpRight /></div>
-                 <div className="mb-4 p-4 bg-purple-50 text-purple-600 rounded-full w-16 h-16 flex items-center justify-center group-hover:bg-gold group-hover:text-white transition-colors">
-                    <BookOpen size={32} />
-                </div>
-                <h3 className="font-bold text-xl mb-2 text-charcoal">Devotional of the Week</h3>
-                <p className="text-2xl md:text-3xl font-serif font-normal mb-1 text-charcoal line-clamp-2">
-                  {isLoadingStats ? '...' : (lastDevotionalLabel || 'None')}
-                </p>
-                <p className="text-neutral mb-4 line-clamp-2">
-                  {isLoadingStats
+              <OverviewStatCard
+                icon={<BookOpen size={18} />}
+                iconClassName="bg-purple-50 text-purple-600"
+                label="Devotional of the Week"
+                value={isLoadingStats ? '...' : (lastDevotionalLabel || 'None')}
+                valueClassName="text-lg md:text-xl line-clamp-2"
+                description={
+                  isLoadingStats
                     ? 'Loading...'
                     : lastDevotionalSubtitle
                       ? lastDevotionalSubtitle
                       : lastDevotionalLabel
                         ? 'Latest devotional'
-                        : 'No devotionals yet'}
-                </p>
-                 <div className="pt-4 border-t border-gray-100">
-                    <span className="text-gold font-bold text-sm">Read Now →</span>
-                </div>
-              </VibrantCard>
+                        : 'No devotionals yet'
+                }
+                footerLabel="Read Now →"
+              />
+            </Link>
+
+            <Link to="/dashboard/sermons" className="block">
+              <OverviewStatCard
+                icon={<Youtube size={18} />}
+                iconClassName="bg-red-50 text-red-600"
+                label="Watch Sermons"
+                value="YouTube"
+                description="Catch up on our latest messages"
+                footerLabel="Watch Now →"
+              />
             </Link>
         </div>
 
-        <div className="glass-card bg-white/60 p-6 md:p-10 rounded-[8px] relative overflow-hidden">
+        <div className="glass-card bg-white/60 p-5 md:p-8 rounded-[8px] relative overflow-hidden">
              <div className="relative z-10">
-                <h3 className="font-serif text-2xl md:text-3xl mb-4 text-charcoal font-normal">Verse of the Day</h3>
-                <p className="text-lg md:text-2xl text-charcoal/80 italic font-serif leading-relaxed max-w-3xl">
+                <h3 className="font-serif text-lg md:text-xl mb-3 text-charcoal font-normal">Verse of the Day</h3>
+                <p className="text-base md:text-lg text-charcoal/80 italic font-serif leading-relaxed max-w-3xl">
                     &ldquo;{verseOfTheDay.text}&rdquo;
                 </p>
-                <p className="mt-6 text-charcoal font-black tracking-widest uppercase text-sm">{verseOfTheDay.reference}</p>
+                <p className="mt-4 text-charcoal font-semibold tracking-wider uppercase text-xs">{verseOfTheDay.reference}</p>
              </div>
         </div>
     </div>

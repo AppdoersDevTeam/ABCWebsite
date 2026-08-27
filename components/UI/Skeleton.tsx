@@ -44,17 +44,17 @@ export const SkeletonCard: React.FC<SkeletonCardProps> = ({
   showFooter = true 
 }) => {
   return (
-    <div className={`bg-white border border-gray-200 rounded-[8px] p-6 shadow-sm ${className}`}>
+    <div className={`bg-white border border-gray-200 rounded-[8px] p-5 md:p-6 shadow-sm ${className}`}>
       {showIcon && (
-        <div className={`${shimmerClass} w-16 h-16 rounded-full mb-4`} />
+        <div className={`${shimmerClass} w-10 h-10 rounded-full mb-3`} />
       )}
-      <div className="space-y-3">
-        <div className={`${shimmerClass} h-6 w-3/4`} />
-        <div className={`${shimmerClass} h-4 w-full`} />
-        <div className={`${shimmerClass} h-4 w-5/6`} />
+      <div className="space-y-2">
+        <div className={`${shimmerClass} h-3 w-1/2`} />
+        <div className={`${shimmerClass} h-6 w-2/3`} />
+        <div className={`${shimmerClass} h-3 w-full`} />
       </div>
       {showFooter && (
-        <div className={`${shimmerClass} h-4 w-1/3 mt-4 pt-4 border-t border-gray-100`} />
+        <div className={`${shimmerClass} h-3 w-1/4 mt-3 pt-3 border-t border-gray-100`} />
       )}
     </div>
   );

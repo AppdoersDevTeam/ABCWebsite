@@ -11,7 +11,8 @@ import {
   MessageSquare,
   X,
   ArrowRightLeft,
-  HelpCircle
+  HelpCircle,
+  Youtube
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { displayName, displayInitial } from '../../lib/constants';
@@ -36,6 +37,7 @@ export const DashboardLayout = () => {
     { label: 'Prayer Wall', path: '/dashboard/prayer', icon: <MessageSquare size={20} /> },
     { label: 'Newsletters', path: '/dashboard/newsletter', icon: <BookOpen size={20} /> },
     { label: 'Devotional of the Week', path: '/dashboard/devotional', icon: <BookOpen size={20} /> },
+    { label: 'Watch Sermons', path: '/dashboard/sermons', icon: <Youtube size={20} /> },
     { label: 'The Team', path: '/dashboard/team', icon: <Users size={20} /> },
     { label: 'Events', path: '/dashboard/events', icon: <Calendar size={20} /> },
     { label: 'Roster', path: '/dashboard/roster', icon: <ClipboardList size={20} /> },
