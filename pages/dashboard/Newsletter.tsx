@@ -131,7 +131,7 @@ export const Newsletter = () => {
               Close
             </button>
           </div>
-          <EmbeddedPdfViewer src={viewing.pdf_url} title={viewing.title} />
+          <EmbeddedPdfViewer key={viewing.pdf_url} src={viewing.pdf_url} title={viewing.title} />
         </div>
       )}
     </div>

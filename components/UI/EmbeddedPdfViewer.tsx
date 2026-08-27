@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { GlobalWorkerOptions, getDocument } from 'pdfjs-dist';
+import { GlobalWorkerOptions, getDocument, type PDFDocumentProxy, type RenderTask } from 'pdfjs-dist';
 import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
 GlobalWorkerOptions.workerSrc = pdfWorker;
@@ -10,6 +10,11 @@ interface EmbeddedPdfViewerProps {
   className?: string;
 }
 
+interface PageImage {
+  pageNumber: number;
+  url: string;
+}
+
 function blockCopyShortcuts(event: React.KeyboardEvent) {
   if (!(event.ctrlKey || event.metaKey)) return;
   const key = event.key.toLowerCase();
@@ -18,10 +23,13 @@ function blockCopyShortcuts(event: React.KeyboardEvent) {
   }
 }
 
+function revokePageUrls(pages: PageImage[]) {
+  pages.forEach((page) => URL.revokeObjectURL(page.url));
+}
+
 /**
  * In-page PDF viewer — canvas-only rendering (no selectable text layer),
  * no download / open-in-new-tab affordances, copy shortcuts blocked.
- * Screenshots and determined users can still capture content; this is a UX deterrent.
  */
 export const EmbeddedPdfViewer: React.FC<EmbeddedPdfViewerProps> = ({
   src,
@@ -29,41 +37,51 @@ export const EmbeddedPdfViewer: React.FC<EmbeddedPdfViewerProps> = ({
   className = '',
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [pageCount, setPageCount] = useState(0);
+  const [pages, setPages] = useState<PageImage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const renderGeneration = useRef(0);
+  const pagesRef = useRef<PageImage[]>([]);
 
   const preventCopy = useCallback((event: React.SyntheticEvent) => {
     event.preventDefault();
   }, []);
 
   useEffect(() => {
-    const container = scrollRef.current;
-    if (!container || !src) return;
+    pagesRef.current = pages;
+  }, [pages]);
+
+  useEffect(() => {
+    if (!src) return;
 
     const generation = ++renderGeneration.current;
     let cancelled = false;
+    let pdfDoc: PDFDocumentProxy | null = null;
+    const renderTasks: RenderTask[] = [];
+    const objectUrls: PageImage[] = [];
 
     const render = async () => {
       setIsLoading(true);
       setError(null);
-      setPageCount(0);
-      container.replaceChildren();
+      setPages((prev) => {
+        revokePageUrls(prev);
+        return [];
+      });
 
       try {
-        const pdf = await getDocument({ url: src, withCredentials: false }).promise;
+        const loadingTask = getDocument({ url: src, withCredentials: false });
+        pdfDoc = await loadingTask.promise;
+
         if (cancelled || generation !== renderGeneration.current) return;
 
-        setPageCount(pdf.numPages);
+        const containerWidth = Math.max(scrollRef.current?.clientWidth ?? 800, 280) - 32;
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const nextPages: PageImage[] = [];
 
-        const containerWidth = Math.max(container.clientWidth - 32, 280);
-        const dpr = window.devicePixelRatio || 1;
-
-        for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
+        for (let pageNumber = 1; pageNumber <= pdfDoc.numPages; pageNumber += 1) {
           if (cancelled || generation !== renderGeneration.current) return;
 
-          const page = await pdf.getPage(pageNumber);
+          const page = await pdfDoc.getPage(pageNumber);
           const baseViewport = page.getViewport({ scale: 1 });
           const scale = containerWidth / baseViewport.width;
           const viewport = page.getViewport({ scale: scale * dpr });
@@ -71,21 +89,31 @@ export const EmbeddedPdfViewer: React.FC<EmbeddedPdfViewerProps> = ({
           const canvas = document.createElement('canvas');
           canvas.width = viewport.width;
           canvas.height = viewport.height;
-          canvas.style.width = `${viewport.width / dpr}px`;
-          canvas.style.height = `${viewport.height / dpr}px`;
-          canvas.style.display = 'block';
-          canvas.style.margin = '0 auto 1rem';
-          canvas.draggable = false;
-          canvas.setAttribute('aria-hidden', 'true');
 
           const context = canvas.getContext('2d');
           if (!context) throw new Error('Could not render PDF page');
 
-          await page.render({ canvasContext: context, viewport, canvas }).promise;
+          const task = page.render({ canvasContext: context, viewport, canvas });
+          renderTasks.push(task);
+          await task.promise;
+
           if (cancelled || generation !== renderGeneration.current) return;
 
-          container.appendChild(canvas);
+          const blob = await new Promise<Blob>((resolve, reject) => {
+            canvas.toBlob(
+              (result) => (result ? resolve(result) : reject(new Error('Could not encode PDF page'))),
+              'image/jpeg',
+              0.92
+            );
+          });
+
+          const url = URL.createObjectURL(blob);
+          nextPages.push({ pageNumber, url });
+          objectUrls.push({ pageNumber, url });
         }
+
+        if (cancelled || generation !== renderGeneration.current) return;
+        setPages(nextPages);
       } catch (err) {
         if (cancelled || generation !== renderGeneration.current) return;
         console.error('Error rendering PDF:', err);
@@ -101,8 +129,25 @@ export const EmbeddedPdfViewer: React.FC<EmbeddedPdfViewerProps> = ({
 
     return () => {
       cancelled = true;
+      renderTasks.forEach((task) => {
+        try {
+          task.cancel();
+        } catch {
+          // ignore cancel errors
+        }
+      });
+      if (pdfDoc) {
+        pdfDoc.destroy();
+      }
+      revokePageUrls(objectUrls);
     };
   }, [src]);
+
+  useEffect(() => {
+    return () => {
+      revokePageUrls(pagesRef.current);
+    };
+  }, []);
 
   return (
     <div
@@ -119,7 +164,7 @@ export const EmbeddedPdfViewer: React.FC<EmbeddedPdfViewerProps> = ({
     >
       <div
         ref={scrollRef}
-        className="w-full h-[50vh] min-h-[320px] md:h-[75vh] overflow-y-auto overflow-x-hidden p-4 select-none"
+        className="relative w-full h-[50vh] min-h-[320px] md:h-[75vh] overflow-y-auto overflow-x-hidden p-4 select-none"
         style={{ WebkitUserSelect: 'none', userSelect: 'none' }}
       >
         {isLoading && (
@@ -128,10 +173,20 @@ export const EmbeddedPdfViewer: React.FC<EmbeddedPdfViewerProps> = ({
         {error && !isLoading && (
           <p className="text-center text-red-600 text-sm py-12">{error}</p>
         )}
+        {!isLoading && !error &&
+          pages.map((page) => (
+            <img
+              key={page.pageNumber}
+              src={page.url}
+              alt=""
+              draggable={false}
+              className="block mx-auto mb-4 max-w-full h-auto pointer-events-none"
+            />
+          ))}
       </div>
-      {!isLoading && !error && pageCount > 0 && (
+      {!isLoading && !error && pages.length > 0 && (
         <p className="text-xs text-neutral text-center py-2 border-t border-gray-200 bg-white">
-          {pageCount} {pageCount === 1 ? 'page' : 'pages'} — view only
+          {pages.length} {pages.length === 1 ? 'page' : 'pages'} — view only
         </p>
       )}
     </div>
