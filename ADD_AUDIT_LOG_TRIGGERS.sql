@@ -51,6 +51,7 @@ BEGIN
     WHEN 'prayer_counts' THEN 'prayer'
     WHEN 'event_rsvps' THEN 'rsvp'
     WHEN 'newsletters' THEN 'newsletter'
+    WHEN 'devotionals' THEN 'devotional'
     WHEN 'roster_images' THEN 'roster'
     WHEN 'photos' THEN 'photos'
     WHEN 'photo_folders' THEN 'photos'
@@ -85,6 +86,8 @@ BEGIN
     v_label := COALESCE(CASE WHEN TG_OP = 'DELETE' THEN OLD.title ELSE NEW.title END, v_entity_id);
   ELSIF TG_TABLE_NAME = 'newsletters' THEN
     v_label := COALESCE(CASE WHEN TG_OP = 'DELETE' THEN OLD.title ELSE NEW.title END, v_entity_id);
+  ELSIF TG_TABLE_NAME = 'devotionals' THEN
+    v_label := COALESCE(CASE WHEN TG_OP = 'DELETE' THEN OLD.title ELSE NEW.title END, v_entity_id);
   ELSIF TG_TABLE_NAME = 'users' THEN
     v_label := COALESCE(CASE WHEN TG_OP = 'DELETE' THEN OLD.email ELSE NEW.email END, v_entity_id);
   ELSIF TG_TABLE_NAME = 'prayer_requests' THEN
@@ -114,6 +117,9 @@ BEGIN
       CASE v_action WHEN 'create' THEN 'added' WHEN 'update' THEN 'updated' ELSE 'removed' END);
   ELSIF TG_TABLE_NAME = 'newsletters' THEN
     v_summary := format('Newsletter "%s" was %s', v_label,
+      CASE v_action WHEN 'create' THEN 'uploaded' WHEN 'update' THEN 'updated' ELSE 'deleted' END);
+  ELSIF TG_TABLE_NAME = 'devotionals' THEN
+    v_summary := format('Devotional "%s" was %s', v_label,
       CASE v_action WHEN 'create' THEN 'uploaded' WHEN 'update' THEN 'updated' ELSE 'deleted' END);
   ELSIF TG_TABLE_NAME = 'roster_images' THEN
     v_summary := format('Roster PDF was %s',
@@ -178,7 +184,7 @@ BEGIN
     'users', 'events', 'team_members', 'prayer_requests', 'prayer_counts',
     'event_rsvps', 'groups', 'job_roles', 'event_categories',
     'team_member_groups', 'team_member_job_roles',
-    'newsletters', 'roster_images', 'photos', 'photo_folders'
+    'newsletters', 'devotionals', 'roster_images', 'photos', 'photo_folders'
   ]
   LOOP
     IF EXISTS (

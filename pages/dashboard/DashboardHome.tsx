@@ -12,6 +12,7 @@ export const DashboardHome = () => {
   const [prayerRequests24h, setPrayerRequests24h] = useState(0);
   const [nextService, setNextService] = useState<string | null>(null);
   const [lastNewsletterDate, setLastNewsletterDate] = useState<string | null>(null);
+  const [lastDevotionalLabel, setLastDevotionalLabel] = useState<string | null>(null);
   const [isLoadingStats, setIsLoadingStats] = useState(true);
   const verseOfTheDay = useMemo(() => getVerseOfTheDay(), []);
 
@@ -27,7 +28,7 @@ export const DashboardHome = () => {
       twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
       
       // Parallelize all queries for faster loading
-      const [prayerResult, newsletterResult] = await Promise.allSettled([
+      const [prayerResult, newsletterResult, devotionalResult] = await Promise.allSettled([
         // Prayer requests query
         supabase
           .from('prayer_requests')
@@ -40,7 +41,13 @@ export const DashboardHome = () => {
           .from('newsletters')
           .select('created_at, month, year')
           .order('created_at', { ascending: false })
-          .limit(1)
+          .limit(1),
+
+        supabase
+          .from('devotionals')
+          .select('title, week_date')
+          .order('week_date', { ascending: false })
+          .limit(1),
       ]);
 
       // Process prayer requests
@@ -78,6 +85,22 @@ export const DashboardHome = () => {
           const lastNewsletter = new Date(newsletter.created_at);
           setLastNewsletterDate(lastNewsletter.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }));
         }
+      }
+
+      if (
+        devotionalResult.status === 'fulfilled' &&
+        !devotionalResult.value.error &&
+        devotionalResult.value.data &&
+        devotionalResult.value.data.length > 0
+      ) {
+        const d = devotionalResult.value.data[0];
+        const week = new Date(`${d.week_date}T00:00:00`);
+        const weekLabel = Number.isNaN(week.getTime())
+          ? d.week_date
+          : week.toLocaleDateString('en-NZ', { day: 'numeric', month: 'short' });
+        setLastDevotionalLabel(weekLabel);
+      } else {
+        setLastDevotionalLabel(null);
       }
     } catch (error) {
       console.error('Error fetching stats:', error);
@@ -151,6 +174,25 @@ export const DashboardHome = () => {
                 </p>
                 <p className="text-neutral mb-4">
                   {isLoadingStats ? 'Loading...' : lastNewsletterDate ? 'Latest edition' : 'No newsletters yet'}
+                </p>
+                 <div className="pt-4 border-t border-gray-100">
+                    <span className="text-gold font-bold text-sm">Read Now →</span>
+                </div>
+              </VibrantCard>
+            </Link>
+
+            <Link to="/dashboard/devotional" className="block">
+              <VibrantCard className="group cursor-pointer bg-white hover:shadow-lg hover:border-gold transition-all">
+                 <div className="absolute top-4 right-4 text-gray-400 group-hover:text-gold transition-colors"><ArrowUpRight /></div>
+                 <div className="mb-4 p-4 bg-purple-50 text-purple-600 rounded-full w-16 h-16 flex items-center justify-center group-hover:bg-gold group-hover:text-white transition-colors">
+                    <BookOpen size={32} />
+                </div>
+                <h3 className="font-bold text-xl mb-2 text-charcoal">Devotional of the Week</h3>
+                <p className="text-4xl font-serif font-normal mb-1 text-charcoal">
+                  {isLoadingStats ? '...' : (lastDevotionalLabel || 'None')}
+                </p>
+                <p className="text-neutral mb-4">
+                  {isLoadingStats ? 'Loading...' : lastDevotionalLabel ? 'Latest week' : 'No devotionals yet'}
                 </p>
                  <div className="pt-4 border-t border-gray-100">
                     <span className="text-gold font-bold text-sm">Read Now →</span>

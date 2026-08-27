@@ -78,8 +78,13 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode }) => {
             </Section>
 
             <Section title="Newsletters">
-              <li>Upload or manage newsletter files (PDFs or links) that members can open from their dashboard.</li>
+              <li>Upload or manage newsletter PDFs that members can read in their dashboard (viewed in-browser only).</li>
               <li>Keep titles and dates clear so members know which issue is current.</li>
+            </Section>
+
+            <Section title="Devotional of the Week">
+              <li>Upload the weekly devotional PDF with a topic title and week date.</li>
+              <li>Members open devotionals in the dashboard viewer — no download or new-tab links.</li>
             </Section>
 
             <Section title="Directory / People">
@@ -127,8 +132,13 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode }) => {
             </Section>
 
             <Section title="Newsletters">
-              <li>Access church newsletters your leaders have published—read or download in one place.</li>
+              <li>Read church newsletters your leaders have published — PDFs open in the page viewer (no download).</li>
               <li>Use this when you want the latest letter without hunting through email.</li>
+            </Section>
+
+            <Section title="Devotional of the Week">
+              <li>Read the current weekly devotional and browse earlier weeks in the archive.</li>
+              <li>PDFs open only inside this page so you can reflect without leaving the portal.</li>
             </Section>
 
             <Section title="The Team">

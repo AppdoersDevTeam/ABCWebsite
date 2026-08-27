@@ -39,6 +39,7 @@ import { Roster } from './pages/dashboard/Roster';
 import { PendingApproval } from './pages/dashboard/PendingApproval';
 import { PrayerWall } from './pages/dashboard/PrayerWall';
 import { Newsletter } from './pages/dashboard/Newsletter';
+import { Devotional } from './pages/dashboard/Devotional';
 import { Team } from './pages/dashboard/Team';
 import { EventsPrivate } from './pages/dashboard/EventsPrivate';
 import { DashboardHelp } from './pages/dashboard/Help';
@@ -48,6 +49,7 @@ import { AdminOverview } from './pages/admin/AdminOverview';
 import { AdminUsers } from './pages/admin/AdminUsers';
 import { AdminPrayerWall } from './pages/admin/AdminPrayerWall';
 import { AdminNewsletter } from './pages/admin/AdminNewsletter';
+import { AdminDevotional } from './pages/admin/AdminDevotional';
 import { AdminTeam } from './pages/admin/AdminTeam';
 import { AdminEvents } from './pages/admin/AdminEvents';
 import { AdminRoster } from './pages/admin/AdminRoster';
@@ -167,6 +169,7 @@ const AppRoutes = () => {
                 <Route index element={<DashboardHome />} />
                 <Route path="prayer" element={<PrayerWall />} />
                 <Route path="newsletter" element={<Newsletter />} />
+                <Route path="devotional" element={<Devotional />} />
                 <Route path="team" element={<Team />} />
                 <Route path="events" element={<EventsPrivate />} />
                 <Route path="roster" element={<Roster />} />
@@ -182,6 +185,7 @@ const AppRoutes = () => {
                 <Route path="logs" element={<AdminLogs />} />
                 <Route path="prayer" element={<AdminPrayerWall />} />
                 <Route path="newsletter" element={<AdminNewsletter />} />
+                <Route path="devotional" element={<AdminDevotional />} />
                 <Route path="team" element={<AdminTeam />} />
                 <Route path="events" element={<AdminEvents />} />
                 <Route path="roster" element={<AdminRoster />} />

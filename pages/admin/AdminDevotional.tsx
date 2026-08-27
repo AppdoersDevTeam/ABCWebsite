@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Upload, Trash2, Eye, X } from 'lucide-react';
+import { BookOpen, Upload, Trash2, Eye, X } from 'lucide-react';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { Modal } from '../../components/UI/Modal';
 import { EmbeddedPdfViewer } from '../../components/UI/EmbeddedPdfViewer';
 import { supabase } from '../../lib/supabase';
-import { Newsletter as NewsletterType } from '../../types';
+import { Devotional as DevotionalType } from '../../types';
 import { SkeletonPageHeader, SkeletonCard } from '../../components/UI/Skeleton';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { logAuditEventSafe } from '../../lib/auditLog';
@@ -18,30 +18,36 @@ function storagePathFromPublicUrl(pdfUrl: string, bucket: string): string | null
   return pdfUrl.split('/').pop() || null;
 }
 
-export const AdminNewsletter = () => {
-  const [newsletters, setNewsletters] = useState<NewsletterType[]>([]);
+function formatWeekDate(weekDate: string): string {
+  const d = new Date(`${weekDate}T00:00:00`);
+  if (Number.isNaN(d.getTime())) return weekDate;
+  return d.toLocaleDateString('en-NZ', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+export const AdminDevotional = () => {
+  const [devotionals, setDevotionals] = useState<DevotionalType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-  const [uploadData, setUploadData] = useState({ month: '', year: '', description: '', file: null as File | null });
+  const [uploadData, setUploadData] = useState({ title: '', weekDate: '', file: null as File | null });
   const [isUploading, setIsUploading] = useState(false);
-  const [viewing, setViewing] = useState<NewsletterType | null>(null);
+  const [viewing, setViewing] = useState<DevotionalType | null>(null);
 
   useEffect(() => {
-    fetchNewsletters();
+    fetchDevotionals();
   }, []);
 
-  const fetchNewsletters = async () => {
+  const fetchDevotionals = async () => {
     try {
       const { data, error } = await supabase
-        .from('newsletters')
+        .from('devotionals')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('week_date', { ascending: false });
 
       if (error) throw error;
-      setNewsletters(data || []);
+      setDevotionals(data || []);
     } catch (error) {
-      console.error('Error fetching newsletters:', error);
-      alert('Failed to load newsletters');
+      console.error('Error fetching devotionals:', error);
+      alert('Failed to load devotionals');
     } finally {
       setIsLoading(false);
     }
@@ -54,7 +60,7 @@ export const AdminNewsletter = () => {
   };
 
   const handleUpload = async () => {
-    if (!uploadData.file || !uploadData.month || !uploadData.year) {
+    if (!uploadData.file || !uploadData.title.trim() || !uploadData.weekDate) {
       alert('Please fill in all required fields and select a file');
       return;
     }
@@ -63,26 +69,26 @@ export const AdminNewsletter = () => {
 
     try {
       const fileExt = uploadData.file.name.split('.').pop();
-      const fileName = `newsletters/${uploadData.month}-${uploadData.year}-${Date.now()}.${fileExt}`;
+      const fileName = `devotionals/${uploadData.weekDate}-${Date.now()}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
-        .from('newsletters')
+        .from('devotionals')
         .upload(fileName, uploadData.file, {
           cacheControl: '3600',
           upsert: false,
+          contentType: 'application/pdf',
         });
 
       if (uploadError) throw uploadError;
 
-      const { data: urlData } = supabase.storage.from('newsletters').getPublicUrl(fileName);
+      const { data: urlData } = supabase.storage.from('devotionals').getPublicUrl(fileName);
 
       const { data, error: dbError } = await supabase
-        .from('newsletters')
+        .from('devotionals')
         .insert([
           {
-            title: `${uploadData.month} ${uploadData.year}`,
-            month: uploadData.month,
-            year: parseInt(uploadData.year),
+            title: uploadData.title.trim(),
+            week_date: uploadData.weekDate,
             pdf_url: urlData.publicUrl,
           },
         ])
@@ -93,60 +99,60 @@ export const AdminNewsletter = () => {
 
       logAuditEventSafe({
         action: 'create',
-        category: 'newsletter',
-        entityType: 'newsletters',
+        category: 'devotional',
+        entityType: 'devotionals',
         entityId: data.id,
-        summary: `Uploaded newsletter ${uploadData.month} ${uploadData.year}`,
+        summary: `Uploaded devotional ${uploadData.title.trim()} (${uploadData.weekDate})`,
       });
 
-      setNewsletters([data, ...newsletters]);
-      setUploadData({ month: '', year: '', description: '', file: null });
+      setDevotionals([data, ...devotionals].sort((a, b) => b.week_date.localeCompare(a.week_date)));
+      setUploadData({ title: '', weekDate: '', file: null });
       setIsUploadModalOpen(false);
-      alert('Newsletter uploaded successfully!');
+      alert('Devotional uploaded successfully!');
     } catch (error: any) {
-      console.error('Error uploading newsletter:', error);
-      alert(error.message || 'Failed to upload newsletter');
+      console.error('Error uploading devotional:', error);
+      alert(error.message || 'Failed to upload devotional');
     } finally {
       setIsUploading(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this newsletter?')) {
+    if (!window.confirm('Are you sure you want to delete this devotional?')) {
       return;
     }
 
     try {
-      const newsletter = newsletters.find(nl => nl.id === id);
+      const item = devotionals.find((d) => d.id === id);
 
-      if (newsletter?.pdf_url) {
-        const path = storagePathFromPublicUrl(newsletter.pdf_url, 'newsletters');
+      if (item?.pdf_url) {
+        const path = storagePathFromPublicUrl(item.pdf_url, 'devotionals');
         if (path) {
-          await supabase.storage.from('newsletters').remove([path]);
+          await supabase.storage.from('devotionals').remove([path]);
         }
       }
 
-      const { error } = await supabase.from('newsletters').delete().eq('id', id);
+      const { error } = await supabase.from('devotionals').delete().eq('id', id);
 
       if (error) throw error;
 
       logAuditEventSafe({
         action: 'delete',
-        category: 'newsletter',
-        entityType: 'newsletters',
+        category: 'devotional',
+        entityType: 'devotionals',
         entityId: id,
-        summary: `Deleted newsletter ${newsletter?.title || id}`,
+        summary: `Deleted devotional ${item?.title || id}`,
       });
 
       if (viewing?.id === id) setViewing(null);
-      setNewsletters(newsletters.filter(nl => nl.id !== id));
+      setDevotionals(devotionals.filter((d) => d.id !== id));
     } catch (error) {
-      console.error('Error deleting newsletter:', error);
-      alert('Failed to delete newsletter');
+      console.error('Error deleting devotional:', error);
+      alert('Failed to delete devotional');
     }
   };
 
-  const latestNewsletter = newsletters[0];
+  const latest = devotionals[0];
 
   if (isLoading) {
     return (
@@ -169,13 +175,13 @@ export const AdminNewsletter = () => {
   return (
     <div className="space-y-8">
       <AdminPageHeader
-        title="Newsletter Management"
-        subtitle="Upload and manage church newsletters."
-        icon={<FileText size={28} />}
+        title="Devotional of the Week"
+        subtitle="Upload and manage weekly devotionals."
+        icon={<BookOpen size={28} />}
         rightSlot={
           <GlowingButton size="sm" fullWidth className="md:w-auto" onClick={() => setIsUploadModalOpen(true)}>
             <Upload size={16} className="mr-2" />
-            Upload Newsletter
+            Upload Devotional
           </GlowingButton>
         }
       />
@@ -186,24 +192,24 @@ export const AdminNewsletter = () => {
             <span className="text-charcoal font-bold text-xs px-4 uppercase tracking-widest">Latest</span>
           </div>
           <div className="glass-card p-8 md:p-16 text-center rounded-[8px] rounded-tl-none border-t-0 bg-white shadow-lg">
-            <FileText size={64} className="text-gold mx-auto mb-6" />
+            <BookOpen size={64} className="text-gold mx-auto mb-6" />
             <h2 className="text-3xl md:text-4xl font-serif text-charcoal mb-2 font-normal">
-              {latestNewsletter?.title || 'No Newsletter'}
+              {latest?.title || 'No Devotional'}
             </h2>
-            {latestNewsletter && (
-              <p className="text-neutral mb-8 font-medium">{latestNewsletter.month} {latestNewsletter.year}</p>
+            {latest && (
+              <p className="text-neutral mb-8 font-medium">Week of {formatWeekDate(latest.week_date)}</p>
             )}
-            {latestNewsletter ? (
+            {latest ? (
               <button
                 type="button"
-                onClick={() => setViewing(latestNewsletter)}
+                onClick={() => setViewing(latest)}
                 className="bg-charcoal text-white px-8 py-3 rounded-[4px] font-bold uppercase tracking-wider hover:bg-gold hover:text-charcoal transition-colors shadow-lg inline-flex items-center gap-2"
               >
                 <Eye size={18} />
                 Read Online
               </button>
             ) : (
-              <p className="text-neutral">Upload your first newsletter to get started</p>
+              <p className="text-neutral">Upload your first weekly devotional to get started</p>
             )}
           </div>
         </div>
@@ -211,26 +217,27 @@ export const AdminNewsletter = () => {
         <div>
           <h3 className="text-charcoal font-bold uppercase tracking-widest text-xs mb-4">Archive</h3>
           <div className="space-y-3">
-            {newsletters.map((newsletter) => (
+            {devotionals.map((item) => (
               <div
-                key={newsletter.id}
+                key={item.id}
                 className={`glass-card bg-white/80 border p-4 flex justify-between items-center gap-2 rounded-[10px] transition-all group ${
-                  viewing?.id === newsletter.id ? 'border-gold shadow-md' : 'border-white/60 hover:shadow-md hover:border-gold'
+                  viewing?.id === item.id ? 'border-gold shadow-md' : 'border-white/60 hover:shadow-md hover:border-gold'
                 }`}
               >
                 <button
                   type="button"
-                  onClick={() => setViewing(newsletter)}
-                  className="text-left text-neutral font-medium hover:text-charcoal min-w-0 flex-1 truncate"
+                  onClick={() => setViewing(item)}
+                  className="text-left min-w-0 flex-1"
                 >
-                  {newsletter.title}
+                  <span className="block text-neutral font-medium hover:text-charcoal truncate">{item.title}</span>
+                  <span className="block text-xs text-neutral/80">Week of {formatWeekDate(item.week_date)}</span>
                 </button>
                 <div className="flex items-center gap-1 shrink-0">
                   <button
                     type="button"
-                    onClick={() => setViewing(newsletter)}
+                    onClick={() => setViewing(item)}
                     className="p-1 text-neutral hover:text-gold transition-colors"
-                    aria-label={`Read ${newsletter.title}`}
+                    aria-label={`Read ${item.title}`}
                   >
                     <Eye size={16} />
                   </button>
@@ -238,10 +245,10 @@ export const AdminNewsletter = () => {
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleDelete(newsletter.id);
+                      handleDelete(item.id);
                     }}
                     className="p-1 text-neutral hover:text-red-500 transition-colors opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
-                    aria-label={`Delete ${newsletter.title}`}
+                    aria-label={`Delete ${item.title}`}
                   >
                     <Trash2 size={16} />
                   </button>
@@ -258,6 +265,7 @@ export const AdminNewsletter = () => {
             <div>
               <h3 className="text-charcoal font-bold uppercase tracking-widest text-xs">Reading</h3>
               <p className="text-lg font-serif text-charcoal">{viewing.title}</p>
+              <p className="text-sm text-neutral">Week of {formatWeekDate(viewing.week_date)}</p>
             </div>
             <button
               type="button"
@@ -276,46 +284,28 @@ export const AdminNewsletter = () => {
         isOpen={isUploadModalOpen}
         onClose={() => {
           setIsUploadModalOpen(false);
-          setUploadData({ month: '', year: '', description: '', file: null });
+          setUploadData({ title: '', weekDate: '', file: null });
         }}
-        title="Upload Newsletter"
+        title="Upload Devotional"
       >
         <div className="space-y-4">
-          <div className="grid md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-bold text-charcoal mb-2">Month *</label>
-              <select
-                value={uploadData.month}
-                onChange={(e) => setUploadData({ ...uploadData, month: e.target.value })}
-                className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none"
-              >
-                <option value="">Select Month</option>
-                {['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'].map(month => (
-                  <option key={month} value={month}>{month}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-bold text-charcoal mb-2">Year *</label>
-              <input
-                type="number"
-                value={uploadData.year}
-                onChange={(e) => setUploadData({ ...uploadData, year: e.target.value })}
-                className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none"
-                placeholder="2023"
-                min="2020"
-                max="2100"
-              />
-            </div>
-          </div>
           <div>
-            <label className="block text-sm font-bold text-charcoal mb-2">Description (Optional)</label>
+            <label className="block text-sm font-bold text-charcoal mb-2">Title *</label>
             <input
               type="text"
-              value={uploadData.description}
-              onChange={(e) => setUploadData({ ...uploadData, description: e.target.value })}
+              value={uploadData.title}
+              onChange={(e) => setUploadData({ ...uploadData, title: e.target.value })}
               className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none"
-              placeholder="e.g., Harvest Edition"
+              placeholder="e.g., Devotional 16 - The Trellis and the Vine"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-charcoal mb-2">Week Date *</label>
+            <input
+              type="date"
+              value={uploadData.weekDate}
+              onChange={(e) => setUploadData({ ...uploadData, weekDate: e.target.value })}
+              className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none"
             />
           </div>
           <div>
@@ -323,15 +313,15 @@ export const AdminNewsletter = () => {
             <div className="border-2 border-dashed border-gray-300 rounded-[4px] p-6 text-center hover:border-gold transition-colors">
               <input
                 type="file"
-                accept=".pdf"
+                accept=".pdf,application/pdf"
                 onChange={handleFileChange}
                 className="hidden"
-                id="newsletter-upload"
+                id="devotional-upload"
               />
-              <label htmlFor="newsletter-upload" className="cursor-pointer">
+              <label htmlFor="devotional-upload" className="cursor-pointer">
                 {uploadData.file ? (
                   <div className="space-y-2">
-                    <FileText size={32} className="mx-auto text-gold" />
+                    <BookOpen size={32} className="mx-auto text-gold" />
                     <p className="text-sm text-charcoal font-bold">{uploadData.file.name}</p>
                     <button
                       onClick={(e) => {
@@ -357,14 +347,17 @@ export const AdminNewsletter = () => {
             <button
               onClick={() => {
                 setIsUploadModalOpen(false);
-                setUploadData({ month: '', year: '', description: '', file: null });
+                setUploadData({ title: '', weekDate: '', file: null });
               }}
               className="px-6 py-2 border border-gray-200 rounded-[4px] text-charcoal hover:bg-gray-50 transition-colors"
             >
               Cancel
             </button>
-            <GlowingButton onClick={handleUpload} disabled={!uploadData.file || !uploadData.month || !uploadData.year || isUploading}>
-              {isUploading ? 'Uploading...' : 'Upload Newsletter'}
+            <GlowingButton
+              onClick={handleUpload}
+              disabled={!uploadData.file || !uploadData.title.trim() || !uploadData.weekDate || isUploading}
+            >
+              {isUploading ? 'Uploading...' : 'Upload Devotional'}
             </GlowingButton>
           </div>
         </div>

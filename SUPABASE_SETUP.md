@@ -209,7 +209,45 @@ CREATE POLICY "Admins can manage newsletters" ON newsletters
   );
 ```
 
-### 6. Roster Table
+### 6. Devotionals Table
+```sql
+CREATE TABLE devotionals (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  title TEXT NOT NULL,
+  week_date DATE NOT NULL,
+  pdf_url TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+ALTER TABLE devotionals ENABLE ROW LEVEL SECURITY;
+
+-- Policy: Authenticated users can read
+CREATE POLICY "Authenticated users can read devotionals" ON devotionals
+  FOR SELECT TO authenticated USING (true);
+
+-- Policy: Only admins can insert/update/delete
+CREATE POLICY "Admins can manage devotionals" ON devotionals
+  FOR ALL TO authenticated USING (
+    EXISTS (
+      SELECT 1 FROM users
+      WHERE users.id = auth.uid()
+      AND users.role = 'admin'
+      AND users.is_approved = true
+    )
+  ) WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM users
+      WHERE users.id = auth.uid()
+      AND users.role = 'admin'
+      AND users.is_approved = true
+    )
+  );
+```
+
+Also see `CREATE_DEVOTIONALS.sql` for table + storage bucket setup.
+
+### 7. Roster Table
 ```sql
 CREATE TABLE roster (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -241,7 +279,7 @@ CREATE POLICY "Admins can manage roster" ON roster
   );
 ```
 
-### 7. Photos Table
+### 8. Photos Table
 ```sql
 CREATE TABLE photos (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -305,12 +343,18 @@ CREATE POLICY "Admins can manage photo folders" ON photo_folders
 - Set it to public or configure appropriate policies
 - Allow authenticated users to upload (admins only)
 
-### 2. Photos Bucket
+### 2. Devotionals Bucket
+- Create a storage bucket named `devotionals`
+- Set it to public or configure appropriate policies
+- Allow authenticated users to upload (admins only)
+- Or run `CREATE_DEVOTIONALS.sql`
+
+### 3. Photos Bucket
 - Create a storage bucket named `photos`
 - Set it to public or configure appropriate policies
 - Allow authenticated users to upload (admins only)
 
-### 3. Roster Images Bucket
+### 4. Roster Images Bucket
 - Create a storage bucket named `roster-images`
 - Set it to public or configure appropriate policies
 - Allow authenticated users to upload (admins only)

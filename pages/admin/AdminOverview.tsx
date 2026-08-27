@@ -24,13 +24,14 @@ export const AdminOverview = () => {
   const [prayerRequests24h, setPrayerRequests24h] = useState(0);
   const [nextService, setNextService] = useState<string | null>(null);
   const [lastNewsletterDate, setLastNewsletterDate] = useState<string | null>(null);
+  const [lastDevotionalDate, setLastDevotionalDate] = useState<string | null>(null);
   const [isLoadingStats, setIsLoadingStats] = useState(true);
   const [teamMembersCount, setTeamMembersCount] = useState(0);
   const [rosterAssignmentsCount, setRosterAssignmentsCount] = useState(0);
   const [pendingPrayerRequestsCount, setPendingPrayerRequestsCount] = useState(0);
   const [recentActivities, setRecentActivities] = useState<Array<{
     id: string;
-    type: 'prayer' | 'event' | 'team_member' | 'newsletter' | 'roster';
+    type: 'prayer' | 'event' | 'team_member' | 'newsletter' | 'devotional' | 'roster';
     title: string;
     date: string;
   }>>([]);
@@ -269,6 +270,25 @@ export const AdminOverview = () => {
         const lastNewsletter = new Date(newsletters[0].created_at);
         setLastNewsletterDate(lastNewsletter.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }));
       }
+
+      const { data: devotionals, error: devotionalsError } = await supabase
+        .from('devotionals')
+        .select('week_date, created_at')
+        .order('week_date', { ascending: false })
+        .limit(1);
+
+      if (devotionalsError) {
+        console.error('Error fetching devotionals:', devotionalsError);
+      } else if (devotionals && devotionals.length > 0) {
+        const week = new Date(`${devotionals[0].week_date}T00:00:00`);
+        setLastDevotionalDate(
+          Number.isNaN(week.getTime())
+            ? devotionals[0].week_date
+            : week.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+        );
+      } else {
+        setLastDevotionalDate(null);
+      }
     } catch (error) {
       console.error('Error fetching stats:', error);
     } finally {
@@ -290,6 +310,7 @@ export const AdminOverview = () => {
         eventsResult,
         teamMembersResult,
         newslettersResult,
+        devotionalsResult,
         rosterResult
       ] = await Promise.allSettled([
         // Recent prayer requests
@@ -323,6 +344,13 @@ export const AdminOverview = () => {
           .or(`created_at.gte.${cutoffDate},updated_at.gte.${cutoffDate}`)
           .order('created_at', { ascending: false })
           .limit(10),
+
+        supabase
+          .from('devotionals')
+          .select('id, title, week_date, created_at, updated_at')
+          .or(`created_at.gte.${cutoffDate},updated_at.gte.${cutoffDate}`)
+          .order('created_at', { ascending: false })
+          .limit(10),
         
         // Recent roster updates
         supabase
@@ -335,7 +363,7 @@ export const AdminOverview = () => {
 
       const activities: Array<{
         id: string;
-        type: 'prayer' | 'event' | 'team_member' | 'newsletter' | 'roster';
+        type: 'prayer' | 'event' | 'team_member' | 'newsletter' | 'devotional' | 'roster';
         title: string;
         date: string;
       }> = [];
@@ -402,6 +430,23 @@ export const AdminOverview = () => {
             id: newsletter.id,
             type: 'newsletter',
             title: isUpdate ? `Newsletter updated: ${newsletter.title}` : `Newsletter uploaded: ${newsletter.title}`,
+            date: mostRecentDate
+          });
+        });
+      }
+
+      if (devotionalsResult.status === 'fulfilled' && !devotionalsResult.value.error) {
+        const items = devotionalsResult.value.data || [];
+        items.forEach((item: any) => {
+          const mostRecentDate = item.updated_at && new Date(item.updated_at) > new Date(item.created_at)
+            ? item.updated_at
+            : item.created_at;
+          const isUpdate = item.updated_at && item.updated_at !== item.created_at &&
+            new Date(item.updated_at) > new Date(item.created_at);
+          activities.push({
+            id: item.id,
+            type: 'devotional',
+            title: isUpdate ? `Devotional updated: ${item.title}` : `Devotional uploaded: ${item.title}`,
             date: mostRecentDate
           });
         });
@@ -487,6 +532,14 @@ export const AdminOverview = () => {
       subtitle: isLoadingStats ? 'Loading...' : undefined
     },
     { 
+      label: 'Last Devotional', 
+      value: isLoadingStats ? '...' : (lastDevotionalDate || 'None'), 
+      icon: <BookOpen size={24} />, 
+      path: '/admin/devotional', 
+      color: 'text-emerald-500',
+      subtitle: isLoadingStats ? 'Loading...' : undefined
+    },
+    { 
       label: 'Team Members', 
       value: isLoadingStats ? '...' : teamMembersCount.toString(), 
       icon: <Users size={24} />, 
@@ -502,7 +555,7 @@ export const AdminOverview = () => {
       color: 'text-indigo-500',
       subtitle: isLoadingStats ? 'Loading...' : undefined
     },
-  ], [visiblePendingCount, prayerRequests24h, nextService, lastNewsletterDate, isLoadingStats, teamMembersCount, rosterAssignmentsCount]);
+  ], [visiblePendingCount, prayerRequests24h, nextService, lastNewsletterDate, lastDevotionalDate, isLoadingStats, teamMembersCount, rosterAssignmentsCount]);
 
   console.log('AdminOverview - Rendering, user:', user, 'pendingCount:', pendingCount, 'isLoadingUsers:', isLoadingUsers);
 
@@ -555,6 +608,9 @@ export const AdminOverview = () => {
               )}
               {stat.label === 'Last Newsletter' && lastNewsletterDate && !isLoadingStats && (
                 <p className="text-sm text-neutral mt-1">Uploaded {lastNewsletterDate}</p>
+              )}
+              {stat.label === 'Last Devotional' && lastDevotionalDate && !isLoadingStats && (
+                <p className="text-sm text-neutral mt-1">Week of {lastDevotionalDate}</p>
               )}
               <div className="pt-4 border-t border-gray-100">
                 <span className="text-gold font-bold text-sm">Manage →</span>
@@ -785,6 +841,10 @@ export const AdminOverview = () => {
             <Link to="/admin/newsletter" className="block p-4 bg-white border border-gray-100 rounded-[4px] hover:border-gold hover:shadow-md transition-all">
               <span className="font-bold text-charcoal">Upload Newsletter</span>
               <p className="text-sm text-neutral mt-1">Share latest church updates</p>
+            </Link>
+            <Link to="/admin/devotional" className="block p-4 bg-white border border-gray-100 rounded-[4px] hover:border-gold hover:shadow-md transition-all">
+              <span className="font-bold text-charcoal">Upload Devotional</span>
+              <p className="text-sm text-neutral mt-1">Publish this week&apos;s weekly PDF</p>
             </Link>
           </div>
         </div>

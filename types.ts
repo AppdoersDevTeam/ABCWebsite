@@ -99,6 +99,15 @@ export interface Newsletter {
   updated_at?: string;
 }
 
+export interface Devotional {
+  id: string;
+  title: string;
+  week_date: string;
+  pdf_url: string;
+  created_at: string;
+  updated_at?: string;
+}
+
 export interface Photo {
   id: string;
   folder_id?: string;
@@ -187,6 +196,7 @@ export type AuditLogCategory =
   | 'prayer'
   | 'roster'
   | 'newsletter'
+  | 'devotional'
   | 'settings'
   | 'rsvp'
   | 'photos'
@@ -251,6 +261,11 @@ export interface Database {
         Row: Newsletter;
         Insert: Omit<Newsletter, 'id' | 'created_at' | 'updated_at'>;
         Update: Partial<Omit<Newsletter, 'id' | 'created_at'>>;
+      };
+      devotionals: {
+        Row: Devotional;
+        Insert: Omit<Devotional, 'id' | 'created_at' | 'updated_at'>;
+        Update: Partial<Omit<Devotional, 'id' | 'created_at'>>;
       };
       roster: {
         Row: RosterMember;
