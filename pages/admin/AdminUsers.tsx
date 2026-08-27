@@ -159,8 +159,9 @@ export const AdminUsers = () => {
       if (wasUnapproved) {
         const notifyResult = await notifyUserApproved(userId);
         if (!notifyResult.ok) {
-          emailNote =
-            ' User was approved, but the confirmation email may not have been sent.';
+          emailNote = ` User was approved, but the confirmation email may not have been sent${
+            notifyResult.error ? ` (${notifyResult.error})` : ''
+          }.`;
         }
       }
 
@@ -258,7 +259,9 @@ export const AdminUsers = () => {
         const notifyResult = await notifyUserApproved(userId);
         if (!notifyResult.ok) {
           emailNote =
-            ' They are an admin now, but the approval confirmation email may not have been sent.';
+            ' They are an admin now, but the approval confirmation email may not have been sent' +
+            (notifyResult.error ? ` (${notifyResult.error})` : '') +
+            '.';
         }
       }
 
@@ -537,40 +540,40 @@ export const AdminUsers = () => {
         <div className="flex flex-nowrap min-w-0 gap-2">
         <button
           onClick={() => setFilter('all')}
-          className={`px-4 sm:px-6 py-3 text-sm sm:text-base font-bold transition-colors whitespace-nowrap ${
+          className={`px-4 sm:px-6 py-3 text-sm sm:text-base font-bold transition-colors whitespace-nowrap text-black ${
             filter === 'all'
-              ? 'text-charcoal border-b-2 border-gold'
-              : 'text-neutral hover:text-charcoal'
+              ? 'border-b-2 border-gold'
+              : 'opacity-70 hover:opacity-100'
           }`}
         >
           All Users ({visibleUsers.length})
         </button>
         <button
           onClick={() => setFilter('pending')}
-          className={`px-4 sm:px-6 py-3 text-sm sm:text-base font-bold transition-colors whitespace-nowrap ${
+          className={`px-4 sm:px-6 py-3 text-sm sm:text-base font-bold transition-colors whitespace-nowrap text-black ${
             filter === 'pending'
-              ? 'text-charcoal border-b-2 border-gold'
-              : 'text-neutral hover:text-charcoal'
+              ? 'border-b-2 border-gold'
+              : 'opacity-70 hover:opacity-100'
           }`}
         >
           Pending ({visiblePendingCount})
         </button>
         <button
           onClick={() => setFilter('approved')}
-          className={`px-4 sm:px-6 py-3 text-sm sm:text-base font-bold transition-colors whitespace-nowrap ${
+          className={`px-4 sm:px-6 py-3 text-sm sm:text-base font-bold transition-colors whitespace-nowrap text-black ${
             filter === 'approved'
-              ? 'text-charcoal border-b-2 border-gold'
-              : 'text-neutral hover:text-charcoal'
+              ? 'border-b-2 border-gold'
+              : 'opacity-70 hover:opacity-100'
           }`}
         >
           Approved ({visibleUsers.filter(u => u.is_approved).length})
         </button>
         <button
           onClick={() => setFilter('admins')}
-          className={`px-4 sm:px-6 py-3 text-sm sm:text-base font-bold transition-colors whitespace-nowrap ${
+          className={`px-4 sm:px-6 py-3 text-sm sm:text-base font-bold transition-colors whitespace-nowrap text-black ${
             filter === 'admins'
-              ? 'text-charcoal border-b-2 border-gold'
-              : 'text-neutral hover:text-charcoal'
+              ? 'border-b-2 border-gold'
+              : 'opacity-70 hover:opacity-100'
           }`}
         >
           Admins ({visibleUsers.filter(u => u.role === 'admin').length})
