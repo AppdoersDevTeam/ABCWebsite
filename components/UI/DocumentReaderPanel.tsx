@@ -24,12 +24,12 @@ export const DocumentReaderPanel: React.FC<DocumentReaderPanelProps> = ({
 }) => {
   return (
     <div className="space-y-3 -mx-1 sm:mx-0">
-      <div className="sticky top-0 z-10 flex items-start justify-between gap-3 rounded-[4px] border border-gray-200 bg-white/95 backdrop-blur-sm p-3 sm:p-4 shadow-sm">
-        <div className="min-w-0 flex-1">
-          <h3 className="text-charcoal font-bold uppercase tracking-widest text-[10px] sm:text-xs">{label}</h3>
-          <p className="text-base sm:text-lg font-serif text-charcoal break-words">{title}</p>
+      <div className="sticky top-0 z-10 flex items-start justify-between gap-3 rounded-[4px] border border-gray-200 bg-white p-3 sm:p-4 shadow-sm">
+        <div className="min-w-0 flex-1 text-charcoal">
+          <h3 className="font-bold uppercase tracking-widest text-[10px] sm:text-xs text-[#222222]">{label}</h3>
+          <p className="text-lg font-sans font-semibold text-[#222222] break-words leading-snug">{title}</p>
           {subtitle && (
-            <p className="text-sm sm:text-base font-serif text-charcoal/80 break-words">{subtitle}</p>
+            <p className="text-base font-sans text-[#444444] break-words leading-snug mt-0.5">{subtitle}</p>
           )}
           {meta && <p className="text-xs sm:text-sm text-neutral mt-0.5">{meta}</p>}
         </div>
