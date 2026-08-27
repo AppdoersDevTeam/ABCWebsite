@@ -128,8 +128,9 @@ export const AdminOverview = () => {
       if (wasUnapproved) {
         const notifyResult = await notifyUserApproved(userId);
         if (!notifyResult.ok) {
-          emailNote =
-            ' User was approved, but the confirmation email may not have been sent.';
+          emailNote = ` User was approved, but the confirmation email may not have been sent${
+            notifyResult.error ? ` (${notifyResult.error})` : ''
+          }.`;
         }
       }
 

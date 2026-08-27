@@ -297,21 +297,31 @@ This is separate from Auth SMTP (confirm signup / reset password). Auth template
 
 ### Set Edge Function secrets
 
-In Supabase Dashboard → **Edge Functions** → **Secrets** (or CLI), set:
+These must be **Supabase Edge Function secrets**, not Vercel / Vite `.env` vars. The function reads them with `Deno.env.get(...)`.
+
+1. Open [Edge Function Secrets](https://supabase.com/dashboard/project/zwxlccqhafdnvdohzxkg/functions/secrets) for the **ABC Website** project  
+   (Dashboard → **Edge Functions** → **Secrets**)
+2. Add:
 
 | Secret | Value |
 |--------|--------|
-| `RESEND_API_KEY` | Your Resend API key |
+| `RESEND_API_KEY` | Your Resend API key (starts with `re_`) |
 | `SITE_URL` | `https://ashburtonbaptist.co.nz` (no trailing slash) |
 | `APPROVAL_FROM_EMAIL` | Optional. Default: `Ashburton Baptist Church <office@ashburtonbaptist.co.nz>` |
 
+3. Save, then **approve again** (revoke first if the user is already approved — the app only emails on the pending → approved transition).
+
 `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` are provided automatically to Edge Functions.
+
+If logs show `Missing RESEND_API_KEY`, the secret is missing or was set in the wrong place (e.g. Vercel env, Auth SMTP, or project `.env`).
 
 CLI example:
 
 ```powershell
-supabase secrets set RESEND_API_KEY="re_xxx" SITE_URL="https://ashburtonbaptist.co.nz" --project-ref zwxlccqhafdnvdohzxkg
+npx supabase secrets set RESEND_API_KEY="re_xxx" SITE_URL="https://ashburtonbaptist.co.nz" --project-ref zwxlccqhafdnvdohzxkg
 ```
+
+---
 
 ### Deploy / redeploy the function
 
