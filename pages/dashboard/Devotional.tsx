@@ -75,6 +75,9 @@ export const Devotional = () => {
                 <h2 className="text-3xl md:text-4xl font-serif text-charcoal mb-2 font-normal">
                   {latest.title}
                 </h2>
+                {latest.subtitle && (
+                  <p className="text-xl md:text-2xl font-serif text-charcoal/80 mb-2">{latest.subtitle}</p>
+                )}
                 <p className="text-neutral mb-8 font-medium">Week of {formatWeekDate(latest.week_date)}</p>
                 <button
                   type="button"
@@ -112,6 +115,9 @@ export const Devotional = () => {
                     <span className="block text-neutral font-medium group-hover:text-charcoal truncate">
                       {item.title}
                     </span>
+                    {item.subtitle && (
+                      <span className="block text-sm text-charcoal/70 truncate">{item.subtitle}</span>
+                    )}
                     <span className="block text-xs text-neutral/80">Week of {formatWeekDate(item.week_date)}</span>
                   </span>
                   <Eye size={16} className="text-neutral group-hover:text-gold shrink-0" />
@@ -128,6 +134,9 @@ export const Devotional = () => {
             <div>
               <h3 className="text-charcoal font-bold uppercase tracking-widest text-xs">Reading</h3>
               <p className="text-lg font-serif text-charcoal">{viewing.title}</p>
+              {viewing.subtitle && (
+                <p className="text-base font-serif text-charcoal/80">{viewing.subtitle}</p>
+              )}
               <p className="text-sm text-neutral">Week of {formatWeekDate(viewing.week_date)}</p>
             </div>
             <button
@@ -139,7 +148,10 @@ export const Devotional = () => {
               Close
             </button>
           </div>
-          <EmbeddedPdfViewer src={viewing.pdf_url} title={viewing.title} />
+          <EmbeddedPdfViewer
+            src={viewing.pdf_url}
+            title={viewing.subtitle ? `${viewing.title} — ${viewing.subtitle}` : viewing.title}
+          />
         </div>
       )}
     </div>

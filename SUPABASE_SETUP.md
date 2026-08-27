@@ -214,6 +214,7 @@ CREATE POLICY "Admins can manage newsletters" ON newsletters
 CREATE TABLE devotionals (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   title TEXT NOT NULL,
+  subtitle TEXT NOT NULL DEFAULT '',
   week_date DATE NOT NULL,
   pdf_url TEXT NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),

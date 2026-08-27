@@ -13,6 +13,7 @@ export const DashboardHome = () => {
   const [nextService, setNextService] = useState<string | null>(null);
   const [lastNewsletterDate, setLastNewsletterDate] = useState<string | null>(null);
   const [lastDevotionalLabel, setLastDevotionalLabel] = useState<string | null>(null);
+  const [lastDevotionalSubtitle, setLastDevotionalSubtitle] = useState<string | null>(null);
   const [isLoadingStats, setIsLoadingStats] = useState(true);
   const verseOfTheDay = useMemo(() => getVerseOfTheDay(), []);
 
@@ -45,7 +46,7 @@ export const DashboardHome = () => {
 
         supabase
           .from('devotionals')
-          .select('title, week_date')
+          .select('title, subtitle, week_date')
           .order('week_date', { ascending: false })
           .limit(1),
       ]);
@@ -94,13 +95,11 @@ export const DashboardHome = () => {
         devotionalResult.value.data.length > 0
       ) {
         const d = devotionalResult.value.data[0];
-        const week = new Date(`${d.week_date}T00:00:00`);
-        const weekLabel = Number.isNaN(week.getTime())
-          ? d.week_date
-          : week.toLocaleDateString('en-NZ', { day: 'numeric', month: 'short' });
-        setLastDevotionalLabel(weekLabel);
+        setLastDevotionalLabel(d.title || null);
+        setLastDevotionalSubtitle(d.subtitle || null);
       } else {
         setLastDevotionalLabel(null);
+        setLastDevotionalSubtitle(null);
       }
     } catch (error) {
       console.error('Error fetching stats:', error);
@@ -188,11 +187,17 @@ export const DashboardHome = () => {
                     <BookOpen size={32} />
                 </div>
                 <h3 className="font-bold text-xl mb-2 text-charcoal">Devotional of the Week</h3>
-                <p className="text-4xl font-serif font-normal mb-1 text-charcoal">
+                <p className="text-2xl md:text-3xl font-serif font-normal mb-1 text-charcoal line-clamp-2">
                   {isLoadingStats ? '...' : (lastDevotionalLabel || 'None')}
                 </p>
-                <p className="text-neutral mb-4">
-                  {isLoadingStats ? 'Loading...' : lastDevotionalLabel ? 'Latest week' : 'No devotionals yet'}
+                <p className="text-neutral mb-4 line-clamp-2">
+                  {isLoadingStats
+                    ? 'Loading...'
+                    : lastDevotionalSubtitle
+                      ? lastDevotionalSubtitle
+                      : lastDevotionalLabel
+                        ? 'Latest devotional'
+                        : 'No devotionals yet'}
                 </p>
                  <div className="pt-4 border-t border-gray-100">
                     <span className="text-gold font-bold text-sm">Read Now →</span>

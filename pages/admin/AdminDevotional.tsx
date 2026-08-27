@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BookOpen, Upload, Trash2, Eye, X } from 'lucide-react';
+import { BookOpen, Upload, Trash2, Eye, X, Pencil } from 'lucide-react';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { Modal } from '../../components/UI/Modal';
 import { EmbeddedPdfViewer } from '../../components/UI/EmbeddedPdfViewer';
@@ -28,9 +28,27 @@ export const AdminDevotional = () => {
   const [devotionals, setDevotionals] = useState<DevotionalType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-  const [uploadData, setUploadData] = useState({ title: '', weekDate: '', file: null as File | null });
+  const [uploadData, setUploadData] = useState({ title: '', subtitle: '', weekDate: '', file: null as File | null });
   const [isUploading, setIsUploading] = useState(false);
   const [viewing, setViewing] = useState<DevotionalType | null>(null);
+  const [editing, setEditing] = useState<DevotionalType | null>(null);
+  const [editData, setEditData] = useState({ title: '', subtitle: '', weekDate: '', file: null as File | null });
+  const [isSaving, setIsSaving] = useState(false);
+
+  const resetEditForm = () => {
+    setEditing(null);
+    setEditData({ title: '', subtitle: '', weekDate: '', file: null });
+  };
+
+  const openEdit = (item: DevotionalType) => {
+    setEditing(item);
+    setEditData({
+      title: item.title,
+      subtitle: item.subtitle || '',
+      weekDate: item.week_date,
+      file: null,
+    });
+  };
 
   useEffect(() => {
     fetchDevotionals();
@@ -59,8 +77,14 @@ export const AdminDevotional = () => {
     }
   };
 
+  const handleEditFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setEditData({ ...editData, file: e.target.files[0] });
+    }
+  };
+
   const handleUpload = async () => {
-    if (!uploadData.file || !uploadData.title.trim() || !uploadData.weekDate) {
+    if (!uploadData.file || !uploadData.title.trim() || !uploadData.subtitle.trim() || !uploadData.weekDate) {
       alert('Please fill in all required fields and select a file');
       return;
     }
@@ -88,6 +112,7 @@ export const AdminDevotional = () => {
         .insert([
           {
             title: uploadData.title.trim(),
+            subtitle: uploadData.subtitle.trim(),
             week_date: uploadData.weekDate,
             pdf_url: urlData.publicUrl,
           },
@@ -102,11 +127,11 @@ export const AdminDevotional = () => {
         category: 'devotional',
         entityType: 'devotionals',
         entityId: data.id,
-        summary: `Uploaded devotional ${uploadData.title.trim()} (${uploadData.weekDate})`,
+        summary: `Uploaded devotional ${uploadData.title.trim()} — ${uploadData.subtitle.trim()} (${uploadData.weekDate})`,
       });
 
       setDevotionals([data, ...devotionals].sort((a, b) => b.week_date.localeCompare(a.week_date)));
-      setUploadData({ title: '', weekDate: '', file: null });
+      setUploadData({ title: '', subtitle: '', weekDate: '', file: null });
       setIsUploadModalOpen(false);
       alert('Devotional uploaded successfully!');
     } catch (error: any) {
@@ -114,6 +139,78 @@ export const AdminDevotional = () => {
       alert(error.message || 'Failed to upload devotional');
     } finally {
       setIsUploading(false);
+    }
+  };
+
+  const handleEdit = async () => {
+    if (!editing || !editData.title.trim() || !editData.subtitle.trim() || !editData.weekDate) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
+    setIsSaving(true);
+
+    try {
+      let pdfUrl = editing.pdf_url;
+      const oldPath = storagePathFromPublicUrl(editing.pdf_url, 'devotionals');
+
+      if (editData.file) {
+        const fileExt = editData.file.name.split('.').pop();
+        const fileName = `devotionals/${editData.weekDate}-${Date.now()}.${fileExt}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('devotionals')
+          .upload(fileName, editData.file, {
+            cacheControl: '3600',
+            upsert: false,
+            contentType: 'application/pdf',
+          });
+
+        if (uploadError) throw uploadError;
+
+        const { data: urlData } = supabase.storage.from('devotionals').getPublicUrl(fileName);
+        pdfUrl = urlData.publicUrl;
+
+        if (oldPath) {
+          await supabase.storage.from('devotionals').remove([oldPath]);
+        }
+      }
+
+      const { data, error: dbError } = await supabase
+        .from('devotionals')
+        .update({
+          title: editData.title.trim(),
+          subtitle: editData.subtitle.trim(),
+          week_date: editData.weekDate,
+          pdf_url: pdfUrl,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', editing.id)
+        .select()
+        .single();
+
+      if (dbError) throw dbError;
+
+      logAuditEventSafe({
+        action: 'update',
+        category: 'devotional',
+        entityType: 'devotionals',
+        entityId: editing.id,
+        summary: `Updated devotional ${editData.title.trim()} — ${editData.subtitle.trim()} (${editData.weekDate})`,
+      });
+
+      const sorted = devotionals
+        .map((d) => (d.id === editing.id ? data : d))
+        .sort((a, b) => b.week_date.localeCompare(a.week_date));
+      setDevotionals(sorted);
+      if (viewing?.id === editing.id) setViewing(data);
+      resetEditForm();
+      alert('Devotional updated successfully!');
+    } catch (error: any) {
+      console.error('Error updating devotional:', error);
+      alert(error.message || 'Failed to update devotional');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -197,7 +294,12 @@ export const AdminDevotional = () => {
               {latest?.title || 'No Devotional'}
             </h2>
             {latest && (
-              <p className="text-neutral mb-8 font-medium">Week of {formatWeekDate(latest.week_date)}</p>
+              <>
+                {latest.subtitle && (
+                  <p className="text-xl md:text-2xl font-serif text-charcoal/80 mb-2">{latest.subtitle}</p>
+                )}
+                <p className="text-neutral mb-8 font-medium">Week of {formatWeekDate(latest.week_date)}</p>
+              </>
             )}
             {latest ? (
               <button
@@ -230,6 +332,9 @@ export const AdminDevotional = () => {
                   className="text-left min-w-0 flex-1"
                 >
                   <span className="block text-neutral font-medium hover:text-charcoal truncate">{item.title}</span>
+                  {item.subtitle && (
+                    <span className="block text-sm text-charcoal/70 truncate">{item.subtitle}</span>
+                  )}
                   <span className="block text-xs text-neutral/80">Week of {formatWeekDate(item.week_date)}</span>
                 </button>
                 <div className="flex items-center gap-1 shrink-0">
@@ -240,6 +345,17 @@ export const AdminDevotional = () => {
                     aria-label={`Read ${item.title}`}
                   >
                     <Eye size={16} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openEdit(item);
+                    }}
+                    className="p-1 text-neutral hover:text-gold transition-colors opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
+                    aria-label={`Edit ${item.title}`}
+                  >
+                    <Pencil size={16} />
                   </button>
                   <button
                     type="button"
@@ -265,6 +381,9 @@ export const AdminDevotional = () => {
             <div>
               <h3 className="text-charcoal font-bold uppercase tracking-widest text-xs">Reading</h3>
               <p className="text-lg font-serif text-charcoal">{viewing.title}</p>
+              {viewing.subtitle && (
+                <p className="text-base font-serif text-charcoal/80">{viewing.subtitle}</p>
+              )}
               <p className="text-sm text-neutral">Week of {formatWeekDate(viewing.week_date)}</p>
             </div>
             <button
@@ -276,7 +395,11 @@ export const AdminDevotional = () => {
               Close
             </button>
           </div>
-          <EmbeddedPdfViewer src={viewing.pdf_url} title={viewing.title} />
+          <EmbeddedPdfViewer
+            key={viewing.pdf_url}
+            src={viewing.pdf_url}
+            title={viewing.subtitle ? `${viewing.title} — ${viewing.subtitle}` : viewing.title}
+          />
         </div>
       )}
 
@@ -284,7 +407,7 @@ export const AdminDevotional = () => {
         isOpen={isUploadModalOpen}
         onClose={() => {
           setIsUploadModalOpen(false);
-          setUploadData({ title: '', weekDate: '', file: null });
+          setUploadData({ title: '', subtitle: '', weekDate: '', file: null });
         }}
         title="Upload Devotional"
       >
@@ -296,7 +419,17 @@ export const AdminDevotional = () => {
               value={uploadData.title}
               onChange={(e) => setUploadData({ ...uploadData, title: e.target.value })}
               className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none"
-              placeholder="e.g., Devotional 16 - The Trellis and the Vine"
+              placeholder="e.g., Devotional 16"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-charcoal mb-2">Subtitle *</label>
+            <input
+              type="text"
+              value={uploadData.subtitle}
+              onChange={(e) => setUploadData({ ...uploadData, subtitle: e.target.value })}
+              className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none"
+              placeholder="e.g., The Trellis and the Vine"
             />
           </div>
           <div>
@@ -347,7 +480,7 @@ export const AdminDevotional = () => {
             <button
               onClick={() => {
                 setIsUploadModalOpen(false);
-                setUploadData({ title: '', weekDate: '', file: null });
+                setUploadData({ title: '', subtitle: '', weekDate: '', file: null });
               }}
               className="px-6 py-2 border border-gray-200 rounded-[4px] text-charcoal hover:bg-gray-50 transition-colors"
             >
@@ -355,9 +488,96 @@ export const AdminDevotional = () => {
             </button>
             <GlowingButton
               onClick={handleUpload}
-              disabled={!uploadData.file || !uploadData.title.trim() || !uploadData.weekDate || isUploading}
+              disabled={!uploadData.file || !uploadData.title.trim() || !uploadData.subtitle.trim() || !uploadData.weekDate || isUploading}
             >
               {isUploading ? 'Uploading...' : 'Upload Devotional'}
+            </GlowingButton>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={!!editing}
+        onClose={resetEditForm}
+        title="Edit Devotional"
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-bold text-charcoal mb-2">Title *</label>
+            <input
+              type="text"
+              value={editData.title}
+              onChange={(e) => setEditData({ ...editData, title: e.target.value })}
+              className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-charcoal mb-2">Subtitle *</label>
+            <input
+              type="text"
+              value={editData.subtitle}
+              onChange={(e) => setEditData({ ...editData, subtitle: e.target.value })}
+              className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-charcoal mb-2">Week Date *</label>
+            <input
+              type="date"
+              value={editData.weekDate}
+              onChange={(e) => setEditData({ ...editData, weekDate: e.target.value })}
+              className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-charcoal mb-2">Replace PDF (optional)</label>
+            <div className="border-2 border-dashed border-gray-300 rounded-[4px] p-6 text-center hover:border-gold transition-colors">
+              <input
+                type="file"
+                accept=".pdf,application/pdf"
+                onChange={handleEditFileChange}
+                className="hidden"
+                id="devotional-edit-upload"
+              />
+              <label htmlFor="devotional-edit-upload" className="cursor-pointer">
+                {editData.file ? (
+                  <div className="space-y-2">
+                    <BookOpen size={32} className="mx-auto text-gold" />
+                    <p className="text-sm text-charcoal font-bold">{editData.file.name}</p>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setEditData({ ...editData, file: null });
+                      }}
+                      className="text-xs text-red-500 hover:text-red-700"
+                    >
+                      Remove file
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <Upload size={32} className="mx-auto text-neutral" />
+                    <p className="text-sm text-charcoal">Click to replace PDF</p>
+                    <p className="text-xs text-neutral">Leave empty to keep the current file</p>
+                  </div>
+                )}
+              </label>
+            </div>
+          </div>
+          <div className="flex flex-col-reverse sm:flex-row gap-3 justify-end pt-4">
+            <button
+              type="button"
+              onClick={resetEditForm}
+              className="px-6 py-2 border border-gray-200 rounded-[4px] text-charcoal hover:bg-gray-50 transition-colors"
+            >
+              Cancel
+            </button>
+            <GlowingButton
+              onClick={handleEdit}
+              disabled={!editData.title.trim() || !editData.subtitle.trim() || !editData.weekDate || isSaving}
+            >
+              {isSaving ? 'Saving...' : 'Save Changes'}
             </GlowingButton>
           </div>
         </div>

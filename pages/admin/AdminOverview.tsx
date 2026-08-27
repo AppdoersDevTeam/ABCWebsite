@@ -347,7 +347,7 @@ export const AdminOverview = () => {
 
         supabase
           .from('devotionals')
-          .select('id, title, week_date, created_at, updated_at')
+          .select('id, title, subtitle, week_date, created_at, updated_at')
           .or(`created_at.gte.${cutoffDate},updated_at.gte.${cutoffDate}`)
           .order('created_at', { ascending: false })
           .limit(10),
@@ -446,7 +446,9 @@ export const AdminOverview = () => {
           activities.push({
             id: item.id,
             type: 'devotional',
-            title: isUpdate ? `Devotional updated: ${item.title}` : `Devotional uploaded: ${item.title}`,
+            title: isUpdate
+              ? `Devotional updated: ${item.title}${item.subtitle ? ` — ${item.subtitle}` : ''}`
+              : `Devotional uploaded: ${item.title}${item.subtitle ? ` — ${item.subtitle}` : ''}`,
             date: mostRecentDate
           });
         });

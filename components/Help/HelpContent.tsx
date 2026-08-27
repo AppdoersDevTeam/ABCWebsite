@@ -79,11 +79,13 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode }) => {
 
             <Section title="Newsletters">
               <li>Upload or manage newsletter PDFs that members can read in their dashboard (viewed in-browser only).</li>
+              <li>Edit month, year, or replace the PDF from the archive list after upload.</li>
               <li>Keep titles and dates clear so members know which issue is current.</li>
             </Section>
 
             <Section title="Devotional of the Week">
-              <li>Upload the weekly devotional PDF with a topic title and week date.</li>
+              <li>Upload the weekly devotional PDF with a title, subtitle, and week date.</li>
+              <li>Edit details or replace the PDF from the archive list after upload.</li>
               <li>Members open devotionals in the dashboard viewer — no download or new-tab links.</li>
             </Section>
 

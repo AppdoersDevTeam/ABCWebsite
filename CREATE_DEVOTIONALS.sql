@@ -4,6 +4,7 @@
 CREATE TABLE IF NOT EXISTS public.devotionals (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   title TEXT NOT NULL,
+  subtitle TEXT NOT NULL DEFAULT '',
   week_date DATE NOT NULL,
   pdf_url TEXT NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),

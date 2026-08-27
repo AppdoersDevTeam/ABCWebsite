@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Upload, Trash2, Eye, X } from 'lucide-react';
+import { FileText, Upload, Trash2, Eye, X, Pencil } from 'lucide-react';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { Modal } from '../../components/UI/Modal';
 import { EmbeddedPdfViewer } from '../../components/UI/EmbeddedPdfViewer';
@@ -25,6 +25,23 @@ export const AdminNewsletter = () => {
   const [uploadData, setUploadData] = useState({ month: '', year: '', description: '', file: null as File | null });
   const [isUploading, setIsUploading] = useState(false);
   const [viewing, setViewing] = useState<NewsletterType | null>(null);
+  const [editing, setEditing] = useState<NewsletterType | null>(null);
+  const [editData, setEditData] = useState({ month: '', year: '', file: null as File | null });
+  const [isSaving, setIsSaving] = useState(false);
+
+  const resetEditForm = () => {
+    setEditing(null);
+    setEditData({ month: '', year: '', file: null });
+  };
+
+  const openEdit = (item: NewsletterType) => {
+    setEditing(item);
+    setEditData({
+      month: item.month,
+      year: String(item.year),
+      file: null,
+    });
+  };
 
   useEffect(() => {
     fetchNewsletters();
@@ -50,6 +67,12 @@ export const AdminNewsletter = () => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setUploadData({ ...uploadData, file: e.target.files[0] });
+    }
+  };
+
+  const handleEditFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setEditData({ ...editData, file: e.target.files[0] });
     }
   };
 
@@ -108,6 +131,74 @@ export const AdminNewsletter = () => {
       alert(error.message || 'Failed to upload newsletter');
     } finally {
       setIsUploading(false);
+    }
+  };
+
+  const handleEdit = async () => {
+    if (!editing || !editData.month || !editData.year) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
+    setIsSaving(true);
+
+    try {
+      let pdfUrl = editing.pdf_url;
+      const oldPath = storagePathFromPublicUrl(editing.pdf_url, 'newsletters');
+
+      if (editData.file) {
+        const fileExt = editData.file.name.split('.').pop();
+        const fileName = `newsletters/${editData.month}-${editData.year}-${Date.now()}.${fileExt}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('newsletters')
+          .upload(fileName, editData.file, {
+            cacheControl: '3600',
+            upsert: false,
+          });
+
+        if (uploadError) throw uploadError;
+
+        const { data: urlData } = supabase.storage.from('newsletters').getPublicUrl(fileName);
+        pdfUrl = urlData.publicUrl;
+
+        if (oldPath) {
+          await supabase.storage.from('newsletters').remove([oldPath]);
+        }
+      }
+
+      const { data, error: dbError } = await supabase
+        .from('newsletters')
+        .update({
+          title: `${editData.month} ${editData.year}`,
+          month: editData.month,
+          year: parseInt(editData.year, 10),
+          pdf_url: pdfUrl,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', editing.id)
+        .select()
+        .single();
+
+      if (dbError) throw dbError;
+
+      logAuditEventSafe({
+        action: 'update',
+        category: 'newsletter',
+        entityType: 'newsletters',
+        entityId: editing.id,
+        summary: `Updated newsletter ${editData.month} ${editData.year}`,
+      });
+
+      setNewsletters(newsletters.map((nl) => (nl.id === editing.id ? data : nl)));
+      if (viewing?.id === editing.id) setViewing(data);
+      resetEditForm();
+      alert('Newsletter updated successfully!');
+    } catch (error: any) {
+      console.error('Error updating newsletter:', error);
+      alert(error.message || 'Failed to update newsletter');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -238,6 +329,17 @@ export const AdminNewsletter = () => {
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
+                      openEdit(newsletter);
+                    }}
+                    className="p-1 text-neutral hover:text-gold transition-colors opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
+                    aria-label={`Edit ${newsletter.title}`}
+                  >
+                    <Pencil size={16} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
                       handleDelete(newsletter.id);
                     }}
                     className="p-1 text-neutral hover:text-red-500 transition-colors opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
@@ -268,7 +370,7 @@ export const AdminNewsletter = () => {
               Close
             </button>
           </div>
-          <EmbeddedPdfViewer src={viewing.pdf_url} title={viewing.title} />
+          <EmbeddedPdfViewer key={viewing.pdf_url} src={viewing.pdf_url} title={viewing.title} />
         </div>
       )}
 
@@ -365,6 +467,92 @@ export const AdminNewsletter = () => {
             </button>
             <GlowingButton onClick={handleUpload} disabled={!uploadData.file || !uploadData.month || !uploadData.year || isUploading}>
               {isUploading ? 'Uploading...' : 'Upload Newsletter'}
+            </GlowingButton>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={!!editing}
+        onClose={resetEditForm}
+        title="Edit Newsletter"
+      >
+        <div className="space-y-4">
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-bold text-charcoal mb-2">Month *</label>
+              <select
+                value={editData.month}
+                onChange={(e) => setEditData({ ...editData, month: e.target.value })}
+                className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none"
+              >
+                <option value="">Select Month</option>
+                {['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'].map(month => (
+                  <option key={month} value={month}>{month}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-charcoal mb-2">Year *</label>
+              <input
+                type="number"
+                value={editData.year}
+                onChange={(e) => setEditData({ ...editData, year: e.target.value })}
+                className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none"
+                min="2020"
+                max="2100"
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-charcoal mb-2">Replace PDF (optional)</label>
+            <div className="border-2 border-dashed border-gray-300 rounded-[4px] p-6 text-center hover:border-gold transition-colors">
+              <input
+                type="file"
+                accept=".pdf"
+                onChange={handleEditFileChange}
+                className="hidden"
+                id="newsletter-edit-upload"
+              />
+              <label htmlFor="newsletter-edit-upload" className="cursor-pointer">
+                {editData.file ? (
+                  <div className="space-y-2">
+                    <FileText size={32} className="mx-auto text-gold" />
+                    <p className="text-sm text-charcoal font-bold">{editData.file.name}</p>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setEditData({ ...editData, file: null });
+                      }}
+                      className="text-xs text-red-500 hover:text-red-700"
+                    >
+                      Remove file
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <Upload size={32} className="mx-auto text-neutral" />
+                    <p className="text-sm text-charcoal">Click to replace PDF</p>
+                    <p className="text-xs text-neutral">Leave empty to keep the current file</p>
+                  </div>
+                )}
+              </label>
+            </div>
+          </div>
+          <div className="flex flex-col-reverse sm:flex-row gap-3 justify-end pt-4">
+            <button
+              type="button"
+              onClick={resetEditForm}
+              className="px-6 py-2 border border-gray-200 rounded-[4px] text-charcoal hover:bg-gray-50 transition-colors"
+            >
+              Cancel
+            </button>
+            <GlowingButton
+              onClick={handleEdit}
+              disabled={!editData.month || !editData.year || isSaving}
+            >
+              {isSaving ? 'Saving...' : 'Save Changes'}
             </GlowingButton>
           </div>
         </div>

@@ -102,6 +102,7 @@ export interface Newsletter {
 export interface Devotional {
   id: string;
   title: string;
+  subtitle: string;
   week_date: string;
   pdf_url: string;
   created_at: string;
