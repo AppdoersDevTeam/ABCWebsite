@@ -423,9 +423,9 @@ export const AdminNewsletter = () => {
           </div>
         </div>
 
-        <div className="min-w-0">
-          <h3 className="text-charcoal font-bold uppercase tracking-widest text-xs mb-4">Archive</h3>
-          <div className="space-y-3">
+        <div className="min-w-0 flex flex-col">
+          <h3 className="text-charcoal font-bold uppercase tracking-widest text-xs mb-4 shrink-0">Archive</h3>
+          <div className="space-y-3 max-h-[min(20rem,45vh)] md:max-h-[min(36rem,calc(100dvh-11rem))] overflow-y-auto overscroll-y-contain pr-1">
             {newsletters.map((newsletter) => (
               <div
                 key={newsletter.id}
