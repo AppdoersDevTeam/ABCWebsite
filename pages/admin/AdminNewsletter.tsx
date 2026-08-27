@@ -393,6 +393,8 @@ export const AdminNewsletter = () => {
           setUploadData({ month: '', year: '', description: '', file: null });
         }}
         title="Upload Newsletter"
+        closeOnBackdropClick={false}
+        preventClose={isUploading}
       >
         <div className="space-y-4">
           <div className="grid md:grid-cols-2 gap-4">
@@ -488,6 +490,8 @@ export const AdminNewsletter = () => {
         isOpen={!!editing}
         onClose={resetEditForm}
         title="Edit Newsletter"
+        closeOnBackdropClick={false}
+        preventClose={isSaving}
       >
         <div className="space-y-4">
           <div className="grid md:grid-cols-2 gap-4">

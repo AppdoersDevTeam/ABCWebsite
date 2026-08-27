@@ -420,6 +420,8 @@ export const AdminDevotional = () => {
           setUploadData({ title: '', subtitle: '', weekDate: '', file: null });
         }}
         title="Upload Devotional"
+        closeOnBackdropClick={false}
+        preventClose={isUploading}
       >
         <div className="space-y-4">
           <div>
@@ -510,6 +512,8 @@ export const AdminDevotional = () => {
         isOpen={!!editing}
         onClose={resetEditForm}
         title="Edit Devotional"
+        closeOnBackdropClick={false}
+        preventClose={isSaving}
       >
         <div className="space-y-4">
           <div>

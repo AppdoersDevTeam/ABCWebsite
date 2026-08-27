@@ -21,6 +21,9 @@ interface PageImage {
   url: string;
 }
 
+/** Ignore scrollbar-induced width jitter when deciding to re-render. */
+const WIDTH_RERENDER_THRESHOLD = 32;
+
 function blockCopyShortcuts(event: React.KeyboardEvent) {
   if (!(event.ctrlKey || event.metaKey)) return;
   const key = event.key.toLowerCase();
@@ -42,13 +45,15 @@ export const EmbeddedPdfViewer: React.FC<EmbeddedPdfViewerProps> = ({
   title,
   className = '',
 }) => {
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const outerRef = useRef<HTMLDivElement>(null);
   const [pages, setPages] = useState<PageImage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [containerWidth, setContainerWidth] = useState(0);
   const renderGeneration = useRef(0);
   const pagesRef = useRef<PageImage[]>([]);
+  const lastRenderedWidthRef = useRef(0);
+  const lastRenderedSrcRef = useRef('');
 
   const preventCopy = useCallback((event: React.SyntheticEvent) => {
     event.preventDefault();
@@ -58,41 +63,58 @@ export const EmbeddedPdfViewer: React.FC<EmbeddedPdfViewerProps> = ({
     pagesRef.current = pages;
   }, [pages]);
 
+  // Measure the outer shell (not the scrolling area) to avoid scrollbar width feedback loops.
   useEffect(() => {
-    const element = scrollRef.current;
+    const element = outerRef.current;
     if (!element) return;
 
+    let frame = 0;
     const updateWidth = () => {
-      setContainerWidth(Math.max(Math.round(element.clientWidth), 0));
+      window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(() => {
+        const next = Math.max(Math.round(element.getBoundingClientRect().width), 0);
+        setContainerWidth((prev) => (prev === next ? prev : next));
+      });
     };
 
     updateWidth();
     const observer = new ResizeObserver(updateWidth);
     observer.observe(element);
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      window.cancelAnimationFrame(frame);
+    };
   }, []);
 
   useEffect(() => {
     if (!src || containerWidth < 200) return;
 
+    const srcChanged = src !== lastRenderedSrcRef.current;
+    const widthDelta = Math.abs(containerWidth - lastRenderedWidthRef.current);
+    if (!srcChanged && lastRenderedWidthRef.current > 0 && widthDelta < WIDTH_RERENDER_THRESHOLD) {
+      return;
+    }
+
     const generation = ++renderGeneration.current;
     let cancelled = false;
     let loadingTask: PDFDocumentLoadingTask | null = null;
-    let pdfDoc: PDFDocumentProxy | null = null;
     const renderTasks: RenderTask[] = [];
     const objectUrls: PageImage[] = [];
+    const showInitialLoading = srcChanged || pagesRef.current.length === 0;
 
     const render = async () => {
-      setIsLoading(true);
-      setError(null);
-      setPages((prev) => {
-        revokePageUrls(prev);
-        return [];
-      });
+      if (showInitialLoading) {
+        setIsLoading(true);
+        setError(null);
+        setPages((prev) => {
+          revokePageUrls(prev);
+          return [];
+        });
+      }
 
       try {
         loadingTask = getDocument({ url: src, withCredentials: false });
-        pdfDoc = await loadingTask.promise;
+        const pdfDoc: PDFDocumentProxy = await loadingTask.promise;
 
         if (cancelled || generation !== renderGeneration.current) return;
 
@@ -135,7 +157,13 @@ export const EmbeddedPdfViewer: React.FC<EmbeddedPdfViewerProps> = ({
         }
 
         if (cancelled || generation !== renderGeneration.current) return;
-        setPages(nextPages);
+
+        setPages((prev) => {
+          revokePageUrls(prev);
+          return nextPages;
+        });
+        lastRenderedWidthRef.current = containerWidth;
+        lastRenderedSrcRef.current = src;
       } catch (err) {
         if (cancelled || generation !== renderGeneration.current) return;
         console.error('Error rendering PDF:', err);
@@ -158,7 +186,6 @@ export const EmbeddedPdfViewer: React.FC<EmbeddedPdfViewerProps> = ({
           // ignore cancel errors
         }
       });
-      // pdfjs-dist v6 removed PDFDocumentProxy.destroy(); tear down via loadingTask.
       if (loadingTask) {
         try {
           loadingTask.destroy();
@@ -176,8 +203,11 @@ export const EmbeddedPdfViewer: React.FC<EmbeddedPdfViewerProps> = ({
     };
   }, []);
 
+  const showLoadingMessage = isLoading && pages.length === 0;
+
   return (
     <div
+      ref={outerRef}
       className={`w-full min-w-0 rounded-[4px] border border-gray-200 overflow-hidden bg-gray-50 ${className}`}
       role="region"
       aria-label={title}
@@ -190,28 +220,31 @@ export const EmbeddedPdfViewer: React.FC<EmbeddedPdfViewerProps> = ({
       tabIndex={0}
     >
       <div
-        ref={scrollRef}
-        className="relative w-full min-w-0 h-[65dvh] min-h-[280px] sm:h-[55vh] md:h-[70vh] overflow-y-auto overflow-x-hidden px-2 py-3 sm:p-4 select-none touch-pan-y"
-        style={{ WebkitUserSelect: 'none', userSelect: 'none', WebkitOverflowScrolling: 'touch' }}
+        className="relative w-full min-w-0 h-[65dvh] min-h-[280px] sm:h-[55vh] md:h-[70vh] overflow-y-scroll overflow-x-hidden px-2 py-3 sm:p-4 select-none touch-pan-y"
+        style={{
+          WebkitUserSelect: 'none',
+          userSelect: 'none',
+          WebkitOverflowScrolling: 'touch',
+          scrollbarGutter: 'stable',
+        }}
       >
-        {isLoading && (
+        {showLoadingMessage && (
           <p className="text-center text-neutral text-sm py-12">Loading document…</p>
         )}
-        {error && !isLoading && (
+        {error && !isLoading && pages.length === 0 && (
           <p className="text-center text-red-600 text-sm py-12 px-2">{error}</p>
         )}
-        {!isLoading && !error &&
-          pages.map((page) => (
-            <img
-              key={page.pageNumber}
-              src={page.url}
-              alt=""
-              draggable={false}
-              className="block mx-auto mb-3 sm:mb-4 w-full max-w-full h-auto pointer-events-none"
-            />
-          ))}
+        {pages.map((page) => (
+          <img
+            key={page.pageNumber}
+            src={page.url}
+            alt=""
+            draggable={false}
+            className="block mx-auto mb-3 sm:mb-4 w-full max-w-full h-auto pointer-events-none"
+          />
+        ))}
       </div>
-      {!isLoading && !error && pages.length > 0 && (
+      {!showLoadingMessage && !error && pages.length > 0 && (
         <p className="text-xs text-neutral text-center py-2 border-t border-gray-200 bg-white">
           {pages.length} {pages.length === 1 ? 'page' : 'pages'} — view only
         </p>
