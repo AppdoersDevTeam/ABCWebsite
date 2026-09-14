@@ -8,19 +8,20 @@ import {
   ClipboardList, 
   LogOut, 
   Menu,
-  MessageSquare,
   X,
   Shield,
   UserCog,
   ArrowRightLeft,
   Settings,
   HelpCircle,
-  ScrollText
+  ScrollText,
+  Newspaper
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { displayName, displayInitial } from '../../lib/constants';
 import { ScrollToTop } from '../ScrollToTop';
 import { useAutoSectionReveal } from '../UI/useAutoSectionReveal';
+import { PrayingHandsIcon } from '../UI/PrayingHandsIcon';
 
 export const AdminLayout = () => {
   const { user, logout } = useAuth();
@@ -38,9 +39,9 @@ export const AdminLayout = () => {
   const navItems = [
     { label: 'Overview', path: '/admin', icon: <Home size={20} /> },
     { label: 'User Management', path: '/admin/users', icon: <UserCog size={20} /> },
-    { label: 'Prayer Wall', path: '/admin/prayer', icon: <MessageSquare size={20} /> },
-    { label: 'Newsletters', path: '/admin/newsletter', icon: <BookOpen size={20} /> },
-    { label: 'Devotional of the Week', path: '/admin/devotional', icon: <BookOpen size={20} /> },
+    { label: 'Prayers', path: '/admin/prayer', icon: <PrayingHandsIcon size={20} /> },
+    { label: 'Newsletters', path: '/admin/newsletter', icon: <Newspaper size={20} /> },
+    { label: 'Devotionals', path: '/admin/devotional', icon: <BookOpen size={20} /> },
     { label: 'Directory / People', path: '/admin/team', icon: <Users size={20} /> },
     { label: 'Events', path: '/admin/events', icon: <Calendar size={20} /> },
     { label: 'Roster', path: '/admin/roster', icon: <ClipboardList size={20} /> },

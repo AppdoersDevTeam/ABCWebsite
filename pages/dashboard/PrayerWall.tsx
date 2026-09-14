@@ -349,7 +349,7 @@ export const PrayerWall = () => {
       </div>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-gray-200 pb-6">
         <div>
-          <h1 className="text-2xl md:text-4xl font-serif font-normal text-charcoal">Prayer Wall</h1>
+          <h1 className="text-2xl md:text-4xl font-serif font-normal text-charcoal">Prayers</h1>
           <p className="text-neutral mt-1">Bear one another's burdens.</p>
         </div>
         <GlowingButton size="sm" onClick={() => setIsModalOpen(true)}>

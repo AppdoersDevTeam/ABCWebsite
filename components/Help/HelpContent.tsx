@@ -72,7 +72,7 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode }) => {
               <li>Contact form submissions are not stored in logs (email only). Logs cannot be edited or deleted in the portal.</li>
             </Section>
 
-            <Section title="Prayer Wall (admin)">
+            <Section title="Prayers (admin)">
               <li>Moderate prayer requests: review what members post, hide or remove items if needed, and keep the wall respectful.</li>
               <li>See the same prayer activity members see, with tools appropriate to your admin role.</li>
             </Section>
@@ -128,7 +128,7 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode }) => {
               <li>Open this when you first log in to see what is new or highlighted for members.</li>
             </Section>
 
-            <Section title="Prayer Wall">
+            <Section title="Prayers">
               <li>Submit prayer requests and read requests from others in the church family.</li>
               <li>Tap “I’m praying” to show support; counts update so requesters know people are standing with them.</li>
             </Section>
@@ -140,6 +140,7 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode }) => {
 
             <Section title="Devotional of the Week">
               <li>Read the current weekly devotional and browse earlier weeks in the archive.</li>
+              <li>On a phone, tap Enlarge to read the PDF full screen, then use + / − to zoom in on the text.</li>
               <li>PDFs open only inside this page so you can reflect without leaving the portal.</li>
             </Section>
 

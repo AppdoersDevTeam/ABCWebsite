@@ -5,9 +5,10 @@ import { displayName, formatDisplayTitle } from '../../lib/constants';
 import { formatWeekDate, resolveNewsletterWeekDate } from '../../lib/dateUtils';
 import { fetchLatestNewsletter } from '../../lib/newsletters';
 import { OverviewStatCard } from '../../components/UI/OverviewStatCard';
-import { Calendar, MessageSquare, BookOpen, Youtube } from 'lucide-react';
+import { Calendar, BookOpen, Youtube, Newspaper } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { getVerseOfTheDay } from '../../lib/getVerseOfTheDay';
+import { PrayingHandsIcon } from '../../components/UI/PrayingHandsIcon';
 
 export const DashboardHome = () => {
   const { user } = useAuth();
@@ -141,9 +142,9 @@ export const DashboardHome = () => {
 
             <Link to="/dashboard/prayer" className="block">
               <OverviewStatCard
-                icon={<MessageSquare size={20} />}
+                icon={<PrayingHandsIcon size={20} />}
                 iconClassName="bg-blue-50 text-blue-600"
-                label="Prayer Wall"
+                label="Prayers"
                 value={isLoadingStats ? '...' : prayerRequests24h}
                 description={
                   isLoadingStats
@@ -156,7 +157,7 @@ export const DashboardHome = () => {
 
             <Link to="/dashboard/newsletter" className="block">
               <OverviewStatCard
-                icon={<BookOpen size={20} />}
+                icon={<Newspaper size={20} />}
                 iconClassName="bg-orange-50 text-orange-600"
                 label="Newsletter"
                 value={isLoadingStats ? '...' : (lastNewsletterTitle || 'None')}

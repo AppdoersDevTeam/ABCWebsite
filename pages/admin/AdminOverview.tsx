@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { OverviewStatCard } from '../../components/UI/OverviewStatCard';
-import { Calendar, MessageSquare, BookOpen, Users, ClipboardList, UserCheck, X, Plus, Shield, Mail } from 'lucide-react';
+import { Calendar, BookOpen, Users, ClipboardList, UserCheck, X, Plus, Shield, Mail, Newspaper } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { displayName, filterUsersForAdminView } from '../../lib/constants';
@@ -13,6 +13,7 @@ import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { logAuditEventSafe } from '../../lib/auditLog';
 import { notifyUserApproved } from '../../lib/notifyUserApproved';
 import { IntroInquiryEmailModal } from './IntroInquiryEmailModal';
+import { PrayingHandsIcon } from '../../components/UI/PrayingHandsIcon';
 
 export const AdminOverview = () => {
   const { user } = useAuth();
@@ -515,7 +516,7 @@ export const AdminOverview = () => {
     { 
       label: 'New Prayer Requests (24h)', 
       value: isLoadingStats ? '...' : prayerRequests24h.toString(), 
-      icon: <MessageSquare size={20} />, 
+      icon: <PrayingHandsIcon size={20} />, 
       path: '/admin/prayer', 
       color: 'text-blue-500',
       subtitle: isLoadingStats ? 'Loading...' : undefined
@@ -531,7 +532,7 @@ export const AdminOverview = () => {
     { 
       label: 'Last Newsletter', 
       value: isLoadingStats ? '...' : (lastNewsletterTitle || lastNewsletterDate || 'None'), 
-      icon: <BookOpen size={20} />,
+      icon: <Newspaper size={20} />,
       path: '/admin/newsletter',
       color: 'text-orange-500',
       subtitle: isLoadingStats ? 'Loading...' : undefined,

@@ -14,6 +14,10 @@ interface EmbeddedPdfViewerProps {
   src: string;
   title: string;
   className?: string;
+  /** Fill the parent height instead of using the default viewport-based height. */
+  fillHeight?: boolean;
+  /** CSS zoom of rendered pages (1 = fit width). */
+  zoom?: number;
 }
 
 interface PageImage {
@@ -44,6 +48,8 @@ export const EmbeddedPdfViewer: React.FC<EmbeddedPdfViewerProps> = ({
   src,
   title,
   className = '',
+  fillHeight = false,
+  zoom = 1,
 }) => {
   const outerRef = useRef<HTMLDivElement>(null);
   const [pages, setPages] = useState<PageImage[]>([]);
@@ -205,10 +211,13 @@ export const EmbeddedPdfViewer: React.FC<EmbeddedPdfViewerProps> = ({
 
   const showLoadingMessage = isLoading && pages.length === 0;
 
+  const canPanHorizontally = zoom > 1;
+  const pageWidthPercent = `${Math.round(zoom * 100)}%`;
+
   return (
     <div
       ref={outerRef}
-      className={`w-full min-w-0 rounded-[4px] border border-gray-200 overflow-hidden bg-gray-50 ${className}`}
+      className={`w-full min-w-0 rounded-[4px] border border-gray-200 overflow-hidden bg-gray-50 ${fillHeight ? 'h-full flex flex-col' : ''} ${className}`}
       role="region"
       aria-label={title}
       onContextMenu={preventCopy}
@@ -220,12 +229,15 @@ export const EmbeddedPdfViewer: React.FC<EmbeddedPdfViewerProps> = ({
       tabIndex={0}
     >
       <div
-        className="relative w-full min-w-0 h-[65dvh] min-h-[280px] sm:h-[55vh] md:h-[70vh] overflow-y-scroll overflow-x-hidden px-2 py-3 sm:p-4 select-none touch-pan-y"
+        className={`relative w-full min-w-0 overflow-y-scroll px-2 py-3 sm:p-4 select-none ${
+          fillHeight ? 'flex-1 min-h-0 h-full' : 'h-[65dvh] min-h-[280px] sm:h-[55vh] md:h-[70vh]'
+        } ${canPanHorizontally ? 'overflow-x-auto touch-pan-x touch-pan-y' : 'overflow-x-hidden touch-pan-y'}`}
         style={{
           WebkitUserSelect: 'none',
           userSelect: 'none',
           WebkitOverflowScrolling: 'touch',
           scrollbarGutter: 'stable',
+          overscrollBehavior: 'contain',
         }}
       >
         {showLoadingMessage && (
@@ -240,11 +252,14 @@ export const EmbeddedPdfViewer: React.FC<EmbeddedPdfViewerProps> = ({
             src={page.url}
             alt=""
             draggable={false}
-            className="block mx-auto mb-3 sm:mb-4 w-full max-w-full h-auto pointer-events-none"
+            className={`block mx-auto mb-3 sm:mb-4 h-auto pointer-events-none ${
+              canPanHorizontally ? 'max-w-none' : 'w-full max-w-full'
+            }`}
+            style={canPanHorizontally ? { width: pageWidthPercent } : undefined}
           />
         ))}
       </div>
-      {!showLoadingMessage && !error && pages.length > 0 && (
+      {!fillHeight && !showLoadingMessage && !error && pages.length > 0 && (
         <p className="text-xs text-neutral text-center py-2 border-t border-gray-200 bg-white">
           {pages.length} {pages.length === 1 ? 'page' : 'pages'} — view only
         </p>
