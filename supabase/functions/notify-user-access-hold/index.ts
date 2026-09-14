@@ -15,13 +15,6 @@ const DEFAULT_FROM =
 const DEFAULT_SITE_URL = "https://ashburtonbaptist.co.nz";
 const LOGO_URL = "https://ashburtonbaptist.co.nz/abc-logo.png";
 
-type RoleKind = "granted" | "revoked";
-
-type NotifyBody = {
-  userId?: string;
-  kind?: RoleKind;
-};
-
 function jsonResponse(body: Record<string, unknown>, status = 200): Response {
   return new Response(JSON.stringify(body), {
     status,
@@ -116,30 +109,17 @@ function emailShell(params: {
 </html>`;
 }
 
-function buildGrantedEmailHtml(firstName: string, loginUrl: string): string {
+function buildHoldEmailHtml(firstName: string, loginUrl: string): string {
   const greetingName = escapeHtml(firstName) || "there";
   return emailShell({
-    title: "Your administrative role",
-    heading: "Administrative role granted",
+    title: "Your website access is on hold",
+    heading: "Access on hold",
     loginUrl,
     innerHtml: `<p style="margin:0 0 20px;">Kia ora ${greetingName},</p>
-      <p style="margin:0 0 20px;">You have been granted an <strong>Administrative role</strong> on the Ashburton Baptist Church website. This trusted access allows you to use the admin portal and carry out church administration tasks.</p>
-      <p style="margin:0 0 20px;">Please use this access carefully and only for the work of the church.</p>
-      <p style="margin:0 0 20px;">For security purposes, all actions you perform in the system are recorded in an activity log. These records may be reviewed, and further investigation may take place if it is necessary and appropriate.</p>
-      <p style="margin:0 0 24px;">If you did not expect this change, or if you have questions about this role, please contact the Office on <a href="mailto:${OFFICE_EMAIL}" style="color:#222222;font-weight:bold;">${OFFICE_EMAIL}</a>.</p>`,
-  });
-}
-
-function buildRevokedEmailHtml(firstName: string, loginUrl: string): string {
-  const greetingName = escapeHtml(firstName) || "there";
-  return emailShell({
-    title: "Your administrative role has ended",
-    heading: "Administrative role ended",
-    loginUrl,
-    innerHtml: `<p style="margin:0 0 20px;">Kia ora ${greetingName},</p>
-      <p style="margin:0 0 20px;">This email is to confirm that you are <strong>no longer granted an Administrative role</strong> on the Ashburton Baptist Church website.</p>
-      <p style="margin:0 0 20px;">Your account has been returned to <strong>standard member access</strong>. You can still log in, and you will have member permissions only. Access to the admin portal is no longer available.</p>
-      <p style="margin:0 0 24px;">If you did not expect this change, or if you have questions, please contact the Office on <a href="mailto:${OFFICE_EMAIL}" style="color:#222222;font-weight:bold;">${OFFICE_EMAIL}</a>.</p>`,
+      <p style="margin:0 0 20px;">This email is to confirm that your access to the Ashburton Baptist Church website has been <strong>placed on hold</strong> for security reasons.</p>
+      <p style="margin:0 0 20px;">While access is on hold, you will not be able to use member or administrative areas of the website. Public pages remain available as usual.</p>
+      <p style="margin:0 0 20px;">If this was expected, no further action is needed until the Office restores your access. If you did not expect this change, or if you have questions, please contact the Office on <a href="mailto:${OFFICE_EMAIL}" style="color:#222222;font-weight:bold;">${OFFICE_EMAIL}</a>.</p>
+      <p style="margin:0 0 24px;">You will receive another email if your access is restored.</p>`,
   });
 }
 
@@ -237,31 +217,25 @@ Deno.serve(async (req: Request) => {
     const nested = root.body && typeof root.body === "object"
       ? root.body as Record<string, unknown>
       : null;
-    const payload = (typeof root.userId === "string" || typeof root.kind === "string")
-      ? root
-      : (nested || root);
+    const payload = typeof root.userId === "string" ? root : (nested || root);
 
     const userId = String(payload.userId || payload.user_id || "").trim();
     if (!userId) {
       return jsonResponse({ error: "userId is required" }, 400);
     }
 
-    const kindRaw = String(payload.kind || payload.action || "")
-      .trim()
-      .toLowerCase();
-    const kind: RoleKind =
-      kindRaw === "revoked" || kindRaw === "revoke" ? "revoked" : "granted";
-
     if (userId === caller.id) {
       return jsonResponse(
-        { error: "You cannot change your own administrative role." },
+        { error: "You cannot place your own access on hold." },
         403,
       );
     }
 
     const { data: target, error: targetError } = await adminClient
       .from("users")
-      .select("id, email, first_name, name, role, is_approved, is_super_admin")
+      .select(
+        "id, email, first_name, name, role, is_approved, is_super_admin, is_access_held",
+      )
       .eq("id", userId)
       .maybeSingle();
 
@@ -275,146 +249,85 @@ Deno.serve(async (req: Request) => {
     }
 
     const targetEmailNorm = (target.email || "").trim().toLowerCase();
-    if (target.is_super_admin === true || targetEmailNorm === ADMIN_EMAIL.toLowerCase()) {
+    if (
+      target.is_super_admin === true ||
+      targetEmailNorm === ADMIN_EMAIL.toLowerCase()
+    ) {
       return jsonResponse({ error: "This account cannot be changed." }, 403);
     }
 
     const toEmail = (target.email || "").trim();
+    if (!toEmail) {
+      return jsonResponse({ error: "User has no email" }, 400);
+    }
+
     const firstName =
       (target.first_name || "").trim() ||
       (target.name || "").trim().split(/\s+/)[0] ||
       "";
     const loginUrl = `${siteUrl}/#/login`;
+    const html = buildHoldEmailHtml(firstName, loginUrl);
 
-    const sendRoleEmail = async (): Promise<{
-      emailed: string | null;
-      emailSkipped: boolean;
-      resendId: string | null;
-      error?: string;
-    }> => {
-      if (!toEmail) {
-        return {
-          emailed: null,
-          emailSkipped: true,
-          resendId: null,
-          error: "User has no email",
-        };
-      }
+    const resendRes = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${resendApiKey}`,
+      },
+      body: JSON.stringify({
+        from: fromEmail,
+        to: [toEmail],
+        subject:
+          "Your access to the Ashburton Baptist Church website is on hold",
+        html,
+      }),
+    });
+    const resendBody = await resendRes.json().catch(() => ({}));
+    console.log(
+      "access-hold email",
+      JSON.stringify({
+        userId,
+        toEmail,
+        status: resendRes.status,
+        id: (resendBody as { id?: string })?.id ?? null,
+      }),
+    );
 
-      const subject =
-        kind === "revoked"
-          ? "Your administrative role at Ashburton Baptist Church has ended"
-          : "Your administrative role at Ashburton Baptist Church";
-      const html =
-        kind === "revoked"
-          ? buildRevokedEmailHtml(firstName, loginUrl)
-          : buildGrantedEmailHtml(firstName, loginUrl);
-
-      const resendRes = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${resendApiKey}`,
-        },
-        body: JSON.stringify({
-          from: fromEmail,
-          to: [toEmail],
-          subject,
-          html,
-        }),
-      });
-      const resendBody = await resendRes.json().catch(() => ({}));
-      console.log(
-        "admin-role email",
-        JSON.stringify({
-          kind,
-          userId,
-          toEmail,
-          status: resendRes.status,
-          id: (resendBody as { id?: string })?.id ?? null,
-        }),
-      );
-      if (!resendRes.ok) {
-        console.error("Resend error", resendRes.status, resendBody);
-        return {
-          emailed: null,
-          emailSkipped: true,
-          resendId: null,
-          error: "Failed to send administrative role email",
-        };
-      }
-      return {
-        emailed: toEmail,
-        emailSkipped: false,
-        resendId: typeof (resendBody as { id?: string })?.id === "string"
-          ? (resendBody as { id: string }).id
-          : null,
-      };
-    };
-
-    // For revoke: email first so a failed send does not leave the user as a member with no notice.
-    if (kind === "revoked") {
-      const emailResult = await sendRoleEmail();
-      if (!emailResult.emailed) {
-        return jsonResponse(
-          {
-            error: emailResult.error || "Failed to send administrative role email",
-            emailSkipped: true,
-          },
-          502,
-        );
-      }
-
-      const { error: updateError } = await adminClient
-        .from("users")
-        .update({ role: "member" })
-        .eq("id", userId);
-
-      if (updateError) {
-        console.error("Failed to update admin role after email", updateError);
-        return jsonResponse({ error: "Failed to update administrative role" }, 500);
-      }
-
-      return jsonResponse({
-        ok: true,
-        kind,
-        emailed: emailResult.emailed,
-        emailSkipped: false,
-        id: emailResult.resendId,
-      });
-    }
-
-    const { error: updateError } = await adminClient
-      .from("users")
-      .update({ role: "admin", is_approved: true, is_access_held: false, access_held_at: null })
-      .eq("id", userId);
-
-    if (updateError) {
-      console.error("Failed to update admin role", updateError);
-      return jsonResponse({ error: "Failed to update administrative role" }, 500);
-    }
-
-    const emailResult = await sendRoleEmail();
-    if (!emailResult.emailed) {
+    if (!resendRes.ok) {
+      console.error("Resend error", resendRes.status, resendBody);
       return jsonResponse(
         {
-          error: emailResult.error || "Failed to send administrative role email",
+          error: "Failed to send access hold email",
           emailSkipped: true,
-          kind,
         },
         502,
       );
     }
 
+    const { error: updateError } = await adminClient
+      .from("users")
+      .update({
+        is_approved: false,
+        is_access_held: true,
+        access_held_at: new Date().toISOString(),
+      })
+      .eq("id", userId);
+
+    if (updateError) {
+      console.error("Failed to place access on hold after email", updateError);
+      return jsonResponse({ error: "Failed to place access on hold" }, 500);
+    }
+
     return jsonResponse({
       ok: true,
-      kind,
-      emailed: emailResult.emailed,
+      emailed: toEmail,
       emailSkipped: false,
-      id: emailResult.resendId,
+      id: typeof (resendBody as { id?: string })?.id === "string"
+        ? (resendBody as { id: string }).id
+        : null,
     });
   } catch (err) {
-    console.error("notify-user-admin-role unexpected error", err);
+    console.error("notify-user-access-hold unexpected error", err);
     return jsonResponse({ error: "Internal server error" }, 500);
   }
 });

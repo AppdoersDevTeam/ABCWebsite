@@ -32,6 +32,7 @@ function buildFallbackUser(su: SupabaseUser): User {
     last_name,
     name: [first_name, last_name].filter(Boolean).join(' '),
     is_approved: isAdminEmail,
+    is_access_held: false,
     role: isAdminEmail ? 'admin' : 'member',
     is_super_admin: isSuperAdmin,
   };
@@ -161,8 +162,11 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
         if (needsAdminUpdate) {
           updateData.role = 'admin';
           updateData.is_approved = true;
+          updateData.is_access_held = false;
+          updateData.access_held_at = null;
           userData.role = 'admin';
           userData.is_approved = true;
+          userData.is_access_held = false;
         }
         if (needsSuperAdminUpdate) {
           updateData.is_super_admin = true;

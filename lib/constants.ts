@@ -39,6 +39,23 @@ export function displayInitial(user: { first_name?: string; name?: string } | nu
   return letter.toUpperCase();
 }
 
+type ApprovalFlags = {
+  is_approved?: boolean | null;
+  is_access_held?: boolean | null;
+};
+
+/** First-time signup still waiting for approval (not placed on hold). */
+export function isPendingApproval(
+  user: ApprovalFlags | null | undefined
+): boolean {
+  return !!user && user.is_approved !== true && user.is_access_held !== true;
+}
+
+/** Website access has been placed on hold for security reasons. */
+export function isAccessHeld(user: ApprovalFlags | null | undefined): boolean {
+  return !!user && user.is_access_held === true && user.is_approved !== true;
+}
+
 /** Approved website admin — full admin portal, including User Management. */
 export function isAdminUser(
   user: { role?: string | null; is_approved?: boolean | null } | null | undefined

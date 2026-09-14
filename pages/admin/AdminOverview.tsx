@@ -4,7 +4,7 @@ import { OverviewStatCard } from '../../components/UI/OverviewStatCard';
 import { Calendar, BookOpen, Users, ClipboardList, UserCheck, X, Plus, Shield, Mail, Newspaper, HandHeart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
-import { displayName, filterUsersForAdminView } from '../../lib/constants';
+import { displayName, filterUsersForAdminView, isPendingApproval } from '../../lib/constants';
 import { User } from '../../types';
 import { SkeletonPageHeader, SkeletonCard, SkeletonUserCard, SkeletonStatsCard } from '../../components/UI/Skeleton';
 import { formatRelativeDateInTimezone, formatFullDateTimeInTimezone, formatWeekDate, resolveNewsletterWeekDate } from '../../lib/dateUtils';
@@ -72,6 +72,7 @@ export const AdminOverview = () => {
         .from('users')
         .select('*')
         .eq('is_approved', false)
+        .or('is_access_held.eq.false,is_access_held.is.null')
         .order('created_at', { ascending: false });
 
       console.log('AdminOverview - Supabase response for pending users:', { data, error });
@@ -145,7 +146,7 @@ export const AdminOverview = () => {
 
       const { error } = await supabase
         .from('users')
-        .update({ is_approved: true })
+        .update({ is_approved: true, is_access_held: false, access_held_at: null })
         .eq('id', userId);
 
       if (error) throw error;
@@ -532,7 +533,7 @@ export const AdminOverview = () => {
   );
 
   const visiblePendingUsers = useMemo(
-    () => filterUsersForAdminView(pendingUsers, user),
+    () => filterUsersForAdminView(pendingUsers, user).filter((u) => isPendingApproval(u)),
     [pendingUsers, user]
   );
 

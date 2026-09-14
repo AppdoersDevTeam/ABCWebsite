@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Ban, Mail, AlertTriangle, RefreshCw } from 'lucide-react';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { useAuth } from '../../context/AuthContext';
-import { isAdminUser } from '../../lib/constants';
+import { isAdminUser, isAccessHeld } from '../../lib/constants';
 import { BackgroundBlobs } from '../../components/UI/BackgroundBlobs';
 import { supabase } from '../../lib/supabase';
 import { notifySignupReceivedOnce } from '../../lib/notifyUserReview';
@@ -12,28 +12,17 @@ import { allowPendingPublicBrowse, clearPendingPublicBrowse } from '../../lib/pe
 export const PendingApproval = () => {
   const { logout, user, isLoading, refreshUserProfile } = useAuth();
   const navigate = useNavigate();
-  const [isRevoked, setIsRevoked] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const isHeld = isAccessHeld(user);
 
   useEffect(() => {
-    if (user?.created_at) {
-      const createdDate = new Date(user.created_at);
-      const now = new Date();
-      const daysSinceCreation = (now.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24);
-      if (daysSinceCreation > 1 && user.email) {
-        setIsRevoked(true);
-      }
-    }
-  }, [user]);
-
-  useEffect(() => {
-    if (!user?.id || user.is_approved || isRevoked) return;
+    if (!user?.id || user.is_approved || isHeld) return;
     notifySignupReceivedOnce(user.id, user.created_at);
-  }, [user?.id, user?.is_approved, user?.created_at, isRevoked]);
+  }, [user?.id, user?.is_approved, user?.created_at, isHeld]);
 
   useEffect(() => {
-    if (!user || isRevoked) return;
+    if (!user || isHeld) return;
 
     let checkCount = 0;
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
@@ -57,7 +46,7 @@ export const PendingApproval = () => {
     return () => {
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [user, isRevoked, refreshUserProfile]);
+  }, [user, isHeld, refreshUserProfile]);
 
   useEffect(() => {
     if (isLoading || isSigningOut) return;
@@ -112,9 +101,9 @@ export const PendingApproval = () => {
       <BackgroundBlobs />
 
       <div className="page-shell-content max-w-lg w-full text-center glass-card bg-white/70 p-6 sm:p-12 rounded-[16px] shadow-xl">
-        <div className={`w-24 h-24 bg-white border border-gray-200 rounded-full flex items-center justify-center mx-auto mb-8 shadow-lg overflow-hidden ${isRevoked ? 'shadow-red-200' : 'shadow-gold/20'} animate-pulse-slow`}>
-          {isRevoked ? (
-            <Ban size={40} className="text-red-500" />
+        <div className={`w-24 h-24 bg-white border border-gray-200 rounded-full flex items-center justify-center mx-auto mb-8 shadow-lg overflow-hidden ${isHeld ? 'shadow-orange-200' : 'shadow-gold/20'} animate-pulse-slow`}>
+          {isHeld ? (
+            <Ban size={40} className="text-orange-500" />
           ) : (
             <img
               src="/ABC Logo.png"
@@ -124,23 +113,23 @@ export const PendingApproval = () => {
           )}
         </div>
 
-        {isRevoked ? (
+        {isHeld ? (
           <>
-            <h1 className="text-3xl sm:text-5xl font-serif font-normal text-charcoal mb-4">Access Revoked</h1>
+            <h1 className="text-3xl sm:text-5xl font-serif font-normal text-charcoal mb-4">Access on Hold</h1>
             <p className="text-xl text-neutral font-light mb-6 leading-relaxed">
-              Your access to this website has been revoked by an administrator.
+              Your access to this website has been placed on hold for security reasons.
             </p>
             <p className="text-lg text-neutral font-light mb-10 leading-relaxed">
-              If you believe this is an error, please contact support for assistance.
+              Member and administrative areas are unavailable until the Office restores your access.
             </p>
 
-            <div className="bg-red-50 border border-red-200 p-6 rounded-[8px] mb-8">
+            <div className="bg-orange-50 border border-orange-200 p-6 rounded-[8px] mb-8">
               <div className="flex items-center justify-center gap-3 mb-3">
-                <Mail className="text-red-600" size={20} />
-                <span className="text-red-800 font-bold">Contact Support</span>
+                <Mail className="text-orange-700" size={20} />
+                <span className="text-orange-900 font-bold">Contact the Office</span>
               </div>
-              <p className="text-sm text-red-700">
-                Please reach out to the church administration for help with your account access.
+              <p className="text-sm text-orange-800">
+                If you did not expect this change, please contact the church office for help with your account.
               </p>
             </div>
           </>
@@ -170,7 +159,7 @@ export const PendingApproval = () => {
         )}
 
         <div className="flex gap-4 justify-center flex-wrap">
-          {isRevoked && (
+          {isHeld && (
             <GlowingButton
               onClick={handleManualRefresh}
               variant="outline"

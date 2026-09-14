@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { Users, UserCheck, X, Shield, ShieldOff, Ban, Crown, KeyRound, AlertTriangle, Mail, ChevronDown, Link2, Trash2 } from 'lucide-react';
+import { Users, UserCheck, X, Shield, ShieldOff, Crown, KeyRound, AlertTriangle, Mail, ChevronDown, Link2, Trash2, PauseCircle } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { displayName, displayInitial, filterUsersForAdminView, canChangeUserAdminRole, isAdminUser, isOwnUserAccount, isServiceAccountEmail } from '../../lib/constants';
+import { displayName, displayInitial, filterUsersForAdminView, canChangeUserAdminRole, isAdminUser, isOwnUserAccount, isServiceAccountEmail, isPendingApproval, isAccessHeld } from '../../lib/constants';
 import { User } from '../../types';
 import { CreateUserProfile } from './CreateUserProfile';
 import { LinkDirectoryUserModal } from './LinkDirectoryUserModal';
@@ -17,7 +17,7 @@ import { logAuditEventSafe } from '../../lib/auditLog';
 import { notifyUserApproved } from '../../lib/notifyUserApproved';
 import { notifyUserReview } from '../../lib/notifyUserReview';
 import { notifyUserAdminRole, adminRoleEmailNote } from '../../lib/notifyUserAdminRole';
-import { deleteUserAccount } from '../../lib/deleteUserAccount';
+import { notifyUserAccessHold, accessHoldEmailNote } from '../../lib/notifyUserAccessHold';
 
 export const AdminUsers = () => {
   const { user, sendPasswordReset } = useAuth();
@@ -25,7 +25,7 @@ export const AdminUsers = () => {
   const [pendingUsers, setPendingUsers] = useState<User[]>([]);
   const [pendingCount, setPendingCount] = useState(0);
   const [isLoadingUsers, setIsLoadingUsers] = useState(true);
-  const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'admins'>('all');
+  const [filter, setFilter] = useState<'all' | 'pending' | 'held' | 'approved' | 'admins'>('all');
   const [directoryByUserId, setDirectoryByUserId] = useState<
     Record<string, { id: string; created_from_user_sync?: boolean | null }>
   >({});
@@ -136,18 +136,21 @@ export const AdminUsers = () => {
   };
 
   const handleApproveUser = async (userId: string, asAdmin = false) => {
+    const target = allUsers.find((u) => u.id === userId);
+    const restoringHold = isAccessHeld(target);
     if (
       !window.confirm(
         asAdmin
           ? 'Approve this user as an admin? They will get the full admin portal, including User Management.'
-          : 'Are you sure you want to approve this user?'
+          : restoringHold
+            ? `Restore website access for ${displayName(target) || 'this user'}? They will again have member access.`
+            : 'Are you sure you want to approve this user?'
       )
     ) {
       return;
     }
 
     try {
-      const target = allUsers.find((u) => u.id === userId);
       const wasUnapproved = target ? !target.is_approved : true;
 
       if (asAdmin) {
@@ -177,7 +180,7 @@ export const AdminUsers = () => {
 
       const { error } = await supabase
         .from('users')
-        .update({ is_approved: true })
+        .update({ is_approved: true, is_access_held: false, access_held_at: null })
         .eq('id', userId);
 
       if (error) throw error;
@@ -303,31 +306,41 @@ export const AdminUsers = () => {
     }
   };
 
-  const handleRevokeApproval = async (userId: string, userName: string) => {
-    if (!window.confirm(`Are you sure you want to revoke approval for ${userName}? They will lose access to the website.`)) {
+  const handleHoldAccess = async (userId: string, userName: string) => {
+    if (
+      !window.confirm(
+        `Place ${userName}'s website access on hold? They will not be able to use member or admin areas until access is restored.`
+      )
+    ) {
       return;
     }
 
     try {
-      const { error } = await supabase
-        .from('users')
-        .update({ is_approved: false })
-        .eq('id', userId);
+      const notifyResult = await notifyUserAccessHold(userId);
+      if (!notifyResult.ok || !notifyResult.emailed) {
+        alert(
+          `Access was not placed on hold for ${userName} because the confirmation email could not be sent${
+            notifyResult.error ? `: ${notifyResult.error}` : ''
+          }. Please try again.`
+        );
+        return;
+      }
 
-      if (error) throw error;
       logAuditEventSafe({
         action: 'update',
         category: 'users',
         entityType: 'users',
         entityId: userId,
-        summary: `Revoked approval for ${userName}`,
-        details: { field: 'is_approved', value: false },
+        summary: `Placed website access on hold for ${userName}`,
+        details: { field: 'is_access_held', value: true, emailed: notifyResult.emailed },
       });
-      alert('User approval revoked successfully');
+      alert(
+        `${userName}'s access has been placed on hold for security reasons.${accessHoldEmailNote(notifyResult)}`
+      );
       fetchUsers();
     } catch (error) {
-      console.error('Error revoking approval:', error);
-      alert('Failed to revoke approval');
+      console.error('Error placing access on hold:', error);
+      alert('Failed to place access on hold');
     }
   };
 
@@ -448,7 +461,22 @@ export const AdminUsers = () => {
   );
 
   const visiblePendingCount = useMemo(
-    () => visibleUsers.filter((u) => !u.is_approved).length,
+    () => visibleUsers.filter((u) => isPendingApproval(u)).length,
+    [visibleUsers]
+  );
+
+  const visibleHeldCount = useMemo(
+    () => visibleUsers.filter((u) => isAccessHeld(u)).length,
+    [visibleUsers]
+  );
+
+  const visibleApprovedCount = useMemo(
+    () => visibleUsers.filter((u) => u.is_approved).length,
+    [visibleUsers]
+  );
+
+  const visibleAdminCount = useMemo(
+    () => visibleUsers.filter((u) => u.role === 'admin' && u.is_approved).length,
     [visibleUsers]
   );
 
@@ -540,11 +568,13 @@ export const AdminUsers = () => {
   const filteredUsers = () => {
     switch (filter) {
       case 'pending':
-        return visibleUsers.filter(u => !u.is_approved);
+        return visibleUsers.filter((u) => isPendingApproval(u));
+      case 'held':
+        return visibleUsers.filter((u) => isAccessHeld(u));
       case 'approved':
-        return visibleUsers.filter(u => u.is_approved);
+        return visibleUsers.filter((u) => u.is_approved);
       case 'admins':
-        return visibleUsers.filter(u => u.role === 'admin');
+        return visibleUsers.filter((u) => u.role === 'admin' && u.is_approved);
       default:
         return visibleUsers;
     }
@@ -574,13 +604,13 @@ export const AdminUsers = () => {
 
       {/* Stats Cards */}
       {isLoadingUsers ? (
-        <div className="grid md:grid-cols-3 gap-4">
-          {Array.from({ length: 3 }).map((_, i) => (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {Array.from({ length: 4 }).map((_, i) => (
             <SkeletonStatsCard key={i} />
           ))}
         </div>
       ) : (
-        <div className="grid md:grid-cols-3 gap-4">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-white border border-gray-200 p-6 rounded-[12px] shadow-sm">
             <div className="flex items-center justify-between">
               <div>
@@ -606,8 +636,19 @@ export const AdminUsers = () => {
           <div className="bg-white border border-gray-200 p-6 rounded-[12px] shadow-sm">
             <div className="flex items-center justify-between">
               <div>
+                <p className="text-sm text-neutral font-bold">Hold Access</p>
+                <p className="text-3xl font-bold text-orange-600 mt-2">{visibleHeldCount}</p>
+              </div>
+              <div className="p-3 bg-orange-100 rounded-full">
+                <PauseCircle size={24} className="text-orange-600" />
+              </div>
+            </div>
+          </div>
+          <div className="bg-white border border-gray-200 p-6 rounded-[12px] shadow-sm">
+            <div className="flex items-center justify-between">
+              <div>
                 <p className="text-sm text-neutral font-bold">Approved Users</p>
-                <p className="text-3xl font-bold text-green-600 mt-2">{visibleUsers.filter(u => u.is_approved).length}</p>
+                <p className="text-3xl font-bold text-green-600 mt-2">{visibleApprovedCount}</p>
               </div>
               <div className="p-3 bg-green-100 rounded-full">
                 <UserCheck size={24} className="text-green-600" />
@@ -665,6 +706,18 @@ export const AdminUsers = () => {
         </button>
         <button
           type="button"
+          onClick={() => setFilter('held')}
+          style={{ color: filter === 'held' ? '#111111' : '#333333' }}
+          className={`px-4 sm:px-6 py-3 text-sm sm:text-base font-bold transition-opacity whitespace-nowrap ${
+            filter === 'held'
+              ? 'border-b-2 border-gold'
+              : 'opacity-70 hover:opacity-100'
+          }`}
+        >
+          Hold Access ({visibleHeldCount})
+        </button>
+        <button
+          type="button"
           onClick={() => setFilter('approved')}
           style={{ color: filter === 'approved' ? '#111111' : '#333333' }}
           className={`px-4 sm:px-6 py-3 text-sm sm:text-base font-bold transition-opacity whitespace-nowrap ${
@@ -673,7 +726,7 @@ export const AdminUsers = () => {
               : 'opacity-70 hover:opacity-100'
           }`}
         >
-          Approved ({visibleUsers.filter(u => u.is_approved).length})
+          Approved ({visibleApprovedCount})
         </button>
         <button
           type="button"
@@ -685,7 +738,7 @@ export const AdminUsers = () => {
               : 'opacity-70 hover:opacity-100'
           }`}
         >
-          Admins ({visibleUsers.filter(u => u.role === 'admin').length})
+          Admins ({visibleAdminCount})
         </button>
         </div>
       </div>
@@ -744,6 +797,10 @@ export const AdminUsers = () => {
                           <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded uppercase font-bold">
                             Approved
                           </span>
+                        ) : isAccessHeld(u) ? (
+                          <span className="bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded uppercase font-bold">
+                            Hold Access
+                          </span>
                         ) : (
                           <span className="bg-yellow-100 text-yellow-700 text-xs px-2 py-1 rounded uppercase font-bold">
                             Pending
@@ -777,10 +834,10 @@ export const AdminUsers = () => {
                         type="button"
                         onClick={() => handleApproveUser(u.id)}
                         className="bg-gold text-charcoal px-4 py-2 rounded-[4px] font-bold hover:bg-gold/80 transition-colors shadow-sm flex items-center gap-2 text-sm"
-                        title="Approve as member"
+                        title={isAccessHeld(u) ? 'Restore member access' : 'Approve as member'}
                       >
                         <UserCheck size={16} />
-                        Approve
+                        {isAccessHeld(u) ? 'Restore Access' : 'Approve'}
                       </button>
                       {u.role !== 'admin' && (
                         <button
@@ -867,6 +924,7 @@ export const AdminUsers = () => {
                         )}
 
                         {canChangeUserAdminRole(user, u) &&
+                          !isAccessHeld(u) &&
                           (u.role === 'member' ? (
                             <button
                               type="button"
@@ -900,21 +958,21 @@ export const AdminUsers = () => {
                             <button
                               type="button"
                               role="menuitem"
-                              className="w-full flex items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-red-600 hover:bg-red-50 border-t border-gray-100 mt-1"
+                              className="w-full flex items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-orange-700 hover:bg-orange-50 border-t border-gray-100 mt-1"
                               onClick={() => {
                                 setActionsMenuUserId(null);
-                                void handleRevokeApproval(
+                                void handleHoldAccess(
                                   u.id,
                                   displayName(u)
                                 );
                               }}
                             >
-                              <Ban size={16} />
-                              Revoke Access
+                              <PauseCircle size={16} />
+                              Hold Access
                             </button>
                           )}
 
-                        {!u.is_approved && (
+                        {isPendingApproval(u) && (
                           <button
                             type="button"
                             role="menuitem"

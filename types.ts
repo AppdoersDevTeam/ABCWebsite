@@ -9,6 +9,9 @@ export interface User {
   /** Legacy combined name — kept for backward compat. Prefer first_name + last_name. */
   name: string;
   is_approved: boolean;
+  /** When true, website access is on hold for security (not a first-time pending signup). */
+  is_access_held?: boolean;
+  access_held_at?: string | null;
   role: 'member' | 'admin';
   is_super_admin?: boolean;
   created_at?: string;

@@ -13,3 +13,6 @@ verify_jwt = true
 [functions.notify-user-admin-role]
 verify_jwt = true
 
+[functions.notify-user-access-hold]
+verify_jwt = true
+
