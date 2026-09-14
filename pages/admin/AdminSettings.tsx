@@ -312,8 +312,8 @@ export const AdminSettings = () => {
   return (
     <div className="space-y-8">
       <AdminPageHeader
-        title="Directory Setup"
-        subtitle="Manage Groups, Job Roles, and Event Categories used across Directory/People, Events, and Rosters."
+        title="System Setup"
+        subtitle="Manage Groups, Job Roles, and Event Categories used across Leadership, Events, and Rosters."
         icon={<Settings size={28} />}
       />
 
@@ -482,7 +482,7 @@ export const AdminSettings = () => {
           )}
 
           <p className="text-xs text-neutral">
-            Active groups ({activeGroups.length}) will show up in the Directory / People create/edit form and filters.
+            Active groups ({activeGroups.length}) will show up in the Leadership create/edit form and filters.
           </p>
         </div>
       ) : tab === 'job_roles' ? (
@@ -583,7 +583,7 @@ export const AdminSettings = () => {
           )}
 
           <p className="text-xs text-neutral">
-            Active job roles ({activeJobRoles.length}) will show up in the Directory / People create/edit form and filters.
+            Active job roles ({activeJobRoles.length}) will show up in the Leadership create/edit form and filters.
           </p>
         </div>
       ) : (

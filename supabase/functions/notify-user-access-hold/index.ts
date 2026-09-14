@@ -123,6 +123,19 @@ function buildHoldEmailHtml(firstName: string, loginUrl: string): string {
   });
 }
 
+function buildRestoredEmailHtml(firstName: string, loginUrl: string): string {
+  const greetingName = escapeHtml(firstName) || "there";
+  return emailShell({
+    title: "Your website access has been restored",
+    heading: "Access restored",
+    loginUrl,
+    innerHtml: `<p style="margin:0 0 20px;">Kia ora ${greetingName},</p>
+      <p style="margin:0 0 20px;">This email is to confirm that your access to the Ashburton Baptist Church website has been <strong>restored</strong>.</p>
+      <p style="margin:0 0 20px;">You can log in again and use the member areas of the website as before. If you previously had an Administrative role, that access is also available again.</p>
+      <p style="margin:0 0 24px;">If you did not expect this change, or if you have questions, please contact the Office on <a href="mailto:${OFFICE_EMAIL}" style="color:#222222;font-weight:bold;">${OFFICE_EMAIL}</a>.</p>`,
+  });
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -224,9 +237,19 @@ Deno.serve(async (req: Request) => {
       return jsonResponse({ error: "userId is required" }, 400);
     }
 
+    const kindRaw = String(payload.kind || payload.action || "")
+      .trim()
+      .toLowerCase();
+    const kind: "held" | "restored" =
+      kindRaw === "restored" || kindRaw === "restore" ? "restored" : "held";
+
     if (userId === caller.id) {
       return jsonResponse(
-        { error: "You cannot place your own access on hold." },
+        {
+          error: kind === "restored"
+            ? "You cannot restore your own access."
+            : "You cannot place your own access on hold.",
+        },
         403,
       );
     }
@@ -266,7 +289,12 @@ Deno.serve(async (req: Request) => {
       (target.name || "").trim().split(/\s+/)[0] ||
       "";
     const loginUrl = `${siteUrl}/#/login`;
-    const html = buildHoldEmailHtml(firstName, loginUrl);
+    const html = kind === "restored"
+      ? buildRestoredEmailHtml(firstName, loginUrl)
+      : buildHoldEmailHtml(firstName, loginUrl);
+    const subject = kind === "restored"
+      ? "Your access to the Ashburton Baptist Church website has been restored"
+      : "Your access to the Ashburton Baptist Church website is on hold";
 
     const resendRes = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -277,8 +305,7 @@ Deno.serve(async (req: Request) => {
       body: JSON.stringify({
         from: fromEmail,
         to: [toEmail],
-        subject:
-          "Your access to the Ashburton Baptist Church website is on hold",
+        subject,
         html,
       }),
     });
@@ -286,6 +313,7 @@ Deno.serve(async (req: Request) => {
     console.log(
       "access-hold email",
       JSON.stringify({
+        kind,
         userId,
         toEmail,
         status: resendRes.status,
@@ -297,29 +325,47 @@ Deno.serve(async (req: Request) => {
       console.error("Resend error", resendRes.status, resendBody);
       return jsonResponse(
         {
-          error: "Failed to send access hold email",
+          error: kind === "restored"
+            ? "Failed to send access restored email"
+            : "Failed to send access hold email",
           emailSkipped: true,
         },
         502,
       );
     }
 
-    const { error: updateError } = await adminClient
-      .from("users")
-      .update({
+    const updatePayload = kind === "restored"
+      ? {
+        is_approved: true,
+        is_access_held: false,
+        access_held_at: null,
+      }
+      : {
         is_approved: false,
         is_access_held: true,
         access_held_at: new Date().toISOString(),
-      })
+      };
+
+    const { error: updateError } = await adminClient
+      .from("users")
+      .update(updatePayload)
       .eq("id", userId);
 
     if (updateError) {
-      console.error("Failed to place access on hold after email", updateError);
-      return jsonResponse({ error: "Failed to place access on hold" }, 500);
+      console.error("Failed to update access after email", updateError);
+      return jsonResponse(
+        {
+          error: kind === "restored"
+            ? "Failed to restore access"
+            : "Failed to place access on hold",
+        },
+        500,
+      );
     }
 
     return jsonResponse({
       ok: true,
+      kind,
       emailed: toEmail,
       emailSkipped: false,
       id: typeof (resendBody as { id?: string })?.id === "string"

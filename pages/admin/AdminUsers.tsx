@@ -142,7 +142,9 @@ export const AdminUsers = () => {
     if (
       !window.confirm(
         asAdmin
-          ? 'Approve this user as an admin? They will get the full admin portal, including User Management.'
+          ? restoringHold
+            ? `Restore website access for ${displayName(target) || 'this user'} as an admin?`
+            : 'Approve this user as an admin? They will get the full admin portal, including User Management.'
           : restoringHold
             ? `Restore website access for ${displayName(target) || 'this user'}? They will again have member access.`
             : 'Are you sure you want to approve this user?'
@@ -158,7 +160,7 @@ export const AdminUsers = () => {
         const notifyResult = await notifyUserAdminRole(userId, 'granted');
         if (!notifyResult.ok) {
           alert(
-            `Failed to approve this user as an admin${
+            `Failed to ${restoringHold ? 'restore this user as an admin' : 'approve this user as an admin'}${
               notifyResult.error ? `: ${notifyResult.error}` : ''
             }`
           );
@@ -169,11 +171,41 @@ export const AdminUsers = () => {
           category: 'users',
           entityType: 'users',
           entityId: userId,
-          summary: `Approved signup for ${target?.email || userId} as admin`,
+          summary: restoringHold
+            ? `Restored website access for ${target?.email || userId} as admin`
+            : `Approved signup for ${target?.email || userId} as admin`,
           details: { email: target?.email, role: 'admin', emailed: notifyResult.emailed },
         });
         alert(
-          `${displayName(target) || 'User'} is approved as an admin.${adminRoleEmailNote(notifyResult)}`
+          restoringHold
+            ? `${displayName(target) || 'User'}'s access has been restored as an admin.${adminRoleEmailNote(notifyResult)}`
+            : `${displayName(target) || 'User'} is approved as an admin.${adminRoleEmailNote(notifyResult)}`
+        );
+        fetchUsers();
+        return;
+      }
+
+      if (restoringHold) {
+        const notifyResult = await notifyUserAccessHold(userId, 'restored');
+        if (!notifyResult.ok || !notifyResult.emailed) {
+          alert(
+            `Access was not restored for ${displayName(target) || 'this user'} because the confirmation email could not be sent${
+              notifyResult.error ? `: ${notifyResult.error}` : ''
+            }. Please try again.`
+          );
+          return;
+        }
+
+        logAuditEventSafe({
+          action: 'update',
+          category: 'users',
+          entityType: 'users',
+          entityId: userId,
+          summary: `Restored website access for ${displayName(target) || userId}`,
+          details: { field: 'is_access_held', value: false, emailed: notifyResult.emailed },
+        });
+        alert(
+          `${displayName(target) || 'User'}'s website access has been restored.${accessHoldEmailNote(notifyResult, 'restored')}`
         );
         fetchUsers();
         return;
@@ -209,7 +241,7 @@ export const AdminUsers = () => {
       fetchUsers();
     } catch (error) {
       console.error('Error approving user:', error);
-      alert('Failed to approve user');
+      alert(restoringHold ? 'Failed to restore access' : 'Failed to approve user');
     }
   };
 
@@ -557,7 +589,7 @@ export const AdminUsers = () => {
         if (ok) linked += 1;
       }
       await fetchUsers();
-      alert(linked > 0 ? `Linked ${linked} user(s) to Directory.` : 'No safe matches found. Manual linking required.');
+      alert(linked > 0 ? `Linked ${linked} user(s) to Leadership.` : 'No safe matches found. Manual linking required.');
     } catch (e) {
       console.error(e);
       alert('Failed to recheck directory links.');
@@ -633,7 +665,7 @@ export const AdminUsers = () => {
               onClick={() => void recheckDirectoryLinks()}
               disabled={isRelinking || isLoadingUsers}
             >
-              {isRelinking ? 'Checking…' : 'Check Directory Links'}
+              {isRelinking ? 'Checking…' : 'Check Leadership Links'}
             </GlowingButton>
           </div>
         }
@@ -703,11 +735,11 @@ export const AdminUsers = () => {
             </div>
             <div className="flex-1">
               <p className="font-bold">
-                {directoryNeedsReviewCount} user{directoryNeedsReviewCount === 1 ? '' : 's'} not linked to Directory
+                {directoryNeedsReviewCount} user{directoryNeedsReviewCount === 1 ? '' : 's'} not linked to Leadership
               </p>
               <p className="text-red-900 mt-1">
-                Users need a linked Directory person to inherit ministry/group permissions (rosters). If they shouldn’t have one, you can ignore this. Otherwise click{' '}
-                <span className="font-bold">Link Directory</span>.
+                Users need a linked Leadership person to inherit ministry/group permissions (rosters). If they shouldn’t have one, you can ignore this. Otherwise click{' '}
+                <span className="font-bold">Link Leadership</span>.
               </p>
             </div>
           </div>
@@ -822,12 +854,12 @@ export const AdminUsers = () => {
                         )}
                         {directoryByUserId[u.id] ? (
                           <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded font-bold">
-                            Directory linked
+                            Leadership linked
                           </span>
                         ) : (
                           <span className="bg-red-100 text-red-800 text-xs px-2 py-1 rounded font-bold inline-flex items-center gap-1 border border-red-200">
                             <AlertTriangle size={12} />
-                            Directory not linked
+                            Leadership not linked
                           </span>
                         )}
                         {u.is_approved ? (
@@ -929,7 +961,7 @@ export const AdminUsers = () => {
                           }}
                         >
                           <Link2 size={16} className="text-blue-600" />
-                          Link Directory
+                          Link Leadership
                         </button>
 
                         <button

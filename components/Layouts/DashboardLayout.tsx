@@ -42,7 +42,7 @@ export const DashboardLayout = () => {
     { label: 'Newsletters', path: '/dashboard/newsletter', icon: <Newspaper size={20} />, iconClass: DASHBOARD_NAV_ICON.newsletters },
     { label: 'Devotionals', path: '/dashboard/devotional', icon: <BookOpen size={20} />, iconClass: DASHBOARD_NAV_ICON.devotionals },
     { label: 'Sermons', path: '/dashboard/sermons', icon: <Youtube size={20} />, iconClass: DASHBOARD_NAV_ICON.sermons },
-    { label: 'The Team', path: '/dashboard/team', icon: <Users size={20} />, iconClass: DASHBOARD_NAV_ICON.team },
+    { label: 'Leadership', path: '/dashboard/team', icon: <Users size={20} />, iconClass: DASHBOARD_NAV_ICON.team },
     { label: 'Events', path: '/dashboard/events', icon: <Calendar size={20} />, iconClass: DASHBOARD_NAV_ICON.events },
     { label: 'Rosters (Beta)', path: '/dashboard/roster', icon: <ClipboardList size={20} />, iconClass: DASHBOARD_NAV_ICON.rosters },
     { label: 'Help', path: '/dashboard/help', icon: <HelpCircle size={20} />, iconClass: DASHBOARD_NAV_ICON.help },

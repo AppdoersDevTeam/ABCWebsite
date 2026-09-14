@@ -455,7 +455,7 @@ export const AdminOverview = () => {
           activities.push({
             id: member.id,
             type: 'team_member',
-            title: isUpdate ? `Team member updated: ${member.name}` : `Team member added: ${member.name}`,
+            title: isUpdate ? `Leadership updated: ${member.name}` : `Leadership added: ${member.name}`,
             date: mostRecentDate
           });
         });
@@ -587,7 +587,7 @@ export const AdminOverview = () => {
       subtitle: isLoadingStats ? 'Loading...' : undefined
     },
     { 
-      label: 'Team Members', 
+      label: 'Leadership', 
       value: isLoadingStats ? '...' : teamMembersCount.toString(), 
       icon: <Users size={20} />, 
       path: '/admin/team', 

@@ -48,7 +48,7 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode }) => {
           <>
             <Section title="Overview">
               <li>Your landing page after signing in as an admin: quick snapshot and shortcuts into the main tools.</li>
-              <li>Use it to orient new admins before they open User Management or Directory.</li>
+              <li>Use it to orient new admins before they open User Management or Leadership.</li>
             </Section>
 
             <Section title="Annual Calendar">
@@ -58,7 +58,7 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode }) => {
             </Section>
 
             <Section title="User Management">
-              <li>Every approved admin can use this page — including User Management, Directory, Events, and the rest of the admin menu.</li>
+              <li>Every approved admin can use this page — including User Management, Leadership, Events, and the rest of the admin menu.</li>
               <li>See everyone who has a website login: email, role (member/admin), and approval status.</li>
               <li>Approve new accounts as a member or as an admin, reset passwords, and promote or demote admin access.</li>
               <li>
@@ -67,11 +67,11 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode }) => {
                 account while logged in.
               </li>
               <li>
-                Link a login to a Directory person so group memberships and rosters apply to that account. Use “Check
-                Directory Links” to retry safe automatic matches; use “Link Directory” when you need to pick the right
+                Link a login to a Leadership person so group memberships and rosters apply to that account. Use “Check
+                Leadership Links” to retry safe automatic matches; use “Link Leadership” when you need to pick the right
                 person manually.
               </li>
-              <li>Not every login needs a Directory row—only link when they should appear in ministry lists or see group rosters.</li>
+              <li>Not every login needs a Leadership row—only link when they should appear in ministry lists or see group rosters.</li>
             </Section>
 
             <Section title="Logs">
@@ -80,7 +80,7 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode }) => {
                 when this feature was enabled.
               </li>
               <li>Filter by category, action, date, or search by email or summary. Export filtered results to CSV for records.</li>
-              <li>Database changes (groups, events, directory, etc.) are recorded automatically — you may occasionally see two entries for the same action (app + database).</li>
+              <li>Database changes (groups, events, Leadership, etc.) are recorded automatically — you may occasionally see two entries for the same action (app + database).</li>
               <li>Contact form submissions are not stored in logs (email only). Logs cannot be edited or deleted in the portal.</li>
             </Section>
 
@@ -101,31 +101,31 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode }) => {
               <li>Members open devotionals in the dashboard viewer — no download or new-tab links.</li>
             </Section>
 
-            <Section title="Directory / People">
-              <li>Add and edit people shown on the public team/directory and used for ministry structure.</li>
+            <Section title="Leadership">
+              <li>Add and edit people shown on the public leadership pages and used for ministry structure.</li>
               <li>Assign groups (ministries) and job roles; photos and names feed leader lines on rosters and listings.</li>
-              <li>Watch for duplicate emails and “linked account” vs “no account link” so logins and directory rows stay aligned.</li>
+              <li>Watch for duplicate emails and “linked account” vs “no account link” so logins and Leadership rows stay aligned.</li>
             </Section>
 
             <Section title="Events">
-              <li>Create and edit church events: times, details, and categories from Directory Setup.</li>
+              <li>Create and edit church events: times, details, and categories from System Setup.</li>
               <li>Control what appears on public event pages vs member-only views, depending on how your site is set up.</li>
             </Section>
 
             <Section title="Roster">
               <li>Publish rosters per ministry (group): PDF upload, date range, and which group the file belongs to.</li>
               <li>Edit existing rosters to change ministry, dates, or replace the file without re-creating the entry.</li>
-              <li>Only members who are in that group (via their linked Directory person) can see that roster on their dashboard.</li>
+              <li>Only members who are in that group (via their linked Leadership person) can see that roster on their dashboard.</li>
             </Section>
 
-            <Section title="Directory Setup">
+            <Section title="System Setup">
               <li>
                 <span className="font-semibold text-charcoal">Groups</span> — ministry/team names used when you assign
                 people and when you attach a roster to a ministry.
               </li>
               <li>
                 <span className="font-semibold text-charcoal">Job Roles</span> — titles and leader roles (e.g. “Worship
-                Leader”) shown with people in the directory and on roster cards.
+                Leader”) shown with people in Leadership and on roster cards.
               </li>
               <li>
                 <span className="font-semibold text-charcoal">Event Categories</span> — dropdown options when admins create
@@ -162,7 +162,7 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode }) => {
               <li>PDFs open only inside this page so you can reflect without leaving the portal.</li>
             </Section>
 
-            <Section title="The Team">
+            <Section title="Leadership">
               <li>Browse staff and key people: names, roles, and photos the church has chosen to show members.</li>
               <li>Use it to learn who leads which areas and how to recognise people on a Sunday.</li>
             </Section>
@@ -174,7 +174,7 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode }) => {
 
             <Section title="Roster">
               <li>View ministry rosters (usually PDFs) for groups you belong to—schedules, serving teams, or similar.</li>
-              <li>You only see rosters for your ministries. If nothing appears, your account may not be linked to the Directory yet, or no roster has been uploaded for your group.</li>
+              <li>You only see rosters for your ministries. If nothing appears, your account may not be linked to Leadership yet, or no roster has been uploaded for your group.</li>
               <li>Ask an admin if you expect a roster but do not see one after you are correctly placed in a ministry group.</li>
             </Section>
           </>

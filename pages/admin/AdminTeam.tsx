@@ -331,7 +331,7 @@ export const AdminTeam = () => {
     const yyyy = d.getFullYear();
     const mm = String(d.getMonth() + 1).padStart(2, '0');
     const dd = String(d.getDate()).padStart(2, '0');
-    return `directory-people-${yyyy}-${mm}-${dd}`;
+    return `leadership-${yyyy}-${mm}-${dd}`;
   }, []);
 
   /** Normalized emails that appear on more than one active directory row (data hygiene warning). */
@@ -415,7 +415,7 @@ export const AdminTeam = () => {
       setMembers(withJoins);
     } catch (error) {
       console.error('Error fetching team members:', error);
-      alert('Failed to load team members');
+      alert('Failed to load Leadership');
     } finally {
       setIsLoading(false);
     }
@@ -677,7 +677,7 @@ export const AdminTeam = () => {
         category: 'team',
         entityType: 'team_members',
         entityId: created.id,
-        summary: `Added directory person "${trimmed.name}"`,
+        summary: `Added leadership person "${trimmed.name}"`,
         details: { profile_type: trimmed.profile_type },
       });
 
@@ -686,7 +686,7 @@ export const AdminTeam = () => {
       setIsModalOpen(false);
     } catch (error: unknown) {
       console.error('Error creating team member:', error);
-      const msg = getSupabaseErrorMessage(error) || 'Failed to create team member';
+      const msg = getSupabaseErrorMessage(error) || 'Failed to add person to Leadership';
       alert(msg + teamMemberSaveErrorHint(msg));
     } finally {
       setIsUploading(false);
@@ -759,7 +759,7 @@ export const AdminTeam = () => {
         category: 'team',
         entityType: 'team_members',
         entityId: editingMember.id,
-        summary: `Updated directory person "${trimmed.name}"`,
+        summary: `Updated leadership person "${trimmed.name}"`,
       });
 
       await fetchMembers();
@@ -768,7 +768,7 @@ export const AdminTeam = () => {
       setIsModalOpen(false);
     } catch (error: unknown) {
       console.error('Error updating team member:', error);
-      const msg = getSupabaseErrorMessage(error) || 'Failed to update team member';
+      const msg = getSupabaseErrorMessage(error) || 'Failed to update Leadership person';
       alert(msg + teamMemberSaveErrorHint(msg));
     } finally {
       setIsUploading(false);
@@ -794,14 +794,14 @@ export const AdminTeam = () => {
         category: 'team',
         entityType: 'team_members',
         entityId: deleteTarget.id,
-        summary: `Permanently deleted directory person "${deleteTarget.name}"`,
+        summary: `Permanently deleted leadership person "${deleteTarget.name}"`,
       });
       setDeleteTarget(null);
       setDeleteConfirmText('');
       await fetchMembers();
     } catch (error: unknown) {
       console.error('Error deleting team member:', error);
-      alert(getSupabaseErrorMessage(error) || 'Failed to delete team member');
+      alert(getSupabaseErrorMessage(error) || 'Failed to delete Leadership person');
     } finally {
       setIsDeleting(false);
     }
@@ -829,13 +829,13 @@ export const AdminTeam = () => {
         category: 'team',
         entityType: 'team_members',
         entityId: archiveTarget.id,
-        summary: `Archived directory person "${archiveTarget.name}"`,
+        summary: `Archived leadership person "${archiveTarget.name}"`,
       });
       setArchiveTarget(null);
       await fetchMembers();
     } catch (error: unknown) {
       console.error('Error archiving team member:', error);
-      alert(getSupabaseErrorMessage(error) || 'Failed to archive team member');
+      alert(getSupabaseErrorMessage(error) || 'Failed to archive Leadership person');
     } finally {
       setIsArchiving(false);
     }
@@ -854,12 +854,12 @@ export const AdminTeam = () => {
         category: 'team',
         entityType: 'team_members',
         entityId: id,
-        summary: `Restored directory person "${member?.name || id}" from archive`,
+        summary: `Restored leadership person "${member?.name || id}" from archive`,
       });
       await fetchMembers();
     } catch (error: unknown) {
       console.error('Error unarchiving team member:', error);
-      alert(getSupabaseErrorMessage(error) || 'Failed to unarchive team member');
+      alert(getSupabaseErrorMessage(error) || 'Failed to restore Leadership person');
     }
   };
 
@@ -906,8 +906,8 @@ export const AdminTeam = () => {
   return (
     <div className="space-y-8">
       <AdminPageHeader
-        title="Directory / People"
-        subtitle="Manage staff, attendees, and members in the directory."
+        title="Leadership"
+        subtitle="Manage staff, attendees, and members."
         icon={<User size={28} />}
         rightSlot={
           <div className="flex gap-2 flex-wrap">
@@ -1211,7 +1211,7 @@ export const AdminTeam = () => {
 
       {activeTab === 'active' && activeMembersList.length === 0 ? (
         <div className="text-center py-12 glass-card bg-white/80 border border-white/60 rounded-[12px]">
-          <p className="text-neutral">No team members yet. Add your first team member to get started.</p>
+          <p className="text-neutral">No people in Leadership yet. Add your first person to get started.</p>
         </div>
       ) : activeTab === 'active' && visibleMembers.length === 0 ? (
         <div className="text-center py-12 glass-card bg-white/80 border border-white/60 rounded-[12px]">
@@ -1291,10 +1291,10 @@ export const AdminTeam = () => {
         <div className="glass-card bg-white/80 border border-white/60 rounded-[12px] overflow-hidden">
           {duplicateEmails.size > 0 && (
             <div className="px-4 py-3 bg-amber-50 border-b border-amber-200 text-sm text-amber-900">
-              <p className="font-bold">Duplicate directory emails detected</p>
+              <p className="font-bold">Duplicate Leadership emails detected</p>
               <p className="text-amber-800 mt-1">
-                Some people share the same email address. User ↔ Directory auto-link and roster permissions use
-                email matching — resolve duplicates in Directory so each login email maps to one person.
+                Some people share the same email address. User ↔ Leadership auto-link and roster permissions use
+                email matching — resolve duplicates in Leadership so each login email maps to one person.
               </p>
             </div>
           )}
@@ -1401,7 +1401,7 @@ export const AdminTeam = () => {
           setEditingMember(null);
           resetModal();
         }}
-        title={editingMember ? 'Edit Team Member' : 'Add Team Member'}
+        title={editingMember ? 'Edit Person' : 'Add Person'}
       >
         <div className="space-y-4">
           <div>
@@ -1428,7 +1428,7 @@ export const AdminTeam = () => {
                 </option>
               ))}
             </select>
-            <p className="text-xs text-neutral mt-1">Staff, Attendee, or Member (church directory).</p>
+            <p className="text-xs text-neutral mt-1">Staff, Attendee, or Member (Leadership).</p>
           </div>
 
           {formData.profile_type !== 'attendee' && (groups.length > 0 || jobRoles.length > 0) && (
@@ -1655,7 +1655,7 @@ export const AdminTeam = () => {
                       );
 
                   if (isImage && previewUrl) {
-                    return <img src={previewUrl} alt="Team member" className="w-full h-full object-cover" />;
+                    return <img src={previewUrl} alt="Leadership person" className="w-full h-full object-cover" />;
                   }
                   return (
                     <div className="w-full h-full bg-gold/10 flex items-center justify-center">
@@ -1771,7 +1771,7 @@ export const AdminTeam = () => {
             <div className="rounded-[8px] border border-red-200 bg-red-50 p-4 text-sm text-red-900">
               <p className="font-bold">This action is permanent and cannot be undone.</p>
               <p className="mt-2">
-                All directory data for <span className="font-bold">{deleteTarget.name}</span> will be removed from the
+                All Leadership data for <span className="font-bold">{deleteTarget.name}</span> will be removed from the
                 database, including groups, job roles, and any linked profile information.
               </p>
             </div>
@@ -1823,7 +1823,7 @@ export const AdminTeam = () => {
           <div className="space-y-4">
             <p className="text-sm text-neutral">
               <span className="font-bold text-charcoal">{archiveTarget.name}</span> will be hidden from the public site,
-              member directory, and rosters. Only admins can view archived people and restore them later.
+              Leadership, and rosters. Only admins can view archived people and restore them later.
             </p>
             <div className="flex flex-col-reverse sm:flex-row gap-3 justify-end pt-2">
               <button

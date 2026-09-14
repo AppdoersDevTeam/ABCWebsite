@@ -1,5 +1,7 @@
 import { supabase } from './supabase';
 
+export type AccessHoldKind = 'held' | 'restored';
+
 export type NotifyUserAccessHoldResult = {
   ok: boolean;
   emailed?: string | null;
@@ -28,15 +30,16 @@ async function extractInvokeError(error: unknown, data: unknown): Promise<string
     }
   }
 
-  return err?.message || 'Failed to place access on hold';
+  return err?.message || 'Failed to update website access';
 }
 
 /**
- * Place website access on hold and email the user.
- * The Edge Function applies the hold and sends the confirmation email.
+ * Place website access on hold, or restore it, and email the user.
+ * The Edge Function applies the change and sends the matching email.
  */
 export async function notifyUserAccessHold(
-  userId: string
+  userId: string,
+  kind: AccessHoldKind = 'held'
 ): Promise<NotifyUserAccessHoldResult> {
   if (!userId) {
     return { ok: false, error: 'Missing userId' };
@@ -44,7 +47,7 @@ export async function notifyUserAccessHold(
 
   try {
     const { data, error } = await supabase.functions.invoke('notify-user-access-hold', {
-      body: { userId },
+      body: { userId, kind, action: kind },
     });
 
     if (error) {
@@ -68,20 +71,24 @@ export async function notifyUserAccessHold(
     return {
       ok: false,
       error:
-        err instanceof Error ? err.message : 'Failed to place access on hold',
+        err instanceof Error ? err.message : 'Failed to update website access',
     };
   }
 }
 
-export function accessHoldEmailNote(result: NotifyUserAccessHoldResult): string {
+export function accessHoldEmailNote(
+  result: NotifyUserAccessHoldResult,
+  kind: AccessHoldKind = 'held'
+): string {
+  const actionLabel = kind === 'restored' ? 'restored' : 'placed on hold';
   if (!result.ok) {
-    return ` Access was not placed on hold${result.error ? ` (${result.error})` : ''}.`;
+    return ` Access was not ${actionLabel}${result.error ? ` (${result.error})` : ''}.`;
   }
   if (result.emailed) {
     return ` A confirmation email was sent to ${result.emailed}.`;
   }
   if (result.emailSkipped) {
-    return ' Access was updated, but the confirmation email could not be sent.';
+    return ` Access was ${actionLabel}, but the confirmation email could not be sent.`;
   }
   return '';
 }

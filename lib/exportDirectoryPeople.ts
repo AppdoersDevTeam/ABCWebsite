@@ -63,7 +63,7 @@ function downloadBlob(filename: string, blob: Blob) {
 export function downloadDirectoryCsv(members: TeamMember[], filenameBase: string, meta: ExportMeta) {
   const rows = toRows(members);
   const headers: (keyof ExportRow)[] = ['Name', 'Email', 'Phone', 'Role', 'Groups', 'JobRoles', 'Status'];
-  const title = `${meta.churchName} – Directory/People List`;
+  const title = `${meta.churchName} – Leadership List`;
   const exportedLine = `Exported: ${formatLocalDateTime(meta.exportedAt)}`;
 
   const lines = [
@@ -83,7 +83,7 @@ export function downloadDirectoryPdf(members: TeamMember[], filenameBase: string
   const rows = toRows(members);
   const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
 
-  const headerText = `${meta.churchName} – Directory/People List`;
+  const headerText = `${meta.churchName} – Leadership List`;
   const exportedAtText = formatLocalDateTime(meta.exportedAt);
 
   autoTable(doc, {

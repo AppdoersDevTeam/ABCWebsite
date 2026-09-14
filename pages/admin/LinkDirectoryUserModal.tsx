@@ -85,7 +85,7 @@ export const LinkDirectoryUserModal: React.FC<LinkDirectoryUserModalProps> = ({
       setSelectedId(null);
     } catch (e) {
       console.error('Directory search failed', e);
-      alert('Could not search directory. Check Supabase connection and RLS.');
+      alert('Could not search Leadership. Check Supabase connection and RLS.');
       setRows([]);
     } finally {
       setLoading(false);
@@ -99,7 +99,7 @@ export const LinkDirectoryUserModal: React.FC<LinkDirectoryUserModalProps> = ({
     if (row.user_id && row.user_id !== targetUser.id) {
       if (
         !window.confirm(
-          'This directory person is already linked to another website user. Replace the link with this user?'
+          'This Leadership person is already linked to another website user. Replace the link with this user?'
         )
       ) {
         return;
@@ -117,10 +117,10 @@ export const LinkDirectoryUserModal: React.FC<LinkDirectoryUserModalProps> = ({
         category: 'users',
         entityType: 'team_members',
         entityId: selectedId,
-        summary: `Linked directory person "${row.name}" to login ${targetUser.email}`,
+        summary: `Linked leadership person "${row.name}" to login ${targetUser.email}`,
         details: { user_id: targetUser.id, directory_id: selectedId },
       });
-      alert('Directory link saved.');
+      alert('Leadership link saved.');
       onSuccess();
       onClose();
     } catch (e: unknown) {
@@ -133,7 +133,7 @@ export const LinkDirectoryUserModal: React.FC<LinkDirectoryUserModalProps> = ({
 
   const unlink = async () => {
     if (!targetUser?.id) return;
-    if (!window.confirm('Remove the Directory link for this user? They will lose roster access until linked again.')) {
+    if (!window.confirm('Remove the Leadership link for this user? They will lose roster access until linked again.')) {
       return;
     }
     setSaving(true);
@@ -145,7 +145,7 @@ export const LinkDirectoryUserModal: React.FC<LinkDirectoryUserModalProps> = ({
         category: 'users',
         entityType: 'users',
         entityId: targetUser.id,
-        summary: `Removed directory link for ${targetUser.email}`,
+        summary: `Removed leadership link for ${targetUser.email}`,
       });
       alert('Link removed.');
       onSuccess();
@@ -161,10 +161,10 @@ export const LinkDirectoryUserModal: React.FC<LinkDirectoryUserModalProps> = ({
   if (!targetUser) return null;
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={`Link to Directory — ${displayName(targetUser)}`}>
+    <Modal isOpen={isOpen} onClose={onClose} title={`Link to Leadership — ${displayName(targetUser)}`}>
       <div className="space-y-4">
         <p className="text-sm text-neutral">
-          Search for an existing directory person (unlinked or linked). Linking connects this login to that directory
+          Search for an existing Leadership person (unlinked or linked). Linking connects this login to that Leadership
           record so ministry groups and rosters apply.
         </p>
 
@@ -228,7 +228,7 @@ export const LinkDirectoryUserModal: React.FC<LinkDirectoryUserModalProps> = ({
             className="px-4 py-2 border border-red-200 text-red-700 rounded-[4px] font-bold hover:bg-red-50 inline-flex items-center justify-center gap-2"
           >
             <Unlink size={16} />
-            Unlink directory
+            Unlink Leadership
           </button>
           <GlowingButton type="button" onClick={() => void linkSelected()} disabled={saving || !selectedId}>
             <Link2 size={16} className="inline mr-1" />
