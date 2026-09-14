@@ -517,7 +517,7 @@ export const AdminOverview = () => {
       value: isLoadingStats ? '...' : prayerRequests24h.toString(), 
       icon: <HandHeart size={20} />, 
       path: '/admin/prayer', 
-      color: 'text-blue-500',
+      color: 'text-blue-600',
       subtitle: isLoadingStats ? 'Loading...' : undefined
     },
     { 
@@ -525,7 +525,7 @@ export const AdminOverview = () => {
       value: isLoadingStats ? '...' : (nextService || 'Sunday 10AM'), 
       icon: <Calendar size={20} />, 
       path: '/admin/events', 
-      color: 'text-green-500',
+      color: 'text-green-600',
       subtitle: isLoadingStats ? 'Loading...' : undefined
     },
     { 
@@ -533,7 +533,7 @@ export const AdminOverview = () => {
       value: isLoadingStats ? '...' : (lastNewsletterTitle || lastNewsletterDate || 'None'), 
       icon: <Newspaper size={20} />,
       path: '/admin/newsletter',
-      color: 'text-orange-500',
+      color: 'text-orange-600',
       subtitle: isLoadingStats ? 'Loading...' : undefined,
       valueSize: 'title' as const,
     },
@@ -542,7 +542,7 @@ export const AdminOverview = () => {
       value: isLoadingStats ? '...' : (lastDevotionalDate || 'None'), 
       icon: <BookOpen size={20} />,
       path: '/admin/devotional',
-      color: 'text-emerald-500',
+      color: 'text-purple-600',
       subtitle: isLoadingStats ? 'Loading...' : undefined
     },
     { 
@@ -550,7 +550,7 @@ export const AdminOverview = () => {
       value: isLoadingStats ? '...' : teamMembersCount.toString(), 
       icon: <Users size={20} />, 
       path: '/admin/team', 
-      color: 'text-purple-500',
+      color: 'text-teal-600',
       subtitle: isLoadingStats ? 'Loading...' : undefined
     },
     { 
@@ -558,7 +558,7 @@ export const AdminOverview = () => {
       value: isLoadingStats ? '...' : rosterAssignmentsCount.toString(), 
       icon: <ClipboardList size={20} />, 
       path: '/admin/roster', 
-      color: 'text-indigo-500',
+      color: 'text-indigo-600',
       subtitle: isLoadingStats ? 'Loading...' : undefined
     },
   ], [visiblePendingCount, prayerRequests24h, nextService, lastNewsletterDate, lastNewsletterTitle, lastDevotionalDate, isLoadingStats, teamMembersCount, rosterAssignmentsCount]);

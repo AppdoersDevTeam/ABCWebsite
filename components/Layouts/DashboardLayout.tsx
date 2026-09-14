@@ -19,6 +19,7 @@ import { useAuth } from '../../context/AuthContext';
 import { displayName, displayInitial } from '../../lib/constants';
 import { ScrollToTop } from '../ScrollToTop';
 import { useAutoSectionReveal } from '../UI/useAutoSectionReveal';
+import { DASHBOARD_NAV_ICON } from '../../lib/dashboardNav';
 
 export const DashboardLayout = () => {
   const { user, logout } = useAuth();
@@ -34,15 +35,15 @@ export const DashboardLayout = () => {
   };
 
   const navItems = [
-    { label: 'Overview', path: '/dashboard', icon: <Home size={20} /> },
-    { label: 'Prayers', path: '/dashboard/prayer', icon: <HandHeart size={20} /> },
-    { label: 'Newsletters', path: '/dashboard/newsletter', icon: <Newspaper size={20} /> },
-    { label: 'Devotionals', path: '/dashboard/devotional', icon: <BookOpen size={20} /> },
-    { label: 'Sermons', path: '/dashboard/sermons', icon: <Youtube size={20} /> },
-    { label: 'The Team', path: '/dashboard/team', icon: <Users size={20} /> },
-    { label: 'Events', path: '/dashboard/events', icon: <Calendar size={20} /> },
-    { label: 'Rosters', path: '/dashboard/roster', icon: <ClipboardList size={20} /> },
-    { label: 'Help', path: '/dashboard/help', icon: <HelpCircle size={20} /> },
+    { label: 'Overview', path: '/dashboard', icon: <Home size={20} />, iconClass: DASHBOARD_NAV_ICON.overview },
+    { label: 'Prayers', path: '/dashboard/prayer', icon: <HandHeart size={20} />, iconClass: DASHBOARD_NAV_ICON.prayers },
+    { label: 'Newsletters', path: '/dashboard/newsletter', icon: <Newspaper size={20} />, iconClass: DASHBOARD_NAV_ICON.newsletters },
+    { label: 'Devotionals', path: '/dashboard/devotional', icon: <BookOpen size={20} />, iconClass: DASHBOARD_NAV_ICON.devotionals },
+    { label: 'Sermons', path: '/dashboard/sermons', icon: <Youtube size={20} />, iconClass: DASHBOARD_NAV_ICON.sermons },
+    { label: 'The Team', path: '/dashboard/team', icon: <Users size={20} />, iconClass: DASHBOARD_NAV_ICON.team },
+    { label: 'Events', path: '/dashboard/events', icon: <Calendar size={20} />, iconClass: DASHBOARD_NAV_ICON.events },
+    { label: 'Rosters', path: '/dashboard/roster', icon: <ClipboardList size={20} />, iconClass: DASHBOARD_NAV_ICON.rosters },
+    { label: 'Help', path: '/dashboard/help', icon: <HelpCircle size={20} />, iconClass: DASHBOARD_NAV_ICON.help },
   ];
 
   return (
@@ -92,7 +93,11 @@ export const DashboardLayout = () => {
                   `}
                 >
                   {isActive && <div className="absolute left-0 top-0 bottom-0 w-1 bg-gold"></div>}
-                  <span className={`transition-transform duration-300 ${isActive ? 'scale-110 text-gold' : 'group-hover:scale-110 group-hover:text-gold'}`}>
+                  <span
+                    className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-transform duration-300 ${item.iconClass} ${
+                      isActive ? 'scale-110' : 'group-hover:scale-110'
+                    }`}
+                  >
                     {item.icon}
                   </span>
                   <span className="tracking-wide">{item.label}</span>

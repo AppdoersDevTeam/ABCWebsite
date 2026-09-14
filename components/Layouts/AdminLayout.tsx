@@ -22,6 +22,7 @@ import { useAuth } from '../../context/AuthContext';
 import { displayName, displayInitial } from '../../lib/constants';
 import { ScrollToTop } from '../ScrollToTop';
 import { useAutoSectionReveal } from '../UI/useAutoSectionReveal';
+import { DASHBOARD_NAV_ICON } from '../../lib/dashboardNav';
 
 export const AdminLayout = () => {
   const { user, logout } = useAuth();
@@ -37,17 +38,17 @@ export const AdminLayout = () => {
   };
 
   const navItems = [
-    { label: 'Overview', path: '/admin', icon: <Home size={20} /> },
-    { label: 'User Management', path: '/admin/users', icon: <UserCog size={20} /> },
-    { label: 'Prayers', path: '/admin/prayer', icon: <HandHeart size={20} /> },
-    { label: 'Newsletters', path: '/admin/newsletter', icon: <Newspaper size={20} /> },
-    { label: 'Devotionals', path: '/admin/devotional', icon: <BookOpen size={20} /> },
-    { label: 'Directory / People', path: '/admin/team', icon: <Users size={20} /> },
-    { label: 'Events', path: '/admin/events', icon: <Calendar size={20} /> },
-    { label: 'Rosters', path: '/admin/roster', icon: <ClipboardList size={20} /> },
-    { label: 'Directory Setup', path: '/admin/settings', icon: <Settings size={20} /> },
-    { label: 'Help', path: '/admin/help', icon: <HelpCircle size={20} /> },
-    { label: 'Logs', path: '/admin/logs', icon: <ScrollText size={20} /> },
+    { label: 'Overview', path: '/admin', icon: <Home size={20} />, iconClass: DASHBOARD_NAV_ICON.overview },
+    { label: 'User Management', path: '/admin/users', icon: <UserCog size={20} />, iconClass: DASHBOARD_NAV_ICON.users },
+    { label: 'Prayers', path: '/admin/prayer', icon: <HandHeart size={20} />, iconClass: DASHBOARD_NAV_ICON.prayers },
+    { label: 'Newsletters', path: '/admin/newsletter', icon: <Newspaper size={20} />, iconClass: DASHBOARD_NAV_ICON.newsletters },
+    { label: 'Devotionals', path: '/admin/devotional', icon: <BookOpen size={20} />, iconClass: DASHBOARD_NAV_ICON.devotionals },
+    { label: 'Directory / People', path: '/admin/team', icon: <Users size={20} />, iconClass: DASHBOARD_NAV_ICON.team },
+    { label: 'Events', path: '/admin/events', icon: <Calendar size={20} />, iconClass: DASHBOARD_NAV_ICON.events },
+    { label: 'Rosters', path: '/admin/roster', icon: <ClipboardList size={20} />, iconClass: DASHBOARD_NAV_ICON.rosters },
+    { label: 'Directory Setup', path: '/admin/settings', icon: <Settings size={20} />, iconClass: DASHBOARD_NAV_ICON.settings },
+    { label: 'Help', path: '/admin/help', icon: <HelpCircle size={20} />, iconClass: DASHBOARD_NAV_ICON.help },
+    { label: 'Logs', path: '/admin/logs', icon: <ScrollText size={20} />, iconClass: DASHBOARD_NAV_ICON.logs },
   ];
 
   return (
@@ -100,7 +101,11 @@ export const AdminLayout = () => {
                   `}
                 >
                   {isActive && <div className="absolute left-0 top-0 bottom-0 w-1 bg-gold"></div>}
-                  <span className={`transition-transform duration-300 ${isActive ? 'scale-110 text-gold' : 'group-hover:scale-110 group-hover:text-gold'}`}>
+                  <span
+                    className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-transform duration-300 ${item.iconClass} ${
+                      isActive ? 'scale-110' : 'group-hover:scale-110'
+                    }`}
+                  >
                     {item.icon}
                   </span>
                   <span className="tracking-wide">{item.label}</span>
