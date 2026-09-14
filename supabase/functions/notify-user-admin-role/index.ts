@@ -137,8 +137,8 @@ function buildRevokedEmailHtml(firstName: string, loginUrl: string): string {
     heading: "Administrative role ended",
     loginUrl,
     innerHtml: `<p style="margin:0 0 20px;">Kia ora ${greetingName},</p>
-      <p style="margin:0 0 20px;">Your <strong>Administrative role</strong> on the Ashburton Baptist Church website has been revoked. You now have a standard member account.</p>
-      <p style="margin:0 0 20px;">You can still log in as a member. Access to the admin portal is no longer available.</p>
+      <p style="margin:0 0 20px;">This email is to confirm that you are <strong>no longer granted an Administrative role</strong> on the Ashburton Baptist Church website.</p>
+      <p style="margin:0 0 20px;">Your account has been returned to <strong>standard member access</strong>. You can still log in, and you will have member permissions only. Access to the admin portal is no longer available.</p>
       <p style="margin:0 0 24px;">If you did not expect this change, or if you have questions, please contact the Office on <a href="mailto:${OFFICE_EMAIL}" style="color:#222222;font-weight:bold;">${OFFICE_EMAIL}</a>.</p>`,
   });
 }
@@ -216,19 +216,41 @@ Deno.serve(async (req: Request) => {
       return jsonResponse({ error: "Forbidden" }, 403);
     }
 
-    let body: NotifyBody;
+    let parsed: unknown;
     try {
-      body = await req.json();
+      parsed = await req.json();
     } catch {
       return jsonResponse({ error: "Invalid JSON body" }, 400);
     }
 
-    const userId = body.userId?.trim();
+    if (typeof parsed === "string") {
+      try {
+        parsed = JSON.parse(parsed);
+      } catch {
+        return jsonResponse({ error: "Invalid JSON body" }, 400);
+      }
+    }
+
+    const root = parsed && typeof parsed === "object"
+      ? parsed as Record<string, unknown>
+      : {};
+    const nested = root.body && typeof root.body === "object"
+      ? root.body as Record<string, unknown>
+      : null;
+    const payload = (typeof root.userId === "string" || typeof root.kind === "string")
+      ? root
+      : (nested || root);
+
+    const userId = String(payload.userId || payload.user_id || "").trim();
     if (!userId) {
       return jsonResponse({ error: "userId is required" }, 400);
     }
 
-    const kind: RoleKind = body.kind === "revoked" ? "revoked" : "granted";
+    const kindRaw = String(payload.kind || payload.action || "")
+      .trim()
+      .toLowerCase();
+    const kind: RoleKind =
+      kindRaw === "revoked" || kindRaw === "revoke" ? "revoked" : "granted";
 
     if (userId === caller.id) {
       return jsonResponse(
@@ -257,21 +279,6 @@ Deno.serve(async (req: Request) => {
       return jsonResponse({ error: "This account cannot be changed." }, 403);
     }
 
-    const roleUpdate =
-      kind === "revoked"
-        ? { role: "member" }
-        : { role: "admin", is_approved: true };
-
-    const { error: updateError } = await adminClient
-      .from("users")
-      .update(roleUpdate)
-      .eq("id", userId);
-
-    if (updateError) {
-      console.error("Failed to update admin role", updateError);
-      return jsonResponse({ error: "Failed to update administrative role" }, 500);
-    }
-
     const toEmail = (target.email || "").trim();
     const firstName =
       (target.first_name || "").trim() ||
@@ -279,13 +286,21 @@ Deno.serve(async (req: Request) => {
       "";
     const loginUrl = `${siteUrl}/#/login`;
 
-    let emailed: string | null = null;
-    let emailSkipped = false;
-    let resendId: string | null = null;
+    const sendRoleEmail = async (): Promise<{
+      emailed: string | null;
+      emailSkipped: boolean;
+      resendId: string | null;
+      error?: string;
+    }> => {
+      if (!toEmail) {
+        return {
+          emailed: null,
+          emailSkipped: true,
+          resendId: null,
+          error: "User has no email",
+        };
+      }
 
-    if (!toEmail) {
-      emailSkipped = true;
-    } else {
       const subject =
         kind === "revoked"
           ? "Your administrative role at Ashburton Baptist Church has ended"
@@ -309,21 +324,94 @@ Deno.serve(async (req: Request) => {
         }),
       });
       const resendBody = await resendRes.json().catch(() => ({}));
+      console.log(
+        "admin-role email",
+        JSON.stringify({
+          kind,
+          userId,
+          toEmail,
+          status: resendRes.status,
+          id: (resendBody as { id?: string })?.id ?? null,
+        }),
+      );
       if (!resendRes.ok) {
         console.error("Resend error", resendRes.status, resendBody);
-        emailSkipped = true;
-      } else {
-        emailed = toEmail;
-        resendId = typeof resendBody?.id === "string" ? resendBody.id : null;
+        return {
+          emailed: null,
+          emailSkipped: true,
+          resendId: null,
+          error: "Failed to send administrative role email",
+        };
       }
+      return {
+        emailed: toEmail,
+        emailSkipped: false,
+        resendId: typeof (resendBody as { id?: string })?.id === "string"
+          ? (resendBody as { id: string }).id
+          : null,
+      };
+    };
+
+    // For revoke: email first so a failed send does not leave the user as a member with no notice.
+    if (kind === "revoked") {
+      const emailResult = await sendRoleEmail();
+      if (!emailResult.emailed) {
+        return jsonResponse(
+          {
+            error: emailResult.error || "Failed to send administrative role email",
+            emailSkipped: true,
+          },
+          502,
+        );
+      }
+
+      const { error: updateError } = await adminClient
+        .from("users")
+        .update({ role: "member" })
+        .eq("id", userId);
+
+      if (updateError) {
+        console.error("Failed to update admin role after email", updateError);
+        return jsonResponse({ error: "Failed to update administrative role" }, 500);
+      }
+
+      return jsonResponse({
+        ok: true,
+        kind,
+        emailed: emailResult.emailed,
+        emailSkipped: false,
+        id: emailResult.resendId,
+      });
+    }
+
+    const { error: updateError } = await adminClient
+      .from("users")
+      .update({ role: "admin", is_approved: true })
+      .eq("id", userId);
+
+    if (updateError) {
+      console.error("Failed to update admin role", updateError);
+      return jsonResponse({ error: "Failed to update administrative role" }, 500);
+    }
+
+    const emailResult = await sendRoleEmail();
+    if (!emailResult.emailed) {
+      return jsonResponse(
+        {
+          error: emailResult.error || "Failed to send administrative role email",
+          emailSkipped: true,
+          kind,
+        },
+        502,
+      );
     }
 
     return jsonResponse({
       ok: true,
       kind,
-      emailed,
-      emailSkipped,
-      id: resendId,
+      emailed: emailResult.emailed,
+      emailSkipped: false,
+      id: emailResult.resendId,
     });
   } catch (err) {
     console.error("notify-user-admin-role unexpected error", err);

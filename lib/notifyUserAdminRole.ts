@@ -47,7 +47,7 @@ export async function notifyUserAdminRole(
 
   try {
     const { data, error } = await supabase.functions.invoke('notify-user-admin-role', {
-      body: { userId, kind },
+      body: { userId, kind, action: kind },
     });
 
     if (error) {

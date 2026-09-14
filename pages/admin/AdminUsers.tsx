@@ -365,17 +365,21 @@ export const AdminUsers = () => {
   };
 
   const handleRevokeAdmin = async (userId: string, userName: string) => {
-    if (!window.confirm(`Revoke admin rights from ${userName}? They will become a regular member.`)) {
+    if (
+      !window.confirm(
+        `Revoke the Administrative role from ${userName}? They will be returned to member access only.`
+      )
+    ) {
       return;
     }
 
     try {
       const notifyResult = await notifyUserAdminRole(userId, 'revoked');
-      if (!notifyResult.ok) {
+      if (!notifyResult.ok || !notifyResult.emailed) {
         alert(
-          `Failed to revoke admin rights from ${userName}${
+          `The Administrative role was not fully completed for ${userName} because the confirmation email could not be sent${
             notifyResult.error ? `: ${notifyResult.error}` : ''
-          }`
+          }. Please try again.`
         );
         return;
       }
@@ -388,7 +392,9 @@ export const AdminUsers = () => {
         summary: `Revoked admin access from ${userName}`,
         details: { field: 'role', value: 'member', emailed: notifyResult.emailed },
       });
-      alert(`${userName} is now a member.${adminRoleEmailNote(notifyResult)}`);
+      alert(
+        `${userName} is no longer granted an Administrative role and has been returned to member access.${adminRoleEmailNote(notifyResult)}`
+      );
       fetchUsers();
     } catch (error) {
       console.error('Error revoking admin:', error);
