@@ -7,7 +7,8 @@ import { supabase } from '../../lib/supabase';
 import { displayName, filterUsersForAdminView } from '../../lib/constants';
 import { User } from '../../types';
 import { SkeletonPageHeader, SkeletonCard, SkeletonUserCard, SkeletonStatsCard } from '../../components/UI/Skeleton';
-import { formatRelativeDateInTimezone, formatFullDateTimeInTimezone } from '../../lib/dateUtils';
+import { formatRelativeDateInTimezone, formatFullDateTimeInTimezone, formatWeekDate, resolveNewsletterWeekDate } from '../../lib/dateUtils';
+import { fetchLatestNewsletter } from '../../lib/newsletters';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { logAuditEventSafe } from '../../lib/auditLog';
 import { notifyUserApproved } from '../../lib/notifyUserApproved';
@@ -24,6 +25,7 @@ export const AdminOverview = () => {
   const [prayerRequests24h, setPrayerRequests24h] = useState(0);
   const [nextService, setNextService] = useState<string | null>(null);
   const [lastNewsletterDate, setLastNewsletterDate] = useState<string | null>(null);
+  const [lastNewsletterTitle, setLastNewsletterTitle] = useState<string | null>(null);
   const [lastDevotionalDate, setLastDevotionalDate] = useState<string | null>(null);
   const [isLoadingStats, setIsLoadingStats] = useState(true);
   const [teamMembersCount, setTeamMembersCount] = useState(0);
@@ -258,17 +260,18 @@ export const AdminOverview = () => {
       setNextService(`${day} ${month}`);
 
       // Fetch last newsletter date
-      const { data: newsletters, error: newsletterError } = await supabase
-        .from('newsletters')
-        .select('created_at')
-        .order('created_at', { ascending: false })
-        .limit(1);
-
-      if (newsletterError) {
-        console.error('Error fetching newsletters:', newsletterError);
-      } else if (newsletters && newsletters.length > 0) {
-        const lastNewsletter = new Date(newsletters[0].created_at);
-        setLastNewsletterDate(lastNewsletter.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }));
+      const latestNewsletter = await fetchLatestNewsletter();
+      if (latestNewsletter) {
+        setLastNewsletterTitle(latestNewsletter.title || null);
+        const weekDate = resolveNewsletterWeekDate(latestNewsletter);
+        setLastNewsletterDate(
+          weekDate
+            ? formatWeekDate(weekDate)
+            : new Date(latestNewsletter.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+        );
+      } else {
+        setLastNewsletterTitle(null);
+        setLastNewsletterDate(null);
       }
 
       const { data: devotionals, error: devotionalsError } = await supabase
@@ -527,11 +530,12 @@ export const AdminOverview = () => {
     },
     { 
       label: 'Last Newsletter', 
-      value: isLoadingStats ? '...' : (lastNewsletterDate || 'None'), 
+      value: isLoadingStats ? '...' : (lastNewsletterTitle || lastNewsletterDate || 'None'), 
       icon: <BookOpen size={20} />,
       path: '/admin/newsletter',
       color: 'text-orange-500',
-      subtitle: isLoadingStats ? 'Loading...' : undefined
+      subtitle: isLoadingStats ? 'Loading...' : undefined,
+      valueSize: 'title' as const,
     },
     { 
       label: 'Last Devotional', 
@@ -557,7 +561,7 @@ export const AdminOverview = () => {
       color: 'text-indigo-500',
       subtitle: isLoadingStats ? 'Loading...' : undefined
     },
-  ], [visiblePendingCount, prayerRequests24h, nextService, lastNewsletterDate, lastDevotionalDate, isLoadingStats, teamMembersCount, rosterAssignmentsCount]);
+  ], [visiblePendingCount, prayerRequests24h, nextService, lastNewsletterDate, lastNewsletterTitle, lastDevotionalDate, isLoadingStats, teamMembersCount, rosterAssignmentsCount]);
 
   console.log('AdminOverview - Rendering, user:', user, 'pendingCount:', pendingCount, 'isLoadingUsers:', isLoadingUsers);
 
@@ -596,7 +600,7 @@ export const AdminOverview = () => {
             stat.label === 'Next Service' && nextService && !isLoadingStats
               ? 'Every Sunday at 10:00 AM'
               : stat.label === 'Last Newsletter' && lastNewsletterDate && !isLoadingStats
-                ? `Uploaded ${lastNewsletterDate}`
+                ? `Week of ${lastNewsletterDate}`
                 : stat.label === 'Last Devotional' && lastDevotionalDate && !isLoadingStats
                   ? `Week of ${lastDevotionalDate}`
                   : stat.subtitle;
@@ -610,6 +614,8 @@ export const AdminOverview = () => {
               description={description}
               footerLabel="Manage →"
               highlight={stat.highlight}
+              valueSize={stat.valueSize}
+              valueClassName={stat.valueSize === 'title' ? 'line-clamp-2' : undefined}
             />
           );
 
@@ -835,7 +841,7 @@ export const AdminOverview = () => {
             </Link>
             <Link to="/admin/newsletter" className="block p-4 bg-white border border-gray-100 rounded-[4px] hover:border-gold hover:shadow-md transition-all">
               <span className="font-semibold text-base text-charcoal">Upload Newsletter</span>
-              <p className="text-sm text-neutral mt-1">Share latest church updates</p>
+              <p className="text-sm text-neutral mt-1">Publish with title, week date, and PDF</p>
             </Link>
             <Link to="/admin/devotional" className="block p-4 bg-white border border-gray-100 rounded-[4px] hover:border-gold hover:shadow-md transition-all">
               <span className="font-semibold text-base text-charcoal">Upload Devotional</span>

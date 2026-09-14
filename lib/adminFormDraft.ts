@@ -50,16 +50,15 @@ export interface DevotionalEditDraft {
 
 export interface NewsletterUploadDraft {
   open: boolean;
-  month: string;
-  year: string;
-  description: string;
+  title: string;
+  weekDate: string;
   fileName?: string;
 }
 
 export interface NewsletterEditDraft {
   open: boolean;
   id: string;
-  month: string;
-  year: string;
+  title: string;
+  weekDate: string;
   fileName?: string;
 }

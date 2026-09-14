@@ -167,4 +167,44 @@ export const formatFullDateTimeInTimezone = (
   }
 };
 
+const MONTH_NAMES = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+] as const;
+
+/** Format a DATE-only value (YYYY-MM-DD) for display, e.g. "14 Sep 2026" */
+export function formatWeekDate(weekDate: string): string {
+  const d = new Date(`${weekDate}T00:00:00`);
+  if (Number.isNaN(d.getTime())) return weekDate;
+  return d.toLocaleDateString('en-NZ', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+export function monthYearFromWeekDate(weekDate: string): { month: string; year: number } {
+  const d = new Date(`${weekDate}T00:00:00`);
+  if (Number.isNaN(d.getTime())) {
+    return { month: '', year: 0 };
+  }
+  return {
+    month: MONTH_NAMES[d.getMonth()],
+    year: d.getFullYear(),
+  };
+}
+
+export function resolveNewsletterWeekDate(item: {
+  week_date?: string | null;
+  month?: string;
+  year?: number;
+  created_at?: string;
+}): string {
+  if (item.week_date) return item.week_date;
+  if (item.month && item.year) {
+    const idx = MONTH_NAMES.indexOf(item.month as (typeof MONTH_NAMES)[number]);
+    if (idx >= 0) {
+      return `${item.year}-${String(idx + 1).padStart(2, '0')}-01`;
+    }
+  }
+  if (item.created_at) return item.created_at.slice(0, 10);
+  return '';
+}
+
 

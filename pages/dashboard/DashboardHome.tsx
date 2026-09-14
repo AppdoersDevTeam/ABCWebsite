@@ -2,6 +2,8 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { displayName, formatDisplayTitle } from '../../lib/constants';
+import { formatWeekDate, resolveNewsletterWeekDate } from '../../lib/dateUtils';
+import { fetchLatestNewsletter } from '../../lib/newsletters';
 import { OverviewStatCard } from '../../components/UI/OverviewStatCard';
 import { Calendar, MessageSquare, BookOpen, Youtube } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
@@ -11,7 +13,8 @@ export const DashboardHome = () => {
   const { user } = useAuth();
   const [prayerRequests24h, setPrayerRequests24h] = useState(0);
   const [nextService, setNextService] = useState<string | null>(null);
-  const [lastNewsletterDate, setLastNewsletterDate] = useState<string | null>(null);
+  const [lastNewsletterTitle, setLastNewsletterTitle] = useState<string | null>(null);
+  const [lastNewsletterWeek, setLastNewsletterWeek] = useState<string | null>(null);
   const [lastDevotionalLabel, setLastDevotionalLabel] = useState<string | null>(null);
   const [lastDevotionalSubtitle, setLastDevotionalSubtitle] = useState<string | null>(null);
   const [isLoadingStats, setIsLoadingStats] = useState(true);
@@ -29,7 +32,7 @@ export const DashboardHome = () => {
       twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
       
       // Parallelize all queries for faster loading
-      const [prayerResult, newsletterResult, devotionalResult] = await Promise.allSettled([
+      const [prayerResult, newsletter, devotionalResult] = await Promise.allSettled([
         // Prayer requests query
         supabase
           .from('prayer_requests')
@@ -37,12 +40,7 @@ export const DashboardHome = () => {
           .eq('is_confidential', false)
           .gte('created_at', twentyFourHoursAgo.toISOString()),
         
-        // Newsletter query
-        supabase
-          .from('newsletters')
-          .select('created_at, month, year, title')
-          .order('created_at', { ascending: false })
-          .limit(1),
+        fetchLatestNewsletter(),
 
         supabase
           .from('devotionals')
@@ -78,16 +76,21 @@ export const DashboardHome = () => {
       setNextService(`${day} ${month}`);
 
       // Process newsletter
-      if (newsletterResult.status === 'fulfilled' && !newsletterResult.value.error && newsletterResult.value.data && newsletterResult.value.data.length > 0) {
-        const newsletter = newsletterResult.value.data[0];
-        if (newsletter.title) {
-          setLastNewsletterDate(formatDisplayTitle(newsletter.title));
-        } else if (newsletter.month && newsletter.year) {
-          setLastNewsletterDate(`${newsletter.month} ${newsletter.year}`);
+      if (newsletter.status === 'fulfilled' && newsletter.value) {
+        const latest = newsletter.value;
+        if (latest.title) {
+          setLastNewsletterTitle(formatDisplayTitle(latest.title));
+        } else if (latest.month && latest.year) {
+          setLastNewsletterTitle(`${latest.month} ${latest.year}`);
         } else {
-          const lastNewsletter = new Date(newsletter.created_at);
-          setLastNewsletterDate(lastNewsletter.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }));
+          const lastNewsletter = new Date(latest.created_at);
+          setLastNewsletterTitle(lastNewsletter.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }));
         }
+        const weekDate = resolveNewsletterWeekDate(latest);
+        setLastNewsletterWeek(weekDate ? formatWeekDate(weekDate) : null);
+      } else {
+        setLastNewsletterTitle(null);
+        setLastNewsletterWeek(null);
       }
 
       if (
@@ -156,9 +159,17 @@ export const DashboardHome = () => {
                 icon={<BookOpen size={20} />}
                 iconClassName="bg-orange-50 text-orange-600"
                 label="Newsletter"
-                value={isLoadingStats ? '...' : (lastNewsletterDate || 'None')}
+                value={isLoadingStats ? '...' : (lastNewsletterTitle || 'None')}
+                valueSize="title"
+                valueClassName="line-clamp-2"
                 description={
-                  isLoadingStats ? 'Loading...' : lastNewsletterDate ? 'Latest edition' : 'No newsletters yet'
+                  isLoadingStats
+                    ? 'Loading...'
+                    : lastNewsletterWeek
+                      ? `Week of ${lastNewsletterWeek}`
+                      : lastNewsletterTitle
+                        ? 'Latest edition'
+                        : 'No newsletters yet'
                 }
                 footerLabel="Read Now →"
               />

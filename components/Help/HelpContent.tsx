@@ -79,8 +79,8 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode }) => {
 
             <Section title="Newsletters">
               <li>Upload or manage newsletter PDFs that members can read in their dashboard (viewed in-browser only).</li>
-              <li>Edit month, year, or replace the PDF from the archive list after upload.</li>
-              <li>Keep titles and dates clear so members know which issue is current.</li>
+              <li>Each issue needs a title, week date, and PDF — same pattern as Devotional of the Week.</li>
+              <li>The archive lists title and date, newest first. Edit title, week date, or replace the PDF after upload.</li>
             </Section>
 
             <Section title="Devotional of the Week">
@@ -135,7 +135,7 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode }) => {
 
             <Section title="Newsletters">
               <li>Read church newsletters your leaders have published — PDFs open in the page viewer (no download).</li>
-              <li>Use this when you want the latest letter without hunting through email.</li>
+              <li>The latest issue is shown first; older issues appear in the archive with title and week date.</li>
             </Section>
 
             <Section title="Devotional of the Week">

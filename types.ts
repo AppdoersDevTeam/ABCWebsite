@@ -94,6 +94,7 @@ export interface Newsletter {
   title: string;
   month: string;
   year: number;
+  week_date?: string;
   pdf_url: string;
   created_at: string;
   updated_at?: string;

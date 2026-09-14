@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { FileText, Eye } from 'lucide-react';
 import { DocumentReaderPanel } from '../../components/UI/DocumentReaderPanel';
-import { supabase } from '../../lib/supabase';
 import { Newsletter as NewsletterType } from '../../types';
 import { SkeletonPageHeader, SkeletonCard } from '../../components/UI/Skeleton';
+import { formatWeekDate, resolveNewsletterWeekDate } from '../../lib/dateUtils';
+import { fetchNewslettersOrdered } from '../../lib/newsletters';
 
 export const Newsletter = () => {
   const [newsletters, setNewsletters] = useState<NewsletterType[]>([]);
@@ -22,13 +23,8 @@ export const Newsletter = () => {
 
   const fetchNewsletters = async () => {
     try {
-      const { data, error } = await supabase
-        .from('newsletters')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setNewsletters(data || []);
+      const data = await fetchNewslettersOrdered();
+      setNewsletters(data);
     } catch (error) {
       console.error('Error fetching newsletters:', error);
     } finally {
@@ -55,6 +51,7 @@ export const Newsletter = () => {
   }
 
   const latestNewsletter = newsletters[0];
+  const latestWeekDate = latestNewsletter ? resolveNewsletterWeekDate(latestNewsletter) : '';
 
   return (
     <div className="space-y-6 md:space-y-8 min-w-0">
@@ -68,6 +65,7 @@ export const Newsletter = () => {
           <DocumentReaderPanel
             label="Reading"
             title={viewing.title}
+            meta={`Week of ${formatWeekDate(resolveNewsletterWeekDate(viewing))}`}
             pdfUrl={viewing.pdf_url}
             pdfTitle={viewing.title}
             onClose={() => setViewing(null)}
@@ -87,9 +85,11 @@ export const Newsletter = () => {
                 <h2 className="text-xl sm:text-2xl md:text-4xl font-serif text-charcoal mb-2 font-normal break-words">
                   {latestNewsletter.title}
                 </h2>
-                <p className="text-neutral mb-6 md:mb-8 font-medium text-sm md:text-base">
-                  {latestNewsletter.month} {latestNewsletter.year}
-                </p>
+                {latestWeekDate && (
+                  <p className="text-neutral mb-6 md:mb-8 font-medium text-sm md:text-base">
+                    Week of {formatWeekDate(latestWeekDate)}
+                  </p>
+                )}
                 <button
                   type="button"
                   onClick={() => setViewing(latestNewsletter)}
@@ -111,23 +111,31 @@ export const Newsletter = () => {
             <p className="text-neutral text-sm">No archived newsletters</p>
           ) : (
             <div className="space-y-3 max-h-[min(20rem,45vh)] md:max-h-[min(36rem,calc(100dvh-11rem))] overflow-y-auto overscroll-y-contain pr-1">
-              {newsletters.slice(1).map((newsletter) => (
-                <button
-                  key={newsletter.id}
-                  type="button"
-                  onClick={() => setViewing(newsletter)}
-                  className={`w-full bg-white border p-3 sm:p-4 flex justify-between items-center gap-3 cursor-pointer rounded-[4px] transition-all group min-w-0 text-left min-h-[44px] ${
-                    viewing?.id === newsletter.id
-                      ? 'border-gold shadow-md'
-                      : 'border-gray-200 hover:shadow-md hover:border-gold'
-                  }`}
-                >
-                  <span className="text-neutral font-medium group-hover:text-charcoal min-w-0 truncate">
-                    {newsletter.title}
-                  </span>
-                  <Eye size={16} className="text-neutral group-hover:text-gold shrink-0" />
-                </button>
-              ))}
+              {newsletters.slice(1).map((newsletter) => {
+                const weekDate = resolveNewsletterWeekDate(newsletter);
+                return (
+                  <button
+                    key={newsletter.id}
+                    type="button"
+                    onClick={() => setViewing(newsletter)}
+                    className={`w-full bg-white border p-3 sm:p-4 flex justify-between items-center gap-3 cursor-pointer rounded-[4px] transition-all group min-w-0 text-left min-h-[44px] ${
+                      viewing?.id === newsletter.id
+                        ? 'border-gold shadow-md'
+                        : 'border-gray-200 hover:shadow-md hover:border-gold'
+                    }`}
+                  >
+                    <span className="min-w-0">
+                      <span className="block text-neutral font-medium group-hover:text-charcoal truncate">
+                        {newsletter.title}
+                      </span>
+                      {weekDate && (
+                        <span className="block text-xs text-neutral/80">Week of {formatWeekDate(weekDate)}</span>
+                      )}
+                    </span>
+                    <Eye size={16} className="text-neutral group-hover:text-gold shrink-0" />
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>
@@ -138,6 +146,7 @@ export const Newsletter = () => {
           <DocumentReaderPanel
             label="Reading"
             title={viewing.title}
+            meta={`Week of ${formatWeekDate(resolveNewsletterWeekDate(viewing))}`}
             pdfUrl={viewing.pdf_url}
             pdfTitle={viewing.title}
             onClose={() => setViewing(null)}

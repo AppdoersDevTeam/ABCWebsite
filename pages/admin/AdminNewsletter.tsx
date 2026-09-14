@@ -8,6 +8,8 @@ import { Newsletter as NewsletterType } from '../../types';
 import { SkeletonPageHeader, SkeletonCard } from '../../components/UI/Skeleton';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { logAuditEventSafe } from '../../lib/auditLog';
+import { formatWeekDate, monthYearFromWeekDate, resolveNewsletterWeekDate } from '../../lib/dateUtils';
+import { fetchNewslettersOrdered, sortNewslettersLatestFirst } from '../../lib/newsletters';
 import {
   ADMIN_DRAFT_KEYS,
   clearFormDraft,
@@ -18,34 +20,32 @@ import {
 } from '../../lib/adminFormDraft';
 
 type NewsletterUploadForm = {
-  month: string;
-  year: string;
-  description: string;
+  title: string;
+  weekDate: string;
   file: File | null;
   pendingFileName?: string;
 };
 
 type NewsletterEditForm = {
-  month: string;
-  year: string;
+  title: string;
+  weekDate: string;
   file: File | null;
   pendingFileName?: string;
 };
 
 function emptyUploadForm(): NewsletterUploadForm {
-  return { month: '', year: '', description: '', file: null };
+  return { title: '', weekDate: '', file: null };
 }
 
 function emptyEditForm(): NewsletterEditForm {
-  return { month: '', year: '', file: null };
+  return { title: '', weekDate: '', file: null };
 }
 
 function uploadFormFromDraft(draft: NewsletterUploadDraft | null): NewsletterUploadForm {
   if (!draft) return emptyUploadForm();
   return {
-    month: draft.month,
-    year: draft.year,
-    description: draft.description,
+    title: draft.title,
+    weekDate: draft.weekDate,
     file: null,
     pendingFileName: draft.fileName,
   };
@@ -54,8 +54,8 @@ function uploadFormFromDraft(draft: NewsletterUploadDraft | null): NewsletterUpl
 function editFormFromDraft(draft: NewsletterEditDraft | null): NewsletterEditForm {
   if (!draft) return emptyEditForm();
   return {
-    month: draft.month,
-    year: draft.year,
+    title: draft.title,
+    weekDate: draft.weekDate,
     file: null,
     pendingFileName: draft.fileName,
   };
@@ -102,8 +102,8 @@ export const AdminNewsletter = () => {
     pendingEditIdRef.current = item.id;
     setEditing(item);
     setEditData({
-      month: item.month,
-      year: String(item.year),
+      title: item.title,
+      weekDate: resolveNewsletterWeekDate(item),
       file: null,
     });
   };
@@ -122,9 +122,8 @@ export const AdminNewsletter = () => {
   useEffect(() => {
     if (
       !isUploadModalOpen &&
-      !uploadData.month &&
-      !uploadData.year &&
-      !uploadData.description &&
+      !uploadData.title &&
+      !uploadData.weekDate &&
       !uploadData.pendingFileName
     ) {
       clearFormDraft(ADMIN_DRAFT_KEYS.newsletterUpload);
@@ -133,9 +132,8 @@ export const AdminNewsletter = () => {
 
     writeFormDraft<NewsletterUploadDraft>(ADMIN_DRAFT_KEYS.newsletterUpload, {
       open: isUploadModalOpen,
-      month: uploadData.month,
-      year: uploadData.year,
-      description: uploadData.description,
+      title: uploadData.title,
+      weekDate: uploadData.weekDate,
       fileName: uploadData.file?.name ?? uploadData.pendingFileName,
     });
   }, [isUploadModalOpen, uploadData]);
@@ -146,8 +144,8 @@ export const AdminNewsletter = () => {
     writeFormDraft<NewsletterEditDraft>(ADMIN_DRAFT_KEYS.newsletterEdit, {
       open: true,
       id: editing.id,
-      month: editData.month,
-      year: editData.year,
+      title: editData.title,
+      weekDate: editData.weekDate,
       fileName: editData.file?.name ?? editData.pendingFileName,
     });
   }, [editing, editData]);
@@ -160,13 +158,8 @@ export const AdminNewsletter = () => {
 
   const fetchNewsletters = async () => {
     try {
-      const { data, error } = await supabase
-        .from('newsletters')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setNewsletters(data || []);
+      const data = await fetchNewslettersOrdered();
+      setNewsletters(data);
     } catch (error) {
       console.error('Error fetching newsletters:', error);
       alert('Failed to load newsletters');
@@ -188,7 +181,7 @@ export const AdminNewsletter = () => {
   };
 
   const handleUpload = async () => {
-    if (!uploadData.file || !uploadData.month || !uploadData.year) {
+    if (!uploadData.file || !uploadData.title.trim() || !uploadData.weekDate) {
       alert('Please fill in all required fields and select a file');
       return;
     }
@@ -197,13 +190,15 @@ export const AdminNewsletter = () => {
 
     try {
       const fileExt = uploadData.file.name.split('.').pop();
-      const fileName = `newsletters/${uploadData.month}-${uploadData.year}-${Date.now()}.${fileExt}`;
+      const fileName = `newsletters/${uploadData.weekDate}-${Date.now()}.${fileExt}`;
+      const { month, year } = monthYearFromWeekDate(uploadData.weekDate);
 
       const { error: uploadError } = await supabase.storage
         .from('newsletters')
         .upload(fileName, uploadData.file, {
           cacheControl: '3600',
           upsert: false,
+          contentType: 'application/pdf',
         });
 
       if (uploadError) throw uploadError;
@@ -214,9 +209,10 @@ export const AdminNewsletter = () => {
         .from('newsletters')
         .insert([
           {
-            title: `${uploadData.month} ${uploadData.year}`,
-            month: uploadData.month,
-            year: parseInt(uploadData.year),
+            title: uploadData.title.trim(),
+            month,
+            year,
+            week_date: uploadData.weekDate,
             pdf_url: urlData.publicUrl,
           },
         ])
@@ -230,22 +226,26 @@ export const AdminNewsletter = () => {
         category: 'newsletter',
         entityType: 'newsletters',
         entityId: data.id,
-        summary: `Uploaded newsletter ${uploadData.month} ${uploadData.year}`,
+        summary: `Uploaded newsletter ${uploadData.title.trim()} (${uploadData.weekDate})`,
       });
 
-      setNewsletters([data, ...newsletters]);
+      setNewsletters(sortNewslettersLatestFirst([data, ...newsletters]));
       closeUploadModal();
       alert('Newsletter uploaded successfully!');
     } catch (error: any) {
       console.error('Error uploading newsletter:', error);
-      alert(error.message || 'Failed to upload newsletter');
+      if (String(error?.message || '').includes('week_date')) {
+        alert('Please run ADD_NEWSLETTER_WEEK_DATE.sql in the Supabase SQL editor, then try uploading again.');
+      } else {
+        alert(error.message || 'Failed to upload newsletter');
+      }
     } finally {
       setIsUploading(false);
     }
   };
 
   const handleEdit = async () => {
-    if (!editing || !editData.month || !editData.year) {
+    if (!editing || !editData.title.trim() || !editData.weekDate) {
       alert('Please fill in all required fields');
       return;
     }
@@ -255,16 +255,18 @@ export const AdminNewsletter = () => {
     try {
       let pdfUrl = editing.pdf_url;
       const oldPath = storagePathFromPublicUrl(editing.pdf_url, 'newsletters');
+      const { month, year } = monthYearFromWeekDate(editData.weekDate);
 
       if (editData.file) {
         const fileExt = editData.file.name.split('.').pop();
-        const fileName = `newsletters/${editData.month}-${editData.year}-${Date.now()}.${fileExt}`;
+        const fileName = `newsletters/${editData.weekDate}-${Date.now()}.${fileExt}`;
 
         const { error: uploadError } = await supabase.storage
           .from('newsletters')
           .upload(fileName, editData.file, {
             cacheControl: '3600',
             upsert: false,
+            contentType: 'application/pdf',
           });
 
         if (uploadError) throw uploadError;
@@ -280,9 +282,10 @@ export const AdminNewsletter = () => {
       const { data, error: dbError } = await supabase
         .from('newsletters')
         .update({
-          title: `${editData.month} ${editData.year}`,
-          month: editData.month,
-          year: parseInt(editData.year, 10),
+          title: editData.title.trim(),
+          month,
+          year,
+          week_date: editData.weekDate,
           pdf_url: pdfUrl,
           updated_at: new Date().toISOString(),
         })
@@ -297,16 +300,22 @@ export const AdminNewsletter = () => {
         category: 'newsletter',
         entityType: 'newsletters',
         entityId: editing.id,
-        summary: `Updated newsletter ${editData.month} ${editData.year}`,
+        summary: `Updated newsletter ${editData.title.trim()} (${editData.weekDate})`,
       });
 
-      setNewsletters(newsletters.map((nl) => (nl.id === editing.id ? data : nl)));
+      setNewsletters(
+        sortNewslettersLatestFirst(newsletters.map((nl) => (nl.id === editing.id ? data : nl)))
+      );
       if (viewing?.id === editing.id) setViewing(data);
       resetEditForm();
       alert('Newsletter updated successfully!');
     } catch (error: any) {
       console.error('Error updating newsletter:', error);
-      alert(error.message || 'Failed to update newsletter');
+      if (String(error?.message || '').includes('week_date')) {
+        alert('Please run ADD_NEWSLETTER_WEEK_DATE.sql in the Supabase SQL editor, then try saving again.');
+      } else {
+        alert(error.message || 'Failed to update newsletter');
+      }
     } finally {
       setIsSaving(false);
     }
@@ -318,7 +327,7 @@ export const AdminNewsletter = () => {
     }
 
     try {
-      const newsletter = newsletters.find(nl => nl.id === id);
+      const newsletter = newsletters.find((nl) => nl.id === id);
 
       if (newsletter?.pdf_url) {
         const path = storagePathFromPublicUrl(newsletter.pdf_url, 'newsletters');
@@ -340,7 +349,7 @@ export const AdminNewsletter = () => {
       });
 
       if (viewing?.id === id) setViewing(null);
-      setNewsletters(newsletters.filter(nl => nl.id !== id));
+      setNewsletters(newsletters.filter((nl) => nl.id !== id));
     } catch (error) {
       console.error('Error deleting newsletter:', error);
       alert('Failed to delete newsletter');
@@ -348,6 +357,7 @@ export const AdminNewsletter = () => {
   };
 
   const latestNewsletter = newsletters[0];
+  const latestWeekDate = latestNewsletter ? resolveNewsletterWeekDate(latestNewsletter) : '';
 
   if (isLoading && !isUploadModalOpen) {
     return (
@@ -386,6 +396,7 @@ export const AdminNewsletter = () => {
           <DocumentReaderPanel
             label="Reading"
             title={viewing.title}
+            meta={`Week of ${formatWeekDate(resolveNewsletterWeekDate(viewing))}`}
             pdfUrl={viewing.pdf_url}
             pdfTitle={viewing.title}
             onClose={() => setViewing(null)}
@@ -403,9 +414,9 @@ export const AdminNewsletter = () => {
             <h2 className="text-xl sm:text-2xl md:text-4xl font-serif text-charcoal mb-2 font-normal break-words">
               {latestNewsletter?.title || 'No Newsletter'}
             </h2>
-            {latestNewsletter && (
+            {latestNewsletter && latestWeekDate && (
               <p className="text-neutral mb-6 md:mb-8 font-medium text-sm md:text-base">
-                {latestNewsletter.month} {latestNewsletter.year}
+                Week of {formatWeekDate(latestWeekDate)}
               </p>
             )}
             {latestNewsletter ? (
@@ -426,54 +437,60 @@ export const AdminNewsletter = () => {
         <div className="min-w-0 flex flex-col">
           <h3 className="text-charcoal font-bold uppercase tracking-widest text-xs mb-4 shrink-0">Archive</h3>
           <div className="space-y-3 max-h-[min(20rem,45vh)] md:max-h-[min(36rem,calc(100dvh-11rem))] overflow-y-auto overscroll-y-contain pr-1">
-            {newsletters.map((newsletter) => (
-              <div
-                key={newsletter.id}
-                className={`glass-card bg-white/80 border p-3 sm:p-4 flex justify-between items-center gap-2 rounded-[10px] transition-all group min-w-0 ${
-                  viewing?.id === newsletter.id ? 'border-gold shadow-md' : 'border-white/60 hover:shadow-md hover:border-gold'
-                }`}
-              >
-                <button
-                  type="button"
-                  onClick={() => setViewing(newsletter)}
-                  className="text-left text-neutral font-medium hover:text-charcoal min-w-0 flex-1 truncate"
+            {newsletters.map((newsletter) => {
+              const weekDate = resolveNewsletterWeekDate(newsletter);
+              return (
+                <div
+                  key={newsletter.id}
+                  className={`glass-card bg-white/80 border p-3 sm:p-4 flex justify-between items-center gap-2 rounded-[10px] transition-all group min-w-0 ${
+                    viewing?.id === newsletter.id ? 'border-gold shadow-md' : 'border-white/60 hover:shadow-md hover:border-gold'
+                  }`}
                 >
-                  {newsletter.title}
-                </button>
-                <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
                   <button
                     type="button"
                     onClick={() => setViewing(newsletter)}
-                    className="p-2 text-neutral hover:text-gold transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
-                    aria-label={`Read ${newsletter.title}`}
+                    className="text-left min-w-0 flex-1"
                   >
-                    <Eye size={16} />
+                    <span className="block text-neutral font-medium hover:text-charcoal truncate">{newsletter.title}</span>
+                    {weekDate && (
+                      <span className="block text-xs text-neutral/80">Week of {formatWeekDate(weekDate)}</span>
+                    )}
                   </button>
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      openEdit(newsletter);
-                    }}
-                    className="p-2 text-neutral hover:text-gold transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
-                    aria-label={`Edit ${newsletter.title}`}
-                  >
-                    <Pencil size={16} />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDelete(newsletter.id);
-                    }}
-                    className="p-2 text-neutral hover:text-red-500 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
-                    aria-label={`Delete ${newsletter.title}`}
-                  >
-                    <Trash2 size={16} />
-                  </button>
+                  <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => setViewing(newsletter)}
+                      className="p-2 text-neutral hover:text-gold transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+                      aria-label={`Read ${newsletter.title}`}
+                    >
+                      <Eye size={16} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openEdit(newsletter);
+                      }}
+                      className="p-2 text-neutral hover:text-gold transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+                      aria-label={`Edit ${newsletter.title}`}
+                    >
+                      <Pencil size={16} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(newsletter.id);
+                      }}
+                      className="p-2 text-neutral hover:text-red-500 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+                      aria-label={`Delete ${newsletter.title}`}
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>
@@ -483,6 +500,7 @@ export const AdminNewsletter = () => {
           <DocumentReaderPanel
             label="Reading"
             title={viewing.title}
+            meta={`Week of ${formatWeekDate(resolveNewsletterWeekDate(viewing))}`}
             pdfUrl={viewing.pdf_url}
             pdfTitle={viewing.title}
             onClose={() => setViewing(null)}
@@ -498,41 +516,23 @@ export const AdminNewsletter = () => {
         preventClose={isUploading}
       >
         <div className="space-y-4">
-          <div className="grid md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-bold text-charcoal mb-2">Month *</label>
-              <select
-                value={uploadData.month}
-                onChange={(e) => setUploadData({ ...uploadData, month: e.target.value })}
-                className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none"
-              >
-                <option value="">Select Month</option>
-                {['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'].map(month => (
-                  <option key={month} value={month}>{month}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-bold text-charcoal mb-2">Year *</label>
-              <input
-                type="number"
-                value={uploadData.year}
-                onChange={(e) => setUploadData({ ...uploadData, year: e.target.value })}
-                className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none"
-                placeholder="2023"
-                min="2020"
-                max="2100"
-              />
-            </div>
-          </div>
           <div>
-            <label className="block text-sm font-bold text-charcoal mb-2">Description (Optional)</label>
+            <label className="block text-sm font-bold text-charcoal mb-2">Title *</label>
             <input
               type="text"
-              value={uploadData.description}
-              onChange={(e) => setUploadData({ ...uploadData, description: e.target.value })}
+              value={uploadData.title}
+              onChange={(e) => setUploadData({ ...uploadData, title: e.target.value })}
               className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none"
-              placeholder="e.g., Harvest Edition"
+              placeholder="e.g., The Newsletter"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-charcoal mb-2">Week Date *</label>
+            <input
+              type="date"
+              value={uploadData.weekDate}
+              onChange={(e) => setUploadData({ ...uploadData, weekDate: e.target.value })}
+              className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none"
             />
           </div>
           <div>
@@ -545,7 +545,7 @@ export const AdminNewsletter = () => {
             <div className="border-2 border-dashed border-gray-300 rounded-[4px] p-6 text-center hover:border-gold transition-colors">
               <input
                 type="file"
-                accept=".pdf"
+                accept=".pdf,application/pdf"
                 onChange={handleFileChange}
                 className="hidden"
                 id="newsletter-upload"
@@ -582,7 +582,10 @@ export const AdminNewsletter = () => {
             >
               Cancel
             </button>
-            <GlowingButton onClick={handleUpload} disabled={!uploadData.file || !uploadData.month || !uploadData.year || isUploading}>
+            <GlowingButton
+              onClick={handleUpload}
+              disabled={!uploadData.file || !uploadData.title.trim() || !uploadData.weekDate || isUploading}
+            >
               {isUploading ? 'Uploading...' : 'Upload Newsletter'}
             </GlowingButton>
           </div>
@@ -597,31 +600,23 @@ export const AdminNewsletter = () => {
         preventClose={isSaving}
       >
         <div className="space-y-4">
-          <div className="grid md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-bold text-charcoal mb-2">Month *</label>
-              <select
-                value={editData.month}
-                onChange={(e) => setEditData({ ...editData, month: e.target.value })}
-                className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none"
-              >
-                <option value="">Select Month</option>
-                {['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'].map(month => (
-                  <option key={month} value={month}>{month}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-bold text-charcoal mb-2">Year *</label>
-              <input
-                type="number"
-                value={editData.year}
-                onChange={(e) => setEditData({ ...editData, year: e.target.value })}
-                className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none"
-                min="2020"
-                max="2100"
-              />
-            </div>
+          <div>
+            <label className="block text-sm font-bold text-charcoal mb-2">Title *</label>
+            <input
+              type="text"
+              value={editData.title}
+              onChange={(e) => setEditData({ ...editData, title: e.target.value })}
+              className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-charcoal mb-2">Week Date *</label>
+            <input
+              type="date"
+              value={editData.weekDate}
+              onChange={(e) => setEditData({ ...editData, weekDate: e.target.value })}
+              className="w-full p-3 rounded-[4px] border border-gray-200 focus:border-gold focus:outline-none"
+            />
           </div>
           <div>
             <label className="block text-sm font-bold text-charcoal mb-2">Replace PDF (optional)</label>
@@ -633,7 +628,7 @@ export const AdminNewsletter = () => {
             <div className="border-2 border-dashed border-gray-300 rounded-[4px] p-6 text-center hover:border-gold transition-colors">
               <input
                 type="file"
-                accept=".pdf"
+                accept=".pdf,application/pdf"
                 onChange={handleEditFileChange}
                 className="hidden"
                 id="newsletter-edit-upload"
@@ -674,7 +669,7 @@ export const AdminNewsletter = () => {
             </button>
             <GlowingButton
               onClick={handleEdit}
-              disabled={!editData.month || !editData.year || isSaving}
+              disabled={!editData.title.trim() || !editData.weekDate || isSaving}
             >
               {isSaving ? 'Saving...' : 'Save Changes'}
             </GlowingButton>
