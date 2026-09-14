@@ -15,6 +15,7 @@ import { Modal } from '../../components/UI/Modal';
 import { TurnstileField, type TurnstileFieldHandle } from '../../components/UI/TurnstileField';
 import { logAuditEventSafe } from '../../lib/auditLog';
 import { notifyUserApproved } from '../../lib/notifyUserApproved';
+import { notifyUserReview } from '../../lib/notifyUserReview';
 import { deleteUserAccount } from '../../lib/deleteUserAccount';
 
 export const AdminUsers = () => {
@@ -193,6 +194,14 @@ export const AdminUsers = () => {
     }
 
     try {
+      const notifyResult = await notifyUserReview(userId, 'denied');
+      let emailNote = '';
+      if (!notifyResult.ok) {
+        emailNote = ` The denial email may not have been sent${
+          notifyResult.error ? ` (${notifyResult.error})` : ''
+        }.`;
+      }
+
       const { error: deleteError } = await supabase
         .from('users')
         .delete()
@@ -206,9 +215,9 @@ export const AdminUsers = () => {
         entityType: 'users',
         entityId: userId,
         summary: `Rejected and removed signup for ${target?.email || userId}`,
-        details: { email: target?.email },
+        details: { email: target?.email, denialEmailSent: notifyResult.ok },
       });
-      alert('User rejected and removed');
+      alert(`User rejected and removed.${emailNote}`);
       fetchUsers();
     } catch (error) {
       console.error('Error rejecting user:', error);

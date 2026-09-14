@@ -32,7 +32,7 @@ export const OAuthCallbackWrapper = () => {
       });
       
       if (!user.is_approved) {
-        navigate('/pending-approval', { replace: true });
+        return;
       } else if (isAdminUser(user)) {
         navigate('/admin', { replace: true });
       } else {
@@ -46,8 +46,8 @@ export const OAuthCallbackWrapper = () => {
     return <OAuthCallback />;
   }
 
-  // If user is logged in, show loading while redirecting (the useEffect above will redirect)
-  if (user && !isLoading) {
+  // Show the public home for visitors and for accounts still waiting on approval
+  if (user && !isLoading && user.is_approved) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-base text-charcoal font-serif">
         <div className="animate-pulse text-xl">Redirecting...</div>

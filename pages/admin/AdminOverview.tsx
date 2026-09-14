@@ -12,6 +12,7 @@ import { fetchLatestNewsletter } from '../../lib/newsletters';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { logAuditEventSafe } from '../../lib/auditLog';
 import { notifyUserApproved } from '../../lib/notifyUserApproved';
+import { notifyUserReview } from '../../lib/notifyUserReview';
 import { IntroInquiryEmailModal } from './IntroInquiryEmailModal';
 
 export const AdminOverview = () => {
@@ -164,6 +165,14 @@ export const AdminOverview = () => {
 
     try {
       const target = pendingUsers.find((u) => u.id === userId) || allUsers.find((u) => u.id === userId);
+      const notifyResult = await notifyUserReview(userId, 'denied');
+      let emailNote = '';
+      if (!notifyResult.ok) {
+        emailNote = ` The denial email may not have been sent${
+          notifyResult.error ? ` (${notifyResult.error})` : ''
+        }.`;
+      }
+
       const { error: deleteError } = await supabase
         .from('users')
         .delete()
@@ -177,9 +186,10 @@ export const AdminOverview = () => {
         entityType: 'users',
         entityId: userId,
         summary: `Rejected and removed signup for ${target?.email || userId}`,
-        details: { email: target?.email },
+        details: { email: target?.email, denialEmailSent: notifyResult.ok },
       });
 
+      alert(`User rejected and removed.${emailNote}`);
       fetchPendingUsers();
     } catch (error) {
       console.error('Error rejecting user:', error);

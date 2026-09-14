@@ -48,7 +48,11 @@ export async function deleteUserAccount(userId: string): Promise<DeleteUserAccou
     if (error) {
       const message = await extractInvokeError(error, data);
       console.error('deleteUserAccount invoke error:', error, data);
-      return { ok: false, error: message };
+      const friendly =
+        /failed to send a request to the edge function/i.test(message)
+          ? 'The delete service is not available yet. Please try again in a moment.'
+          : message;
+      return { ok: false, error: friendly };
     }
 
     if (data?.error) {

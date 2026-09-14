@@ -7,6 +7,7 @@ import { syncDirectoryUserLink } from '../lib/directoryUserLink';
 import { hasAuthCallbackParams, completeAuthCallbackFromUrl, isPasswordRecoveryUrl } from '../lib/authCallback';
 import { logAuditEventSafe } from '../lib/auditLog';
 import { getAuthEmailRedirectUrl } from '../lib/authRedirect';
+import { notifySignupReceivedOnce } from '../lib/notifyUserReview';
 import type { AuthError, Session, User as SupabaseUser } from '@supabase/supabase-js';
 
 function splitName(fullName: string): { first_name: string; last_name: string } {
@@ -454,6 +455,11 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
       subscription.unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    if (isLoading || !user?.id || user.is_approved) return;
+    notifySignupReceivedOnce(user.id, user.created_at);
+  }, [isLoading, user?.id, user?.is_approved, user?.created_at]);
 
   const loginWithEmail = async (email: string, password: string, captchaToken: string) => {
     setIsLoading(true);
