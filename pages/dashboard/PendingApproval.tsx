@@ -5,13 +5,16 @@ import { GlowingButton } from '../../components/UI/GlowingButton';
 import { useAuth } from '../../context/AuthContext';
 import { isAdminUser } from '../../lib/constants';
 import { BackgroundBlobs } from '../../components/UI/BackgroundBlobs';
+import { supabase } from '../../lib/supabase';
 import { notifySignupReceivedOnce } from '../../lib/notifyUserReview';
+import { allowPendingPublicBrowse, clearPendingPublicBrowse } from '../../lib/pendingAccess';
 
 export const PendingApproval = () => {
-  const { logout, user, refreshUserProfile } = useAuth();
+  const { logout, user, isLoading, refreshUserProfile } = useAuth();
   const navigate = useNavigate();
   const [isRevoked, setIsRevoked] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
   useEffect(() => {
     if (user?.created_at) {
@@ -57,14 +60,25 @@ export const PendingApproval = () => {
   }, [user, isRevoked, refreshUserProfile]);
 
   useEffect(() => {
-    if (user?.is_approved) {
+    if (isLoading || isSigningOut) return;
+    if (!user) {
+      let cancelled = false;
+      void supabase.auth.getSession().then(({ data: { session } }) => {
+        if (cancelled || session?.user) return;
+        navigate('/', { replace: true });
+      });
+      return () => {
+        cancelled = true;
+      };
+    }
+    if (user.is_approved) {
       if (isAdminUser(user)) {
         navigate('/admin', { replace: true });
       } else {
         navigate('/dashboard', { replace: true });
       }
     }
-  }, [user, navigate]);
+  }, [user, isLoading, isSigningOut, navigate]);
 
   const handleManualRefresh = async () => {
     setIsRefreshing(true);
@@ -78,7 +92,19 @@ export const PendingApproval = () => {
   };
 
   const goHome = () => {
+    allowPendingPublicBrowse();
     navigate('/');
+  };
+
+  const handleLogout = async () => {
+    setIsSigningOut(true);
+    clearPendingPublicBrowse();
+    try {
+      await logout();
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+    navigate('/', { replace: true });
   };
 
   return (
@@ -155,11 +181,12 @@ export const PendingApproval = () => {
             Go to Home
           </GlowingButton>
           <GlowingButton
-            onClick={logout}
+            onClick={handleLogout}
             variant="outline"
+            disabled={isSigningOut}
             className="border-gray-300 text-neutral hover:border-charcoal hover:text-charcoal"
           >
-            Sign Out
+            {isSigningOut ? 'Signing out...' : 'Log Out'}
           </GlowingButton>
         </div>
       </div>

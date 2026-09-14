@@ -19,8 +19,7 @@ function normalizeRecoveryUrl(): void {
       const route = parts[1];
       const authParams = parts.slice(2).join('#');
       const baseUrl = window.location.origin.replace(/\/$/, '');
-      const pathname = window.location.pathname.replace(/\/$/, '') || '';
-      const newUrl = `${baseUrl}${pathname}#${route}#${authParams}`;
+      const newUrl = `${baseUrl}/#${route}#${authParams}`;
       window.history.replaceState({}, document.title, newUrl);
     }
   }

@@ -196,7 +196,7 @@ export function clearRecoveryParamsFromUrl(): void {
   const hash = url.hash || '';
   if (!hash.includes('/reset-password')) return;
 
-  const base = `${url.origin}${url.pathname}`;
+  const base = `${url.origin}/`;
   window.history.replaceState({}, document.title, `${base}#/reset-password`);
 }
 

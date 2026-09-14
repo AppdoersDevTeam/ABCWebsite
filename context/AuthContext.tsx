@@ -8,6 +8,7 @@ import { hasAuthCallbackParams, completeAuthCallbackFromUrl, isPasswordRecoveryU
 import { logAuditEventSafe } from '../lib/auditLog';
 import { getAuthEmailRedirectUrl } from '../lib/authRedirect';
 import { notifySignupReceivedOnce } from '../lib/notifyUserReview';
+import { clearPendingPublicBrowse } from '../lib/pendingAccess';
 import type { AuthError, Session, User as SupabaseUser } from '@supabase/supabase-js';
 
 function splitName(fullName: string): { first_name: string; last_name: string } {
@@ -680,6 +681,7 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       userProfileCache.current = null;
+      clearPendingPublicBrowse();
       setUser(null);
     } catch (error) {
       console.error('Logout error:', error);

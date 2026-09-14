@@ -1,304 +1,124 @@
-import { useEffect, useState, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { User } from '../../types';
 import { isAdminUser } from '../../lib/constants';
 import { completeAuthCallbackFromUrl } from '../../lib/authCallback';
+import { clearPendingPublicBrowse } from '../../lib/pendingAccess';
+import { hashRouterHref } from '../../lib/ensureHashRouterUrl';
+import { User } from '../../types';
+
+function destinationForUser(profile: Pick<User, 'is_approved' | 'role'>): string {
+  if (!profile.is_approved) return '/pending-approval';
+  if (isAdminUser(profile)) return '/admin';
+  return '/dashboard';
+}
+
+function replaceToHashRoute(path: string) {
+  window.history.replaceState({}, document.title, hashRouterHref(path));
+}
 
 export const OAuthCallback = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const { user, isLoading, refreshUserProfile } = useAuth();
-  const [redirectAttempted, setRedirectAttempted] = useState(false);
-  const [isOAuthCallback, setIsOAuthCallback] = useState(false);
-  const redirectPathRef = useRef<string | null>(null);
+  const { user, isLoading } = useAuth();
+  const redirectedRef = useRef(false);
 
-  const replaceToAppBase = () => {
-    // With HashRouter we must keep pathname at the app base (usually "/"),
-    // otherwise you end up with URLs like "/auth/callback#/dashboard" which 404 on refresh in Vercel.
-    const base = import.meta.env.BASE_URL || '/';
-    window.history.replaceState({}, document.title, base);
+  const finish = (path: string) => {
+    if (redirectedRef.current) return;
+    redirectedRef.current = true;
+    clearPendingPublicBrowse();
+    navigate(path, { replace: true });
+    replaceToHashRoute(path);
+    window.setTimeout(() => {
+      const hash = window.location.hash || '';
+      if (hash.includes('auth/callback') || window.location.pathname.includes('auth/callback')) {
+        replaceToHashRoute(path);
+        window.location.hash = `#${path}`;
+      }
+    }, 250);
   };
 
   useEffect(() => {
-    // Check if this is an OAuth callback by looking for access_token in URL
-    // Handle malformed hash (e.g., #/auth/callback#access_token=...)
-    let hash = window.location.hash;
-    const search = window.location.search;
-    
-    // Fix malformed hash - if hash contains #access_token after a route, extract it properly
-    if (hash.includes('#access_token') && hash.includes('/auth/callback')) {
-      // Split on the second # to get the route and the OAuth params
-      const parts = hash.split('#');
-      if (parts.length > 2) {
-        // Reconstruct: first part is route, second part onwards is OAuth params
-        const route = parts[1]; // /auth/callback
-        hash = '#' + parts.slice(2).join('#');
-        // Update URL to fix the hash immediately
-        const baseUrl = window.location.origin.replace(/\/$/, '');
-        const pathname = window.location.pathname.replace(/\/$/, '') || '';
-        const newUrl = `${baseUrl}${pathname}${route}${hash}`;
-        window.history.replaceState({}, document.title, newUrl);
-        console.log('OAuthCallback - Fixed malformed hash, new URL:', newUrl);
+    let cancelled = false;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+    const run = async () => {
+      const { error: callbackError } = await completeAuthCallbackFromUrl();
+      if (cancelled) return;
+
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (callbackError && !session?.user) {
+        const lower = callbackError.toLowerCase();
+        if (
+          lower.includes('expired') ||
+          lower.includes('invalid') ||
+          lower.includes('already')
+        ) {
+          finish('/login?status=confirm_link_used');
+        } else {
+          finish('/login-error?error=confirm_failed');
+        }
+        return;
       }
-    }
-    
-    // Also check if we're on the callback route and have a session (OAuth might have completed)
-    const hasOAuthParams = hash.includes('access_token') || search.includes('access_token') || 
-                          search.includes('code=') || hash.includes('code=') ||
-                          hash.includes('error') || search.includes('error') ||
-                          hash.includes('type=signup') || hash.includes('type=email') ||
-                          (location.pathname === '/auth/callback' && (hash === '#' || hash === ''));
-    
-    setIsOAuthCallback(hasOAuthParams || location.pathname === '/auth/callback');
-  }, [location]);
 
-  useEffect(() => {
-    // Only process if this is actually an OAuth callback
-    if (!isOAuthCallback) {
-      return;
-    }
+      if (session?.user) {
+        const loadProfile = async () => {
+          const { data } = await supabase
+            .from('users')
+            .select('is_approved, role')
+            .eq('id', session.user.id)
+            .maybeSingle();
+          return data;
+        };
 
-    const handleCallback = async () => {
-      try {
-        // If we already attempted redirect, don't try again
-        if (redirectAttempted) {
-          console.log('OAuthCallback - Redirect already attempted, skipping');
+        let profile = await loadProfile();
+        if (!profile) {
+          await new Promise((resolve) => window.setTimeout(resolve, 1500));
+          if (cancelled || redirectedRef.current) return;
+          profile = await loadProfile();
+        }
+
+        if (cancelled || redirectedRef.current) return;
+
+        if (profile) {
+          finish(destinationForUser(profile as User));
           return;
         }
 
-        console.log('OAuthCallback - Processing callback');
-
-        const { error: callbackError } = await completeAuthCallbackFromUrl();
-        if (callbackError) {
-          console.warn('OAuthCallback - Callback exchange failed:', callbackError);
-          setRedirectAttempted(true);
-          replaceToAppBase();
-          const lower = callbackError.toLowerCase();
-          if (
-            lower.includes('expired') ||
-            lower.includes('invalid') ||
-            lower.includes('already')
-          ) {
-            navigate('/login?status=confirm_link_used', { replace: true });
-          } else {
-            navigate('/login-error?error=confirm_failed', { replace: true });
-          }
-          return;
-        }
-
-        // Always check session first to get the most up-to-date state
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-        
-        if (sessionError) {
-          console.error('OAuthCallback - Session error:', sessionError);
-          setRedirectAttempted(true);
-          replaceToAppBase();
-          navigate('/login-error?error=session_error', { replace: true });
-          return;
-        }
-
-        if (!session?.user) {
-          console.log('OAuthCallback - No session found, waiting for auth context...');
-          // Wait a bit more for auth context to process
-          if (!isLoading && !user) {
-            setTimeout(() => {
-              if (!redirectAttempted) {
-                console.log('OAuthCallback - Still no session after wait, redirecting to error page');
-                setRedirectAttempted(true);
-                replaceToAppBase();
-                navigate('/login-error?error=no_session', { replace: true });
-              }
-            }, 2000);
-          }
-          return;
-        }
-
-        console.log('OAuthCallback - Session found, user ID:', session.user.id);
-
-        // Refresh user profile to get the latest approval status
-        console.log('OAuthCallback - Refreshing user profile...');
-        await refreshUserProfile();
-        
-        // Wait a moment for state to update
-        await new Promise(resolve => setTimeout(resolve, 500));
-
-        // Try to fetch user profile directly to ensure we have latest data
-        const { data: userData, error: profileError } = await supabase
-          .from('users')
-          .select('*')
-          .eq('id', session.user.id)
-          .single();
-
-        console.log('OAuthCallback - Profile query result:', { 
-          hasData: !!userData, 
-          is_approved: userData?.is_approved,
-          role: userData?.role,
-          error: profileError?.message 
-        });
-
-        // Use the fetched data or fall back to context user
-        // If userData is available, use it; otherwise wait a bit for context to update
-        let userProfile = userData || user;
-        
-        // If we don't have userData but have a session, wait a moment for context to update
-        if (!userProfile && session?.user) {
-          console.log('OAuthCallback - Waiting for context user to update...');
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          // Try refreshing one more time
-          await refreshUserProfile();
-          await new Promise(resolve => setTimeout(resolve, 500));
-          
-          // Check context user again
-          const { data: { session: session2 } } = await supabase.auth.getSession();
-          if (session2?.user) {
-            const { data: retryData } = await supabase
-              .from('users')
-              .select('*')
-              .eq('id', session2.user.id)
-              .single();
-            userProfile = retryData || user;
-          }
-        }
-        
-        if (!userProfile) {
-          // Profile doesn't exist yet - might be waiting for trigger
-          if (profileError && profileError.code === 'PGRST116') {
-            console.log('OAuthCallback - User profile not found (PGRST116), waiting for trigger...');
-            
-            // Wait a bit for the trigger to create the profile, then check again
-            setTimeout(async () => {
-              if (redirectAttempted) return;
-              
-              const { data: retryUserData } = await supabase
-                .from('users')
-                .select('*')
-                .eq('id', session.user.id)
-                .single();
-
-              if (retryUserData) {
-                const retryProfile = retryUserData as User;
-                setRedirectAttempted(true);
-                // Clean up the URL hash before redirecting
-                replaceToAppBase();
-                
-                if (!retryProfile.is_approved) {
-                  console.log('OAuthCallback - User not approved after retry, redirecting to pending approval');
-                  navigate('/pending-approval', { replace: true });
-                } else if (isAdminUser(retryProfile)) {
-                  console.log('OAuthCallback - Admin user after retry, redirecting to admin dashboard');
-                  navigate('/admin', { replace: true });
-                } else {
-                  console.log('OAuthCallback - Regular user approved after retry, redirecting to dashboard');
-                  navigate('/dashboard', { replace: true });
-                }
-              } else {
-                setRedirectAttempted(true);
-                console.warn('OAuthCallback - Profile still not found after retry, redirecting to pending approval');
-                replaceToAppBase();
-                navigate('/pending-approval', { replace: true });
-              }
-            }, 3000);
-            return;
-          } else {
-            setRedirectAttempted(true);
-            console.warn('OAuthCallback - No user profile available, redirecting to pending approval');
-            replaceToAppBase();
-            navigate('/pending-approval', { replace: true });
-            return;
-          }
-        }
-
-        // Profile found, redirect based on approval status
-        setRedirectAttempted(true);
-        const profile = userProfile as User;
-        console.log('OAuthCallback - Profile found, redirecting. Profile:', {
-          id: profile.id,
-          email: profile.email,
-          is_approved: profile.is_approved,
-          role: profile.role
-        });
-        
-        // Clean up the URL before redirecting (keep pathname at app base for HashRouter)
-        replaceToAppBase();
-        
-        // Determine redirect path
-        const redirectPath = !profile.is_approved 
-          ? '/pending-approval'
-          : isAdminUser(profile)
-          ? '/admin'
-          : '/dashboard';
-        
-        redirectPathRef.current = redirectPath;
-        console.log('OAuthCallback - Redirecting to:', redirectPath);
-        
-        // Use a small delay to ensure state is updated before redirect
-        setTimeout(() => {
-          // Try React Router navigation first
-          navigate(redirectPath, { replace: true });
-          
-          // Fallback: if navigation doesn't work after a short delay, use window.location
-          setTimeout(() => {
-            const currentHash = window.location.hash;
-            const currentPath = window.location.pathname;
-            if ((currentHash.includes('auth/callback') || currentPath.includes('auth/callback')) && redirectPathRef.current) {
-              console.log('OAuthCallback - Navigation may have failed, using window.location fallback');
-              // For HashRouter, we need to set the hash with the # prefix
-              replaceToAppBase();
-              window.location.hash = `#${redirectPathRef.current}`;
-            }
-          }, 500);
-        }, 100);
-      } catch (error) {
-        console.error('OAuth callback handler error:', error);
-        if (!redirectAttempted) {
-          setRedirectAttempted(true);
-          replaceToAppBase();
-          navigate('/login-error?error=callback_failed', { replace: true });
-        }
+        finish('/pending-approval');
       }
     };
 
-    // Process callback - wait for auth context if needed
-    if (isOAuthCallback) {
-      if (isLoading) {
-        // Wait for auth context to finish loading
-        console.log('OAuthCallback - Auth context still loading, waiting...');
-        const timer = setTimeout(() => {
-          handleCallback();
-        }, 2000);
-        return () => clearTimeout(timer);
-      } else {
-        // Small delay to ensure everything is ready
-        const timer = setTimeout(() => {
-          handleCallback();
-        }, 500);
-        return () => clearTimeout(timer);
-      }
-    }
-  }, [navigate, user, isLoading, redirectAttempted, isOAuthCallback, refreshUserProfile]);
+    void run();
 
-  // Safety mechanism: if we have a redirect path but are still on callback route, force redirect
-  useEffect(() => {
-    if (redirectPathRef.current && location.pathname === '/auth/callback') {
-      const timer = setTimeout(() => {
-        console.log('OAuthCallback - Safety redirect triggered to:', redirectPathRef.current);
-        if (redirectPathRef.current) {
-          navigate(redirectPathRef.current, { replace: true });
-          // If still on callback route after navigation, use window.location
-          setTimeout(() => {
-            if (window.location.hash.includes('auth/callback') || window.location.pathname.includes('auth/callback')) {
-              console.log('OAuthCallback - Force redirect using window.location');
-              replaceToAppBase();
-              window.location.hash = `#${redirectPathRef.current}`;
-            }
-          }, 300);
+    timeoutId = window.setTimeout(() => {
+      if (cancelled || redirectedRef.current) return;
+      void supabase.auth.getSession().then(({ data: { session } }) => {
+        if (cancelled || redirectedRef.current) return;
+        if (session?.user) {
+          finish('/pending-approval');
+          return;
         }
-      }, 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [location.pathname, navigate]);
+        finish('/login-error?error=no_session');
+      });
+    }, 8000);
+
+    return () => {
+      cancelled = true;
+      if (timeoutId) window.clearTimeout(timeoutId);
+    };
+    // finish uses navigate; run once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (isLoading || redirectedRef.current || !user) return;
+    finish(destinationForUser(user));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, isLoading]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-secondary text-white font-serif">
@@ -309,4 +129,3 @@ export const OAuthCallback = () => {
     </div>
   );
 };
-

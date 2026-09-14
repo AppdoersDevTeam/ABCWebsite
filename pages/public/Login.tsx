@@ -14,6 +14,7 @@ import {
 } from '../../lib/validateSignupFields';
 import { normalizePhoneForAuth, sanitizePhoneInput } from '../../lib/validatePhone';
 import { getAuthEmailErrorMessage } from '../../lib/authEmailErrors';
+import { clearPendingPublicBrowse } from '../../lib/pendingAccess';
 
 function fieldInputClass(hasError: boolean): string {
   const base =
@@ -131,13 +132,17 @@ export const Login = () => {
   };
 
   const goToPendingApproval = () => {
+    clearPendingPublicBrowse();
     setTimeout(() => {
       navigate('/pending-approval', { replace: true });
     }, 500);
   };
 
   const getRedirectPath = (role: string, isApproved: boolean): string => {
-    if (!isApproved) return '/pending-approval';
+    if (!isApproved) {
+      clearPendingPublicBrowse();
+      return '/pending-approval';
+    }
     sessionStorage.removeItem('testRoleOverride');
     return isAdminUser({ role, is_approved: isApproved }) ? '/admin' : '/dashboard';
   };

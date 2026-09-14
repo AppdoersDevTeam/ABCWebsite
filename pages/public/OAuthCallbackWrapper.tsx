@@ -5,6 +5,7 @@ import { OAuthCallback } from './OAuthCallback';
 import { useAuth } from '../../context/AuthContext';
 import { isAdminUser } from '../../lib/constants';
 import { hasAuthCallbackParams } from '../../lib/authCallback';
+import { canPendingUserBrowsePublic } from '../../lib/pendingAccess';
 
 export const OAuthCallbackWrapper = () => {
   const navigate = useNavigate();
@@ -13,40 +14,32 @@ export const OAuthCallbackWrapper = () => {
 
   useEffect(() => {
     const isOAuth = hasAuthCallbackParams();
-    
     setHasOAuthParams(isOAuth);
-    
     if (isOAuth) {
       navigate('/auth/callback', { replace: true });
     }
   }, [navigate]);
 
-  // Redirect logged-in users to their appropriate dashboard
   useEffect(() => {
-    if (!isLoading && user && !hasOAuthParams) {
-      console.log('OAuthCallbackWrapper - User is logged in, redirecting from home. User:', {
-        id: user.id,
-        email: user.email,
-        is_approved: user.is_approved,
-        role: user.role
-      });
-      
-      if (!user.is_approved) {
-        return;
-      } else if (isAdminUser(user)) {
-        navigate('/admin', { replace: true });
-      } else {
-        navigate('/dashboard', { replace: true });
-      }
+    if (isLoading || !user || hasOAuthParams) return;
+
+    if (!user.is_approved) {
+      if (canPendingUserBrowsePublic()) return;
+      navigate('/pending-approval', { replace: true });
+      return;
+    }
+
+    if (isAdminUser(user)) {
+      navigate('/admin', { replace: true });
+    } else {
+      navigate('/dashboard', { replace: true });
     }
   }, [user, isLoading, navigate, hasOAuthParams]);
 
-  // If OAuth callback detected, show callback component
   if (hasOAuthParams) {
     return <OAuthCallback />;
   }
 
-  // Show the public home for visitors and for accounts still waiting on approval
   if (user && !isLoading && user.is_approved) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-base text-charcoal font-serif">
@@ -55,7 +48,5 @@ export const OAuthCallbackWrapper = () => {
     );
   }
 
-  // Show home page for non-logged-in users
   return <Home />;
 };
-
