@@ -13,6 +13,7 @@ import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { logAuditEventSafe } from '../../lib/auditLog';
 import { notifyUserApproved } from '../../lib/notifyUserApproved';
 import { notifyUserReview } from '../../lib/notifyUserReview';
+import { notifyUserAdminRole } from '../../lib/notifyUserAdminRole';
 import { IntroInquiryEmailModal } from './IntroInquiryEmailModal';
 
 export const AdminOverview = () => {
@@ -137,7 +138,14 @@ export const AdminOverview = () => {
       });
 
       let emailNote = '';
-      if (wasUnapproved) {
+      if (asAdmin) {
+        const notifyResult = await notifyUserAdminRole(userId);
+        if (!notifyResult.ok) {
+          emailNote = ` User is an admin now, but the administrative-role email may not have been sent${
+            notifyResult.error ? ` (${notifyResult.error})` : ''
+          }.`;
+        }
+      } else if (wasUnapproved) {
         const notifyResult = await notifyUserApproved(userId);
         if (!notifyResult.ok) {
           emailNote = ` User was approved, but the confirmation email may not have been sent${

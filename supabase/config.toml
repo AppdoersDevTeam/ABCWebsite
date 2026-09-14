@@ -9,3 +9,7 @@ verify_jwt = true
 
 [functions.notify-user-review]
 verify_jwt = true
+
+[functions.notify-user-admin-role]
+verify_jwt = true
+

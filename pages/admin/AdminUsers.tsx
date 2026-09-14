@@ -16,6 +16,7 @@ import { TurnstileField, type TurnstileFieldHandle } from '../../components/UI/T
 import { logAuditEventSafe } from '../../lib/auditLog';
 import { notifyUserApproved } from '../../lib/notifyUserApproved';
 import { notifyUserReview } from '../../lib/notifyUserReview';
+import { notifyUserAdminRole } from '../../lib/notifyUserAdminRole';
 import { deleteUserAccount } from '../../lib/deleteUserAccount';
 
 export const AdminUsers = () => {
@@ -167,7 +168,14 @@ export const AdminUsers = () => {
       });
 
       let emailNote = '';
-      if (wasUnapproved) {
+      if (asAdmin) {
+        const notifyResult = await notifyUserAdminRole(userId);
+        if (!notifyResult.ok) {
+          emailNote = ` User is an admin now, but the administrative-role email may not have been sent${
+            notifyResult.error ? ` (${notifyResult.error})` : ''
+          }.`;
+        }
+      } else if (wasUnapproved) {
         const notifyResult = await notifyUserApproved(userId);
         if (!notifyResult.ok) {
           emailNote = ` User was approved, but the confirmation email may not have been sent${
@@ -316,9 +324,6 @@ export const AdminUsers = () => {
     }
 
     try {
-      const target = allUsers.find((u) => u.id === userId);
-      const wasUnapproved = target ? !target.is_approved : false;
-
       const { error } = await supabase
         .from('users')
         .update({ role: 'admin', is_approved: true })
@@ -335,14 +340,12 @@ export const AdminUsers = () => {
       });
 
       let emailNote = '';
-      if (wasUnapproved) {
-        const notifyResult = await notifyUserApproved(userId);
-        if (!notifyResult.ok) {
-          emailNote =
-            ' They are an admin now, but the approval confirmation email may not have been sent' +
-            (notifyResult.error ? ` (${notifyResult.error})` : '') +
-            '.';
-        }
+      const notifyResult = await notifyUserAdminRole(userId);
+      if (!notifyResult.ok) {
+        emailNote =
+          ' They are an admin now, but the administrative-role email may not have been sent' +
+          (notifyResult.error ? ` (${notifyResult.error})` : '') +
+          '.';
       }
 
       alert(`${userName} is now an admin.${emailNote}`);
