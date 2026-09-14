@@ -18,7 +18,7 @@ export const AdminPageHeader = ({ title, subtitle, icon, rightSlot }: AdminPageH
         )}
         <div>
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-serif font-normal text-charcoal">{title}</h1>
-          {subtitle && <p className="text-neutral mt-1">{subtitle}</p>}
+          {subtitle && <p className="text-charcoal/70 mt-1 text-sm md:text-base">{subtitle}</p>}
         </div>
       </div>
       {rightSlot && (
