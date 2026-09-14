@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Lock, Ban, Mail, AlertTriangle, RefreshCw } from 'lucide-react';
+import { Ban, Mail, AlertTriangle, RefreshCw } from 'lucide-react';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { useAuth } from '../../context/AuthContext';
 import { isAdminUser } from '../../lib/constants';
@@ -112,11 +112,15 @@ export const PendingApproval = () => {
       <BackgroundBlobs />
 
       <div className="page-shell-content max-w-lg w-full text-center glass-card bg-white/70 p-6 sm:p-12 rounded-[16px] shadow-xl">
-        <div className={`w-24 h-24 bg-white border border-gray-200 rounded-full flex items-center justify-center mx-auto mb-8 shadow-lg ${isRevoked ? 'shadow-red-200' : 'shadow-gold/20'} animate-pulse-slow`}>
+        <div className={`w-24 h-24 bg-white border border-gray-200 rounded-full flex items-center justify-center mx-auto mb-8 shadow-lg overflow-hidden ${isRevoked ? 'shadow-red-200' : 'shadow-gold/20'} animate-pulse-slow`}>
           {isRevoked ? (
             <Ban size={40} className="text-red-500" />
           ) : (
-            <Lock size={40} className="text-gold" />
+            <img
+              src="/ABC Logo.png"
+              alt="Ashburton Baptist Church"
+              className="w-full h-full object-contain"
+            />
           )}
         </div>
 
@@ -193,6 +197,18 @@ export const PendingApproval = () => {
             {isSigningOut ? 'Signing out...' : 'Log Out'}
           </GlowingButton>
         </div>
+
+        <p className="mt-8 text-xs text-neutral font-light leading-relaxed">
+          &copy; 2026 Ashburton Baptist Church. Developed by{' '}
+          <a
+            href="https://www.appdoers.co.nz"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-gold font-medium underline hover:text-charcoal transition-colors"
+          >
+            Appdoers.co.nz
+          </a>
+        </p>
       </div>
     </div>
   );

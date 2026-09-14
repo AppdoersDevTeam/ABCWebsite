@@ -600,14 +600,13 @@ export const PublicLayout = () => {
               <br />
               <span className="text-white">Developed by </span>
               <a
-                href="https://appdoers.com/"
+                href="https://www.appdoers.co.nz"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-white hover:text-gold transition-colors"
+                className="text-white hover:text-gold transition-colors underline"
               >
-                AppDoers
+                Appdoers.co.nz
               </a>
-              <span className="text-white">.</span>
             </p>
             <div className="flex flex-col items-end gap-2">
               <button
