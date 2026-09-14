@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { VibrantCard } from '../../components/UI/VibrantCard';
-import { Mail, Phone, User } from 'lucide-react';
+import { Mail, Phone, User, Users } from 'lucide-react';
 import { TeamMember } from '../../types';
 import { supabase } from '../../lib/supabase';
 import { getDisplayRole, inferProfileType } from '../../lib/teamMemberUtils';
 import { SkeletonPageHeader } from '../../components/UI/Skeleton';
+import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 
 export const Team = () => {
   const [members, setMembers] = useState<TeamMember[]>([]);
@@ -48,10 +49,11 @@ export const Team = () => {
 
   return (
     <div className="space-y-8">
-      <div className="border-b border-gray-200 pb-6">
-         <h1 className="text-2xl md:text-4xl font-serif font-normal text-charcoal">Leadership</h1>
-         <p className="text-neutral mt-1">Staff and church leadership.</p>
-      </div>
+      <AdminPageHeader
+        title="Leadership"
+        subtitle="Staff and church leadership."
+        icon={<Users size={28} />}
+      />
 
       {members.length === 0 ? (
         <div className="text-center py-12">

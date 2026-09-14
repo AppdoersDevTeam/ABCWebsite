@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Eye } from 'lucide-react';
+import { FileText, Eye, Newspaper } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import { DocumentReaderPanel } from '../../components/UI/DocumentReaderPanel';
 import { Newsletter as NewsletterType } from '../../types';
 import { SkeletonPageHeader, SkeletonCard } from '../../components/UI/Skeleton';
+import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { formatWeekDate, resolveNewsletterWeekDate } from '../../lib/dateUtils';
 import { fetchNewslettersOrdered } from '../../lib/newsletters';
 
@@ -64,10 +65,11 @@ export const Newsletter = () => {
 
   return (
     <div className="space-y-6 md:space-y-8 min-w-0">
-      <div className="border-b border-gray-200 pb-4 md:pb-6">
-        <h1 className="text-2xl md:text-4xl font-serif font-normal text-charcoal">Newsletters</h1>
-        <p className="text-neutral mt-1 text-sm md:text-base">Church life updates.</p>
-      </div>
+      <AdminPageHeader
+        title="Newsletters"
+        subtitle="Church life updates."
+        icon={<Newspaper size={28} />}
+      />
 
       {viewing && (
         <div className="md:hidden">

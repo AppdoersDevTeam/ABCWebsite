@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Calendar, FileText, Users } from 'lucide-react';
+import { ArrowLeft, Calendar, FileText, Users, ClipboardList } from 'lucide-react';
 import { Group, JobRole, RosterImage, TeamMember } from '../../types';
 import { supabase } from '../../lib/supabase';
 import { SkeletonPageHeader } from '../../components/UI/Skeleton';
+import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { useAuth } from '../../context/AuthContext';
 
 export const Roster = () => {
@@ -184,10 +185,11 @@ export const Roster = () => {
   if (rosterLinkedGroups.length === 0) {
     return (
       <div className="space-y-8">
-        <div className="border-b border-gray-200 pb-6">
-          <h1 className="text-2xl md:text-4xl font-serif font-normal text-charcoal">Roster</h1>
-          <p className="text-neutral mt-1">View roster schedules.</p>
-        </div>
+        <AdminPageHeader
+          title="Rosters"
+          subtitle="View roster schedules for your ministries."
+          icon={<ClipboardList size={28} />}
+        />
         <div className="text-center py-12 bg-white border border-gray-100 rounded-[8px]">
           <FileText size={48} className="mx-auto text-neutral mb-4" />
           <p className="text-neutral text-lg mb-2">No rosters at this time.</p>
@@ -204,10 +206,11 @@ export const Roster = () => {
 
   return (
     <div className="space-y-8">
-      <div className="border-b border-gray-200 pb-6">
-        <h1 className="text-2xl md:text-4xl font-serif font-normal text-charcoal">Roster</h1>
-        <p className="text-neutral mt-1">View roster schedules.</p>
-      </div>
+      <AdminPageHeader
+        title="Rosters"
+        subtitle="View roster schedules for your ministries."
+        icon={<ClipboardList size={28} />}
+      />
 
       {!selected ? (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">

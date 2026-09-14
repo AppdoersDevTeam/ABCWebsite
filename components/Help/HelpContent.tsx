@@ -1,4 +1,6 @@
 import React from 'react';
+import { HelpCircle } from 'lucide-react';
+import { AdminPageHeader } from '../UI/AdminPageHeader';
 
 type Mode = 'member' | 'admin';
 
@@ -26,22 +28,15 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode }) => {
 
   return (
     <div className="space-y-8">
-      <div className="border-b border-gray-200 pb-6">
-        <h1 className="text-4xl font-serif font-normal text-charcoal">Help</h1>
-        <p className="text-neutral mt-2 max-w-3xl">
-          {isAdmin ? (
-            <>
-              This page explains each area of the <span className="font-semibold text-charcoal">Admin Portal</span>: what
-              it is for, what you can configure, and typical tasks. Use the same names as the left-hand menu.
-            </>
-          ) : (
-            <>
-              This page explains what each part of the <span className="font-semibold text-charcoal">Member Portal</span>{' '}
-              gives you: what you can view, join in with, or download. It matches the sections in your sidebar.
-            </>
-          )}
-        </p>
-      </div>
+      <AdminPageHeader
+        title="Help"
+        subtitle={
+          isAdmin
+            ? 'This page explains each area of the Admin Portal: what it is for, what you can configure, and typical tasks. Use the same names as the left-hand menu.'
+            : 'This page explains what each part of the Member Portal gives you: what you can view, join in with, or download. It matches the sections in your sidebar.'
+        }
+        icon={<HelpCircle size={28} />}
+      />
 
       <div className="grid gap-6">
         {isAdmin ? (

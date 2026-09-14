@@ -3,6 +3,7 @@ import { Calendar as CalIcon } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Event } from '../../types';
 import { SkeletonPageHeader } from '../../components/UI/Skeleton';
+import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { EventsCalendarGrid, EventsCalendarGridSkeleton } from '../../components/dashboard/EventsCalendarGrid';
 import { useAuth } from '../../context/AuthContext';
 
@@ -47,10 +48,11 @@ export const EventsPrivate = () => {
 
   return (
     <div className="space-y-8">
-      <div className="border-b border-gray-200 pb-6">
-        <h1 className="text-2xl md:text-4xl font-serif font-normal text-charcoal">Internal Calendar</h1>
-        <p className="text-neutral mt-1">Meetings & Rehearsals.</p>
-      </div>
+      <AdminPageHeader
+        title="Events"
+        subtitle="Meetings & Rehearsals."
+        icon={<CalIcon size={28} />}
+      />
 
       {events.length === 0 ? (
         <div className="text-center py-16">

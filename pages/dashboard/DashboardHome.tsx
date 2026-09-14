@@ -5,7 +5,8 @@ import { displayName, formatDisplayTitle } from '../../lib/constants';
 import { formatWeekDate, resolveNewsletterWeekDate } from '../../lib/dateUtils';
 import { fetchLatestNewsletter } from '../../lib/newsletters';
 import { OverviewStatCard } from '../../components/UI/OverviewStatCard';
-import { Calendar, CalendarDays, BookOpen, Youtube, Newspaper, HandHeart } from 'lucide-react';
+import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
+import { Calendar, CalendarDays, BookOpen, Youtube, Newspaper, HandHeart, Home } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { getVerseOfTheDay } from '../../lib/getVerseOfTheDay';
 
@@ -115,17 +116,16 @@ export const DashboardHome = () => {
 
   return (
     <div className="space-y-8">
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 border-b border-gray-200 pb-6">
-             <div>
-                <h1 className="text-2xl md:text-3xl font-serif font-normal text-charcoal">Welcome, {displayName(user)}</h1>
-                <p className="text-neutral mt-2 text-base">Here is what is happening in your community.</p>
-             </div>
-             <div className="hidden md:flex items-center gap-2">
-                 <span className="text-xs font-bold text-charcoal bg-gold px-4 py-2 rounded-full border border-gold uppercase tracking-widest shadow-sm">
-                   {user?.is_super_admin ? 'Super Admin' : user?.role === 'admin' ? 'Admin Access' : 'Member Access'}
-                 </span>
-             </div>
-        </div>
+        <AdminPageHeader
+          title={`Welcome, ${displayName(user)}`}
+          subtitle="Here is what is happening in your community."
+          icon={<Home size={28} />}
+          rightSlot={
+            <span className="hidden md:inline-flex text-xs font-bold text-charcoal bg-gold px-4 py-2 rounded-full border border-gold uppercase tracking-widest shadow-sm">
+              {user?.is_super_admin ? 'Super Admin' : user?.role === 'admin' ? 'Admin Access' : 'Member Access'}
+            </span>
+          }
+        />
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
             <Link to="/dashboard/calendar" className="block">

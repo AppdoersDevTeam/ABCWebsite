@@ -5,6 +5,7 @@ import { Calendar as CalIcon, Edit, Trash2, Plus, Users, Image, Upload } from 'l
 import type { Event, EventCategory } from '../../types';
 import { supabase } from '../../lib/supabase';
 import { SkeletonPageHeader } from '../../components/UI/Skeleton';
+import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { EventsCalendarGrid, EventsCalendarGridSkeleton } from '../../components/dashboard/EventsCalendarGrid';
 import { EventImage } from '../../components/UI/EventImage';
 import { EVENT_IMAGE } from '../../lib/eventImageSpec';
@@ -426,16 +427,17 @@ export const AdminEvents = () => {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col gap-4 border-b border-gray-200 pb-6 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h1 className="text-2xl md:text-4xl font-serif font-normal text-charcoal">Events Management</h1>
-          <p className="text-neutral mt-1">Create and manage church events and meetings.</p>
-        </div>
-        <GlowingButton size="sm" fullWidth className="sm:w-auto" onClick={openCreateModal}>
-          <Plus size={16} className="mr-2" />
-          Add Event
-        </GlowingButton>
-      </div>
+      <AdminPageHeader
+        title="Events"
+        subtitle="Create and manage church events and meetings."
+        icon={<CalIcon size={28} />}
+        rightSlot={
+          <GlowingButton size="sm" fullWidth className="md:w-auto" onClick={openCreateModal}>
+            <Plus size={16} className="mr-2" />
+            Add Event
+          </GlowingButton>
+        }
+      />
 
       {events.length === 0 ? (
         <div className="text-center py-16">

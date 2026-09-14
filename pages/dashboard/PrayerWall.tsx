@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { VibrantCard } from '../../components/UI/VibrantCard';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { Modal } from '../../components/UI/Modal';
-import { Heart, Edit, Trash2 } from 'lucide-react';
+import { Heart, Edit, Trash2, HandHeart } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { PrayerRequest } from '../../types';
 import { SkeletonPageHeader, SkeletonPrayerCard } from '../../components/UI/Skeleton';
+import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { getUserTimezone, formatRelativeDateInTimezone } from '../../lib/dateUtils';
 import { logAuditEventSafe } from '../../lib/auditLog';
 import { displayName } from '../../lib/constants';
@@ -347,15 +348,16 @@ export const PrayerWall = () => {
           </div>
         ))}
       </div>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-gray-200 pb-6">
-        <div>
-          <h1 className="text-2xl md:text-4xl font-serif font-normal text-charcoal">Prayers</h1>
-          <p className="text-neutral mt-1">Bear one another's burdens.</p>
-        </div>
-        <GlowingButton size="sm" onClick={() => setIsModalOpen(true)}>
-          Share Request
-        </GlowingButton>
-      </div>
+      <AdminPageHeader
+        title="Prayers"
+        subtitle="Bear one another’s burdens."
+        icon={<HandHeart size={28} />}
+        rightSlot={
+          <GlowingButton size="sm" fullWidth className="md:w-auto" onClick={() => setIsModalOpen(true)}>
+            Share Request
+          </GlowingButton>
+        }
+      />
 
       {requests.length === 0 ? (
         <div className="text-center py-12">
