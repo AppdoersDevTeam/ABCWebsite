@@ -1,7 +1,7 @@
 // Application Constants
 
 // Super admin email — this account is always super admin.
-// Other admins are promoted via the admin dashboard by a super admin.
+// Other admins are promoted via User Management by any approved admin.
 export const ADMIN_EMAIL = 'devteam@appdoers.co.nz';
 export const SUPER_ADMIN_EMAIL = ADMIN_EMAIL;
 export const CONTACT_FORM_RECIPIENT = 'pastor@ashburtonbaptist.co.nz';
@@ -37,6 +37,32 @@ export function displayInitial(user: { first_name?: string; name?: string } | nu
   if (!user) return 'U';
   const letter = (user.first_name || user.name || 'U').charAt(0);
   return letter.toUpperCase();
+}
+
+/** Approved website admin — full admin portal, including User Management. */
+export function isAdminUser(
+  user: { role?: string | null; is_approved?: boolean | null } | null | undefined
+): boolean {
+  return !!user && user.role === 'admin' && user.is_approved === true;
+}
+
+/** Whether the viewer may promote or demote this account's admin role. */
+export function canChangeUserAdminRole(
+  viewer: { role?: string | null; is_approved?: boolean | null; id?: string } | null | undefined,
+  target: { id?: string; is_super_admin?: boolean | null; email?: string | null } | null | undefined
+): boolean {
+  if (!isAdminUser(viewer) || !target) return false;
+  if (target.id && viewer?.id && target.id === viewer.id) return false;
+  if (target.is_super_admin) return false;
+  if (isServiceAccountEmail(target.email)) return false;
+  return true;
+}
+
+export function isOwnUserAccount(
+  viewer: { id?: string } | null | undefined,
+  target: { id?: string } | null | undefined
+): boolean {
+  return Boolean(viewer?.id && target?.id && viewer.id === target.id);
 }
 
 function normalizeEmail(email: string | null | undefined): string {

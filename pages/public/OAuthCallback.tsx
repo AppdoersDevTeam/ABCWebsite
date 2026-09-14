@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { User } from '../../types';
+import { isAdminUser } from '../../lib/constants';
 import { completeAuthCallbackFromUrl } from '../../lib/authCallback';
 
 export const OAuthCallback = () => {
@@ -185,7 +186,7 @@ export const OAuthCallback = () => {
                 if (!retryProfile.is_approved) {
                   console.log('OAuthCallback - User not approved after retry, redirecting to pending approval');
                   navigate('/pending-approval', { replace: true });
-                } else if (retryProfile.role === 'admin') {
+                } else if (isAdminUser(retryProfile)) {
                   console.log('OAuthCallback - Admin user after retry, redirecting to admin dashboard');
                   navigate('/admin', { replace: true });
                 } else {
@@ -225,7 +226,7 @@ export const OAuthCallback = () => {
         // Determine redirect path
         const redirectPath = !profile.is_approved 
           ? '/pending-approval'
-          : profile.role === 'admin'
+          : isAdminUser(profile)
           ? '/admin'
           : '/dashboard';
         

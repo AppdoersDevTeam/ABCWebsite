@@ -17,7 +17,7 @@ import {
   CalendarDays
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { displayName, displayInitial } from '../../lib/constants';
+import { displayName, displayInitial, isAdminUser } from '../../lib/constants';
 import { ScrollToTop } from '../ScrollToTop';
 import { useAutoSectionReveal } from '../UI/useAutoSectionReveal';
 import { DASHBOARD_NAV_ICON } from '../../lib/dashboardNav';
@@ -117,11 +117,11 @@ export const DashboardLayout = () => {
                 <p className="text-sm font-bold text-charcoal truncate">{displayName(user)}</p>
                 <p className="text-xs text-neutral truncate">{user?.email}</p>
                 <span className="text-[10px] text-gold font-bold uppercase tracking-wider">
-                  {user?.role === 'admin' ? 'Admin' : 'Member'}
+                  {isAdminUser(user) ? 'Admin' : 'Member'}
                 </span>
               </div>
             </div>
-            {user?.role === 'admin' && (
+            {isAdminUser(user) && (
               <button 
                 onClick={() => {
                   sessionStorage.removeItem('testRoleOverride');

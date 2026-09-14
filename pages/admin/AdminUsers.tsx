@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { Users, UserCheck, X, Shield, ShieldOff, Ban, Crown, KeyRound, AlertTriangle, Mail, ChevronDown, Link2 } from 'lucide-react';
+import { Users, UserCheck, X, Shield, ShieldOff, Ban, Crown, KeyRound, AlertTriangle, Mail, ChevronDown, Link2, Trash2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { displayName, displayInitial, filterUsersForAdminView } from '../../lib/constants';
+import { displayName, displayInitial, filterUsersForAdminView, canChangeUserAdminRole, isAdminUser, isOwnUserAccount, isServiceAccountEmail } from '../../lib/constants';
 import { User } from '../../types';
 import { CreateUserProfile } from './CreateUserProfile';
 import { LinkDirectoryUserModal } from './LinkDirectoryUserModal';
@@ -15,6 +15,7 @@ import { Modal } from '../../components/UI/Modal';
 import { TurnstileField, type TurnstileFieldHandle } from '../../components/UI/TurnstileField';
 import { logAuditEventSafe } from '../../lib/auditLog';
 import { notifyUserApproved } from '../../lib/notifyUserApproved';
+import { deleteUserAccount } from '../../lib/deleteUserAccount';
 
 export const AdminUsers = () => {
   const { user, sendPasswordReset } = useAuth();
@@ -32,6 +33,7 @@ export const AdminUsers = () => {
   const [passwordResetEmail, setPasswordResetEmail] = useState<string | null>(null);
   const [passwordResetCaptcha, setPasswordResetCaptcha] = useState<string | null>(null);
   const [isSendingPasswordReset, setIsSendingPasswordReset] = useState(false);
+  const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
   const [actionsMenuUserId, setActionsMenuUserId] = useState<string | null>(null);
   const passwordResetTurnstileRef = useRef<TurnstileFieldHandle>(null);
   const actionsMenuRef = useRef<HTMLDivElement | null>(null);
@@ -131,8 +133,14 @@ export const AdminUsers = () => {
     }
   };
 
-  const handleApproveUser = async (userId: string) => {
-    if (!window.confirm('Are you sure you want to approve this user?')) {
+  const handleApproveUser = async (userId: string, asAdmin = false) => {
+    if (
+      !window.confirm(
+        asAdmin
+          ? 'Approve this user as an admin? They will get the full admin portal, including User Management.'
+          : 'Are you sure you want to approve this user?'
+      )
+    ) {
       return;
     }
 
@@ -142,7 +150,7 @@ export const AdminUsers = () => {
 
       const { error } = await supabase
         .from('users')
-        .update({ is_approved: true })
+        .update(asAdmin ? { is_approved: true, role: 'admin' } : { is_approved: true })
         .eq('id', userId);
 
       if (error) throw error;
@@ -151,8 +159,10 @@ export const AdminUsers = () => {
         category: 'users',
         entityType: 'users',
         entityId: userId,
-        summary: `Approved signup for ${target?.email || userId}`,
-        details: { email: target?.email },
+        summary: asAdmin
+          ? `Approved signup for ${target?.email || userId} as admin`
+          : `Approved signup for ${target?.email || userId}`,
+        details: { email: target?.email, role: asAdmin ? 'admin' : target?.role },
       });
 
       let emailNote = '';
@@ -165,7 +175,11 @@ export const AdminUsers = () => {
         }
       }
 
-      alert(`User approved successfully.${emailNote}`);
+      alert(
+        asAdmin
+          ? `${displayName(target) || 'User'} is approved as an admin.${emailNote}`
+          : `User approved successfully.${emailNote}`
+      );
       fetchUsers();
     } catch (error) {
       console.error('Error approving user:', error);
@@ -199,6 +213,63 @@ export const AdminUsers = () => {
     } catch (error) {
       console.error('Error rejecting user:', error);
       alert('Failed to reject user');
+    }
+  };
+
+  const handleDeleteUser = async (target: User) => {
+    setActionsMenuUserId(null);
+
+    if (!isAdminUser(user)) {
+      alert('Only an admin can delete users.');
+      return;
+    }
+
+    if (isOwnUserAccount(user, target)) {
+      alert('You cannot delete your own account while you are logged in.');
+      return;
+    }
+
+    if (target.is_super_admin || isServiceAccountEmail(target.email)) {
+      alert('This account cannot be deleted.');
+      return;
+    }
+
+    const label = `${displayName(target)}${target.email ? ` (${target.email})` : ''}`;
+    const confirmed = window.confirm(
+      `Delete ${label} from the Ashburton Baptist Church system?\n\nThis cannot be undone. Their login and related records will be removed, and they will receive a confirmation email.`
+    );
+    if (!confirmed) return;
+
+    setDeletingUserId(target.id);
+    try {
+      const result = await deleteUserAccount(target.id);
+      if (!result.ok) {
+        alert(result.error || 'Failed to delete user');
+        return;
+      }
+
+      logAuditEventSafe({
+        action: 'delete',
+        category: 'users',
+        entityType: 'users',
+        entityId: target.id,
+        summary: `Deleted user ${target.email || target.id} from the system`,
+        details: { email: target.email, emailed: result.emailed, emailSkipped: result.emailSkipped },
+      });
+
+      let message = `${displayName(target)} has been deleted from the Ashburton Baptist Church system.`;
+      if (result.emailed) {
+        message += ` A confirmation email was sent to ${result.emailed}.`;
+      } else if (result.emailSkipped) {
+        message += ' The account was removed, but the confirmation email could not be sent.';
+      }
+      alert(message);
+      fetchUsers();
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      alert('Failed to delete user');
+    } finally {
+      setDeletingUserId(null);
     }
   };
 
@@ -671,15 +742,28 @@ export const AdminUsers = () => {
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0 self-start md:self-center">
                   {!u.is_approved && (
-                    <button
-                      type="button"
-                      onClick={() => handleApproveUser(u.id)}
-                      className="bg-gold text-charcoal px-4 py-2 rounded-[4px] font-bold hover:bg-gold/80 transition-colors shadow-sm flex items-center gap-2 text-sm"
-                      title="Approve user"
-                    >
-                      <UserCheck size={16} />
-                      Approve
-                    </button>
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => handleApproveUser(u.id)}
+                        className="bg-gold text-charcoal px-4 py-2 rounded-[4px] font-bold hover:bg-gold/80 transition-colors shadow-sm flex items-center gap-2 text-sm"
+                        title="Approve as member"
+                      >
+                        <UserCheck size={16} />
+                        Approve
+                      </button>
+                      {u.role !== 'admin' && (
+                        <button
+                          type="button"
+                          onClick={() => handleApproveUser(u.id, true)}
+                          className="bg-white border-2 border-purple-200 text-purple-700 px-4 py-2 rounded-[4px] font-bold hover:bg-purple-50 transition-colors shadow-sm flex items-center gap-2 text-sm"
+                          title="Approve as admin"
+                        >
+                          <Shield size={16} />
+                          Approve as Admin
+                        </button>
+                      )}
+                    </>
                   )}
 
                   <div
@@ -752,9 +836,7 @@ export const AdminUsers = () => {
                           </button>
                         )}
 
-                        {isSuperAdmin &&
-                          u.id !== user?.id &&
-                          !u.is_super_admin &&
+                        {canChangeUserAdminRole(user, u) &&
                           (u.role === 'member' ? (
                             <button
                               type="button"
@@ -784,8 +866,7 @@ export const AdminUsers = () => {
                           ))}
 
                         {u.is_approved &&
-                          u.id !== user?.id &&
-                          !u.is_super_admin && (
+                          canChangeUserAdminRole(user, u) && (
                             <button
                               type="button"
                               role="menuitem"
@@ -817,6 +898,19 @@ export const AdminUsers = () => {
                             Reject
                           </button>
                         )}
+
+                        <button
+                          type="button"
+                          role="menuitem"
+                          disabled={deletingUserId === u.id}
+                          className="w-full flex items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-red-600 hover:bg-red-50 border-t border-gray-100 mt-1 disabled:opacity-60"
+                          onClick={() => {
+                            void handleDeleteUser(u);
+                          }}
+                        >
+                          <Trash2 size={16} />
+                          {deletingUserId === u.id ? 'Deleting…' : 'Delete user'}
+                        </button>
                       </div>
                     )}
                   </div>

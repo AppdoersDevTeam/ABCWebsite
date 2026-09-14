@@ -5,7 +5,7 @@ import { GlowingButton } from '../../components/UI/GlowingButton';
 import { TurnstileField, type TurnstileFieldHandle } from '../../components/UI/TurnstileField';
 import { Shield, User as UserIcon } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { displayName } from '../../lib/constants';
+import { displayName, isAdminUser } from '../../lib/constants';
 import {
   getSignupSummaryError,
   validateEmailSignupFields,
@@ -139,7 +139,7 @@ export const Login = () => {
   const getRedirectPath = (role: string, isApproved: boolean): string => {
     if (!isApproved) return '/pending-approval';
     sessionStorage.removeItem('testRoleOverride');
-    return role === 'admin' ? '/admin' : '/dashboard';
+    return isAdminUser({ role, is_approved: isApproved }) ? '/admin' : '/dashboard';
   };
 
   useEffect(() => {

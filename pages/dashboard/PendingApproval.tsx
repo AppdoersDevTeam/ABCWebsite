@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Lock, Loader2, Ban, Mail, RefreshCw } from 'lucide-react';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { useAuth } from '../../context/AuthContext';
+import { isAdminUser } from '../../lib/constants';
 import { BackgroundBlobs } from '../../components/UI/BackgroundBlobs';
 
 export const PendingApproval = () => {
@@ -64,7 +65,7 @@ export const PendingApproval = () => {
   useEffect(() => {
     if (user?.is_approved) {
       console.log('PendingApproval - User approved, redirecting to dashboard');
-      if (user.role === 'admin') {
+      if (isAdminUser(user)) {
         navigate('/admin', { replace: true });
       } else {
         navigate('/dashboard', { replace: true });

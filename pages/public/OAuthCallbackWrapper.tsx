@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Home } from './Home';
 import { OAuthCallback } from './OAuthCallback';
 import { useAuth } from '../../context/AuthContext';
+import { isAdminUser } from '../../lib/constants';
 import { hasAuthCallbackParams } from '../../lib/authCallback';
 
 export const OAuthCallbackWrapper = () => {
@@ -32,7 +33,7 @@ export const OAuthCallbackWrapper = () => {
       
       if (!user.is_approved) {
         navigate('/pending-approval', { replace: true });
-      } else if (user.role === 'admin') {
+      } else if (isAdminUser(user)) {
         navigate('/admin', { replace: true });
       } else {
         navigate('/dashboard', { replace: true });

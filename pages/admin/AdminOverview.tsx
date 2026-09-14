@@ -102,8 +102,14 @@ export const AdminOverview = () => {
     }
   };
 
-  const handleApproveUser = async (userId: string) => {
-    if (!window.confirm('Are you sure you want to approve this user?')) {
+  const handleApproveUser = async (userId: string, asAdmin = false) => {
+    if (
+      !window.confirm(
+        asAdmin
+          ? 'Approve this user as an admin? They will get the full admin portal, including User Management.'
+          : 'Are you sure you want to approve this user?'
+      )
+    ) {
       return;
     }
 
@@ -114,7 +120,7 @@ export const AdminOverview = () => {
 
       const { error } = await supabase
         .from('users')
-        .update({ is_approved: true })
+        .update(asAdmin ? { is_approved: true, role: 'admin' } : { is_approved: true })
         .eq('id', userId);
 
       if (error) throw error;
@@ -123,8 +129,10 @@ export const AdminOverview = () => {
         category: 'users',
         entityType: 'users',
         entityId: userId,
-        summary: `Approved signup for ${target?.email || userId}`,
-        details: { email: target?.email },
+        summary: asAdmin
+          ? `Approved signup for ${target?.email || userId} as admin`
+          : `Approved signup for ${target?.email || userId}`,
+        details: { email: target?.email, role: asAdmin ? 'admin' : target?.role },
       });
 
       let emailNote = '';
@@ -137,7 +145,11 @@ export const AdminOverview = () => {
         }
       }
 
-      alert(`User approved successfully.${emailNote}`);
+      alert(
+        asAdmin
+          ? `User approved as an admin.${emailNote}`
+          : `User approved successfully.${emailNote}`
+      );
       fetchPendingUsers();
     } catch (error) {
       console.error('Error approving user:', error);
@@ -751,6 +763,15 @@ export const AdminOverview = () => {
                       <UserCheck size={18} />
                       Approve
                     </button>
+                    {pendingUser.role !== 'admin' && (
+                      <button
+                        onClick={() => handleApproveUser(pendingUser.id, true)}
+                        className="bg-white border-2 border-purple-200 text-purple-700 px-6 py-3 rounded-[4px] font-bold hover:bg-purple-50 transition-colors shadow-sm flex items-center gap-2"
+                      >
+                        <Shield size={18} />
+                        Approve as Admin
+                      </button>
+                    )}
                     <button
                       type="button"
                       onClick={() => setEmailModalUser(pendingUser)}

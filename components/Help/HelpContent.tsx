@@ -58,8 +58,14 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode }) => {
             </Section>
 
             <Section title="User Management">
+              <li>Every approved admin can use this page — including User Management, Directory, Events, and the rest of the admin menu.</li>
               <li>See everyone who has a website login: email, role (member/admin), and approval status.</li>
-              <li>Approve new accounts, reset passwords, and promote or demote roles where your policy allows.</li>
+              <li>Approve new accounts as a member or as an admin, reset passwords, and promote or demote admin access.</li>
+              <li>
+                Use <span className="font-semibold text-charcoal">Actions → Delete user</span> to remove someone from
+                the system after confirmation. They receive an email confirming the deletion. You cannot delete your own
+                account while logged in.
+              </li>
               <li>
                 Link a login to a Directory person so group memberships and rosters apply to that account. Use “Check
                 Directory Links” to retry safe automatic matches; use “Link Directory” when you need to pick the right

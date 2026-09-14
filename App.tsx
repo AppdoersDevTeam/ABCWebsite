@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { isAdminUser } from './lib/constants';
 import { PublicLayout } from './components/Layouts/PublicLayout';
 import { DashboardLayout } from './components/Layouts/DashboardLayout';
 import { AdminLayout } from './components/Layouts/AdminLayout';
@@ -88,14 +89,14 @@ const ProtectedRoute = () => {
 
   // Redirect admins to admin dashboard unless test override says "member"
   const testOverride = sessionStorage.getItem('testRoleOverride');
-  if (user.role === 'admin' && testOverride !== 'member') {
+  if (isAdminUser(user) && testOverride !== 'member') {
     return <Navigate to="/admin" replace />;
   }
 
   return <Outlet />;
 };
 
-// Admin Route Component — allows any user with role === 'admin'
+// Admin Route Component — any approved admin gets the full admin portal
 const AdminRoute = () => {
   const { user, isLoading } = useAuth();
 
@@ -115,7 +116,7 @@ const AdminRoute = () => {
     return <Navigate to="/pending-approval" replace />;
   }
 
-  if (user.role !== 'admin') {
+  if (!isAdminUser(user)) {
     return <Navigate to="/dashboard" replace />;
   }
 
@@ -149,7 +150,7 @@ const AppRoutes = () => {
               <Route path="login" element={
                 user ? (
                   !user.is_approved ? <Navigate to="/pending-approval" replace /> :
-                  user.role === 'admin' ? <Navigate to="/admin" replace /> : <Navigate to="/dashboard" replace />
+                  isAdminUser(user) ? <Navigate to="/admin" replace /> : <Navigate to="/dashboard" replace />
                 ) : (
                   <Login />
                 )

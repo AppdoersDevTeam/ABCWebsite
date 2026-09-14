@@ -314,6 +314,7 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
       console.log('AuthContext - Auth state changed:', event, session ? 'has session' : 'no session');
 
       if (event === 'SIGNED_OUT') {
+        userProfileCache.current = null;
         setUser(null);
         setIsLoading(false);
         return;
@@ -367,6 +368,11 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
             timeoutId = null;
           }
           setIsLoading(false);
+        }
+        if (session?.user) {
+          void fetchUserProfile(session.user, false).then((profile) => {
+            if (isMounted && profile) setUser(profile);
+          });
         }
         return;
       }
@@ -667,6 +673,7 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
       }
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
+      userProfileCache.current = null;
       setUser(null);
     } catch (error) {
       console.error('Logout error:', error);
@@ -709,6 +716,37 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
       console.error('refreshUserProfile - Error refreshing profile:', error);
     }
   };
+
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const channel = supabase
+      .channel(`own-user-profile-${user.id}`)
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'users', filter: `id=eq.${user.id}` },
+        (payload) => {
+          const next = payload.new as User;
+          userProfileCache.current = { userId: next.id, profile: next, timestamp: Date.now() };
+          setUser((prev) => (prev ? { ...prev, ...next } : next));
+        }
+      )
+      .subscribe();
+
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') {
+        void refreshUserProfile();
+      }
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    window.addEventListener('focus', onVisible);
+
+    return () => {
+      supabase.removeChannel(channel);
+      document.removeEventListener('visibilitychange', onVisible);
+      window.removeEventListener('focus', onVisible);
+    };
+  }, [user?.id]);
 
   return (
     <AuthContext.Provider
