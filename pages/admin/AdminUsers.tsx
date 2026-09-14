@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { Users, UserCheck, X, Shield, ShieldOff, Crown, KeyRound, AlertTriangle, Mail, ChevronDown, Link2, Trash2, PauseCircle } from 'lucide-react';
+import { Users, UserCheck, X, Shield, ShieldOff, Crown, KeyRound, AlertTriangle, Mail, ChevronDown, Link2, Trash2, PauseCircle, Download } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { displayName, displayInitial, filterUsersForAdminView, canChangeUserAdminRole, isAdminUser, isOwnUserAccount, isServiceAccountEmail, isPendingApproval, isAccessHeld } from '../../lib/constants';
+import { displayName, displayInitials, filterUsersForAdminView, canChangeUserAdminRole, isAdminUser, isOwnUserAccount, isServiceAccountEmail, isPendingApproval, isAccessHeld, CHURCH_NAME } from '../../lib/constants';
 import { User } from '../../types';
 import { CreateUserProfile } from './CreateUserProfile';
 import { LinkDirectoryUserModal } from './LinkDirectoryUserModal';
@@ -18,6 +18,7 @@ import { notifyUserApproved } from '../../lib/notifyUserApproved';
 import { notifyUserReview } from '../../lib/notifyUserReview';
 import { notifyUserAdminRole, adminRoleEmailNote } from '../../lib/notifyUserAdminRole';
 import { notifyUserAccessHold, accessHoldEmailNote } from '../../lib/notifyUserAccessHold';
+import { downloadAdminUsersCsv, downloadAdminUsersPdf } from '../../lib/exportAdminUsers';
 
 export const AdminUsers = () => {
   const { user, sendPasswordReset } = useAuth();
@@ -580,6 +581,18 @@ export const AdminUsers = () => {
     }
   };
 
+  const filenameBase = useMemo(() => {
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `user-management-${yyyy}-${mm}-${dd}`;
+  }, []);
+
+  const exportUsers = () => filteredUsers();
+  const exportMeta = () => ({ churchName: CHURCH_NAME, exportedAt: new Date() });
+  const exportContext = () => ({ directoryByUserId });
+
 
   return (
     <div className="space-y-8">
@@ -589,6 +602,30 @@ export const AdminUsers = () => {
         icon={<Users size={28} />}
         rightSlot={
           <div className="flex gap-2 flex-wrap justify-end">
+            <button
+              type="button"
+              onClick={() =>
+                downloadAdminUsersCsv(exportUsers(), filenameBase, exportMeta(), exportContext())
+              }
+              disabled={isLoadingUsers || exportUsers().length === 0}
+              className="bg-white border-2 border-gray-200 text-charcoal px-4 py-2 rounded-[4px] font-bold hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-2 text-sm disabled:opacity-60"
+              title="Download CSV (current tab)"
+            >
+              <Download size={16} />
+              CSV
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                downloadAdminUsersPdf(exportUsers(), filenameBase, exportMeta(), exportContext())
+              }
+              disabled={isLoadingUsers || exportUsers().length === 0}
+              className="bg-white border-2 border-gray-200 text-charcoal px-4 py-2 rounded-[4px] font-bold hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-2 text-sm disabled:opacity-60"
+              title="Download PDF (current tab)"
+            >
+              <Download size={16} />
+              PDF
+            </button>
             <GlowingButton
               size="sm"
               variant="outline"
@@ -765,8 +802,8 @@ export const AdminUsers = () => {
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div className="flex-1">
                   <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-lg flex-shrink-0">
-                      {displayInitial(u)}
+                    <div className="w-12 h-12 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-sm tracking-wide flex-shrink-0">
+                      {displayInitials(u)}
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2 flex-wrap">

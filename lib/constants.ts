@@ -32,11 +32,34 @@ export function displayName(user: { first_name?: string; last_name?: string; nam
   return full || user.name || 'User';
 }
 
-/** Get the user's first initial for avatars. */
+/** Get the user's first initial for compact avatars. */
 export function displayInitial(user: { first_name?: string; name?: string } | null | undefined): string {
   if (!user) return 'U';
   const letter = (user.first_name || user.name || 'U').charAt(0);
   return letter.toUpperCase();
+}
+
+function firstLetter(value?: string | null): string {
+  const trimmed = (value || '').trim();
+  return trimmed ? trimmed.charAt(0).toUpperCase() : '';
+}
+
+/** Initials from first name and last name for User Management avatars. */
+export function displayInitials(
+  user: { first_name?: string; last_name?: string; name?: string } | null | undefined
+): string {
+  if (!user) return 'U';
+  const first = firstLetter(user.first_name);
+  const last = firstLetter(user.last_name);
+  if (first && last) return `${first}${last}`;
+
+  const nameParts = (user.name || '').trim().split(/\s+/).filter(Boolean);
+  if (nameParts.length >= 2) {
+    return `${nameParts[0].charAt(0)}${nameParts[nameParts.length - 1].charAt(0)}`.toUpperCase();
+  }
+  if (first) return first;
+  if (nameParts[0]) return nameParts[0].charAt(0).toUpperCase();
+  return 'U';
 }
 
 type ApprovalFlags = {
