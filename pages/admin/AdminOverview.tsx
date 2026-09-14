@@ -13,7 +13,7 @@ import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { logAuditEventSafe } from '../../lib/auditLog';
 import { notifyUserApproved } from '../../lib/notifyUserApproved';
 import { notifyUserReview } from '../../lib/notifyUserReview';
-import { notifyUserAdminRole } from '../../lib/notifyUserAdminRole';
+import { notifyUserAdminRole, adminRoleEmailNote } from '../../lib/notifyUserAdminRole';
 import { IntroInquiryEmailModal } from './IntroInquiryEmailModal';
 
 export const AdminOverview = () => {
@@ -120,9 +120,32 @@ export const AdminOverview = () => {
         pendingUsers.find((u) => u.id === userId) || allUsers.find((u) => u.id === userId);
       const wasUnapproved = target ? !target.is_approved : true;
 
+      if (asAdmin) {
+        const notifyResult = await notifyUserAdminRole(userId, 'granted');
+        if (!notifyResult.ok) {
+          alert(
+            `Failed to approve this user as an admin${
+              notifyResult.error ? `: ${notifyResult.error}` : ''
+            }`
+          );
+          return;
+        }
+        logAuditEventSafe({
+          action: 'approve',
+          category: 'users',
+          entityType: 'users',
+          entityId: userId,
+          summary: `Approved signup for ${target?.email || userId} as admin`,
+          details: { email: target?.email, role: 'admin', emailed: notifyResult.emailed },
+        });
+        alert(`User approved as an admin.${adminRoleEmailNote(notifyResult)}`);
+        fetchPendingUsers();
+        return;
+      }
+
       const { error } = await supabase
         .from('users')
-        .update(asAdmin ? { is_approved: true, role: 'admin' } : { is_approved: true })
+        .update({ is_approved: true })
         .eq('id', userId);
 
       if (error) throw error;
@@ -131,21 +154,12 @@ export const AdminOverview = () => {
         category: 'users',
         entityType: 'users',
         entityId: userId,
-        summary: asAdmin
-          ? `Approved signup for ${target?.email || userId} as admin`
-          : `Approved signup for ${target?.email || userId}`,
-        details: { email: target?.email, role: asAdmin ? 'admin' : target?.role },
+        summary: `Approved signup for ${target?.email || userId}`,
+        details: { email: target?.email, role: target?.role },
       });
 
       let emailNote = '';
-      if (asAdmin) {
-        const notifyResult = await notifyUserAdminRole(userId);
-        if (!notifyResult.ok) {
-          emailNote = ` User is an admin now, but the administrative-role email may not have been sent${
-            notifyResult.error ? ` (${notifyResult.error})` : ''
-          }.`;
-        }
-      } else if (wasUnapproved) {
+      if (wasUnapproved) {
         const notifyResult = await notifyUserApproved(userId);
         if (!notifyResult.ok) {
           emailNote = ` User was approved, but the confirmation email may not have been sent${
@@ -154,11 +168,7 @@ export const AdminOverview = () => {
         }
       }
 
-      alert(
-        asAdmin
-          ? `User approved as an admin.${emailNote}`
-          : `User approved successfully.${emailNote}`
-      );
+      alert(`User approved successfully.${emailNote}`);
       fetchPendingUsers();
     } catch (error) {
       console.error('Error approving user:', error);

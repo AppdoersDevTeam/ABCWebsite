@@ -1,9 +1,11 @@
 import { supabase } from './supabase';
 
+export type AdminRoleKind = 'granted' | 'revoked';
+
 export type NotifyUserAdminRoleResult = {
   ok: boolean;
-  skipped?: boolean;
-  emailed?: string;
+  emailed?: string | null;
+  emailSkipped?: boolean;
   error?: string;
 };
 
@@ -28,15 +30,16 @@ async function extractInvokeError(error: unknown, data: unknown): Promise<string
     }
   }
 
-  return err?.message || 'Failed to send administrative role email';
+  return err?.message || 'Failed to update administrative role';
 }
 
 /**
- * Notify a user that they have been granted an Administrative role.
- * Soft-fails: never throws; callers should treat the role change as successful even if email fails.
+ * Grant or revoke an Administrative role and email the user.
+ * The Edge Function applies the role change and sends the matching email.
  */
 export async function notifyUserAdminRole(
-  userId: string
+  userId: string,
+  kind: AdminRoleKind = 'granted'
 ): Promise<NotifyUserAdminRoleResult> {
   if (!userId) {
     return { ok: false, error: 'Missing userId' };
@@ -44,7 +47,7 @@ export async function notifyUserAdminRole(
 
   try {
     const { data, error } = await supabase.functions.invoke('notify-user-admin-role', {
-      body: { userId },
+      body: { userId, kind },
     });
 
     if (error) {
@@ -60,8 +63,8 @@ export async function notifyUserAdminRole(
 
     return {
       ok: true,
-      skipped: Boolean(data?.skipped),
-      emailed: data?.emailed,
+      emailed: data?.emailed ?? null,
+      emailSkipped: Boolean(data?.emailSkipped),
     };
   } catch (err) {
     console.error('notifyUserAdminRole unexpected error:', err);
@@ -70,7 +73,20 @@ export async function notifyUserAdminRole(
       error:
         err instanceof Error
           ? err.message
-          : 'Failed to send administrative role email',
+          : 'Failed to update administrative role',
     };
   }
+}
+
+export function adminRoleEmailNote(result: NotifyUserAdminRoleResult): string {
+  if (!result.ok) {
+    return ` The role was not changed${result.error ? ` (${result.error})` : ''}.`;
+  }
+  if (result.emailed) {
+    return ` A confirmation email was sent to ${result.emailed}.`;
+  }
+  if (result.emailSkipped) {
+    return ' The role was updated, but the confirmation email could not be sent.';
+  }
+  return '';
 }

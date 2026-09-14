@@ -16,7 +16,7 @@ import { TurnstileField, type TurnstileFieldHandle } from '../../components/UI/T
 import { logAuditEventSafe } from '../../lib/auditLog';
 import { notifyUserApproved } from '../../lib/notifyUserApproved';
 import { notifyUserReview } from '../../lib/notifyUserReview';
-import { notifyUserAdminRole } from '../../lib/notifyUserAdminRole';
+import { notifyUserAdminRole, adminRoleEmailNote } from '../../lib/notifyUserAdminRole';
 import { deleteUserAccount } from '../../lib/deleteUserAccount';
 
 export const AdminUsers = () => {
@@ -150,32 +150,49 @@ export const AdminUsers = () => {
       const target = allUsers.find((u) => u.id === userId);
       const wasUnapproved = target ? !target.is_approved : true;
 
+      if (asAdmin) {
+        const notifyResult = await notifyUserAdminRole(userId, 'granted');
+        if (!notifyResult.ok) {
+          alert(
+            `Failed to approve this user as an admin${
+              notifyResult.error ? `: ${notifyResult.error}` : ''
+            }`
+          );
+          return;
+        }
+        logAuditEventSafe({
+          action: 'approve',
+          category: 'users',
+          entityType: 'users',
+          entityId: userId,
+          summary: `Approved signup for ${target?.email || userId} as admin`,
+          details: { email: target?.email, role: 'admin', emailed: notifyResult.emailed },
+        });
+        alert(
+          `${displayName(target) || 'User'} is approved as an admin.${adminRoleEmailNote(notifyResult)}`
+        );
+        fetchUsers();
+        return;
+      }
+
       const { error } = await supabase
         .from('users')
-        .update(asAdmin ? { is_approved: true, role: 'admin' } : { is_approved: true })
+        .update({ is_approved: true })
         .eq('id', userId);
 
       if (error) throw error;
+
       logAuditEventSafe({
         action: 'approve',
         category: 'users',
         entityType: 'users',
         entityId: userId,
-        summary: asAdmin
-          ? `Approved signup for ${target?.email || userId} as admin`
-          : `Approved signup for ${target?.email || userId}`,
-        details: { email: target?.email, role: asAdmin ? 'admin' : target?.role },
+        summary: `Approved signup for ${target?.email || userId}`,
+        details: { email: target?.email, role: target?.role },
       });
 
       let emailNote = '';
-      if (asAdmin) {
-        const notifyResult = await notifyUserAdminRole(userId);
-        if (!notifyResult.ok) {
-          emailNote = ` User is an admin now, but the administrative-role email may not have been sent${
-            notifyResult.error ? ` (${notifyResult.error})` : ''
-          }.`;
-        }
-      } else if (wasUnapproved) {
+      if (wasUnapproved) {
         const notifyResult = await notifyUserApproved(userId);
         if (!notifyResult.ok) {
           emailNote = ` User was approved, but the confirmation email may not have been sent${
@@ -184,11 +201,7 @@ export const AdminUsers = () => {
         }
       }
 
-      alert(
-        asAdmin
-          ? `${displayName(target) || 'User'} is approved as an admin.${emailNote}`
-          : `User approved successfully.${emailNote}`
-      );
+      alert(`User approved successfully.${emailNote}`);
       fetchUsers();
     } catch (error) {
       console.error('Error approving user:', error);
@@ -324,31 +337,26 @@ export const AdminUsers = () => {
     }
 
     try {
-      const { error } = await supabase
-        .from('users')
-        .update({ role: 'admin', is_approved: true })
-        .eq('id', userId);
+      const notifyResult = await notifyUserAdminRole(userId, 'granted');
+      if (!notifyResult.ok) {
+        alert(
+          `Failed to make ${userName} an admin${
+            notifyResult.error ? `: ${notifyResult.error}` : ''
+          }`
+        );
+        return;
+      }
 
-      if (error) throw error;
       logAuditEventSafe({
         action: 'update',
         category: 'users',
         entityType: 'users',
         entityId: userId,
         summary: `Granted admin access to ${userName}`,
-        details: { field: 'role', value: 'admin' },
+        details: { field: 'role', value: 'admin', emailed: notifyResult.emailed },
       });
 
-      let emailNote = '';
-      const notifyResult = await notifyUserAdminRole(userId);
-      if (!notifyResult.ok) {
-        emailNote =
-          ' They are an admin now, but the administrative-role email may not have been sent' +
-          (notifyResult.error ? ` (${notifyResult.error})` : '') +
-          '.';
-      }
-
-      alert(`${userName} is now an admin.${emailNote}`);
+      alert(`${userName} is now an admin.${adminRoleEmailNote(notifyResult)}`);
       fetchUsers();
     } catch (error) {
       console.error('Error making user admin:', error);
@@ -362,21 +370,25 @@ export const AdminUsers = () => {
     }
 
     try {
-      const { error } = await supabase
-        .from('users')
-        .update({ role: 'member' })
-        .eq('id', userId);
+      const notifyResult = await notifyUserAdminRole(userId, 'revoked');
+      if (!notifyResult.ok) {
+        alert(
+          `Failed to revoke admin rights from ${userName}${
+            notifyResult.error ? `: ${notifyResult.error}` : ''
+          }`
+        );
+        return;
+      }
 
-      if (error) throw error;
       logAuditEventSafe({
         action: 'update',
         category: 'users',
         entityType: 'users',
         entityId: userId,
         summary: `Revoked admin access from ${userName}`,
-        details: { field: 'role', value: 'member' },
+        details: { field: 'role', value: 'member', emailed: notifyResult.emailed },
       });
-      alert(`${userName} is now a member`);
+      alert(`${userName} is now a member.${adminRoleEmailNote(notifyResult)}`);
       fetchUsers();
     } catch (error) {
       console.error('Error revoking admin:', error);

@@ -4,7 +4,7 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 const corsHeaders: Record<string, string> = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
+    "authorization, x-client-info, apikey, content-type, x-supabase-api-version",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
@@ -15,8 +15,11 @@ const DEFAULT_FROM =
 const DEFAULT_SITE_URL = "https://ashburtonbaptist.co.nz";
 const LOGO_URL = "https://ashburtonbaptist.co.nz/abc-logo.png";
 
+type RoleKind = "granted" | "revoked";
+
 type NotifyBody = {
   userId?: string;
+  kind?: RoleKind;
 };
 
 function jsonResponse(body: Record<string, unknown>, status = 200): Response {
@@ -46,19 +49,19 @@ function loginPageFooterHtml(loginUrl: string): string {
             </div>`;
 }
 
-function buildAdminRoleEmailHtml(params: {
-  firstName: string;
+function emailShell(params: {
+  title: string;
+  heading: string;
+  innerHtml: string;
   loginUrl: string;
 }): string {
-  const greetingName = escapeHtml(params.firstName) || "there";
-  const loginUrl = params.loginUrl;
-
+  const { title, heading, innerHtml, loginUrl } = params;
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Your administrative role</title>
+  <title>${title}</title>
 </head>
 <body style="margin:0;padding:0;background-color:#A8B774;font-family:Georgia,'Times New Roman',serif;color:#222222;">
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:linear-gradient(180deg,#A8B774 0%,#96a866 100%);padding:40px 16px;">
@@ -72,17 +75,13 @@ function buildAdminRoleEmailHtml(params: {
             <td style="padding:36px 36px 20px;text-align:center;background-color:#ffffff;">
               <img src="${LOGO_URL}" alt="Ashburton Baptist Church" width="110" style="display:block;margin:0 auto 20px;border:0;" />
               <p style="margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:bold;letter-spacing:0.15em;text-transform:uppercase;color:#808080;">Ashburton Baptist Church</p>
-              <h1 style="margin:0 0 12px;font-size:28px;line-height:1.25;color:#222222;font-weight:normal;">Administrative role granted</h1>
+              <h1 style="margin:0 0 12px;font-size:28px;line-height:1.25;color:#222222;font-weight:normal;">${heading}</h1>
               <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.5;color:#666666;font-style:italic;">Disciples of Jesus impacting Ashburton and the nations.</p>
             </td>
           </tr>
           <tr>
             <td style="padding:8px 36px 28px;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.65;color:#444444;">
-              <p style="margin:0 0 20px;">Kia ora ${greetingName},</p>
-              <p style="margin:0 0 20px;">You have been granted an <strong>Administrative role</strong> on the Ashburton Baptist Church website. This trusted access allows you to use the admin portal and carry out church administration tasks.</p>
-              <p style="margin:0 0 20px;">Please use this access carefully and only for the work of the church.</p>
-              <p style="margin:0 0 20px;">For security purposes, all actions you perform in the system are recorded in an activity log. These records may be reviewed, and further investigation may take place if it is necessary and appropriate.</p>
-              <p style="margin:0 0 24px;">If you did not expect this change, or if you have questions about this role, please contact the Office on <a href="mailto:${OFFICE_EMAIL}" style="color:#222222;font-weight:bold;">${OFFICE_EMAIL}</a>.</p>
+              ${innerHtml}
               <table role="presentation" cellspacing="0" cellpadding="0" style="margin:0 auto 28px;">
                 <tr>
                   <td align="center" style="border-radius:10px;background-color:#fbcb05;box-shadow:0 4px 14px rgba(251,203,5,0.45);">
@@ -115,6 +114,33 @@ function buildAdminRoleEmailHtml(params: {
   </table>
 </body>
 </html>`;
+}
+
+function buildGrantedEmailHtml(firstName: string, loginUrl: string): string {
+  const greetingName = escapeHtml(firstName) || "there";
+  return emailShell({
+    title: "Your administrative role",
+    heading: "Administrative role granted",
+    loginUrl,
+    innerHtml: `<p style="margin:0 0 20px;">Kia ora ${greetingName},</p>
+      <p style="margin:0 0 20px;">You have been granted an <strong>Administrative role</strong> on the Ashburton Baptist Church website. This trusted access allows you to use the admin portal and carry out church administration tasks.</p>
+      <p style="margin:0 0 20px;">Please use this access carefully and only for the work of the church.</p>
+      <p style="margin:0 0 20px;">For security purposes, all actions you perform in the system are recorded in an activity log. These records may be reviewed, and further investigation may take place if it is necessary and appropriate.</p>
+      <p style="margin:0 0 24px;">If you did not expect this change, or if you have questions about this role, please contact the Office on <a href="mailto:${OFFICE_EMAIL}" style="color:#222222;font-weight:bold;">${OFFICE_EMAIL}</a>.</p>`,
+  });
+}
+
+function buildRevokedEmailHtml(firstName: string, loginUrl: string): string {
+  const greetingName = escapeHtml(firstName) || "there";
+  return emailShell({
+    title: "Your administrative role has ended",
+    heading: "Administrative role ended",
+    loginUrl,
+    innerHtml: `<p style="margin:0 0 20px;">Kia ora ${greetingName},</p>
+      <p style="margin:0 0 20px;">Your <strong>Administrative role</strong> on the Ashburton Baptist Church website has been revoked. You now have a standard member account.</p>
+      <p style="margin:0 0 20px;">You can still log in as a member. Access to the admin portal is no longer available.</p>
+      <p style="margin:0 0 24px;">If you did not expect this change, or if you have questions, please contact the Office on <a href="mailto:${OFFICE_EMAIL}" style="color:#222222;font-weight:bold;">${OFFICE_EMAIL}</a>.</p>`,
+  });
 }
 
 Deno.serve(async (req: Request) => {
@@ -202,6 +228,15 @@ Deno.serve(async (req: Request) => {
       return jsonResponse({ error: "userId is required" }, 400);
     }
 
+    const kind: RoleKind = body.kind === "revoked" ? "revoked" : "granted";
+
+    if (userId === caller.id) {
+      return jsonResponse(
+        { error: "You cannot change your own administrative role." },
+        403,
+      );
+    }
+
     const { data: target, error: targetError } = await adminClient
       .from("users")
       .select("id, email, first_name, name, role, is_approved, is_super_admin")
@@ -217,58 +252,78 @@ Deno.serve(async (req: Request) => {
       return jsonResponse({ error: "User not found" }, 404);
     }
 
-    const isTargetAdmin =
-      target.role === "admin" || target.is_super_admin === true;
-    if (!isTargetAdmin) {
-      return jsonResponse({
-        ok: true,
-        skipped: true,
-        reason: "user_not_admin",
-      });
+    const targetEmailNorm = (target.email || "").trim().toLowerCase();
+    if (target.is_super_admin === true || targetEmailNorm === ADMIN_EMAIL.toLowerCase()) {
+      return jsonResponse({ error: "This account cannot be changed." }, 403);
+    }
+
+    const roleUpdate =
+      kind === "revoked"
+        ? { role: "member" }
+        : { role: "admin", is_approved: true };
+
+    const { error: updateError } = await adminClient
+      .from("users")
+      .update(roleUpdate)
+      .eq("id", userId);
+
+    if (updateError) {
+      console.error("Failed to update admin role", updateError);
+      return jsonResponse({ error: "Failed to update administrative role" }, 500);
     }
 
     const toEmail = (target.email || "").trim();
-    if (!toEmail) {
-      return jsonResponse({ error: "User has no email" }, 400);
-    }
-
     const firstName =
       (target.first_name || "").trim() ||
       (target.name || "").trim().split(/\s+/)[0] ||
       "";
     const loginUrl = `${siteUrl}/#/login`;
 
-    const resendRes = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${resendApiKey}`,
-      },
-      body: JSON.stringify({
-        from: fromEmail,
-        to: [toEmail],
-        subject: "Your administrative role at Ashburton Baptist Church",
-        html: buildAdminRoleEmailHtml({ firstName, loginUrl }),
-      }),
-    });
+    let emailed: string | null = null;
+    let emailSkipped = false;
+    let resendId: string | null = null;
 
-    const resendBody = await resendRes.json().catch(() => ({}));
+    if (!toEmail) {
+      emailSkipped = true;
+    } else {
+      const subject =
+        kind === "revoked"
+          ? "Your administrative role at Ashburton Baptist Church has ended"
+          : "Your administrative role at Ashburton Baptist Church";
+      const html =
+        kind === "revoked"
+          ? buildRevokedEmailHtml(firstName, loginUrl)
+          : buildGrantedEmailHtml(firstName, loginUrl);
 
-    if (!resendRes.ok) {
-      console.error("Resend error", resendRes.status, resendBody);
-      return jsonResponse(
-        {
-          error: "Failed to send administrative role email",
-          details: resendBody,
+      const resendRes = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${resendApiKey}`,
         },
-        502,
-      );
+        body: JSON.stringify({
+          from: fromEmail,
+          to: [toEmail],
+          subject,
+          html,
+        }),
+      });
+      const resendBody = await resendRes.json().catch(() => ({}));
+      if (!resendRes.ok) {
+        console.error("Resend error", resendRes.status, resendBody);
+        emailSkipped = true;
+      } else {
+        emailed = toEmail;
+        resendId = typeof resendBody?.id === "string" ? resendBody.id : null;
+      }
     }
 
     return jsonResponse({
       ok: true,
-      emailed: toEmail,
-      id: resendBody?.id ?? null,
+      kind,
+      emailed,
+      emailSkipped,
+      id: resendId,
     });
   } catch (err) {
     console.error("notify-user-admin-role unexpected error", err);
