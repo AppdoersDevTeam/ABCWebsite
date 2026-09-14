@@ -12,13 +12,13 @@ import {
   ArrowRightLeft,
   HelpCircle,
   Youtube,
-  Newspaper
+  Newspaper,
+  HandHeart
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { displayName, displayInitial } from '../../lib/constants';
 import { ScrollToTop } from '../ScrollToTop';
 import { useAutoSectionReveal } from '../UI/useAutoSectionReveal';
-import { PrayingHandsIcon } from '../UI/PrayingHandsIcon';
 
 export const DashboardLayout = () => {
   const { user, logout } = useAuth();
@@ -35,13 +35,13 @@ export const DashboardLayout = () => {
 
   const navItems = [
     { label: 'Overview', path: '/dashboard', icon: <Home size={20} /> },
-    { label: 'Prayers', path: '/dashboard/prayer', icon: <PrayingHandsIcon size={20} /> },
+    { label: 'Prayers', path: '/dashboard/prayer', icon: <HandHeart size={20} /> },
     { label: 'Newsletters', path: '/dashboard/newsletter', icon: <Newspaper size={20} /> },
     { label: 'Devotionals', path: '/dashboard/devotional', icon: <BookOpen size={20} /> },
     { label: 'Sermons', path: '/dashboard/sermons', icon: <Youtube size={20} /> },
     { label: 'The Team', path: '/dashboard/team', icon: <Users size={20} /> },
     { label: 'Events', path: '/dashboard/events', icon: <Calendar size={20} /> },
-    { label: 'Roster', path: '/dashboard/roster', icon: <ClipboardList size={20} /> },
+    { label: 'Rosters', path: '/dashboard/roster', icon: <ClipboardList size={20} /> },
     { label: 'Help', path: '/dashboard/help', icon: <HelpCircle size={20} /> },
   ];
 

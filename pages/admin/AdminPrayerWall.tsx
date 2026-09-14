@@ -2,13 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { VibrantCard } from '../../components/UI/VibrantCard';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { Modal } from '../../components/UI/Modal';
-import { Heart, Edit, Trash2, Plus } from 'lucide-react';
+import { Heart, Edit, Trash2, Plus, HandHeart } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { PrayerRequest } from '../../types';
 import { SkeletonPageHeader, SkeletonPrayerCard } from '../../components/UI/Skeleton';
 import { getUserTimezone, formatRelativeDateInTimezone } from '../../lib/dateUtils';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
-import { PrayingHandsIcon } from '../../components/UI/PrayingHandsIcon';
 import { logAuditEventSafe } from '../../lib/auditLog';
 
 export const AdminPrayerWall = () => {
@@ -193,7 +192,7 @@ export const AdminPrayerWall = () => {
       <AdminPageHeader
         title="Prayers"
         subtitle="Manage all prayer requests from the community."
-        icon={<PrayingHandsIcon size={28} />}
+        icon={<HandHeart size={28} />}
         rightSlot={
           <GlowingButton size="sm" fullWidth className="md:w-auto" onClick={() => setIsCreateModalOpen(true)}>
             <Plus size={16} className="mr-2" />

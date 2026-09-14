@@ -15,13 +15,13 @@ import {
   Settings,
   HelpCircle,
   ScrollText,
-  Newspaper
+  Newspaper,
+  HandHeart
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { displayName, displayInitial } from '../../lib/constants';
 import { ScrollToTop } from '../ScrollToTop';
 import { useAutoSectionReveal } from '../UI/useAutoSectionReveal';
-import { PrayingHandsIcon } from '../UI/PrayingHandsIcon';
 
 export const AdminLayout = () => {
   const { user, logout } = useAuth();
@@ -39,12 +39,12 @@ export const AdminLayout = () => {
   const navItems = [
     { label: 'Overview', path: '/admin', icon: <Home size={20} /> },
     { label: 'User Management', path: '/admin/users', icon: <UserCog size={20} /> },
-    { label: 'Prayers', path: '/admin/prayer', icon: <PrayingHandsIcon size={20} /> },
+    { label: 'Prayers', path: '/admin/prayer', icon: <HandHeart size={20} /> },
     { label: 'Newsletters', path: '/admin/newsletter', icon: <Newspaper size={20} /> },
     { label: 'Devotionals', path: '/admin/devotional', icon: <BookOpen size={20} /> },
     { label: 'Directory / People', path: '/admin/team', icon: <Users size={20} /> },
     { label: 'Events', path: '/admin/events', icon: <Calendar size={20} /> },
-    { label: 'Roster', path: '/admin/roster', icon: <ClipboardList size={20} /> },
+    { label: 'Rosters', path: '/admin/roster', icon: <ClipboardList size={20} /> },
     { label: 'Directory Setup', path: '/admin/settings', icon: <Settings size={20} /> },
     { label: 'Help', path: '/admin/help', icon: <HelpCircle size={20} /> },
     { label: 'Logs', path: '/admin/logs', icon: <ScrollText size={20} /> },
