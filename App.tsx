@@ -44,6 +44,7 @@ import { Sermons as DashboardSermons } from './pages/dashboard/Sermons';
 import { Team } from './pages/dashboard/Team';
 import { EventsPrivate } from './pages/dashboard/EventsPrivate';
 import { DashboardHelp } from './pages/dashboard/Help';
+import { AnnualCalendarPage } from './pages/shared/AnnualCalendarPage';
 
 // Admin Pages
 import { AdminOverview } from './pages/admin/AdminOverview';
@@ -168,6 +169,7 @@ const AppRoutes = () => {
             <Route path="/dashboard" element={<ProtectedRoute />}>
               <Route element={<DashboardLayout />}>
                 <Route index element={<DashboardHome />} />
+                <Route path="calendar" element={<AnnualCalendarPage audience="member" />} />
                 <Route path="prayer" element={<PrayerWall />} />
                 <Route path="newsletter" element={<Newsletter />} />
                 <Route path="devotional" element={<Devotional />} />
@@ -183,6 +185,7 @@ const AppRoutes = () => {
             <Route path="/admin" element={<AdminRoute />}>
               <Route element={<AdminLayout />}>
                 <Route index element={<AdminOverview />} />
+                <Route path="calendar" element={<AnnualCalendarPage audience="admin" />} />
                 <Route path="users" element={<AdminUsers />} />
                 <Route path="logs" element={<AdminLogs />} />
                 <Route path="prayer" element={<AdminPrayerWall />} />

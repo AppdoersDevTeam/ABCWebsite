@@ -14,6 +14,7 @@ import {
   parseTimeToInputValue,
 } from '../../lib/eventDateUtils';
 import { logAuditEvent } from '../../lib/auditLog';
+import { notifyCalendarChanged } from '../../lib/calendarItems';
 import metadata from '../../metadata.json';
 
 const DEFAULT_THUMB = '/ABC Logo.png';
@@ -165,6 +166,7 @@ export const AdminEvents = () => {
       });
 
       setEvents([...events, data]);
+      notifyCalendarChanged();
       resetModal();
       setIsModalOpen(false);
     } catch (error: any) {
@@ -233,6 +235,7 @@ export const AdminEvents = () => {
       });
 
       fetchEvents();
+      notifyCalendarChanged();
       resetModal();
       setIsModalOpen(false);
     } catch (error: any) {
@@ -266,6 +269,7 @@ export const AdminEvents = () => {
       });
 
       setEvents(events.filter(e => e.id !== id));
+      notifyCalendarChanged();
     } catch (error) {
       console.error('Error deleting event:', error);
       alert('Failed to delete event');

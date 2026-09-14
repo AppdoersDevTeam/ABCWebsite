@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Youtube, ExternalLink, Loader2, Play, Search, X, ListMusic } from 'lucide-react';
 import { ScrollReveal } from '../UI/ScrollReveal';
 import { StyledSelect } from '../UI/StyledSelect';
@@ -94,7 +95,9 @@ function Reveal({
 }
 
 export const YouTubeSermonCatalog = ({ variant = 'public' }: YouTubeSermonCatalogProps) => {
+  const [searchParams] = useSearchParams();
   const skipNextPlaylistFetch = useRef(false);
+  const openedWatchId = useRef<string | null>(null);
   const [videos, setVideos] = useState<YouTubeVideoType[]>([]);
   const [playlists, setPlaylists] = useState<YouTubePlaylist[]>([]);
   const [selectedPlaylistId, setSelectedPlaylistId] = useState<string>(ALL_VIDEOS_PLAYLIST_ID);
@@ -105,6 +108,7 @@ export const YouTubeSermonCatalog = ({ variant = 'public' }: YouTubeSermonCatalo
   const [activeVideos, setActiveVideos] = useState<Set<string>>(new Set());
 
   const isDashboard = variant === 'dashboard';
+  const watchId = searchParams.get('watch');
 
   const playlistOptions = useMemo(() => {
     const options: YouTubePlaylist[] = [
@@ -234,6 +238,27 @@ export const YouTubeSermonCatalog = ({ variant = 'public' }: YouTubeSermonCatalo
 
     loadPlaylistVideos();
   }, [selectedPlaylistId, uploadsPlaylistId, loading]);
+
+  useEffect(() => {
+    const watchId = searchParams.get('watch');
+    if (!watchId) {
+      openedWatchId.current = null;
+      return;
+    }
+    setSearchQuery('');
+    setSelectedPlaylistId(ALL_VIDEOS_PLAYLIST_ID);
+  }, [searchParams]);
+
+  useEffect(() => {
+    const watchId = searchParams.get('watch');
+    if (!watchId || loading || loadingVideos) return;
+    if (openedWatchId.current === watchId) return;
+    openedWatchId.current = watchId;
+    setActiveVideos((prev) => new Set(prev).add(watchId));
+    requestAnimationFrame(() => {
+      document.getElementById(`sermon-${watchId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  }, [searchParams, loading, loadingVideos, videos]);
 
   const formatDate = (dateString: string) => {
     if (!dateString) return 'Date not available';
@@ -437,6 +462,23 @@ export const YouTubeSermonCatalog = ({ variant = 'public' }: YouTubeSermonCatalo
         </div>
       )}
 
+      {!loading && !loadingVideos && watchId && !videos.some((video) => video.id === watchId) && (
+        <div id={`sermon-${watchId}`} className={`${videoCardClass} mb-6 max-w-2xl`}>
+          <div className="relative w-full pb-[56.25%] bg-gray-100">
+            <iframe
+              className="absolute top-0 left-0 w-full h-full"
+              src={`https://www.youtube.com/embed/${watchId}?autoplay=1`}
+              title="Sermon"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
+          <div className={`p-4 sm:p-5 ${isDashboard ? 'bg-white' : 'bg-white/90'}`}>
+            <h3 className="text-sm sm:text-[1rem] font-serif font-normal text-charcoal">Sermon from the calendar</h3>
+          </div>
+        </div>
+      )}
+
       {!loading && !loadingVideos && filteredVideos.length === 0 && (
         <div className={`text-center ${isDashboard ? 'py-12' : 'py-16'}`}>
           <div className="w-20 h-20 bg-gold/10 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -468,7 +510,7 @@ export const YouTubeSermonCatalog = ({ variant = 'public' }: YouTubeSermonCatalo
 
             return (
               <Reveal key={video.id || i} variant={variant} direction="up" delay={i * 100}>
-                <div className={videoCardClass}>
+                <div id={`sermon-${video.id}`} className={videoCardClass}>
                   <div className="relative w-full pb-[56.25%] bg-gray-100">
                     {isPlaceholder ? (
                       <div className="absolute inset-0 flex flex-col items-center justify-center bg-gold/10 p-6 text-center">

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FileText, Upload, Trash2, Eye, Pencil } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { Modal } from '../../components/UI/Modal';
 import { DocumentReaderPanel } from '../../components/UI/DocumentReaderPanel';
@@ -8,6 +9,7 @@ import { Newsletter as NewsletterType } from '../../types';
 import { SkeletonPageHeader, SkeletonCard } from '../../components/UI/Skeleton';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { logAuditEventSafe } from '../../lib/auditLog';
+import { notifyCalendarChanged } from '../../lib/calendarItems';
 import { formatWeekDate, monthYearFromWeekDate, resolveNewsletterWeekDate } from '../../lib/dateUtils';
 import { fetchNewslettersOrdered, sortNewslettersLatestFirst } from '../../lib/newsletters';
 import {
@@ -71,6 +73,7 @@ function storagePathFromPublicUrl(pdfUrl: string, bucket: string): string | null
 }
 
 export const AdminNewsletter = () => {
+  const [searchParams] = useSearchParams();
   const savedUploadDraft = readFormDraft<NewsletterUploadDraft>(ADMIN_DRAFT_KEYS.newsletterUpload);
   const savedEditDraft = readFormDraft<NewsletterEditDraft>(ADMIN_DRAFT_KEYS.newsletterEdit);
 
@@ -111,6 +114,13 @@ export const AdminNewsletter = () => {
   useEffect(() => {
     fetchNewsletters();
   }, []);
+
+  useEffect(() => {
+    const openId = searchParams.get('id');
+    if (!openId || newsletters.length === 0) return;
+    const match = newsletters.find((item) => item.id === openId);
+    if (match) setViewing(match);
+  }, [searchParams, newsletters]);
 
   useEffect(() => {
     const pendingId = pendingEditIdRef.current;
@@ -230,6 +240,7 @@ export const AdminNewsletter = () => {
       });
 
       setNewsletters(sortNewslettersLatestFirst([data, ...newsletters]));
+      notifyCalendarChanged();
       closeUploadModal();
       alert('Newsletter uploaded successfully!');
     } catch (error: any) {
@@ -306,6 +317,7 @@ export const AdminNewsletter = () => {
       setNewsletters(
         sortNewslettersLatestFirst(newsletters.map((nl) => (nl.id === editing.id ? data : nl)))
       );
+      notifyCalendarChanged();
       if (viewing?.id === editing.id) setViewing(data);
       resetEditForm();
       alert('Newsletter updated successfully!');
@@ -350,6 +362,7 @@ export const AdminNewsletter = () => {
 
       if (viewing?.id === id) setViewing(null);
       setNewsletters(newsletters.filter((nl) => nl.id !== id));
+      notifyCalendarChanged();
     } catch (error) {
       console.error('Error deleting newsletter:', error);
       alert('Failed to delete newsletter');

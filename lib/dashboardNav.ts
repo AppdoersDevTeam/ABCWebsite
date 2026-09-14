@@ -6,6 +6,7 @@ export const DASHBOARD_NAV_ICON = {
   devotionals: 'bg-purple-50 text-purple-600',
   sermons: 'bg-red-50 text-red-600',
   events: 'bg-green-50 text-green-600',
+  calendar: 'bg-emerald-50 text-emerald-600',
   team: 'bg-teal-50 text-teal-600',
   rosters: 'bg-indigo-50 text-indigo-600',
   help: 'bg-cyan-50 text-cyan-600',

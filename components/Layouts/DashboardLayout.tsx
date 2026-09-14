@@ -13,7 +13,8 @@ import {
   HelpCircle,
   Youtube,
   Newspaper,
-  HandHeart
+  HandHeart,
+  CalendarDays
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { displayName, displayInitial } from '../../lib/constants';
@@ -36,6 +37,7 @@ export const DashboardLayout = () => {
 
   const navItems = [
     { label: 'Overview', path: '/dashboard', icon: <Home size={20} />, iconClass: DASHBOARD_NAV_ICON.overview },
+    { label: 'Annual Calendar', path: '/dashboard/calendar', icon: <CalendarDays size={20} />, iconClass: DASHBOARD_NAV_ICON.calendar },
     { label: 'Prayers', path: '/dashboard/prayer', icon: <HandHeart size={20} />, iconClass: DASHBOARD_NAV_ICON.prayers },
     { label: 'Newsletters', path: '/dashboard/newsletter', icon: <Newspaper size={20} />, iconClass: DASHBOARD_NAV_ICON.newsletters },
     { label: 'Devotionals', path: '/dashboard/devotional', icon: <BookOpen size={20} />, iconClass: DASHBOARD_NAV_ICON.devotionals },

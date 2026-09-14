@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FileText, Eye } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
 import { DocumentReaderPanel } from '../../components/UI/DocumentReaderPanel';
 import { Newsletter as NewsletterType } from '../../types';
 import { SkeletonPageHeader, SkeletonCard } from '../../components/UI/Skeleton';
@@ -7,6 +8,7 @@ import { formatWeekDate, resolveNewsletterWeekDate } from '../../lib/dateUtils';
 import { fetchNewslettersOrdered } from '../../lib/newsletters';
 
 export const Newsletter = () => {
+  const [searchParams] = useSearchParams();
   const [newsletters, setNewsletters] = useState<NewsletterType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [viewing, setViewing] = useState<NewsletterType | null>(null);
@@ -14,6 +16,13 @@ export const Newsletter = () => {
   useEffect(() => {
     fetchNewsletters();
   }, []);
+
+  useEffect(() => {
+    const openId = searchParams.get('id');
+    if (!openId || newsletters.length === 0) return;
+    const match = newsletters.find((item) => item.id === openId);
+    if (match) setViewing(match);
+  }, [searchParams, newsletters]);
 
   useEffect(() => {
     if (viewing) {

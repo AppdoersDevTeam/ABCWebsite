@@ -51,6 +51,12 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode }) => {
               <li>Use it to orient new admins before they open User Management or Directory.</li>
             </Section>
 
+            <Section title="Annual Calendar">
+              <li>See this year’s events, sermons, devotionals, and newsletters on one calendar — year, month, or week view.</li>
+              <li>Coloured dots mark each type of item. Tap a day, then tap an item to open it for viewing.</li>
+              <li>The calendar updates when you add or change events, devotionals, or newsletters. Sermons follow the church YouTube channel.</li>
+            </Section>
+
             <Section title="User Management">
               <li>See everyone who has a website login: email, role (member/admin), and approval status.</li>
               <li>Approve new accounts, reset passwords, and promote or demote roles where your policy allows.</li>
@@ -126,6 +132,12 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode }) => {
             <Section title="Overview">
               <li>Your home inside the member area: welcome content and pointers to the rest of the portal.</li>
               <li>Open this when you first log in to see what is new or highlighted for members.</li>
+            </Section>
+
+            <Section title="Annual Calendar">
+              <li>See this year’s church calendar: events, sermons, devotionals, and newsletters together.</li>
+              <li>Switch between year, month, and week. Tap a day to list what is on, then tap an item to open it.</li>
+              <li>New items appear on the calendar after they are published (or when you return to this page).</li>
             </Section>
 
             <Section title="Prayers">

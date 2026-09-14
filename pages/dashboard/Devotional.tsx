@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BookOpen, Eye } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
 import { DocumentReaderPanel } from '../../components/UI/DocumentReaderPanel';
 import { supabase } from '../../lib/supabase';
 import { Devotional as DevotionalType } from '../../types';
@@ -12,6 +13,7 @@ function formatWeekDate(weekDate: string): string {
 }
 
 export const Devotional = () => {
+  const [searchParams] = useSearchParams();
   const [devotionals, setDevotionals] = useState<DevotionalType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [viewing, setViewing] = useState<DevotionalType | null>(null);
@@ -19,6 +21,13 @@ export const Devotional = () => {
   useEffect(() => {
     fetchDevotionals();
   }, []);
+
+  useEffect(() => {
+    const openId = searchParams.get('id');
+    if (!openId || devotionals.length === 0) return;
+    const match = devotionals.find((item) => item.id === openId);
+    if (match) setViewing(match);
+  }, [searchParams, devotionals]);
 
   useEffect(() => {
     if (viewing) {

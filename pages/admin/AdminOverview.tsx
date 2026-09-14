@@ -835,6 +835,10 @@ export const AdminOverview = () => {
               <span className="font-semibold text-base text-charcoal">Review New Prayer Requests</span>
               <p className="text-sm text-neutral mt-1">{pendingPrayerRequestsCount > 0 ? `${pendingPrayerRequestsCount} recent request${pendingPrayerRequestsCount === 1 ? '' : 's'}` : 'No recent requests'}</p>
             </Link>
+            <Link to="/admin/calendar" className="block p-4 bg-white border border-gray-100 rounded-[4px] hover:border-gold hover:shadow-md transition-all">
+              <span className="font-semibold text-base text-charcoal">Annual Calendar</span>
+              <p className="text-sm text-neutral mt-1">See this year’s events, sermons, devotionals, and newsletters</p>
+            </Link>
             <Link to="/admin/events" className="block p-4 bg-white border border-gray-100 rounded-[4px] hover:border-gold hover:shadow-md transition-all">
               <span className="font-semibold text-base text-charcoal">Add New Event</span>
               <p className="text-sm text-neutral mt-1">Create upcoming church event</p>

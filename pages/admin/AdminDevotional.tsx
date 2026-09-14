@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BookOpen, Upload, Trash2, Eye, Pencil } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { Modal } from '../../components/UI/Modal';
 import { DocumentReaderPanel } from '../../components/UI/DocumentReaderPanel';
@@ -8,6 +9,7 @@ import { Devotional as DevotionalType } from '../../types';
 import { SkeletonPageHeader, SkeletonCard } from '../../components/UI/Skeleton';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { logAuditEventSafe } from '../../lib/auditLog';
+import { notifyCalendarChanged } from '../../lib/calendarItems';
 import {
   ADMIN_DRAFT_KEYS,
   clearFormDraft,
@@ -79,6 +81,7 @@ function formatWeekDate(weekDate: string): string {
 }
 
 export const AdminDevotional = () => {
+  const [searchParams] = useSearchParams();
   const savedUploadDraft = readFormDraft<DevotionalUploadDraft>(ADMIN_DRAFT_KEYS.devotionalUpload);
   const savedEditDraft = readFormDraft<DevotionalEditDraft>(ADMIN_DRAFT_KEYS.devotionalEdit);
 
@@ -120,6 +123,13 @@ export const AdminDevotional = () => {
   useEffect(() => {
     fetchDevotionals();
   }, []);
+
+  useEffect(() => {
+    const openId = searchParams.get('id');
+    if (!openId || devotionals.length === 0) return;
+    const match = devotionals.find((item) => item.id === openId);
+    if (match) setViewing(match);
+  }, [searchParams, devotionals]);
 
   useEffect(() => {
     const pendingId = pendingEditIdRef.current;
@@ -245,6 +255,7 @@ export const AdminDevotional = () => {
       });
 
       setDevotionals([data, ...devotionals].sort((a, b) => b.week_date.localeCompare(a.week_date)));
+      notifyCalendarChanged();
       closeUploadModal();
       alert('Devotional uploaded successfully!');
     } catch (error: any) {
@@ -316,6 +327,7 @@ export const AdminDevotional = () => {
         .map((d) => (d.id === editing.id ? data : d))
         .sort((a, b) => b.week_date.localeCompare(a.week_date));
       setDevotionals(sorted);
+      notifyCalendarChanged();
       if (viewing?.id === editing.id) setViewing(data);
       resetEditForm();
       alert('Devotional updated successfully!');
@@ -356,6 +368,7 @@ export const AdminDevotional = () => {
 
       if (viewing?.id === id) setViewing(null);
       setDevotionals(devotionals.filter((d) => d.id !== id));
+      notifyCalendarChanged();
     } catch (error) {
       console.error('Error deleting devotional:', error);
       alert('Failed to delete devotional');

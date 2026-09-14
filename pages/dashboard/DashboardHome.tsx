@@ -5,7 +5,7 @@ import { displayName, formatDisplayTitle } from '../../lib/constants';
 import { formatWeekDate, resolveNewsletterWeekDate } from '../../lib/dateUtils';
 import { fetchLatestNewsletter } from '../../lib/newsletters';
 import { OverviewStatCard } from '../../components/UI/OverviewStatCard';
-import { Calendar, BookOpen, Youtube, Newspaper, HandHeart } from 'lucide-react';
+import { Calendar, CalendarDays, BookOpen, Youtube, Newspaper, HandHeart } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { getVerseOfTheDay } from '../../lib/getVerseOfTheDay';
 
@@ -128,6 +128,17 @@ export const DashboardHome = () => {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
+            <Link to="/dashboard/calendar" className="block">
+              <OverviewStatCard
+                icon={<CalendarDays size={20} />}
+                iconClassName="bg-emerald-50 text-emerald-600"
+                label="Annual Calendar"
+                value={new Date().getFullYear()}
+                description="Year, month, or week — events, sermons, devotionals, and newsletters"
+                footerLabel="Open Calendar →"
+              />
+            </Link>
+
             <Link to="/dashboard/events" className="block">
               <OverviewStatCard
                 icon={<Calendar size={20} />}

@@ -16,7 +16,8 @@ import {
   HelpCircle,
   ScrollText,
   Newspaper,
-  HandHeart
+  HandHeart,
+  CalendarDays
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { displayName, displayInitial } from '../../lib/constants';
@@ -39,6 +40,7 @@ export const AdminLayout = () => {
 
   const navItems = [
     { label: 'Overview', path: '/admin', icon: <Home size={20} />, iconClass: DASHBOARD_NAV_ICON.overview },
+    { label: 'Annual Calendar', path: '/admin/calendar', icon: <CalendarDays size={20} />, iconClass: DASHBOARD_NAV_ICON.calendar },
     { label: 'User Management', path: '/admin/users', icon: <UserCog size={20} />, iconClass: DASHBOARD_NAV_ICON.users },
     { label: 'Prayers', path: '/admin/prayer', icon: <HandHeart size={20} />, iconClass: DASHBOARD_NAV_ICON.prayers },
     { label: 'Newsletters', path: '/admin/newsletter', icon: <Newspaper size={20} />, iconClass: DASHBOARD_NAV_ICON.newsletters },
