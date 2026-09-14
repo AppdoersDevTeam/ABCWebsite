@@ -38,6 +38,42 @@ function clampToYear(date: Date, year: number): Date {
   return copy;
 }
 
+function ordinal(day: number): string {
+  const remainder = day % 100;
+  if (remainder >= 11 && remainder <= 13) return `${day}th`;
+  switch (day % 10) {
+    case 1:
+      return `${day}st`;
+    case 2:
+      return `${day}nd`;
+    case 3:
+      return `${day}rd`;
+    default:
+      return `${day}th`;
+  }
+}
+
+function shortMonth(date: Date): string {
+  return ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'][date.getMonth()];
+}
+
+function formatWeekRange(start: Date): string {
+  const end = new Date(start);
+  end.setDate(start.getDate() + 6);
+  const startLabel = `${ordinal(start.getDate())}`;
+  const endLabel = `${ordinal(end.getDate())}`;
+  const startMonth = shortMonth(start);
+  const endMonth = shortMonth(end);
+
+  if (start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear()) {
+    return `Week of ${startLabel} to ${endLabel} ${endMonth}`;
+  }
+  if (start.getFullYear() === end.getFullYear()) {
+    return `Week of ${startLabel} ${startMonth} to ${endLabel} ${endMonth}`;
+  }
+  return `Week of ${startLabel} ${startMonth} ${start.getFullYear()} to ${endLabel} ${endMonth} ${end.getFullYear()}`;
+}
+
 function formatLongDate(key: string): string {
   return parseDateKey(key).toLocaleDateString('en-NZ', {
     weekday: 'long',
@@ -105,10 +141,10 @@ export const AnnualCalendarView: React.FC<AnnualCalendarViewProps> = ({ items, i
 
   return (
     <div className="space-y-4 md:space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div className="flex items-center gap-2">
-          {view !== 'year' && (
-            <>
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-between gap-2">
+          {view !== 'year' ? (
+            <div className="flex items-center gap-2 shrink-0">
               <button
                 type="button"
                 onClick={() => (view === 'month' ? goMonth(-1) : goWeek(-1))}
@@ -125,28 +161,30 @@ export const AnnualCalendarView: React.FC<AnnualCalendarViewProps> = ({ items, i
               >
                 <ChevronRight size={18} />
               </button>
-            </>
+            </div>
+          ) : (
+            <span />
           )}
-          <h2 className="text-xl md:text-2xl font-serif text-charcoal">
-            {view === 'year' && year}
-            {view === 'month' && `${MONTH_NAMES[focusDate.getMonth()]} ${year}`}
-            {view === 'week' && `Week of ${weekStart.toLocaleDateString('en-NZ', { day: 'numeric', month: 'short' })}`}
-          </h2>
+          <div className="inline-flex rounded-[4px] border border-gray-200 overflow-hidden shrink-0">
+            {(['year', 'month', 'week'] as CalendarView[]).map((option) => (
+              <button
+                key={option}
+                type="button"
+                onClick={() => setView(option)}
+                className={`px-3 py-2 text-xs font-bold uppercase tracking-wider min-h-[44px] ${
+                  view === option ? 'bg-charcoal text-white' : 'bg-white text-neutral hover:bg-gray-50'
+                }`}
+              >
+                {option}
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="inline-flex rounded-[4px] border border-gray-200 overflow-hidden self-start">
-          {(['year', 'month', 'week'] as CalendarView[]).map((option) => (
-            <button
-              key={option}
-              type="button"
-              onClick={() => setView(option)}
-              className={`px-3 py-2 text-xs font-bold uppercase tracking-wider min-h-[44px] ${
-                view === option ? 'bg-charcoal text-white' : 'bg-white text-neutral hover:bg-gray-50'
-              }`}
-            >
-              {option}
-            </button>
-          ))}
-        </div>
+        <h2 className="w-full text-xl sm:text-2xl md:text-3xl font-serif text-charcoal leading-snug break-words">
+          {view === 'year' && year}
+          {view === 'month' && `${MONTH_NAMES[focusDate.getMonth()]} ${year}`}
+          {view === 'week' && formatWeekRange(weekStart)}
+        </h2>
       </div>
 
       <div className="flex flex-wrap gap-3 text-xs">
@@ -301,7 +339,7 @@ export const AnnualCalendarView: React.FC<AnnualCalendarViewProps> = ({ items, i
                 return (
                   <div
                     key={key}
-                    className={`bg-white border rounded-[8px] p-3 min-h-[12rem] ${
+                    className={`bg-white border rounded-[8px] p-4 md:p-3 min-h-[10rem] md:min-h-[12rem] ${
                       isToday ? 'border-gold' : 'border-gray-200'
                     } ${!inYear ? 'opacity-40' : ''}`}
                   >
@@ -311,11 +349,13 @@ export const AnnualCalendarView: React.FC<AnnualCalendarViewProps> = ({ items, i
                       onClick={() => openDay(date)}
                       className="w-full text-left mb-3"
                     >
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-neutral">
-                        {date.toLocaleDateString('en-NZ', { weekday: 'short' })}
+                      <p className="text-xs md:text-[10px] font-bold uppercase tracking-wider text-neutral">
+                        <span className="md:hidden">{date.toLocaleDateString('en-NZ', { weekday: 'long' })}</span>
+                        <span className="hidden md:inline">{date.toLocaleDateString('en-NZ', { weekday: 'short' })}</span>
                       </p>
-                      <p className={`text-lg font-serif ${isToday ? 'text-gold' : 'text-charcoal'}`}>
-                        {date.getDate()}
+                      <p className={`text-xl md:text-lg font-serif ${isToday ? 'text-gold' : 'text-charcoal'}`}>
+                        <span className="md:hidden">{ordinal(date.getDate())} {shortMonth(date)}</span>
+                        <span className="hidden md:inline">{date.getDate()}</span>
                       </p>
                     </button>
                     <div className="space-y-1.5">
@@ -323,7 +363,7 @@ export const AnnualCalendarView: React.FC<AnnualCalendarViewProps> = ({ items, i
                         <Link
                           key={`${item.kind}-${item.id}`}
                           to={item.href}
-                          className={`block text-xs px-2 py-1.5 rounded border ${CALENDAR_KIND_META[item.kind].chipClass} hover:shadow-sm`}
+                          className={`block text-sm md:text-xs px-2 py-2 md:py-1.5 rounded border break-words ${CALENDAR_KIND_META[item.kind].chipClass} hover:shadow-sm`}
                         >
                           {item.title}
                         </Link>
