@@ -28,6 +28,18 @@ function jsonResponse(body: Record<string, unknown>, status = 200): Response {
   });
 }
 
+function loginPageFooterHtml(loginUrl: string): string {
+  return `<div style="margin:28px 0 0;padding-top:20px;border-top:1px solid #eeeeee;">
+              <p style="margin:0 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.65;color:#444444;">
+                You can open the website Log in page here:
+                <a href="${loginUrl}" style="color:#222222;font-weight:bold;text-decoration:underline;">Log in page</a>
+              </p>
+              <p style="margin:0;font-size:13px;line-height:1.5;word-break:break-all;">
+                <a href="${loginUrl}" style="color:#808080;text-decoration:underline;">${loginUrl}</a>
+              </p>
+            </div>`;
+}
+
 function escapeHtml(text: string): string {
   return text
     .replace(/&/g, "&amp;")
@@ -72,6 +84,7 @@ function plainTextToEmailHtml(plain: string): string {
 
 function buildIntroEmailHtml(params: { bodyHtml: string }): string {
   const { bodyHtml } = params;
+  const loginUrl = "https://ashburtonbaptist.co.nz/#/login";
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -99,6 +112,7 @@ function buildIntroEmailHtml(params: { bodyHtml: string }): string {
           <tr>
             <td style="padding:8px 36px 28px;">
               ${bodyHtml}
+              ${loginPageFooterHtml(loginUrl)}
             </td>
           </tr>
           <tr>
@@ -109,6 +123,8 @@ function buildIntroEmailHtml(params: { bodyHtml: string }): string {
                 <a href="mailto:office@ashburtonbaptist.co.nz" style="color:#ffffff;text-decoration:none;">office@ashburtonbaptist.co.nz</a>
                 &nbsp;&middot;&nbsp;
                 <a href="https://ashburtonbaptist.co.nz" style="color:#ffffff;text-decoration:none;">ashburtonbaptist.co.nz</a>
+                &nbsp;&middot;&nbsp;
+                <a href="${loginUrl}" style="color:#fbcb05;text-decoration:none;">Log in</a>
               </p>
             </td>
           </tr>

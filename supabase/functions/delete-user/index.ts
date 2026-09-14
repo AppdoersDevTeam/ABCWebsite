@@ -25,8 +25,21 @@ function jsonResponse(body: Record<string, unknown>, status = 200): Response {
   });
 }
 
+function loginPageFooterHtml(loginUrl: string): string {
+  return `<div style="margin:28px 0 0;padding-top:20px;border-top:1px solid #eeeeee;">
+              <p style="margin:0 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.65;color:#444444;">
+                You can open the website Log in page here:
+                <a href="${loginUrl}" style="color:#222222;font-weight:bold;text-decoration:underline;">Log in page</a>
+              </p>
+              <p style="margin:0;font-size:13px;line-height:1.5;word-break:break-all;">
+                <a href="${loginUrl}" style="color:#808080;text-decoration:underline;">${loginUrl}</a>
+              </p>
+            </div>`;
+}
+
 function buildDeletedEmailHtml(firstName: string): string {
   const greetingName = firstName || "there";
+  const loginUrl = `${DEFAULT_SITE_URL}/#/login`;
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -56,7 +69,8 @@ function buildDeletedEmailHtml(firstName: string): string {
               <p style="margin:0 0 20px;">Kia ora ${greetingName},</p>
               <p style="margin:0 0 20px;">This email confirms that your account has been deleted from the Ashburton Baptist Church system. Your login and related website records have been removed.</p>
               <p style="margin:0 0 20px;">If this was unexpected, or you would like to be part of the church website again, please contact the church office.</p>
-              <p style="margin:0;font-size:13px;color:#999999;">You will no longer be able to sign in with this account.</p>
+              <p style="margin:0 0 24px;font-size:13px;color:#999999;">You will no longer be able to sign in with this account.</p>
+              ${loginPageFooterHtml(loginUrl)}
             </td>
           </tr>
           <tr>
@@ -67,6 +81,8 @@ function buildDeletedEmailHtml(firstName: string): string {
                 <a href="mailto:office@ashburtonbaptist.co.nz" style="color:#ffffff;text-decoration:none;">office@ashburtonbaptist.co.nz</a>
                 &nbsp;&middot;&nbsp;
                 <a href="${DEFAULT_SITE_URL}" style="color:#ffffff;text-decoration:none;">ashburtonbaptist.co.nz</a>
+                &nbsp;&middot;&nbsp;
+                <a href="${loginUrl}" style="color:#fbcb05;text-decoration:none;">Log in</a>
               </p>
             </td>
           </tr>

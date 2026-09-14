@@ -24,6 +24,18 @@ function jsonResponse(body: Record<string, unknown>, status = 200): Response {
   });
 }
 
+function loginPageFooterHtml(loginUrl: string): string {
+  return `<div style="margin:28px 0 0;padding-top:20px;border-top:1px solid #eeeeee;">
+              <p style="margin:0 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.65;color:#444444;">
+                You can open the website Log in page here:
+                <a href="${loginUrl}" style="color:#222222;font-weight:bold;text-decoration:underline;">Log in page</a>
+              </p>
+              <p style="margin:0;font-size:13px;line-height:1.5;word-break:break-all;">
+                <a href="${loginUrl}" style="color:#808080;text-decoration:underline;">${loginUrl}</a>
+              </p>
+            </div>`;
+}
+
 function buildApprovalEmailHtml(params: {
   firstName: string;
   loginUrl: string;
@@ -67,7 +79,8 @@ function buildApprovalEmailHtml(params: {
               </table>
               <p style="margin:0 0 8px;font-size:13px;color:#808080;">Button not working? Copy and paste this link into your browser:</p>
               <p style="margin:0 0 24px;font-size:13px;line-height:1.5;word-break:break-all;"><a href="${loginUrl}" style="color:#222222;text-decoration:underline;">${loginUrl}</a></p>
-              <p style="margin:0;font-size:13px;color:#999999;">If you didn&rsquo;t request a member account, you can safely ignore this email.</p>
+              <p style="margin:0 0 24px;font-size:13px;color:#999999;">If you didn&rsquo;t request a member account, you can safely ignore this email.</p>
+              ${loginPageFooterHtml(loginUrl)}
             </td>
           </tr>
           <tr>
@@ -78,6 +91,8 @@ function buildApprovalEmailHtml(params: {
                 <a href="mailto:office@ashburtonbaptist.co.nz" style="color:#ffffff;text-decoration:none;">office@ashburtonbaptist.co.nz</a>
                 &nbsp;&middot;&nbsp;
                 <a href="https://ashburtonbaptist.co.nz" style="color:#ffffff;text-decoration:none;">ashburtonbaptist.co.nz</a>
+                &nbsp;&middot;&nbsp;
+                <a href="${loginUrl}" style="color:#fbcb05;text-decoration:none;">Log in</a>
               </p>
             </td>
           </tr>

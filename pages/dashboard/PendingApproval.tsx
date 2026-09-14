@@ -143,10 +143,14 @@ export const PendingApproval = () => {
         ) : (
           <>
             <h1 className="text-3xl sm:text-5xl font-serif font-normal text-charcoal mb-4">Access Pending</h1>
-            <p className="text-base sm:text-lg text-neutral font-light mb-10 leading-relaxed">
-              Your account is currently under administrative review.<br />
-              We ensure our community stays safe and secure.
-            </p>
+            <div className="mb-10 space-y-1">
+              <p className="text-[11px] sm:text-[12px] md:text-[13px] text-neutral font-light leading-snug whitespace-nowrap">
+                Your account is currently under administrative review.
+              </p>
+              <p className="text-[11px] sm:text-[12px] md:text-[13px] text-neutral font-light leading-snug whitespace-nowrap">
+                We ensure our community stays safe and secure.
+              </p>
+            </div>
 
             <div className="bg-white border border-red-200 p-6 rounded-[8px] flex items-center justify-center gap-2 mb-8">
               <span className="text-red-600 font-bold uppercase tracking-widest text-sm">Review in Progress</span>
