@@ -507,16 +507,10 @@ export const AdminTeam = () => {
       return 'Select at least one job role for staff.';
     }
 
-    // Baptism rules:
-    // - Staff & Member: must choose Yes/No. If Yes => date required
-    // - Attendee: optional Yes/No. If Yes => date optional
+    // Baptism: Staff & Member must choose Yes/No. Date is always optional.
     const baptismRequired = trimmed.profile_type === 'staff' || trimmed.profile_type === 'member';
     if (baptismRequired && formData.is_baptised === null) {
       return 'Please select Baptised: Yes or No.';
-    }
-    const baptismYes = formData.is_baptised === true;
-    if (baptismYes && baptismRequired && !formData.baptism_date.trim()) {
-      return 'Baptism date is required when Baptised is Yes.';
     }
 
     if (trimmed.profile_type === 'member') {
@@ -1619,7 +1613,7 @@ export const AdminTeam = () => {
               {formData.is_baptised === true && (
                 <div className="mt-1">
                   <label className="block text-sm font-bold text-charcoal mb-2">
-                    Baptism date {(formData.profile_type === 'staff' || formData.profile_type === 'member') ? '*' : '(optional)'}
+                    Baptism date (optional)
                   </label>
                   <div className="relative">
                     <CalendarDays size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral" />
@@ -1631,9 +1625,7 @@ export const AdminTeam = () => {
                     />
                   </div>
                   <p className="text-xs text-neutral mt-1">
-                    {formData.profile_type === 'attendee'
-                      ? 'Optional for attendees.'
-                      : 'Required when Baptised is Yes.'}
+                    Optional. You can save without a baptism date.
                   </p>
                 </div>
               )}
