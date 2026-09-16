@@ -1,5 +1,6 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { formatDdMmYyyyHHmm } from './dateUtils';
 
 export type EventRsvpRow = {
   name: string;
@@ -21,8 +22,7 @@ function csvEscape(value: string): string {
 }
 
 function formatLocalDateTime(d: Date): string {
-  const pad = (n: number) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  return formatDdMmYyyyHHmm(d);
 }
 
 function downloadBlob(filename: string, blob: Blob) {

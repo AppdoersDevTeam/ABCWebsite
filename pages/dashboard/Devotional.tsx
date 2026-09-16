@@ -6,12 +6,8 @@ import { supabase } from '../../lib/supabase';
 import { Devotional as DevotionalType } from '../../types';
 import { SkeletonPageHeader, SkeletonCard } from '../../components/UI/Skeleton';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
+import { formatWeekDate } from '../../lib/dateUtils';
 
-function formatWeekDate(weekDate: string): string {
-  const d = new Date(`${weekDate}T00:00:00`);
-  if (Number.isNaN(d.getTime())) return weekDate;
-  return d.toLocaleDateString('en-NZ', { day: 'numeric', month: 'short', year: 'numeric' });
-}
 
 export const Devotional = () => {
   const [searchParams] = useSearchParams();

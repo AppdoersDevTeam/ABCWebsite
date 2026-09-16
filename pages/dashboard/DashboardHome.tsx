@@ -2,7 +2,7 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { displayName, formatDisplayTitle } from '../../lib/constants';
-import { formatWeekDate, resolveNewsletterWeekDate } from '../../lib/dateUtils';
+import { formatWeekDate, formatDdMmYyyy, resolveNewsletterWeekDate } from '../../lib/dateUtils';
 import { fetchLatestNewsletter } from '../../lib/newsletters';
 import { OverviewStatCard } from '../../components/UI/OverviewStatCard';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
@@ -72,9 +72,7 @@ export const DashboardHome = () => {
       nextSunday.setHours(10, 0, 0, 0);
 
       // Always use calculated next Sunday - format as "dd month"
-      const month = nextSunday.toLocaleDateString('en-US', { month: 'long' });
-      const day = nextSunday.getDate();
-      setNextService(`${day} ${month}`);
+      setNextService(formatDdMmYyyy(nextSunday));
 
       // Process newsletter
       if (newsletter.status === 'fulfilled' && newsletter.value) {
@@ -85,7 +83,7 @@ export const DashboardHome = () => {
           setLastNewsletterTitle(`${latest.month} ${latest.year}`);
         } else {
           const lastNewsletter = new Date(latest.created_at);
-          setLastNewsletterTitle(lastNewsletter.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }));
+          setLastNewsletterTitle(formatDdMmYyyy(lastNewsletter));
         }
         const weekDate = resolveNewsletterWeekDate(latest);
         setLastNewsletterWeek(weekDate ? formatWeekDate(weekDate) : null);

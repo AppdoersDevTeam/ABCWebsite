@@ -10,6 +10,7 @@ import {
   type CalendarItem,
   type CalendarKind,
 } from '../../lib/calendarItems';
+import { formatDdMmYyyy } from '../../lib/dateUtils';
 
 type CalendarView = 'year' | 'month' | 'week';
 
@@ -75,12 +76,7 @@ function formatWeekRange(start: Date): string {
 }
 
 function formatLongDate(key: string): string {
-  return parseDateKey(key).toLocaleDateString('en-NZ', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  });
+  return formatDdMmYyyy(parseDateKey(key));
 }
 
 interface AnnualCalendarViewProps {

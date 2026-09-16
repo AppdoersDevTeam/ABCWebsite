@@ -1,5 +1,6 @@
 import React from 'react';
 import { PageHeader } from '../../components/UI/PageHeader';
+import { formatDdMmYyyy } from '../../lib/dateUtils';
 
 export const Terms = () => {
   return (
@@ -9,7 +10,7 @@ export const Terms = () => {
       <div className="container mx-auto px-4 -mt-10 relative z-10 max-w-4xl">
         <div className="glass-card rounded-[8px] p-8 md:p-12 bg-white/80">
           <div className="prose prose-lg max-w-none">
-            <p className="text-neutral text-sm mb-8">Last updated: {new Date().toLocaleDateString('en-NZ', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+            <p className="text-neutral text-sm mb-8">Last updated: {formatDdMmYyyy(new Date())}</p>
             
             <section className="mb-12">
               <h2 className="text-3xl font-serif font-normal text-charcoal mb-6">1. Acceptance of Terms</h2>

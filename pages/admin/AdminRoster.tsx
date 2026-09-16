@@ -7,37 +7,20 @@ import { supabase } from '../../lib/supabase';
 import { SkeletonPageHeader } from '../../components/UI/Skeleton';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { logAuditEventSafe } from '../../lib/auditLog';
+import { formatDdMmYyyy, formatDdMmYyyyHHmm } from '../../lib/dateUtils';
 
 type RosterRow = RosterImage & { groups?: Pick<Group, 'id' | 'name'> | null };
 
 function formatDateShort(dateString: string) {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  });
+  return formatDdMmYyyy(dateString);
 }
 
 function formatDateLong(dateString: string) {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
+  return formatDdMmYyyy(dateString);
 }
 
 function formatDateTime(dateString: string) {
-  const date = new Date(dateString);
-  return date.toLocaleString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-  });
+  return formatDdMmYyyyHHmm(dateString);
 }
 
 function getRosterRange(roster: RosterImage): { from: string | null; to: string | null } {

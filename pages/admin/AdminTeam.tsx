@@ -9,6 +9,7 @@ import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { buildStoredRole, getDisplayRole, inferProfileType } from '../../lib/teamMemberUtils';
 import { downloadDirectoryCsv, downloadDirectoryPdf } from '../../lib/exportDirectoryPeople';
 import { logAuditEventSafe } from '../../lib/auditLog';
+import { formatDdMmYyyy } from '../../lib/dateUtils';
 import { useAuth } from '../../context/AuthContext';
 import metadata from '../../metadata.json';
 
@@ -137,7 +138,7 @@ function formatArchivedDate(iso: string | null | undefined): string {
   if (!iso) return '—';
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return '—';
-  return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+  return formatDdMmYyyy(d) || '—';
 }
 
 export const AdminTeam = () => {

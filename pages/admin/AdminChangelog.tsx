@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Calendar,
   Download,
@@ -14,7 +14,7 @@ import { Navigate } from 'react-router-dom';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { useAuth } from '../../context/AuthContext';
 import { CHURCH_NAME, isSuperAdminUser } from '../../lib/constants';
-import { formatDateInTimezone, formatFullDateTimeInTimezone } from '../../lib/dateUtils';
+import { formatDdMmYyyyHHmm, formatFullDateTimeInTimezone } from '../../lib/dateUtils';
 import {
   CHANGELOG_AREA_LABELS,
   CHANGELOG_AREA_OPTIONS,
@@ -31,6 +31,7 @@ import {
   type ChangelogKind,
 } from '../../lib/changelog';
 import { downloadChangelogCsv, downloadChangelogPdf } from '../../lib/exportChangelog';
+import { fetchGithubChangelog, mergeChangelogEntries } from '../../lib/githubChangelog';
 
 /** Explicit dark text — Tailwind utilities have been unreliable on light admin surfaces. */
 const TEXT_PRIMARY = '#222222';
@@ -52,14 +53,7 @@ const KIND_ICON: Record<ChangelogKind, React.ReactNode> = {
 };
 
 function formatChangelogWhen(iso: string, timezone?: string): string {
-  return formatDateInTimezone(iso, timezone, {
-    weekday: 'short',
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+  return formatDdMmYyyyHHmm(iso, timezone);
 }
 
 function ChangelogEntryRow({
@@ -149,12 +143,33 @@ export const AdminChangelog = () => {
   const [monthFilter, setMonthFilter] = useState('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
+  const [githubEntries, setGithubEntries] = useState<ChangelogEntry[]>([]);
+  const [githubStatus, setGithubStatus] = useState<'loading' | 'ok' | 'error'>('loading');
+  const [githubError, setGithubError] = useState('');
 
-  const yearOptions = useMemo(() => getChangelogYearOptions(CHANGELOG_ENTRIES), []);
+  const loadGithub = (force = false) => {
+    setGithubStatus('loading');
+    void fetchGithubChangelog(force).then((result) => {
+      setGithubEntries(result.entries);
+      setGithubStatus(result.ok ? 'ok' : 'error');
+      setGithubError(result.error || '');
+    });
+  };
+
+  useEffect(() => {
+    loadGithub(false);
+  }, []);
+
+  const allEntries = useMemo(
+    () => mergeChangelogEntries(CHANGELOG_ENTRIES, githubEntries),
+    [githubEntries]
+  );
+
+  const yearOptions = useMemo(() => getChangelogYearOptions(allEntries), [allEntries]);
 
   const filteredEntries = useMemo(
     () =>
-      filterChangelogEntries(CHANGELOG_ENTRIES, {
+      filterChangelogEntries(allEntries, {
         kind: kindFilter,
         area: areaFilter,
         search: searchQuery,
@@ -163,7 +178,7 @@ export const AdminChangelog = () => {
         dateFrom,
         dateTo,
       }),
-    [kindFilter, areaFilter, searchQuery, yearFilter, monthFilter, dateFrom, dateTo]
+    [allEntries, kindFilter, areaFilter, searchQuery, yearFilter, monthFilter, dateFrom, dateTo]
   );
 
   const monthGroups = useMemo(() => groupChangelogByMonth(filteredEntries), [filteredEntries]);
@@ -178,8 +193,8 @@ export const AdminChangelog = () => {
       const monthLabel = CHANGELOG_MONTH_OPTIONS.find((o) => o.value === monthFilter)?.label ?? monthFilter;
       parts.push(`Month: ${monthLabel}`);
     }
-    if (dateFrom) parts.push(`From: ${dateFrom}`);
-    if (dateTo) parts.push(`To: ${dateTo}`);
+    if (dateFrom) parts.push(`From: ${dateFrom.split('-').reverse().join('/')}`);
+    if (dateTo) parts.push(`To: ${dateTo.split('-').reverse().join('/')}`);
     return parts.join(' · ');
   }, [kindFilter, areaFilter, searchQuery, yearFilter, monthFilter, dateFrom, dateTo]);
 
@@ -206,10 +221,21 @@ export const AdminChangelog = () => {
     <div className="space-y-6 pb-12" style={{ color: TEXT_PRIMARY }}>
       <AdminPageHeader
         title="Changelog"
-        subtitle="Product history of everything that has been changed on the website."
+        subtitle="Updates from GitHub, newest first. Refresh to pull the latest commits."
         icon={<History size={28} className="text-gold" />}
         rightSlot={
           <div className="flex gap-2 flex-wrap justify-end">
+            <button
+              type="button"
+              onClick={() => loadGithub(true)}
+              disabled={githubStatus === 'loading'}
+              className="bg-white border-2 border-gray-200 px-4 py-2 rounded-[4px] font-bold hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-2 text-sm disabled:opacity-60"
+              style={{ color: TEXT_PRIMARY }}
+              title="Reload commits from GitHub"
+            >
+              <RefreshCw size={16} className={githubStatus === 'loading' ? 'animate-spin' : ''} />
+              {githubStatus === 'loading' ? 'Updating…' : 'Refresh GitHub'}
+            </button>
             <button
               type="button"
               onClick={() => downloadChangelogCsv(filteredEntries, filenameBase, exportMeta())}
@@ -385,7 +411,9 @@ export const AdminChangelog = () => {
           </div>
           <p className="text-xs" style={{ color: TEXT_MUTED }}>
             {filteredEntries.length} change{filteredEntries.length === 1 ? '' : 's'}
-            {filteredEntries.length !== CHANGELOG_ENTRIES.length ? ` of ${CHANGELOG_ENTRIES.length}` : ''}
+            {filteredEntries.length !== allEntries.length ? ` of ${allEntries.length}` : ''}
+            {githubStatus === 'ok' ? ' · GitHub connected' : ''}
+            {githubStatus === 'error' ? ` · GitHub unavailable${githubError ? ` (${githubError})` : ''}` : ''}
           </p>
         </div>
 

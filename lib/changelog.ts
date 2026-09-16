@@ -805,18 +805,23 @@ export function filterChangelogEntries(entries: ChangelogEntry[], filters: Chang
 
 export function groupChangelogByMonth(entries: ChangelogEntry[]): { monthKey: string; label: string; entries: ChangelogEntry[] }[] {
   const groups = new Map<string, ChangelogEntry[]>();
-  for (const entry of entries) {
+  const sorted = [...entries].sort(
+    (a, b) => new Date(b.changedAt).getTime() - new Date(a.changedAt).getTime()
+  );
+  for (const entry of sorted) {
     const monthKey = entry.changedAt.slice(0, 7);
     const list = groups.get(monthKey);
     if (list) list.push(entry);
     else groups.set(monthKey, [entry]);
   }
-  return Array.from(groups.entries()).map(([monthKey, monthEntries]) => {
-    const [year, month] = monthKey.split('-').map(Number);
-    const label = new Date(year, month - 1, 1).toLocaleString('en-NZ', {
-      month: 'long',
-      year: 'numeric',
+  return Array.from(groups.entries())
+    .sort((a, b) => b[0].localeCompare(a[0]))
+    .map(([monthKey, monthEntries]) => {
+      const [year, month] = monthKey.split('-').map(Number);
+      const label = new Date(year, month - 1, 1).toLocaleString('en-NZ', {
+        month: 'long',
+        year: 'numeric',
+      });
+      return { monthKey, label, entries: monthEntries };
     });
-    return { monthKey, label, entries: monthEntries };
-  });
 }

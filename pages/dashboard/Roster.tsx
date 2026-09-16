@@ -5,6 +5,7 @@ import { supabase } from '../../lib/supabase';
 import { SkeletonPageHeader } from '../../components/UI/Skeleton';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { useAuth } from '../../context/AuthContext';
+import { formatDdMmYyyy } from '../../lib/dateUtils';
 
 export const Roster = () => {
   const { user } = useAuth();
@@ -139,24 +140,9 @@ export const Roster = () => {
     run();
   }, [user?.id]);
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      weekday: 'long', 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    });
-  };
+  const formatDate = (dateString: string) => formatDdMmYyyy(dateString);
 
-  const formatDateShort = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric',
-      year: 'numeric'
-    });
-  };
+  const formatDateShort = (dateString: string) => formatDdMmYyyy(dateString);
 
   const formatRangeShort = (roster: RosterImage) => {
     const from = roster.date_from || roster.date || null;

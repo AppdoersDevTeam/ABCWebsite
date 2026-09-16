@@ -1,4 +1,5 @@
 import type { Event } from '../types';
+import { formatDdMmYyyy } from './dateUtils';
 
 export function getEventStartDate(event: Event): string {
   return event.start_date || event.date;
@@ -21,20 +22,16 @@ export function isMultiDayEvent(event: Event): boolean {
 }
 
 function formatDateCompact(dateString: string): string {
-  return new Date(`${dateString}T12:00:00`).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-  });
+  return formatDdMmYyyy(dateString);
 }
 
 function formatDateLong(dateString: string, includeYear = true): string {
-  const options: Intl.DateTimeFormatOptions = {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-    ...(includeYear ? { year: 'numeric' } : {}),
-  };
-  return new Date(`${dateString}T12:00:00`).toLocaleDateString('en-US', options);
+  const formatted = formatDdMmYyyy(dateString);
+  if (!includeYear) {
+    const parts = formatted.split('/');
+    if (parts.length === 3) return `${parts[0]}/${parts[1]}`;
+  }
+  return formatted;
 }
 
 export function formatEventDateTimePoint(
@@ -149,25 +146,16 @@ export function formatTimeForDisplay(time: string): string {
 
 export function formatEventDateRange(
   event: Event,
-  options?: Intl.DateTimeFormatOptions
+  _options?: Intl.DateTimeFormatOptions
 ): string {
   const start = getEventStartDate(event);
   const end = getEventEndDate(event);
-  const defaultOptions: Intl.DateTimeFormatOptions = {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-    ...options,
-  };
 
   if (start === end) {
-    return new Date(`${start}T12:00:00`).toLocaleDateString('en-US', defaultOptions);
+    return formatDdMmYyyy(start);
   }
 
-  const startFormatted = new Date(`${start}T12:00:00`).toLocaleDateString('en-US', defaultOptions);
-  const endFormatted = new Date(`${end}T12:00:00`).toLocaleDateString('en-US', defaultOptions);
-  return `${startFormatted} – ${endFormatted}`;
+  return `${formatDdMmYyyy(start)} – ${formatDdMmYyyy(end)}`;
 }
 
 export function formatEventDateRangeShort(event: Event): string {
@@ -175,21 +163,10 @@ export function formatEventDateRangeShort(event: Event): string {
   const end = getEventEndDate(event);
 
   if (start === end) {
-    return new Date(`${start}T12:00:00`).toLocaleDateString('en-US', {
-      weekday: 'long',
-      month: 'long',
-      day: 'numeric',
-    });
+    return formatDdMmYyyy(start);
   }
 
-  const dateOptions: Intl.DateTimeFormatOptions = {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-  };
-  const startFormatted = new Date(`${start}T12:00:00`).toLocaleDateString('en-US', dateOptions);
-  const endFormatted = new Date(`${end}T12:00:00`).toLocaleDateString('en-US', dateOptions);
-  return `${startFormatted} – ${endFormatted}`;
+  return `${formatDdMmYyyy(start)} – ${formatDdMmYyyy(end)}`;
 }
 
 export function formatEventTimeRange(event: Event): string {
@@ -201,9 +178,10 @@ export function formatEventTimeRange(event: Event): string {
 
 export function formatEventDateBadge(dateString: string): { day: string; month: string } {
   const date = new Date(`${dateString}T12:00:00`);
-  const day = date.getDate().toString().padStart(2, '0');
-  const month = date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
-  return { day, month };
+  const formatted = formatDdMmYyyy(dateString);
+  const [day] = formatted.split('/');
+  const month = date.toLocaleDateString('en-NZ', { month: 'short' }).toUpperCase();
+  return { day: day || date.getDate().toString().padStart(2, '0'), month };
 }
 
 /** Card row label, e.g. "Oct 12, 10:00 AM" or "Oct 2, 5:00 PM – Oct 4, 2:00 PM" */

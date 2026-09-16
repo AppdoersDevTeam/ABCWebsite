@@ -7,7 +7,7 @@ import { supabase } from '../../lib/supabase';
 import { displayName, filterUsersForAdminView, isPendingApproval } from '../../lib/constants';
 import { User } from '../../types';
 import { SkeletonPageHeader, SkeletonCard, SkeletonUserCard, SkeletonStatsCard } from '../../components/UI/Skeleton';
-import { formatRelativeDateInTimezone, formatFullDateTimeInTimezone, formatWeekDate, resolveNewsletterWeekDate } from '../../lib/dateUtils';
+import { formatRelativeDateInTimezone, formatFullDateTimeInTimezone, formatWeekDate, formatDdMmYyyy, resolveNewsletterWeekDate } from '../../lib/dateUtils';
 import { fetchLatestNewsletter } from '../../lib/newsletters';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { logAuditEventSafe } from '../../lib/auditLog';
@@ -296,9 +296,7 @@ export const AdminOverview = () => {
       nextSunday.setHours(10, 0, 0, 0); // 10 AM
       
       // Always use calculated next Sunday - format as "dd month"
-      const month = nextSunday.toLocaleDateString('en-US', { month: 'long' });
-      const day = nextSunday.getDate();
-      setNextService(`${day} ${month}`);
+      setNextService(formatDdMmYyyy(nextSunday));
 
       // Fetch last newsletter date
       const latestNewsletter = await fetchLatestNewsletter();
@@ -308,7 +306,7 @@ export const AdminOverview = () => {
         setLastNewsletterDate(
           weekDate
             ? formatWeekDate(weekDate)
-            : new Date(latestNewsletter.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+            : formatDdMmYyyy(latestNewsletter.created_at)
         );
       } else {
         setLastNewsletterTitle(null);
@@ -328,7 +326,7 @@ export const AdminOverview = () => {
         setLastDevotionalDate(
           Number.isNaN(week.getTime())
             ? devotionals[0].week_date
-            : week.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+            : formatDdMmYyyy(week)
         );
       } else {
         setLastDevotionalDate(null);

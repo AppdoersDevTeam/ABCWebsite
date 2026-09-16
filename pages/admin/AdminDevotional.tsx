@@ -9,6 +9,7 @@ import { Devotional as DevotionalType } from '../../types';
 import { SkeletonPageHeader, SkeletonCard } from '../../components/UI/Skeleton';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { logAuditEventSafe } from '../../lib/auditLog';
+import { formatWeekDate } from '../../lib/dateUtils';
 import { notifyCalendarChanged } from '../../lib/calendarItems';
 import {
   ADMIN_DRAFT_KEYS,
@@ -72,12 +73,6 @@ function storagePathFromPublicUrl(pdfUrl: string, bucket: string): string | null
   const parts = pdfUrl.split(`/${bucket}/`);
   if (parts.length > 1) return decodeURIComponent(parts[1].split('?')[0]);
   return pdfUrl.split('/').pop() || null;
-}
-
-function formatWeekDate(weekDate: string): string {
-  const d = new Date(`${weekDate}T00:00:00`);
-  if (Number.isNaN(d.getTime())) return weekDate;
-  return d.toLocaleDateString('en-NZ', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
 export const AdminDevotional = () => {

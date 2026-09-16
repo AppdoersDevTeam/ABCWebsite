@@ -1,10 +1,50 @@
 /**
  * Timezone-aware date formatting utilities
- * 
- * These functions handle displaying dates in the appropriate timezone:
- * - For admins: Display dates in the admin's current timezone
- * - For users: Display dates in their own timezone (if stored) or browser timezone
+ *
+ * Display dates as dd/mm/yyyy (day/month/year) across the site, PDFs, and CSVs.
+ * HTML <input type="date"> still stores ISO yyyy-mm-dd; browsers follow the page locale (en-NZ).
  */
+
+/** en-GB formats numeric dates as dd/mm/yyyy. */
+export const DATE_DISPLAY_LOCALE = 'en-GB';
+
+function parseDisplayDate(input: Date | string | undefined): Date | null {
+  if (!input) return null;
+  if (input instanceof Date) return Number.isNaN(input.getTime()) ? null : input;
+  const trimmed = input.trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+    const d = new Date(`${trimmed}T12:00:00`);
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+  const d = new Date(trimmed);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+/** Calendar date as dd/mm/yyyy. */
+export function formatDdMmYyyy(input: Date | string | undefined, timeZone?: string): string {
+  const date = parseDisplayDate(input);
+  if (!date) return '';
+  return new Intl.DateTimeFormat(DATE_DISPLAY_LOCALE, {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    ...(timeZone ? { timeZone } : {}),
+  }).format(date);
+}
+
+/** Date and time as dd/mm/yyyy HH:mm (24-hour). */
+export function formatDdMmYyyyHHmm(input: Date | string | undefined, timeZone?: string): string {
+  const date = parseDisplayDate(input);
+  if (!date) return '';
+  const day = formatDdMmYyyy(date, timeZone);
+  const time = new Intl.DateTimeFormat(DATE_DISPLAY_LOCALE, {
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+    ...(timeZone ? { timeZone } : {}),
+  }).format(date);
+  return `${day} ${time}`;
+}
 
 /**
  * Get the user's current timezone (IANA timezone identifier)
@@ -41,15 +81,16 @@ export const formatDateInTimezone = (
     
     const defaultOptions: Intl.DateTimeFormatOptions = {
       year: 'numeric',
-      month: 'short',
-      day: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
       hour: '2-digit',
       minute: '2-digit',
+      hourCycle: 'h23',
       timeZone: tz,
       ...options,
     };
     
-    return new Intl.DateTimeFormat('en-US', defaultOptions).format(date);
+    return new Intl.DateTimeFormat(DATE_DISPLAY_LOCALE, defaultOptions).format(date);
   } catch (error) {
     console.error('Error formatting date in timezone:', error);
     return 'Invalid date';
@@ -106,11 +147,7 @@ export const formatRelativeDateInTimezone = (
     }
     
     // For older dates, show the formatted date in admin's timezone
-    return formatDateInTimezone(dateString, tz, {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
+    return formatDdMmYyyy(dateString, tz);
   } catch (error) {
     console.error('Error formatting relative date in timezone:', error);
     return 'Unknown';
@@ -139,11 +176,12 @@ export const formatFullDateTimeInTimezone = (
     
     const formatted = formatDateInTimezone(dateString, tz, {
       year: 'numeric',
-      month: 'short',
-      day: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit',
+      hourCycle: 'h23',
       timeZoneName: 'short',
     });
     
@@ -151,10 +189,11 @@ export const formatFullDateTimeInTimezone = (
     if (originalTimezone && originalTimezone !== tz) {
       const originalFormatted = formatDateInTimezone(dateString, originalTimezone, {
         year: 'numeric',
-        month: 'short',
-        day: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
         hour: '2-digit',
         minute: '2-digit',
+        hourCycle: 'h23',
         timeZoneName: 'short',
       });
       return `${formatted} (created: ${originalFormatted})`;
@@ -172,11 +211,9 @@ const MONTH_NAMES = [
   'July', 'August', 'September', 'October', 'November', 'December',
 ] as const;
 
-/** Format a DATE-only value (YYYY-MM-DD) for display, e.g. "14 Sep 2026" */
+/** Format a DATE-only value (YYYY-MM-DD) for display as dd/mm/yyyy */
 export function formatWeekDate(weekDate: string): string {
-  const d = new Date(`${weekDate}T00:00:00`);
-  if (Number.isNaN(d.getTime())) return weekDate;
-  return d.toLocaleDateString('en-NZ', { day: 'numeric', month: 'short', year: 'numeric' });
+  return formatDdMmYyyy(weekDate) || weekDate;
 }
 
 export function monthYearFromWeekDate(weekDate: string): { month: string; year: number } {

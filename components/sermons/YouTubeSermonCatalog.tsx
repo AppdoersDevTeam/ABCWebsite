@@ -12,6 +12,8 @@ import {
   type YouTubePlaylist,
 } from '../../lib/youtube';
 
+import { formatDdMmYyyy } from '../../lib/dateUtils';
+
 const ALL_VIDEOS_PLAYLIST_ID = '__all_videos__';
 const PLAYLIST_PILL_MAX_COUNT = 4;
 const PLAYLIST_PILL_MAX_TITLE_LENGTH = 22;
@@ -264,11 +266,7 @@ export const YouTubeSermonCatalog = ({ variant = 'public' }: YouTubeSermonCatalo
     if (!dateString) return 'Date not available';
     try {
       const date = new Date(dateString);
-      return date.toLocaleDateString('en-NZ', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      });
+      return formatDdMmYyyy(date);
     } catch {
       return dateString;
     }

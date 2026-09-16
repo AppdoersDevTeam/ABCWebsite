@@ -10,6 +10,7 @@ import { EventsCalendarGrid, EventsCalendarGridSkeleton } from '../../components
 import { EventImage } from '../../components/UI/EventImage';
 import { EVENT_IMAGE } from '../../lib/eventImageSpec';
 import { downloadEventRsvpsCsv, downloadEventRsvpsPdf } from '../../lib/exportEventRsvps';
+import { formatDdMmYyyyHHmm } from '../../lib/dateUtils';
 import {
   buildEventDateTimePayload,
   parseTimeToInputValue,
@@ -783,7 +784,7 @@ export const AdminEvents = () => {
                       <td className="px-3 py-2 text-sm text-charcoal font-bold">{r.name}</td>
                       <td className="px-3 py-2 text-sm text-neutral">{r.email}</td>
                       <td className="px-3 py-2 text-sm text-neutral">
-                        {new Date(r.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                        {formatDdMmYyyyHHmm(r.created_at)}
                       </td>
                     </tr>
                   ))}

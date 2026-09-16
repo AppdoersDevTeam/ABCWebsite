@@ -2,6 +2,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import type { TeamMember } from '../types';
 import { getDisplayRole, inferProfileType } from './teamMemberUtils';
+import { formatDdMmYyyyHHmm } from './dateUtils';
 
 type ExportRow = {
   Name: string;
@@ -25,8 +26,7 @@ const PROFILE_LABEL: Record<ReturnType<typeof inferProfileType>, string> = {
 };
 
 function formatLocalDateTime(d: Date): string {
-  const pad = (n: number) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  return formatDdMmYyyyHHmm(d);
 }
 
 function toRows(members: TeamMember[]): ExportRow[] {
