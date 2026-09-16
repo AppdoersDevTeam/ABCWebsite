@@ -849,12 +849,10 @@ export const AdminUsers = () => {
                     : 'border-gray-200 hover:border-gold'
                 }`}
               >
-                <div className="flex items-center justify-between gap-1.5">
-                  <div className="min-w-0">
-                    <p className="text-[13px] leading-tight text-charcoal font-bold">{card.label}</p>
-                    <p className={`text-[13px] font-bold mt-0.5 ${card.valueClass}`}>{card.value}</p>
-                  </div>
+                <div className="flex items-center gap-2">
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${card.iconWrap}`}>{card.icon}</div>
+                  <p className="text-[13px] leading-tight text-charcoal font-bold min-w-0 truncate flex-1">{card.label}</p>
+                  <p className={`text-[18px] font-bold shrink-0 ${card.valueClass}`}>{card.value}</p>
                 </div>
               </button>
             );
