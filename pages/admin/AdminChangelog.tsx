@@ -221,7 +221,7 @@ export const AdminChangelog = () => {
     <div className="space-y-6 pb-12" style={{ color: TEXT_PRIMARY }}>
       <AdminPageHeader
         title="Changelog"
-        subtitle="Updates from GitHub, newest first. Refresh to pull the latest commits."
+        subtitle="Curated product history plus GitHub commits, newest first. Refresh to pull the latest commits."
         icon={<History size={28} className="text-gold" />}
         rightSlot={
           <div className="flex gap-2 flex-wrap justify-end">

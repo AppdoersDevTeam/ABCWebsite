@@ -1,0 +1,1805 @@
+{
+  "project": "ashburton-baptist-church",
+  "name": "Ashburton Baptist Church",
+  "formatVersion": 1,
+  "timezone": "Pacific/Auckland",
+  "versionSource": "package.json",
+  "entries": [
+    {
+      "id": "CHG-2026-0916-001",
+      "date": "2026-09-16",
+      "time": "22:30:04",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-16T10:30:04.563Z",
+      "version": "1.0.0",
+      "type": "infrastructure",
+      "area": "system",
+      "title": "Development governance, changelog, and CI validation",
+      "request": "Make a final architectural decision and implement production-grade development governance: changelog, Change IDs, semantic versioning, migration validation, testing, GitHub Actions, and a mandatory agent workflow.",
+      "changes": [
+        "Added AGENTS.md as the authoritative AI development-governance document.",
+        "Created CHANGELOG.json as the canonical machine-readable history and CHANGELOG.md as the generated human-readable form.",
+        "Migrated all 60 existing Super Admin product-changelog entries from lib/changelog.ts, preserving original IDs, titles, summaries, details, authors, areas, and timestamps.",
+        "Added Change ID generation (CHG-YYYY-MMDD-NNN) and validation that changelog Markdown and JSON stay synchronized.",
+        "Set package.json to 1.0.0 as the first official SemVer and the single version source.",
+        "Added Node validation scripts for changelog, version, migrations, and requiring a changelog update when application files change.",
+        "Added a GitHub Actions CI workflow that runs validation, governance tests, and the production build.",
+        "Pointed the Super Admin changelog UI at CHANGELOG.json instead of a second curated list.",
+        "Documented supabase/migrations/ for new SQL; left historical root SQL files in place.",
+        "Stopped tracking .env and added .env.example so secrets are not committed going forward."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "Governance tests (node --test) and vite build were executed. Project-wide tsc already fails on pre-existing application errors unrelated to this change. No ESLint config exists. No application integration or e2e suite exists."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-09-16-changelog-date-filters",
+      "date": "2026-09-16",
+      "time": "19:20:00",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-16T07:20:00+00:00",
+      "version": "0.0.0",
+      "type": "added",
+      "area": "admin",
+      "title": "Changelog year, month, and date range filters",
+      "request": "Super Admins can narrow the Changelog by calendar year, month, and/or a from–to date range. Exports include only the filtered rows.",
+      "changes": [
+        "Super Admins can narrow the Changelog by calendar year, month, and/or a from–to date range. Exports include only the filtered rows."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-09-16-changelog-contrast",
+      "date": "2026-09-16",
+      "time": "19:08:00",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-16T07:08:00+00:00",
+      "version": "0.0.0",
+      "type": "fixed",
+      "area": "admin",
+      "title": "Changelog text contrast on light background",
+      "request": "Changelog titles, summaries, and meta text use explicit dark colours so they stay readable on the white admin surface.",
+      "changes": [
+        "Changelog titles, summaries, and meta text use explicit dark colours so they stay readable on the white admin surface."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-09-16-changelog-layout",
+      "date": "2026-09-16",
+      "time": "18:58:00",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-16T06:58:00+00:00",
+      "version": "0.0.0",
+      "type": "changed",
+      "area": "admin",
+      "title": "Clearer Changelog timeline layout",
+      "request": "Changelog entries use a vertical timeline with a clear title, typed badges, and a tidy footer for when, who, and area.",
+      "changes": [
+        "Month headers show how many updates are in that period.",
+        "Type badges include icons so colour is not the only cue."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-09-16-changelog-export",
+      "date": "2026-09-16",
+      "time": "18:53:00",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-16T06:53:00+00:00",
+      "version": "0.0.0",
+      "type": "added",
+      "area": "admin",
+      "title": "Export Changelog to Excel and PDF",
+      "request": "Super Admins can download the changelog as Excel (CSV) or PDF. Exports include only the rows matching the current type, area, and search filters.",
+      "changes": [
+        "Export buttons sit in the Changelog page header, next to the title."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-09-16-changelog-datetime-user",
+      "date": "2026-09-16",
+      "time": "18:49:00",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-16T06:49:00+00:00",
+      "version": "0.0.0",
+      "type": "changed",
+      "area": "admin",
+      "title": "Changelog shows date, time, and who made each change",
+      "request": "Every changelog row now includes the exact day and time the change shipped and the person or team who made it.",
+      "changes": [
+        "Times display in your admin timezone (same as System Logs).",
+        "Search includes the user name as well as title and summary."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-09-16-superadmin-changelog",
+      "date": "2026-09-16",
+      "time": "18:30:16",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-16T06:30:16+00:00",
+      "version": "0.0.0",
+      "type": "added",
+      "area": "admin",
+      "title": "Super Admin Changelog tab in the admin dashboard",
+      "request": "A Changelog tab sits next to Logs in the admin left menu. Only Super Admins can see or open it.",
+      "changes": [
+        "Regular admins do not see the tab and are redirected to Overview if they guess the URL.",
+        "Filter by type, area, or search. Entries are grouped by month.",
+        "This is the product history — live activity still lives under Logs."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-09-15-hold-access",
+      "date": "2026-09-15",
+      "time": "02:35:23",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-15T02:35:23+12:00",
+      "version": "0.0.0",
+      "type": "added",
+      "area": "users",
+      "title": "Hold Access for existing accounts",
+      "request": "Admins can place website access on hold for security, separate from first-time pending approval.",
+      "changes": [
+        "Held users see a distinct pending-access screen instead of the member portal.",
+        "An email notifies the person when access is held.",
+        "User Management includes a Held filter, export status, and restore flow."
+      ],
+      "changedBy": "Fabiano J A da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-09-15-admin-role-emails",
+      "date": "2026-09-15",
+      "time": "02:13:50",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-15T02:13:50+12:00",
+      "version": "0.0.0",
+      "type": "added",
+      "area": "users",
+      "title": "Emails when admin access is granted or removed",
+      "request": "Promoting or demoting an admin now sends a confirmation email to that person.",
+      "changes": [
+        "Promoting or demoting an admin now sends a confirmation email to that person."
+      ],
+      "changedBy": "Fabiano J A da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-09-15-delete-user",
+      "date": "2026-09-14",
+      "time": "23:55:07",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-14T23:55:07+12:00",
+      "version": "0.0.0",
+      "type": "added",
+      "area": "users",
+      "title": "Delete a user from User Management",
+      "request": "Admins can remove an account after confirmation. The person receives an email confirming deletion.",
+      "changes": [
+        "You cannot delete your own account while signed in.",
+        "Super Admin and the Appdoers service account cannot be deleted."
+      ],
+      "changedBy": "Fabiano J A da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-09-15-user-export",
+      "date": "2026-09-15",
+      "time": "02:48:09",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-15T02:48:09+12:00",
+      "version": "0.0.0",
+      "type": "added",
+      "area": "users",
+      "title": "Export User Management lists to CSV and PDF",
+      "request": "Download the currently visible user list with role, status, leadership link, and join date.",
+      "changes": [
+        "Download the currently visible user list with role, status, leadership link, and join date."
+      ],
+      "changedBy": "Fabiano J A da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-09-14-annual-calendar",
+      "date": "2026-09-14",
+      "time": "23:10:29",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-14T23:10:29+12:00",
+      "version": "0.0.0",
+      "type": "added",
+      "area": "calendar",
+      "title": "Annual Calendar in admin and member portals",
+      "request": "A year / month / week calendar shows events, sermons, devotionals, and newsletters together.",
+      "changes": [
+        "Coloured markers distinguish item types. Open a day, then tap an item to view it.",
+        "The calendar updates when events, devotionals, or newsletters change."
+      ],
+      "changedBy": "Fabiano J A da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-09-14-newsletters-week-date",
+      "date": "2026-09-14",
+      "time": "19:05:44",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-14T19:05:44+12:00",
+      "version": "0.0.0",
+      "type": "changed",
+      "area": "newsletters",
+      "title": "Newsletters match devotionals: title, week date, latest-first archive",
+      "request": "Admin newsletter publishing now uses a title and week date, with newest issues listed first.",
+      "changes": [
+        "Admin newsletter publishing now uses a title and week date, with newest issues listed first."
+      ],
+      "changedBy": "Fabiano J A da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-09-14-dashboard-nav-icons",
+      "date": "2026-09-14",
+      "time": "22:28:05",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-14T22:28:05+12:00",
+      "version": "0.0.0",
+      "type": "changed",
+      "area": "admin",
+      "title": "Sidebar labels and icons for Prayers and Newsletters",
+      "request": "Prayers uses a praying-hands icon; Newsletters has a distinct newspaper icon and colour.",
+      "changes": [
+        "Prayers uses a praying-hands icon; Newsletters has a distinct newspaper icon and colour."
+      ],
+      "changedBy": "Fabiano J A da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-09-14-page-headers",
+      "date": "2026-09-15",
+      "time": "03:14:00",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-15T03:14:00+12:00",
+      "version": "0.0.0",
+      "type": "changed",
+      "area": "admin",
+      "title": "Shared page headers across admin and member sections",
+      "request": "Left-menu pages use a consistent title, subtitle, and icon header.",
+      "changes": [
+        "Left-menu pages use a consistent title, subtitle, and icon header."
+      ],
+      "changedBy": "Fabiano J A da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-09-14-pending-oauth",
+      "date": "2026-09-15",
+      "time": "00:53:03",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-15T00:53:03+12:00",
+      "version": "0.0.0",
+      "type": "fixed",
+      "area": "auth",
+      "title": "Pending approval, OAuth, and HashRouter reliability",
+      "request": "Sign-in callbacks, password recovery, and the pending-approval screen no longer drop people on a blank or looping page.",
+      "changes": [
+        "Sign-in callbacks, password recovery, and the pending-approval screen no longer drop people on a blank or looping page."
+      ],
+      "changedBy": "Fabiano J A da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-09-14-directory-linking",
+      "date": "2026-09-15",
+      "time": "03:09:05",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-15T03:09:05+12:00",
+      "version": "0.0.0",
+      "type": "changed",
+      "area": "leadership",
+      "title": "Leadership linking from User Management",
+      "request": "Link a login to a Leadership person so ministry memberships and rosters apply. Recheck matches or pick a person by hand.",
+      "changes": [
+        "Link a login to a Leadership person so ministry memberships and rosters apply. Recheck matches or pick a person by hand."
+      ],
+      "changedBy": "Fabiano J A da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-08-28-watch-sermons-dashboard",
+      "date": "2026-08-28",
+      "time": "10:15:25",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-08-28T10:15:25+12:00",
+      "version": "0.0.0",
+      "type": "added",
+      "area": "sermons",
+      "title": "Watch Sermons page in the member dashboard",
+      "request": "Members can watch the church YouTube sermons from inside the member portal.",
+      "changes": [
+        "Members can watch the church YouTube sermons from inside the member portal."
+      ],
+      "changedBy": "Sara A. da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-08-28-overview-typography",
+      "date": "2026-08-28",
+      "time": "10:19:04",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-08-28T10:19:04+12:00",
+      "version": "0.0.0",
+      "type": "changed",
+      "area": "admin",
+      "title": "Overview card typography",
+      "request": "Overview titles and labels are easier to read; all-caps labels are no longer forced.",
+      "changes": [
+        "Overview titles and labels are easier to read; all-caps labels are no longer forced."
+      ],
+      "changedBy": "Sara A. da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-08-27-devotional-of-the-week",
+      "date": "2026-08-27",
+      "time": "15:53:00",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-08-27T15:53:00+12:00",
+      "version": "0.0.0",
+      "type": "added",
+      "area": "devotionals",
+      "title": "Devotional of the Week with in-page PDF reader",
+      "request": "Admins upload a weekly PDF with title, subtitle, and week date. Members read it in the portal viewer — no download or new-tab link.",
+      "changes": [
+        "Admins can edit an existing issue or replace the PDF.",
+        "Upload drafts persist if you leave the form and come back.",
+        "Archives are scrollable and listed newest first."
+      ],
+      "changedBy": "Sara A. da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-08-27-pdf-viewer-fixes",
+      "date": "2026-08-27",
+      "time": "16:39:13",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-08-27T16:39:13+12:00",
+      "version": "0.0.0",
+      "type": "fixed",
+      "area": "system",
+      "title": "PDF viewer blank screens, flicker, and mobile layout",
+      "request": "Leaving a PDF, switching tabs, or reading on a phone no longer whites out the page or flashes the document.",
+      "changes": [
+        "Leaving a PDF, switching tabs, or reading on a phone no longer whites out the page or flashes the document."
+      ],
+      "changedBy": "Sara A. da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-08-27-turnstile",
+      "date": "2026-08-23",
+      "time": "14:11:14",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-08-23T14:11:14+12:00",
+      "version": "0.0.0",
+      "type": "added",
+      "area": "auth",
+      "title": "Cloudflare Turnstile on sign-in and admin email actions",
+      "request": "CAPTCHA protects login, signup, password reset, and related admin email flows from automated abuse.",
+      "changes": [
+        "CAPTCHA protects login, signup, password reset, and related admin email flows from automated abuse."
+      ],
+      "changedBy": "Sara A. da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-08-27-user-actions-menu",
+      "date": "2026-08-27",
+      "time": "15:23:49",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-08-27T15:23:49+12:00",
+      "version": "0.0.0",
+      "type": "changed",
+      "area": "users",
+      "title": "User Management actions collapsed into a dropdown",
+      "request": "Pending user rows fit on smaller screens; actions sit in a single menu per person.",
+      "changes": [
+        "Pending user rows fit on smaller screens; actions sit in a single menu per person."
+      ],
+      "changedBy": "Sara A. da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-08-27-approval-email-errors",
+      "date": "2026-08-27",
+      "time": "15:29:16",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-08-27T15:29:16+12:00",
+      "version": "0.0.0",
+      "type": "fixed",
+      "area": "users",
+      "title": "Clear errors when approval emails fail",
+      "request": "If an approval or review email cannot send, the admin sees the failure instead of a silent miss.",
+      "changes": [
+        "If an approval or review email cannot send, the admin sees the failure instead of a silent miss."
+      ],
+      "changedBy": "Sara A. da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-08-27-multiday-events",
+      "date": "2026-08-27",
+      "time": "16:23:22",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-08-27T16:23:22+12:00",
+      "version": "0.0.0",
+      "type": "changed",
+      "area": "events",
+      "title": "Clearer multi-day event schedules",
+      "request": "Event pages show start and end dates and times without unreadable contrast.",
+      "changes": [
+        "Event pages show start and end dates and times without unreadable contrast."
+      ],
+      "changedBy": "Sara A. da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-06-26-remove-community-lunch",
+      "date": "2026-06-26",
+      "time": "10:35:46",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-06-26T10:35:46+12:00",
+      "version": "0.0.0",
+      "type": "changed",
+      "area": "events",
+      "title": "Community Lunch removed from event categories",
+      "request": "Community Lunch is no longer listed as an event category across the site.",
+      "changes": [
+        "Community Lunch is no longer listed as an event category across the site."
+      ],
+      "changedBy": "Sara A. da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-06-23-verse-of-the-day",
+      "date": "2026-06-23",
+      "time": "20:23:38",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-06-23T20:23:38+12:00",
+      "version": "0.0.0",
+      "type": "added",
+      "area": "public",
+      "title": "Verse of the day on the member dashboard",
+      "request": "The member Overview rotates a daily verse drawn from the ACTS Prayers set.",
+      "changes": [
+        "The member Overview rotates a daily verse drawn from the ACTS Prayers set."
+      ],
+      "changedBy": "Sara A. da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-06-23-audit-logs",
+      "date": "2026-06-23",
+      "time": "20:08:23",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-06-23T20:08:23+12:00",
+      "version": "0.0.0",
+      "type": "added",
+      "area": "admin",
+      "title": "System Logs audit trail",
+      "request": "Admins can review sign-ins, sign-ups, admin changes, member activity, and RSVPs, then filter and export to CSV.",
+      "changes": [
+        "Database triggers record many table changes automatically.",
+        "Logs cannot be edited or deleted in the portal."
+      ],
+      "changedBy": "Sara A. da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-06-23-event-images",
+      "date": "2026-06-23",
+      "time": "19:49:21",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-06-23T19:49:21+12:00",
+      "version": "0.0.0",
+      "type": "fixed",
+      "area": "events",
+      "title": "Event posters display at the right size without stretching",
+      "request": "Calendar cards, detail pages, and uploads use a 16:9 poster. Any photo format is accepted; the Watch Online button links correctly.",
+      "changes": [
+        "Calendar cards, detail pages, and uploads use a 16:9 poster. Any photo format is accepted; the Watch Online button links correctly."
+      ],
+      "changedBy": "Sara A. da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-06-22-production-seo",
+      "date": "2026-06-22",
+      "time": "19:45:28",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-06-22T19:45:28+12:00",
+      "version": "0.0.0",
+      "type": "changed",
+      "area": "public",
+      "title": "Production domain, SEO, and leadership pages",
+      "request": "The live site uses ashburtonbaptist.co.nz with search metadata. Placeholder leadership pages were removed.",
+      "changes": [
+        "The live site uses ashburtonbaptist.co.nz with search metadata. Placeholder leadership pages were removed."
+      ],
+      "changedBy": "Sara A. da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-06-21-mobile-dashboards",
+      "date": "2026-06-21",
+      "time": "19:24:16",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-06-21T19:24:16+12:00",
+      "version": "0.0.0",
+      "type": "fixed",
+      "area": "admin",
+      "title": "Admin and member dashboards work on phones",
+      "request": "Mobile layouts scroll and stack correctly without changing the desktop layout.",
+      "changes": [
+        "Mobile layouts scroll and stack correctly without changing the desktop layout."
+      ],
+      "changedBy": "Sara A. da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-06-21-password-reset-hashrouter",
+      "date": "2026-06-21",
+      "time": "18:43:59",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-06-21T18:43:59+12:00",
+      "version": "0.0.0",
+      "type": "fixed",
+      "area": "auth",
+      "title": "Password reset works with HashRouter and recovery tokens",
+      "request": "Reset links from email complete on the HashRouter site. Mobile no longer hangs on an infinite loading state.",
+      "changes": [
+        "Reset links from email complete on the HashRouter site. Mobile no longer hangs on an infinite loading state."
+      ],
+      "changedBy": "Sara A. da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-06-21-shared-event-calendar",
+      "date": "2026-06-21",
+      "time": "18:24:06",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-06-21T18:24:06+12:00",
+      "version": "0.0.0",
+      "type": "changed",
+      "area": "events",
+      "title": "Shared event calendar grid for admin and members",
+      "request": "Admin and member event calendars use the same grid, cards, and category filters.",
+      "changes": [
+        "Admin and member event calendars use the same grid, cards, and category filters."
+      ],
+      "changedBy": "Sara A. da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-06-21-statement-of-faith",
+      "date": "2026-06-21",
+      "time": "16:46:36",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-06-21T16:46:36+12:00",
+      "version": "0.0.0",
+      "type": "added",
+      "area": "public",
+      "title": "Statement of Faith page",
+      "request": "The public beliefs page publishes the adopted church document, with a congregation photo hero and a mobile article picker.",
+      "changes": [
+        "The public beliefs page publishes the adopted church document, with a congregation photo hero and a mobile article picker."
+      ],
+      "changedBy": "Sara A. da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-06-18-contact-form",
+      "date": "2026-06-18",
+      "time": "16:50:55",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-06-18T16:50:55+12:00",
+      "version": "0.0.0",
+      "type": "changed",
+      "area": "public",
+      "title": "Contact form connect-card fields and direct pastor email",
+      "request": "The contact form is a multi-step connect card (first/last name, optional phone, spouse, extra details) and emails the pastor directly.",
+      "changes": [
+        "NZ mobile, landline, and toll-free numbers are accepted.",
+        "Need Prayer was simplified; the Contact navbar dropdown was removed."
+      ],
+      "changedBy": "Sara A. da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-06-18-signup-email",
+      "date": "2026-06-18",
+      "time": "18:05:17",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-06-18T18:05:17+12:00",
+      "version": "0.0.0",
+      "type": "changed",
+      "area": "auth",
+      "title": "Email-only signup with confirmation",
+      "request": "People sign up with email, receive a branded confirmation message, and can complete signup even if they try again.",
+      "changes": [
+        "People sign up with email, receive a branded confirmation message, and can complete signup even if they try again."
+      ],
+      "changedBy": "Sara A. da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-06-18-giving",
+      "date": "2026-06-18",
+      "time": "18:26:31",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-06-18T18:26:31+12:00",
+      "version": "0.0.0",
+      "type": "changed",
+      "area": "public",
+      "title": "Giving page bank details and coming-soon online giving",
+      "request": "The Giving page shows the correct bank account. Give Securely opens a coming-soon message until online giving is ready.",
+      "changes": [
+        "The Giving page shows the correct bank account. Give Securely opens a coming-soon message until online giving is ready."
+      ],
+      "changedBy": "Sara A. da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-06-18-teens-youth",
+      "date": "2026-06-18",
+      "time": "12:43:17",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-06-18T12:43:17+12:00",
+      "version": "0.0.0",
+      "type": "added",
+      "area": "events",
+      "title": "Teens & Youth events page",
+      "request": "A Tuesday 7pm Teens & Youth category and public page were added to Events.",
+      "changes": [
+        "A Tuesday 7pm Teens & Youth category and public page were added to Events."
+      ],
+      "changedBy": "Sara A. da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-06-18-sermons-search",
+      "date": "2026-06-18",
+      "time": "12:09:39",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-06-18T12:09:39+12:00",
+      "version": "0.0.0",
+      "type": "changed",
+      "area": "sermons",
+      "title": "Sermons playlist filter and title search",
+      "request": "Watch Sermons can filter by playlist and search titles. Search no longer matches the description, and the dropdown stacks cleanly on mobile.",
+      "changes": [
+        "Watch Sermons can filter by playlist and search titles. Search no longer matches the description, and the dropdown stacks cleanly on mobile."
+      ],
+      "changedBy": "Sara A. da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-06-18-kids-programme",
+      "date": "2026-06-18",
+      "time": "16:42:11",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-06-18T16:42:11+12:00",
+      "version": "0.0.0",
+      "type": "changed",
+      "area": "events",
+      "title": "Kids Programme time set to 10am",
+      "request": "Kids Programme copy uses 10am, and event contact buttons consistently say Get in touch.",
+      "changes": [
+        "Kids Programme copy uses 10am, and event contact buttons consistently say Get in touch."
+      ],
+      "changedBy": "Sara A. da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-06-18-hide-service-account",
+      "date": "2026-06-18",
+      "time": "18:45:56",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-06-18T18:45:56+12:00",
+      "version": "0.0.0",
+      "type": "changed",
+      "area": "users",
+      "title": "Appdoers service account hidden from other admins",
+      "request": "The Super Admin service account no longer appears in other admins’ user lists.",
+      "changes": [
+        "The Super Admin service account no longer appears in other admins’ user lists."
+      ],
+      "changedBy": "Sara A. da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-06-18-history-mobile",
+      "date": "2026-06-18",
+      "time": "12:12:41",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-06-18T12:12:41+12:00",
+      "version": "0.0.0",
+      "type": "fixed",
+      "area": "public",
+      "title": "History page content visible on mobile",
+      "request": "The History timeline no longer renders blank on phones; hover is scoped to cards.",
+      "changes": [
+        "The History timeline no longer renders blank on phones; hover is scoped to cards."
+      ],
+      "changedBy": "Sara A. da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-06-18-im-new-maps",
+      "date": "2026-06-18",
+      "time": "16:42:21",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-06-18T16:42:21+12:00",
+      "version": "0.0.0",
+      "type": "changed",
+      "area": "public",
+      "title": "I’m New location link and visitor PDF coming soon",
+      "request": "Church location uses a direct Google Maps place link. The new-visitor PDF download shows coming soon when the file is not available.",
+      "changes": [
+        "Church location uses a direct Google Maps place link. The new-visitor PDF download shows coming soon when the file is not available."
+      ],
+      "changedBy": "Sara A. da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-04-27-roster-ministries",
+      "date": "2026-04-27",
+      "time": "14:29:22",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-04-27T14:29:22+12:00",
+      "version": "0.0.0",
+      "type": "added",
+      "area": "roster",
+      "title": "Rosters per ministry with date ranges",
+      "request": "Admins upload a roster PDF for a ministry (group) covering a from–to date range. Members only see rosters for ministries they belong to.",
+      "changes": [
+        "Dashboard Roster shows a ministry list, then roster details and PDF preview.",
+        "Published rosters can be edited (ministry, dates, or replacement file).",
+        "Leader name and photo come from the matching “<Group> Leader” job role."
+      ],
+      "changedBy": "Sara A. da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-04-27-event-categories-settings",
+      "date": "2026-04-27",
+      "time": "13:58:59",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-04-27T13:58:59+12:00",
+      "version": "0.0.0",
+      "type": "added",
+      "area": "admin",
+      "title": "Event categories managed in System Setup",
+      "request": "Admins add, edit, disable, or delete event categories the same way as Groups and Job Roles. Event forms load the live list.",
+      "changes": [
+        "Admins add, edit, disable, or delete event categories the same way as Groups and Job Roles. Event forms load the live list."
+      ],
+      "changedBy": "Sara A. da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-04-27-password-reset",
+      "date": "2026-04-27",
+      "time": "13:52:21",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-04-27T13:52:21+12:00",
+      "version": "0.0.0",
+      "type": "added",
+      "area": "auth",
+      "title": "Forgot password and admin-sent password reset",
+      "request": "Login has Forgot password? Admins can send a reset link from User Management. People set a new password on the recovery page.",
+      "changes": [
+        "Login has Forgot password? Admins can send a reset link from User Management. People set a new password on the recovery page."
+      ],
+      "changedBy": "Sara A. da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-04-27-rsvp-search-export",
+      "date": "2026-04-27",
+      "time": "13:51:31",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-04-27T13:51:31+12:00",
+      "version": "0.0.0",
+      "type": "changed",
+      "area": "events",
+      "title": "RSVP search and directory-styled CSV/PDF export",
+      "request": "Admins can search RSVPs by name or email and export only the filtered rows, styled like the Leadership directory export.",
+      "changes": [
+        "Admins can search RSVPs by name or email and export only the filtered rows, styled like the Leadership directory export."
+      ],
+      "changedBy": "Sara A. da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-04-27-directory-groups-roles",
+      "date": "2026-04-27",
+      "time": "12:14:58",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-04-27T12:14:58+12:00",
+      "version": "0.0.0",
+      "type": "added",
+      "area": "leadership",
+      "title": "Leadership groups, job roles, filters, and export",
+      "request": "System Setup stores Groups and Job Roles. The Leadership table filters by staff/member/attendee and exports CSV or PDF.",
+      "changes": [
+        "Member dashboard Leadership shows staff only.",
+        "Linking a login to a Leadership person is opt-in and re-checkable."
+      ],
+      "changedBy": "Sara A. da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-04-27-help-pages",
+      "date": "2026-04-27",
+      "time": "16:47:25",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-04-27T16:47:25+12:00",
+      "version": "0.0.0",
+      "type": "added",
+      "area": "admin",
+      "title": "Help pages for admin and member portals",
+      "request": "Each left-menu area has a short explanation of what it is for and typical tasks.",
+      "changes": [
+        "Each left-menu area has a short explanation of what it is for and typical tasks."
+      ],
+      "changedBy": "Sara A. da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-04-27-remove-photos",
+      "date": "2026-04-27",
+      "time": "17:07:28",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-04-27T17:07:28+12:00",
+      "version": "0.0.0",
+      "type": "changed",
+      "area": "admin",
+      "title": "Photos section removed from admin",
+      "request": "The Photos tile and routes were taken out of the admin portal.",
+      "changes": [
+        "The Photos tile and routes were taken out of the admin portal."
+      ],
+      "changedBy": "Sara A. da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-04-27-prayer-button",
+      "date": "2026-04-27",
+      "time": "14:30:40",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-04-27T14:30:40+12:00",
+      "version": "0.0.0",
+      "type": "fixed",
+      "area": "prayer",
+      "title": "I’m praying button refreshes the count",
+      "request": "Tapping I’m praying on the prayer wall updates the count without a stale refresh.",
+      "changes": [
+        "Tapping I’m praying on the prayer wall updates the count without a stale refresh."
+      ],
+      "changedBy": "Sara A. da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-04-16-super-admin-roles",
+      "date": "2026-04-16",
+      "time": "20:49:20",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-04-16T20:49:20+12:00",
+      "version": "0.0.0",
+      "type": "added",
+      "area": "users",
+      "title": "Super Admin role and first/last name",
+      "request": "The Super Admin account is protected. Any approved admin can promote or demote other admins. Profiles store first and last name.",
+      "changes": [
+        "View as Member moved from the login page into the dashboard sidebars."
+      ],
+      "changedBy": "Sara A. da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-04-16-events-module",
+      "date": "2026-04-14",
+      "time": "20:39:38",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-04-14T20:39:38+12:00",
+      "version": "0.0.0",
+      "type": "added",
+      "area": "events",
+      "title": "Events: images, detail pages, RSVP, and audience",
+      "request": "Admins upload event images, set audience (staff / members / attendees / all), and optionally collect RSVPs. Public events have a See More detail page.",
+      "changes": [
+        "Missing images fall back to the church logo banner.",
+        "Public events stay visible to everyone; private events stay in the dashboards.",
+        "Calendar cards, RSVP flow, and admin event list were polished for production."
+      ],
+      "changedBy": "Sara A. da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-04-14-directory-table",
+      "date": "2026-04-14",
+      "time": "19:35:56",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-04-14T19:35:56+12:00",
+      "version": "0.0.0",
+      "type": "added",
+      "area": "leadership",
+      "title": "Admin Leadership directory table",
+      "request": "Leadership is an Excel-style table with richer people profiles and export, instead of cards only.",
+      "changes": [
+        "Leadership is an Excel-style table with richer people profiles and export, instead of cards only."
+      ],
+      "changedBy": "Sara A. da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-04-14-oauth-callback",
+      "date": "2026-04-14",
+      "time": "20:06:43",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-04-14T20:06:43+12:00",
+      "version": "0.0.0",
+      "type": "fixed",
+      "area": "auth",
+      "title": "OAuth callback no longer 404s on refresh",
+      "request": "Google sign-in return URLs survive a page refresh on the HashRouter app.",
+      "changes": [
+        "Google sign-in return URLs survive a page refresh on the HashRouter app."
+      ],
+      "changedBy": "Sara A. da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-02-01-sermons-youtube",
+      "date": "2026-04-13",
+      "time": "08:03:07",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-04-13T08:03:07+12:00",
+      "version": "0.0.0",
+      "type": "added",
+      "area": "sermons",
+      "title": "Public Watch Sermons with YouTube embeds",
+      "request": "The public Sermons page embeds the church YouTube channel so visitors can watch messages.",
+      "changes": [
+        "The public Sermons page embeds the church YouTube channel so visitors can watch messages."
+      ],
+      "changedBy": "Sara A. da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-02-01-visual-refresh",
+      "date": "2026-02-01",
+      "time": "19:54:54",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-02-01T19:54:54+13:00",
+      "version": "0.0.0",
+      "type": "changed",
+      "area": "public",
+      "title": "Public pages match the home visual language",
+      "request": "FAQ accordions animate smoothly; scroll icons align on laptop and mobile.",
+      "changes": [
+        "FAQ accordions animate smoothly; scroll icons align on laptop and mobile."
+      ],
+      "changedBy": "Sara A. da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-01-24-admin-responsive",
+      "date": "2026-01-24",
+      "time": "19:28:11",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-01-24T19:28:11+13:00",
+      "version": "0.0.0",
+      "type": "fixed",
+      "area": "admin",
+      "title": "Admin layout works on smaller screens",
+      "request": "The admin sidebar collapses to a menu on phones.",
+      "changes": [
+        "The admin sidebar collapses to a menu on phones."
+      ],
+      "changedBy": "Sara A. da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2026-01-02-leadership-uploads",
+      "date": "2026-01-02",
+      "time": "20:35:52",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-01-02T20:35:52+13:00",
+      "version": "0.0.0",
+      "type": "added",
+      "area": "leadership",
+      "title": "Leadership photo upload and descriptions",
+      "request": "Admins upload a photo file instead of pasting a URL, and can add a description used on public leadership pages.",
+      "changes": [
+        "Admins upload a photo file instead of pasting a URL, and can add a description used on public leadership pages."
+      ],
+      "changedBy": "Fabiano J A da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2025-12-22-core-portals",
+      "date": "2025-12-21",
+      "time": "19:11:01",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2025-12-21T19:11:01+13:00",
+      "version": "0.0.0",
+      "type": "added",
+      "area": "admin",
+      "title": "Admin and member dashboards, prayer wall, and user management",
+      "request": "Signed-in people land in a dashboard. Admins get Overview, User Management, and tools to run the site.",
+      "changes": [
+        "Prayer wall for submitting and supporting requests.",
+        "Roster PDFs, team members, dates and timezones, and skeleton loading states."
+      ],
+      "changedBy": "Sara A. da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "2025-12-21-public-site",
+      "date": "2025-12-21",
+      "time": "18:12:45",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2025-12-21T18:12:45+13:00",
+      "version": "0.0.0",
+      "type": "added",
+      "area": "public",
+      "title": "Public church website and History page",
+      "request": "The public site launched with Home, About, Events, I’m New, Giving, Need Prayer, Contact, and History, plus the first admin dashboard.",
+      "changes": [
+        "The public site launched with Home, About, Events, I’m New, Giving, Need Prayer, Contact, and History, plus the first admin dashboard."
+      ],
+      "changedBy": "Sara A. da Silva",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time."
+      },
+      "breakingChange": false
+    }
+  ]
+}

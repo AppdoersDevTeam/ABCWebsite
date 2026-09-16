@@ -1,0 +1,17 @@
+---
+description: Mandatory development governance — changelog, versioning, validation, and commit workflow
+alwaysApply: true
+---
+
+# Development governance
+
+Follow `AGENTS.md` for every project-changing request. This is not optional and does not require the user to mention it.
+
+Required sequence: inspect → plan → implement → migrate if needed → test → validate → update `CHANGELOG.json` and `CHANGELOG.md` → bump `package.json` SemVer when the change warrants it → review `git status` / `git diff` → commit with `type(scope): description [CHG-ID]`.
+
+- Run `npm run changelog:next-id` for the next Change ID and real `Pacific/Auckland` timestamp. Never invent IDs or times.
+- `CHANGELOG.json` is canonical. Run `npm run changelog:render` after editing it.
+- Run `npm run validate` and `npm test` before commit. Record only checks you actually ran.
+- New SQL belongs in `supabase/migrations/YYYYMMDDHHMMSS_name.sql`. Do not edit already-applied production migrations.
+- Do not commit `.env` or secrets. Do not use destructive git commands unless the user explicitly authorises them.
+- Changelog text must match what was actually implemented, including partial or failed work.
