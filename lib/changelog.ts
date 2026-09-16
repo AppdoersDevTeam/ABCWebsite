@@ -89,6 +89,17 @@ export const CHANGELOG_AREA_LABELS: Record<ChangelogArea, string> = {
  */
 export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   {
+    id: '2026-09-16-changelog-export',
+    changedAt: '2026-09-16T06:53:00+00:00',
+    changedBy: 'Appdoers Dev Team',
+    kind: 'added',
+    area: 'admin',
+    title: 'Export Changelog to Excel and PDF',
+    summary:
+      'Super Admins can download the changelog as Excel (CSV) or PDF. Exports include only the rows matching the current type, area, and search filters.',
+    details: ['Export buttons sit in the Changelog page header, next to the title.'],
+  },
+  {
     id: '2026-09-16-changelog-datetime-user',
     changedAt: '2026-09-16T06:49:00+00:00',
     changedBy: 'Appdoers Dev Team',
@@ -678,6 +689,33 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
       'The public site launched with Home, About, Events, I’m New, Giving, Need Prayer, Contact, and History, plus the first admin dashboard.',
   },
 ];
+
+export function filterChangelogEntries(
+  entries: ChangelogEntry[],
+  filters: {
+    kind?: ChangelogKind | '';
+    area?: ChangelogArea | '';
+    search?: string;
+  }
+): ChangelogEntry[] {
+  const q = (filters.search ?? '').trim().toLowerCase();
+  return entries.filter((entry) => {
+    if (filters.kind && entry.kind !== filters.kind) return false;
+    if (filters.area && entry.area !== filters.area) return false;
+    if (!q) return true;
+    const haystack = [
+      entry.title,
+      entry.summary,
+      entry.changedBy,
+      CHANGELOG_AREA_LABELS[entry.area],
+      CHANGELOG_KIND_LABELS[entry.kind],
+      ...(entry.details ?? []),
+    ]
+      .join(' ')
+      .toLowerCase();
+    return haystack.includes(q);
+  });
+}
 
 export function groupChangelogByMonth(entries: ChangelogEntry[]): { monthKey: string; label: string; entries: ChangelogEntry[] }[] {
   const groups = new Map<string, ChangelogEntry[]>();

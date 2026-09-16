@@ -1,9 +1,9 @@
 import React, { useMemo, useState } from 'react';
-import { History, Search } from 'lucide-react';
+import { Download, History, Search } from 'lucide-react';
 import { Navigate } from 'react-router-dom';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { useAuth } from '../../context/AuthContext';
-import { isSuperAdminUser } from '../../lib/constants';
+import { CHURCH_NAME, isSuperAdminUser } from '../../lib/constants';
 import { formatFullDateTimeInTimezone } from '../../lib/dateUtils';
 import {
   CHANGELOG_AREA_LABELS,
@@ -12,10 +12,12 @@ import {
   CHANGELOG_KIND_COLORS,
   CHANGELOG_KIND_LABELS,
   CHANGELOG_KIND_OPTIONS,
+  filterChangelogEntries,
   groupChangelogByMonth,
   type ChangelogArea,
   type ChangelogKind,
 } from '../../lib/changelog';
+import { downloadChangelogCsv, downloadChangelogPdf } from '../../lib/exportChangelog';
 
 const FILTER_INPUT_CLASS =
   'w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-charcoal focus:outline-none focus:ring-2 focus:ring-gold/40';
@@ -27,27 +29,40 @@ export const AdminChangelog = () => {
   const [areaFilter, setAreaFilter] = useState<ChangelogArea | ''>('');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filteredEntries = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
-    return CHANGELOG_ENTRIES.filter((entry) => {
-      if (kindFilter && entry.kind !== kindFilter) return false;
-      if (areaFilter && entry.area !== areaFilter) return false;
-      if (!q) return true;
-      const haystack = [
-        entry.title,
-        entry.summary,
-        entry.changedBy,
-        CHANGELOG_AREA_LABELS[entry.area],
-        CHANGELOG_KIND_LABELS[entry.kind],
-        ...(entry.details ?? []),
-      ]
-        .join(' ')
-        .toLowerCase();
-      return haystack.includes(q);
-    });
-  }, [kindFilter, areaFilter, searchQuery]);
+  const filteredEntries = useMemo(
+    () =>
+      filterChangelogEntries(CHANGELOG_ENTRIES, {
+        kind: kindFilter,
+        area: areaFilter,
+        search: searchQuery,
+      }),
+    [kindFilter, areaFilter, searchQuery]
+  );
 
   const monthGroups = useMemo(() => groupChangelogByMonth(filteredEntries), [filteredEntries]);
+
+  const exportFilterSummary = useMemo(() => {
+    const parts: string[] = [];
+    if (kindFilter) parts.push(`Type: ${CHANGELOG_KIND_LABELS[kindFilter]}`);
+    if (areaFilter) parts.push(`Area: ${CHANGELOG_AREA_LABELS[areaFilter]}`);
+    if (searchQuery.trim()) parts.push(`Search: ${searchQuery.trim()}`);
+    return parts.join(' · ');
+  }, [kindFilter, areaFilter, searchQuery]);
+
+  const filenameBase = useMemo(() => {
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `abc-changelog-${yyyy}-${mm}-${dd}`;
+  }, []);
+
+  const exportMeta = () => ({
+    churchName: CHURCH_NAME,
+    exportedAt: new Date(),
+    filterSummary: exportFilterSummary || undefined,
+    viewerTimezone,
+  });
 
   if (!isSuperAdminUser(user)) {
     return <Navigate to="/admin" replace />;
@@ -59,6 +74,30 @@ export const AdminChangelog = () => {
         title="Changelog"
         subtitle="Product history of everything that has been changed on the website."
         icon={<History size={28} className="text-gold" />}
+        rightSlot={
+          <div className="flex gap-2 flex-wrap justify-end">
+            <button
+              type="button"
+              onClick={() => downloadChangelogCsv(filteredEntries, filenameBase, exportMeta())}
+              disabled={filteredEntries.length === 0}
+              className="bg-white border-2 border-gray-200 text-charcoal px-4 py-2 rounded-[4px] font-bold hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-2 text-sm disabled:opacity-60"
+              title="Download Excel (CSV) for the filtered list"
+            >
+              <Download size={16} />
+              Excel
+            </button>
+            <button
+              type="button"
+              onClick={() => downloadChangelogPdf(filteredEntries, filenameBase, exportMeta())}
+              disabled={filteredEntries.length === 0}
+              className="bg-white border-2 border-gray-200 text-charcoal px-4 py-2 rounded-[4px] font-bold hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-2 text-sm disabled:opacity-60"
+              title="Download PDF for the filtered list"
+            >
+              <Download size={16} />
+              PDF
+            </button>
+          </div>
+        }
       />
 
       <div className="glass-card bg-white/80 border border-white/60 rounded-[12px] overflow-hidden">

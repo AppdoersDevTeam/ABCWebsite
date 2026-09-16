@@ -87,6 +87,7 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode, isSuperAdmin = f
                   changed on the website.
                 </li>
                 <li>Each row shows when the change shipped (date and time) and who made it. Filter by type or area, or search by title, summary, or user.</li>
+                <li>Export Excel or PDF from the page header — only the filtered rows you see are included in the download.</li>
                 <li>This is not the live audit trail — use Logs for who did what. Changelog records shipped product changes.</li>
               </Section>
             )}
