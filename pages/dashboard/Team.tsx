@@ -62,23 +62,29 @@ export const Team = () => {
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {members.map((member) => (
-            <VibrantCard key={member.id} className="flex flex-col sm:flex-row sm:items-center gap-4 sm:space-x-6 text-center sm:text-left group bg-white shadow-sm hover:shadow-md hover:border-gold">
-              <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-gray-100 group-hover:border-gold transition-colors flex-shrink-0">
-                {member.img ? (
-                  <img src={member.img} alt={member.name} className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full bg-gold/10 flex items-center justify-center">
-                    <User size={32} className="text-white" />
+            <VibrantCard
+              key={member.id}
+              className="group bg-white shadow-sm hover:shadow-md hover:border-gold text-left py-3"
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <div className="flex items-baseline gap-2 min-w-0">
+                    <h4 className="font-bold text-lg text-charcoal truncate">{member.name}</h4>
+                    <p className="text-xs text-gold font-bold uppercase tracking-wider truncate shrink-0">
+                      {getDisplayRole(member)}
+                    </p>
                   </div>
-                )}
-              </div>
-              <div>
-                <h4 className="font-bold text-xl text-charcoal">{member.name}</h4>
-                <p className="text-xs text-gold font-bold uppercase tracking-wider mb-1">{getDisplayRole(member)}</p>
-                {member.description && (
-                  <p className="text-sm text-neutral mt-2 line-clamp-3">{member.description}</p>
-                )}
-                <div className="flex space-x-4 text-neutral">
+                  <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-gray-100 group-hover:border-gold transition-colors flex-shrink-0">
+                    {member.img ? (
+                      <img src={member.img} alt={member.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full bg-gold/10 flex items-center justify-center">
+                        <User size={24} className="text-white" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="flex flex-col items-center justify-center gap-1 flex-shrink-0 text-neutral">
                   {member.email && (
                     <a href={`mailto:${member.email}`} className="hover:text-gold transition-colors" title={member.email}>
                       <Mail size={18} />
