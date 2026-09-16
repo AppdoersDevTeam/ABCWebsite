@@ -89,6 +89,16 @@ export const CHANGELOG_AREA_LABELS: Record<ChangelogArea, string> = {
  */
 export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   {
+    id: '2026-09-16-changelog-contrast',
+    changedAt: '2026-09-16T07:08:00+00:00',
+    changedBy: 'Appdoers Dev Team',
+    kind: 'fixed',
+    area: 'admin',
+    title: 'Changelog text contrast on light background',
+    summary:
+      'Changelog titles, summaries, and meta text use explicit dark colours so they stay readable on the white admin surface.',
+  },
+  {
     id: '2026-09-16-changelog-layout',
     changedAt: '2026-09-16T06:58:00+00:00',
     changedBy: 'Appdoers Dev Team',

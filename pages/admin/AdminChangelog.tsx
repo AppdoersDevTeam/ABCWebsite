@@ -30,8 +30,12 @@ import {
 } from '../../lib/changelog';
 import { downloadChangelogCsv, downloadChangelogPdf } from '../../lib/exportChangelog';
 
+/** Explicit dark text — Tailwind utilities have been unreliable on light admin surfaces. */
+const TEXT_PRIMARY = '#222222';
+const TEXT_MUTED = '#4b5563';
+
 const FILTER_INPUT_CLASS =
-  'w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-charcoal focus:outline-none focus:ring-2 focus:ring-gold/40';
+  'w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold/40';
 
 const KIND_DOT: Record<ChangelogKind, string> = {
   added: 'bg-emerald-500 ring-emerald-100',
@@ -71,15 +75,16 @@ function ChangelogEntryRow({
   return (
     <li className="relative flex gap-4 md:gap-5">
       <div className="relative flex w-5 shrink-0 flex-col items-center" aria-hidden="true">
-        <span
-          className={`mt-1.5 h-3.5 w-3.5 rounded-full ring-4 ${KIND_DOT[entry.kind]}`}
-        />
+        <span className={`mt-1.5 h-3.5 w-3.5 rounded-full ring-4 ${KIND_DOT[entry.kind]}`} />
         {!isLast && <span className="mt-1 w-px flex-1 bg-gray-200" />}
       </div>
 
-      <article className={`min-w-0 flex-1 pb-8 ${isLast ? 'pb-2' : ''}`}>
+      <article className={`min-w-0 flex-1 pb-8 ${isLast ? 'pb-2' : ''}`} style={{ color: TEXT_PRIMARY }}>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
-          <h3 className="text-base md:text-lg font-bold text-charcoal leading-snug tracking-tight">
+          <h3
+            className="text-base md:text-lg font-bold leading-snug tracking-tight"
+            style={{ color: TEXT_PRIMARY }}
+          >
             {entry.title}
           </h3>
           <span
@@ -90,19 +95,21 @@ function ChangelogEntryRow({
           </span>
         </div>
 
-        <p className="mt-2 text-sm text-neutral leading-relaxed max-w-3xl">{entry.summary}</p>
+        <p className="mt-2 text-sm leading-relaxed max-w-3xl" style={{ color: TEXT_MUTED }}>
+          {entry.summary}
+        </p>
 
         {entry.details && entry.details.length > 0 && (
           <ul className="mt-3 space-y-1.5 border-l-2 border-gold/40 pl-3">
             {entry.details.map((detail) => (
-              <li key={detail} className="text-sm text-charcoal leading-relaxed">
+              <li key={detail} className="text-sm leading-relaxed" style={{ color: TEXT_PRIMARY }}>
                 {detail}
               </li>
             ))}
           </ul>
         )}
 
-        <dl className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-neutral">
+        <dl className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs" style={{ color: TEXT_MUTED }}>
           <div className="inline-flex items-center gap-1.5 min-w-0">
             <Calendar size={13} className="shrink-0 text-gold" aria-hidden="true" />
             <dt className="sr-only">When</dt>
@@ -115,7 +122,9 @@ function ChangelogEntryRow({
           <div className="inline-flex items-center gap-1.5 min-w-0">
             <User size={13} className="shrink-0 text-gold" aria-hidden="true" />
             <dt className="sr-only">Changed by</dt>
-            <dd className="truncate font-medium text-charcoal">{entry.changedBy}</dd>
+            <dd className="truncate font-medium" style={{ color: TEXT_PRIMARY }}>
+              {entry.changedBy}
+            </dd>
           </div>
           <div className="inline-flex items-center gap-1.5 min-w-0">
             <MapPin size={13} className="shrink-0 text-gold" aria-hidden="true" />
@@ -175,7 +184,7 @@ export const AdminChangelog = () => {
   }
 
   return (
-    <div className="space-y-6 pb-12">
+    <div className="space-y-6 pb-12" style={{ color: TEXT_PRIMARY }}>
       <AdminPageHeader
         title="Changelog"
         subtitle="Product history of everything that has been changed on the website."
@@ -186,7 +195,8 @@ export const AdminChangelog = () => {
               type="button"
               onClick={() => downloadChangelogCsv(filteredEntries, filenameBase, exportMeta())}
               disabled={filteredEntries.length === 0}
-              className="bg-white border-2 border-gray-200 text-charcoal px-4 py-2 rounded-[4px] font-bold hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-2 text-sm disabled:opacity-60"
+              className="bg-white border-2 border-gray-200 px-4 py-2 rounded-[4px] font-bold hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-2 text-sm disabled:opacity-60"
+              style={{ color: TEXT_PRIMARY }}
               title="Download Excel (CSV) for the filtered list"
             >
               <Download size={16} />
@@ -196,7 +206,8 @@ export const AdminChangelog = () => {
               type="button"
               onClick={() => downloadChangelogPdf(filteredEntries, filenameBase, exportMeta())}
               disabled={filteredEntries.length === 0}
-              className="bg-white border-2 border-gray-200 text-charcoal px-4 py-2 rounded-[4px] font-bold hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-2 text-sm disabled:opacity-60"
+              className="bg-white border-2 border-gray-200 px-4 py-2 rounded-[4px] font-bold hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-2 text-sm disabled:opacity-60"
+              style={{ color: TEXT_PRIMARY }}
               title="Download PDF for the filtered list"
             >
               <Download size={16} />
@@ -206,11 +217,15 @@ export const AdminChangelog = () => {
         }
       />
 
-      <div className="glass-card bg-white/80 border border-white/60 rounded-[12px] overflow-hidden">
+      <div className="glass-card bg-white border border-gray-100 rounded-[12px] overflow-hidden" style={{ color: TEXT_PRIMARY }}>
         <div className="p-4 md:p-5 border-b border-gray-100 space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             <div>
-              <label htmlFor="changelog-kind" className="block text-xs font-bold uppercase tracking-wider text-neutral mb-1.5">
+              <label
+                htmlFor="changelog-kind"
+                className="block text-xs font-bold uppercase tracking-wider mb-1.5"
+                style={{ color: TEXT_MUTED }}
+              >
                 Type
               </label>
               <select
@@ -218,6 +233,7 @@ export const AdminChangelog = () => {
                 value={kindFilter}
                 onChange={(e) => setKindFilter(e.target.value as ChangelogKind | '')}
                 className={FILTER_INPUT_CLASS}
+                style={{ color: TEXT_PRIMARY }}
               >
                 {CHANGELOG_KIND_OPTIONS.map((opt) => (
                   <option key={opt.value || 'all-kinds'} value={opt.value}>
@@ -227,7 +243,11 @@ export const AdminChangelog = () => {
               </select>
             </div>
             <div>
-              <label htmlFor="changelog-area" className="block text-xs font-bold uppercase tracking-wider text-neutral mb-1.5">
+              <label
+                htmlFor="changelog-area"
+                className="block text-xs font-bold uppercase tracking-wider mb-1.5"
+                style={{ color: TEXT_MUTED }}
+              >
                 Area
               </label>
               <select
@@ -235,6 +255,7 @@ export const AdminChangelog = () => {
                 value={areaFilter}
                 onChange={(e) => setAreaFilter(e.target.value as ChangelogArea | '')}
                 className={FILTER_INPUT_CLASS}
+                style={{ color: TEXT_PRIMARY }}
               >
                 {CHANGELOG_AREA_OPTIONS.map((opt) => (
                   <option key={opt.value || 'all-areas'} value={opt.value}>
@@ -244,11 +265,15 @@ export const AdminChangelog = () => {
               </select>
             </div>
             <div>
-              <label htmlFor="changelog-search" className="block text-xs font-bold uppercase tracking-wider text-neutral mb-1.5">
+              <label
+                htmlFor="changelog-search"
+                className="block text-xs font-bold uppercase tracking-wider mb-1.5"
+                style={{ color: TEXT_MUTED }}
+              >
                 Search
               </label>
               <div className="relative">
-                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral" />
+                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gold" />
                 <input
                   id="changelog-search"
                   type="search"
@@ -256,11 +281,12 @@ export const AdminChangelog = () => {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className={`${FILTER_INPUT_CLASS} pl-9 pr-3`}
+                  style={{ color: TEXT_PRIMARY }}
                 />
               </div>
             </div>
           </div>
-          <p className="text-xs text-neutral">
+          <p className="text-xs" style={{ color: TEXT_MUTED }}>
             {filteredEntries.length} change{filteredEntries.length === 1 ? '' : 's'}
             {filteredEntries.length !== CHANGELOG_ENTRIES.length ? ` of ${CHANGELOG_ENTRIES.length}` : ''}
           </p>
@@ -269,23 +295,31 @@ export const AdminChangelog = () => {
         {monthGroups.length === 0 ? (
           <div className="p-10 text-center">
             <History size={36} className="mx-auto text-gold/60 mb-3" />
-            <p className="font-bold text-charcoal">No matching changes</p>
-            <p className="text-neutral text-sm mt-2 max-w-md mx-auto">
+            <p className="font-bold" style={{ color: TEXT_PRIMARY }}>
+              No matching changes
+            </p>
+            <p className="text-sm mt-2 max-w-md mx-auto" style={{ color: TEXT_MUTED }}>
               Try a different type, area, or search term.
             </p>
           </div>
         ) : (
           <div className="p-4 md:p-8 space-y-10">
             {monthGroups.map((group) => (
-              <section key={group.monthKey} aria-labelledby={`changelog-${group.monthKey}`}>
+              <div
+                key={group.monthKey}
+                role="region"
+                aria-labelledby={`changelog-${group.monthKey}`}
+                data-no-reveal
+              >
                 <div className="mb-5 flex items-baseline justify-between gap-3 border-b border-gray-100 pb-2">
                   <h2
                     id={`changelog-${group.monthKey}`}
-                    className="text-sm font-bold uppercase tracking-[0.14em] text-charcoal"
+                    className="text-sm font-bold uppercase tracking-[0.14em]"
+                    style={{ color: TEXT_PRIMARY }}
                   >
                     {group.label}
                   </h2>
-                  <span className="text-xs text-neutral tabular-nums">
+                  <span className="text-xs tabular-nums" style={{ color: TEXT_MUTED }}>
                     {group.entries.length} update{group.entries.length === 1 ? '' : 's'}
                   </span>
                 </div>
@@ -300,7 +334,7 @@ export const AdminChangelog = () => {
                     />
                   ))}
                 </ol>
-              </section>
+              </div>
             ))}
           </div>
         )}
