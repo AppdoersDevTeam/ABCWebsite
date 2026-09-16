@@ -546,7 +546,7 @@ export const AdminOverview = () => {
 
   const stats = useMemo(() => [
     { 
-      label: 'Pending', 
+      label: 'Pending Users', 
       value: visiblePendingCount.toString(), 
       icon: <UserCheck size={20} />, 
       path: '#pending-users', 

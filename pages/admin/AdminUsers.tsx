@@ -797,7 +797,7 @@ export const AdminUsers = () => {
               },
               {
                 id: 'pending' as UserFilter,
-                label: 'Pending',
+                label: 'Pending Users',
                 value: visiblePendingCount,
                 valueClass: 'text-gold',
                 iconWrap: 'bg-yellow-100',
@@ -894,7 +894,7 @@ export const AdminUsers = () => {
                 className="px-3 py-2 bg-white border border-gray-200 rounded-[6px] text-sm font-bold text-charcoal hover:border-gold focus:border-gold focus:outline-none transition-colors min-w-[160px]"
               >
                 <option value="all">All users</option>
-                <option value="pending">Pending</option>
+                <option value="pending">Pending Users</option>
                 <option value="held">Holding</option>
                 <option value="approved">Approved</option>
                 <option value="linked">Linked</option>
