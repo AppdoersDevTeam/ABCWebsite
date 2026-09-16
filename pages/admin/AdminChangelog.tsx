@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { History, Search, Shield } from 'lucide-react';
+import { History, Search } from 'lucide-react';
 import { Navigate } from 'react-router-dom';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { useAuth } from '../../context/AuthContext';
@@ -63,17 +63,9 @@ export const AdminChangelog = () => {
     <div className="space-y-6 pb-12">
       <AdminPageHeader
         title="Changelog"
-        subtitle="Every notable product change shipped to the website. Super Admins only — live activity is still under Logs."
+        subtitle="Product history of everything that has been changed on the website."
         icon={<History size={28} className="text-gold" />}
       />
-
-      <div className="rounded-[12px] border border-violet-200 bg-violet-50/80 px-4 py-3 text-sm text-violet-900 flex items-start gap-3">
-        <Shield size={18} className="mt-0.5 shrink-0 text-violet-700" />
-        <p>
-          Regular admins cannot see this page or the sidebar link. Keep this list updated when Super Admin–visible
-          behaviour changes.
-        </p>
-      </div>
 
       <div className="glass-card bg-white/80 border border-white/60 rounded-[12px] overflow-hidden">
         <div className="p-4 md:p-5 border-b border-gray-100 space-y-4">

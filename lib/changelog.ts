@@ -90,11 +90,11 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
     date: '2026-09-16',
     kind: 'added',
     area: 'admin',
-    title: 'Super Admin changelog in the admin dashboard',
+    title: 'Super Admin Changelog tab in the admin dashboard',
     summary:
-      'A Changelog page lists every notable product change. Only Super Admins can open it or see it in the sidebar.',
+      'A Changelog tab sits next to Logs in the admin left menu. Only Super Admins can see or open it.',
     details: [
-      'Regular admins are redirected to Overview if they guess the URL.',
+      'Regular admins do not see the tab and are redirected to Overview if they guess the URL.',
       'Filter by type, area, or search. Entries are grouped by month.',
       'This is the product history — live activity still lives under Logs.',
     ],

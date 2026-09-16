@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { OverviewStatCard } from '../../components/UI/OverviewStatCard';
-import { Calendar, BookOpen, Users, ClipboardList, UserCheck, X, Plus, Shield, Mail, Newspaper, HandHeart, History } from 'lucide-react';
+import { Calendar, BookOpen, Users, ClipboardList, UserCheck, X, Plus, Shield, Mail, Newspaper, HandHeart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
-import { displayName, filterUsersForAdminView, isPendingApproval, isSuperAdminUser } from '../../lib/constants';
+import { displayName, filterUsersForAdminView, isPendingApproval } from '../../lib/constants';
 import { User } from '../../types';
 import { SkeletonPageHeader, SkeletonCard, SkeletonUserCard, SkeletonStatsCard } from '../../components/UI/Skeleton';
 import { formatRelativeDateInTimezone, formatFullDateTimeInTimezone, formatWeekDate, resolveNewsletterWeekDate } from '../../lib/dateUtils';
@@ -901,15 +901,6 @@ export const AdminOverview = () => {
               <span className="font-semibold text-base text-charcoal">Upload Devotional</span>
               <p className="text-sm text-neutral mt-1">Publish this week&apos;s weekly PDF</p>
             </Link>
-            {isSuperAdminUser(user) && (
-              <Link to="/admin/changelog" className="block p-4 bg-white border border-gray-100 rounded-[4px] hover:border-violet-300 hover:shadow-md transition-all">
-                <span className="font-semibold text-base text-charcoal inline-flex items-center gap-2">
-                  <History size={16} className="text-violet-600" />
-                  Changelog
-                </span>
-                <p className="text-sm text-neutral mt-1">Super Admin: product changes shipped to the website</p>
-              </Link>
-            )}
           </div>
         </div>
 
