@@ -945,15 +945,26 @@ export const AdminUsers = () => {
         </div>
       ) : (
         <div className="space-y-3">
-          {listedUsers.map((u) => (
+          {listedUsers.map((u) => {
+            const isAdminAccount = u.role === 'admin' || !!u.is_super_admin;
+            const isLinkedAdmin = isAdminAccount && !!directoryByUserId[u.id];
+            return (
             <div
               key={u.id}
-              className="bg-white border border-gray-200 p-6 rounded-[12px] hover:border-gold transition-all shadow-sm"
+              className={`p-6 rounded-[12px] hover:border-gold transition-all shadow-sm border ${
+                isLinkedAdmin
+                  ? 'bg-purple-50 border-purple-300'
+                  : 'bg-white border-gray-200'
+              }`}
             >
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div className="flex-1">
                   <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-sm tracking-wide flex-shrink-0">
+                    <div
+                      className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm tracking-wide flex-shrink-0 ${
+                        isLinkedAdmin ? 'bg-purple-200 text-purple-800' : 'bg-blue-100 text-blue-700'
+                      }`}
+                    >
                       {displayInitials(u)}
                     </div>
                     <div className="flex-1">
@@ -966,13 +977,25 @@ export const AdminUsers = () => {
                           </span>
                         )}
                         {u.role === 'admin' && !u.is_super_admin && (
-                          <span className="bg-red-100 text-red-700 text-xs px-2 py-1 rounded uppercase font-bold flex items-center gap-1">
+                          <span
+                            className={`text-xs px-2 py-1 rounded uppercase font-bold flex items-center gap-1 ${
+                              isLinkedAdmin
+                                ? 'bg-purple-200 text-purple-800'
+                                : 'bg-red-100 text-red-700'
+                            }`}
+                          >
                             <Shield size={12} />
                             Admin
                           </span>
                         )}
                         {directoryByUserId[u.id] ? (
-                          <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded font-bold">
+                          <span
+                            className={`text-xs px-2 py-1 rounded font-bold ${
+                              isLinkedAdmin
+                                ? 'bg-purple-200 text-purple-800'
+                                : 'bg-green-100 text-green-800'
+                            }`}
+                          >
                             Leadership linked
                           </span>
                         ) : (
@@ -1014,14 +1037,28 @@ export const AdminUsers = () => {
                       </div>
 
                       {directoryByUserId[u.id] && (
-                        <div className="mt-4 pt-4 border-t border-teal-100">
-                          <p className="text-xs font-bold uppercase tracking-wider text-teal-700 mb-3 inline-flex items-center gap-1.5">
+                        <div className={`mt-4 pt-4 border-t ${isLinkedAdmin ? 'border-purple-200' : 'border-teal-100'}`}>
+                          <p
+                            className={`text-xs font-bold uppercase tracking-wider mb-3 inline-flex items-center gap-1.5 ${
+                              isLinkedAdmin ? 'text-purple-800' : 'text-teal-700'
+                            }`}
+                          >
                             <Link2 size={14} />
                             Linked Leadership
                           </p>
-                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-[10px] border border-teal-200 bg-teal-50/70 p-3">
+                          <div
+                            className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-[10px] border p-3 ${
+                              isLinkedAdmin
+                                ? 'border-purple-200 bg-purple-100/70'
+                                : 'border-teal-200 bg-teal-50/70'
+                            }`}
+                          >
                             <div className="flex items-start gap-3 min-w-0">
-                              <div className="w-10 h-10 rounded-full bg-teal-100 text-teal-800 flex items-center justify-center font-bold text-xs tracking-wide flex-shrink-0 overflow-hidden">
+                              <div
+                                className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs tracking-wide flex-shrink-0 overflow-hidden ${
+                                  isLinkedAdmin ? 'bg-purple-200 text-purple-800' : 'bg-teal-100 text-teal-800'
+                                }`}
+                              >
                                 {directoryByUserId[u.id].img ? (
                                   <img
                                     src={directoryByUserId[u.id].img as string}
@@ -1252,7 +1289,8 @@ export const AdminUsers = () => {
                 </div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
