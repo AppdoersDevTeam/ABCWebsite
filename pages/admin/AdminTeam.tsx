@@ -1253,7 +1253,7 @@ export const AdminTeam = () => {
                       <td className="px-4 py-3 text-sm text-neutral">{member.email || '—'}</td>
                       <td className="px-4 py-3 text-sm text-charcoal font-bold">{getDisplayRole(member)}</td>
                       <td className="px-4 py-3">
-                        <span className="inline-flex items-center px-2 py-1 rounded-full bg-gold/10 text-gold text-[11px] font-bold uppercase tracking-wider">
+                        <span className="inline-flex items-center px-2 py-1 rounded-full bg-gold/10 text-blue-700 text-[11px] font-bold uppercase tracking-wider">
                           {PROFILE_LABEL[pt]}
                         </span>
                       </td>
@@ -1355,7 +1355,7 @@ export const AdminTeam = () => {
                         {(member.job_roles || []).map((r) => r.name).filter(Boolean).join(', ') || '-'}
                       </td>
                       <td className="px-4 py-3">
-                        <span className="inline-flex items-center px-2 py-1 rounded-full bg-gold/10 text-gold text-[11px] font-bold uppercase tracking-wider">
+                        <span className="inline-flex items-center px-2 py-1 rounded-full bg-gold/10 text-blue-700 text-[11px] font-bold uppercase tracking-wider">
                           {PROFILE_LABEL[pt]}
                         </span>
                       </td>
