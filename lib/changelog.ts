@@ -19,7 +19,10 @@ export type ChangelogArea =
 
 export type ChangelogEntry = {
   id: string;
-  date: string;
+  /** ISO date-time when the change shipped */
+  changedAt: string;
+  /** Git author / team member who made the change */
+  changedBy: string;
   kind: ChangelogKind;
   area: ChangelogArea;
   title: string;
@@ -81,13 +84,28 @@ export const CHANGELOG_AREA_LABELS: Record<ChangelogArea, string> = {
 
 /**
  * Curated product changelog covering shipped website changes.
- * Newest entries first. Keep this list updated when Super Admin–visible
- * product behaviour changes.
+ * Newest entries first. Each entry must include changedAt (ISO date-time) and changedBy.
+ * Keep this list updated when Super Admin–visible product behaviour changes.
  */
 export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   {
+    id: '2026-09-16-changelog-datetime-user',
+    changedAt: '2026-09-16T06:49:00+00:00',
+    changedBy: 'Appdoers Dev Team',
+    kind: 'changed',
+    area: 'admin',
+    title: 'Changelog shows date, time, and who made each change',
+    summary:
+      'Every changelog row now includes the exact day and time the change shipped and the person or team who made it.',
+    details: [
+      'Times display in your admin timezone (same as System Logs).',
+      'Search includes the user name as well as title and summary.',
+    ],
+  },
+  {
     id: '2026-09-16-superadmin-changelog',
-    date: '2026-09-16',
+    changedAt: '2026-09-16T06:30:16+00:00',
+    changedBy: 'Appdoers Dev Team',
     kind: 'added',
     area: 'admin',
     title: 'Super Admin Changelog tab in the admin dashboard',
@@ -101,7 +119,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2026-09-15-hold-access',
-    date: '2026-09-15',
+    changedAt: '2026-09-15T02:35:23+12:00',
+    changedBy: 'Fabiano J A da Silva',
     kind: 'added',
     area: 'users',
     title: 'Hold Access for existing accounts',
@@ -115,7 +134,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2026-09-15-admin-role-emails',
-    date: '2026-09-15',
+    changedAt: '2026-09-15T02:13:50+12:00',
+    changedBy: 'Fabiano J A da Silva',
     kind: 'added',
     area: 'users',
     title: 'Emails when admin access is granted or removed',
@@ -123,7 +143,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2026-09-15-delete-user',
-    date: '2026-09-15',
+    changedAt: '2026-09-14T23:55:07+12:00',
+    changedBy: 'Fabiano J A da Silva',
     kind: 'added',
     area: 'users',
     title: 'Delete a user from User Management',
@@ -136,7 +157,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2026-09-15-user-export',
-    date: '2026-09-15',
+    changedAt: '2026-09-15T02:48:09+12:00',
+    changedBy: 'Fabiano J A da Silva',
     kind: 'added',
     area: 'users',
     title: 'Export User Management lists to CSV and PDF',
@@ -144,7 +166,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2026-09-14-annual-calendar',
-    date: '2026-09-14',
+    changedAt: '2026-09-14T23:10:29+12:00',
+    changedBy: 'Fabiano J A da Silva',
     kind: 'added',
     area: 'calendar',
     title: 'Annual Calendar in admin and member portals',
@@ -157,7 +180,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2026-09-14-newsletters-week-date',
-    date: '2026-09-14',
+    changedAt: '2026-09-14T19:05:44+12:00',
+    changedBy: 'Fabiano J A da Silva',
     kind: 'changed',
     area: 'newsletters',
     title: 'Newsletters match devotionals: title, week date, latest-first archive',
@@ -166,7 +190,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2026-09-14-dashboard-nav-icons',
-    date: '2026-09-14',
+    changedAt: '2026-09-14T22:28:05+12:00',
+    changedBy: 'Fabiano J A da Silva',
     kind: 'changed',
     area: 'admin',
     title: 'Sidebar labels and icons for Prayers and Newsletters',
@@ -174,7 +199,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2026-09-14-page-headers',
-    date: '2026-09-14',
+    changedAt: '2026-09-15T03:14:00+12:00',
+    changedBy: 'Fabiano J A da Silva',
     kind: 'changed',
     area: 'admin',
     title: 'Shared page headers across admin and member sections',
@@ -182,7 +208,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2026-09-14-pending-oauth',
-    date: '2026-09-14',
+    changedAt: '2026-09-15T00:53:03+12:00',
+    changedBy: 'Fabiano J A da Silva',
     kind: 'fixed',
     area: 'auth',
     title: 'Pending approval, OAuth, and HashRouter reliability',
@@ -191,7 +218,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2026-09-14-directory-linking',
-    date: '2026-09-14',
+    changedAt: '2026-09-15T03:09:05+12:00',
+    changedBy: 'Fabiano J A da Silva',
     kind: 'changed',
     area: 'leadership',
     title: 'Leadership linking from User Management',
@@ -200,7 +228,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2026-08-28-watch-sermons-dashboard',
-    date: '2026-08-28',
+    changedAt: '2026-08-28T10:15:25+12:00',
+    changedBy: 'Sara A. da Silva',
     kind: 'added',
     area: 'sermons',
     title: 'Watch Sermons page in the member dashboard',
@@ -208,7 +237,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2026-08-28-overview-typography',
-    date: '2026-08-28',
+    changedAt: '2026-08-28T10:19:04+12:00',
+    changedBy: 'Sara A. da Silva',
     kind: 'changed',
     area: 'admin',
     title: 'Overview card typography',
@@ -216,7 +246,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2026-08-27-devotional-of-the-week',
-    date: '2026-08-27',
+    changedAt: '2026-08-27T15:53:00+12:00',
+    changedBy: 'Sara A. da Silva',
     kind: 'added',
     area: 'devotionals',
     title: 'Devotional of the Week with in-page PDF reader',
@@ -230,7 +261,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2026-08-27-pdf-viewer-fixes',
-    date: '2026-08-27',
+    changedAt: '2026-08-27T16:39:13+12:00',
+    changedBy: 'Sara A. da Silva',
     kind: 'fixed',
     area: 'system',
     title: 'PDF viewer blank screens, flicker, and mobile layout',
@@ -239,7 +271,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2026-08-27-turnstile',
-    date: '2026-08-23',
+    changedAt: '2026-08-23T14:11:14+12:00',
+    changedBy: 'Sara A. da Silva',
     kind: 'added',
     area: 'auth',
     title: 'Cloudflare Turnstile on sign-in and admin email actions',
@@ -248,7 +281,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2026-08-27-user-actions-menu',
-    date: '2026-08-27',
+    changedAt: '2026-08-27T15:23:49+12:00',
+    changedBy: 'Sara A. da Silva',
     kind: 'changed',
     area: 'users',
     title: 'User Management actions collapsed into a dropdown',
@@ -256,7 +290,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2026-08-27-approval-email-errors',
-    date: '2026-08-27',
+    changedAt: '2026-08-27T15:29:16+12:00',
+    changedBy: 'Sara A. da Silva',
     kind: 'fixed',
     area: 'users',
     title: 'Clear errors when approval emails fail',
@@ -264,7 +299,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2026-08-27-multiday-events',
-    date: '2026-08-27',
+    changedAt: '2026-08-27T16:23:22+12:00',
+    changedBy: 'Sara A. da Silva',
     kind: 'changed',
     area: 'events',
     title: 'Clearer multi-day event schedules',
@@ -272,7 +308,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2026-06-26-remove-community-lunch',
-    date: '2026-06-26',
+    changedAt: '2026-06-26T10:35:46+12:00',
+    changedBy: 'Sara A. da Silva',
     kind: 'changed',
     area: 'events',
     title: 'Community Lunch removed from event categories',
@@ -280,7 +317,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2026-06-23-verse-of-the-day',
-    date: '2026-06-23',
+    changedAt: '2026-06-23T20:23:38+12:00',
+    changedBy: 'Sara A. da Silva',
     kind: 'added',
     area: 'public',
     title: 'Verse of the day on the member dashboard',
@@ -288,7 +326,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2026-06-23-audit-logs',
-    date: '2026-06-23',
+    changedAt: '2026-06-23T20:08:23+12:00',
+    changedBy: 'Sara A. da Silva',
     kind: 'added',
     area: 'admin',
     title: 'System Logs audit trail',
@@ -301,7 +340,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2026-06-23-event-images',
-    date: '2026-06-23',
+    changedAt: '2026-06-23T19:49:21+12:00',
+    changedBy: 'Sara A. da Silva',
     kind: 'fixed',
     area: 'events',
     title: 'Event posters display at the right size without stretching',
@@ -310,7 +350,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2026-06-22-production-seo',
-    date: '2026-06-22',
+    changedAt: '2026-06-22T19:45:28+12:00',
+    changedBy: 'Sara A. da Silva',
     kind: 'changed',
     area: 'public',
     title: 'Production domain, SEO, and leadership pages',
@@ -319,7 +360,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2026-06-21-mobile-dashboards',
-    date: '2026-06-21',
+    changedAt: '2026-06-21T19:24:16+12:00',
+    changedBy: 'Sara A. da Silva',
     kind: 'fixed',
     area: 'admin',
     title: 'Admin and member dashboards work on phones',
@@ -327,7 +369,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2026-06-21-password-reset-hashrouter',
-    date: '2026-06-21',
+    changedAt: '2026-06-21T18:43:59+12:00',
+    changedBy: 'Sara A. da Silva',
     kind: 'fixed',
     area: 'auth',
     title: 'Password reset works with HashRouter and recovery tokens',
@@ -336,7 +379,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2026-06-21-shared-event-calendar',
-    date: '2026-06-21',
+    changedAt: '2026-06-21T18:24:06+12:00',
+    changedBy: 'Sara A. da Silva',
     kind: 'changed',
     area: 'events',
     title: 'Shared event calendar grid for admin and members',
@@ -344,7 +388,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2026-06-21-statement-of-faith',
-    date: '2026-06-21',
+    changedAt: '2026-06-21T16:46:36+12:00',
+    changedBy: 'Sara A. da Silva',
     kind: 'added',
     area: 'public',
     title: 'Statement of Faith page',
@@ -353,7 +398,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2026-06-18-contact-form',
-    date: '2026-06-18',
+    changedAt: '2026-06-18T16:50:55+12:00',
+    changedBy: 'Sara A. da Silva',
     kind: 'changed',
     area: 'public',
     title: 'Contact form connect-card fields and direct pastor email',
@@ -366,7 +412,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2026-06-18-signup-email',
-    date: '2026-06-18',
+    changedAt: '2026-06-18T18:05:17+12:00',
+    changedBy: 'Sara A. da Silva',
     kind: 'changed',
     area: 'auth',
     title: 'Email-only signup with confirmation',
@@ -375,7 +422,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2026-06-18-giving',
-    date: '2026-06-18',
+    changedAt: '2026-06-18T18:26:31+12:00',
+    changedBy: 'Sara A. da Silva',
     kind: 'changed',
     area: 'public',
     title: 'Giving page bank details and coming-soon online giving',
@@ -384,7 +432,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2026-06-18-teens-youth',
-    date: '2026-06-18',
+    changedAt: '2026-06-18T12:43:17+12:00',
+    changedBy: 'Sara A. da Silva',
     kind: 'added',
     area: 'events',
     title: 'Teens & Youth events page',
@@ -392,7 +441,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2026-06-18-sermons-search',
-    date: '2026-06-18',
+    changedAt: '2026-06-18T12:09:39+12:00',
+    changedBy: 'Sara A. da Silva',
     kind: 'changed',
     area: 'sermons',
     title: 'Sermons playlist filter and title search',
@@ -401,7 +451,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2026-06-18-kids-programme',
-    date: '2026-06-18',
+    changedAt: '2026-06-18T16:42:11+12:00',
+    changedBy: 'Sara A. da Silva',
     kind: 'changed',
     area: 'events',
     title: 'Kids Programme time set to 10am',
@@ -409,7 +460,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2026-06-18-hide-service-account',
-    date: '2026-06-18',
+    changedAt: '2026-06-18T18:45:56+12:00',
+    changedBy: 'Sara A. da Silva',
     kind: 'changed',
     area: 'users',
     title: 'Appdoers service account hidden from other admins',
@@ -417,7 +469,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2026-06-18-history-mobile',
-    date: '2026-06-18',
+    changedAt: '2026-06-18T12:12:41+12:00',
+    changedBy: 'Sara A. da Silva',
     kind: 'fixed',
     area: 'public',
     title: 'History page content visible on mobile',
@@ -425,7 +478,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2026-06-18-im-new-maps',
-    date: '2026-06-18',
+    changedAt: '2026-06-18T16:42:21+12:00',
+    changedBy: 'Sara A. da Silva',
     kind: 'changed',
     area: 'public',
     title: 'I’m New location link and visitor PDF coming soon',
@@ -434,7 +488,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2026-04-27-roster-ministries',
-    date: '2026-04-27',
+    changedAt: '2026-04-27T14:29:22+12:00',
+    changedBy: 'Sara A. da Silva',
     kind: 'added',
     area: 'roster',
     title: 'Rosters per ministry with date ranges',
@@ -448,7 +503,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2026-04-27-event-categories-settings',
-    date: '2026-04-27',
+    changedAt: '2026-04-27T13:58:59+12:00',
+    changedBy: 'Sara A. da Silva',
     kind: 'added',
     area: 'admin',
     title: 'Event categories managed in System Setup',
@@ -457,7 +513,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2026-04-27-password-reset',
-    date: '2026-04-27',
+    changedAt: '2026-04-27T13:52:21+12:00',
+    changedBy: 'Sara A. da Silva',
     kind: 'added',
     area: 'auth',
     title: 'Forgot password and admin-sent password reset',
@@ -466,7 +523,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2026-04-27-rsvp-search-export',
-    date: '2026-04-27',
+    changedAt: '2026-04-27T13:51:31+12:00',
+    changedBy: 'Sara A. da Silva',
     kind: 'changed',
     area: 'events',
     title: 'RSVP search and directory-styled CSV/PDF export',
@@ -475,7 +533,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2026-04-27-directory-groups-roles',
-    date: '2026-04-27',
+    changedAt: '2026-04-27T12:14:58+12:00',
+    changedBy: 'Sara A. da Silva',
     kind: 'added',
     area: 'leadership',
     title: 'Leadership groups, job roles, filters, and export',
@@ -488,7 +547,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2026-04-27-help-pages',
-    date: '2026-04-27',
+    changedAt: '2026-04-27T16:47:25+12:00',
+    changedBy: 'Sara A. da Silva',
     kind: 'added',
     area: 'admin',
     title: 'Help pages for admin and member portals',
@@ -496,7 +556,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2026-04-27-remove-photos',
-    date: '2026-04-27',
+    changedAt: '2026-04-27T17:07:28+12:00',
+    changedBy: 'Sara A. da Silva',
     kind: 'changed',
     area: 'admin',
     title: 'Photos section removed from admin',
@@ -504,7 +565,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2026-04-27-prayer-button',
-    date: '2026-04-27',
+    changedAt: '2026-04-27T14:30:40+12:00',
+    changedBy: 'Sara A. da Silva',
     kind: 'fixed',
     area: 'prayer',
     title: 'I’m praying button refreshes the count',
@@ -512,7 +574,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2026-04-16-super-admin-roles',
-    date: '2026-04-16',
+    changedAt: '2026-04-16T20:49:20+12:00',
+    changedBy: 'Sara A. da Silva',
     kind: 'added',
     area: 'users',
     title: 'Super Admin role and first/last name',
@@ -522,7 +585,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2026-04-16-events-module',
-    date: '2026-04-16',
+    changedAt: '2026-04-14T20:39:38+12:00',
+    changedBy: 'Sara A. da Silva',
     kind: 'added',
     area: 'events',
     title: 'Events: images, detail pages, RSVP, and audience',
@@ -536,7 +600,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2026-04-14-directory-table',
-    date: '2026-04-14',
+    changedAt: '2026-04-14T19:35:56+12:00',
+    changedBy: 'Sara A. da Silva',
     kind: 'added',
     area: 'leadership',
     title: 'Admin Leadership directory table',
@@ -544,7 +609,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2026-04-14-oauth-callback',
-    date: '2026-04-14',
+    changedAt: '2026-04-14T20:06:43+12:00',
+    changedBy: 'Sara A. da Silva',
     kind: 'fixed',
     area: 'auth',
     title: 'OAuth callback no longer 404s on refresh',
@@ -552,7 +618,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2026-02-01-sermons-youtube',
-    date: '2026-02-01',
+    changedAt: '2026-04-13T08:03:07+12:00',
+    changedBy: 'Sara A. da Silva',
     kind: 'added',
     area: 'sermons',
     title: 'Public Watch Sermons with YouTube embeds',
@@ -560,7 +627,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2026-02-01-visual-refresh',
-    date: '2026-02-01',
+    changedAt: '2026-02-01T19:54:54+13:00',
+    changedBy: 'Sara A. da Silva',
     kind: 'changed',
     area: 'public',
     title: 'Public pages match the home visual language',
@@ -568,7 +636,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2026-01-24-admin-responsive',
-    date: '2026-01-24',
+    changedAt: '2026-01-24T19:28:11+13:00',
+    changedBy: 'Sara A. da Silva',
     kind: 'fixed',
     area: 'admin',
     title: 'Admin layout works on smaller screens',
@@ -576,7 +645,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2026-01-02-leadership-uploads',
-    date: '2026-01-02',
+    changedAt: '2026-01-02T20:35:52+13:00',
+    changedBy: 'Fabiano J A da Silva',
     kind: 'added',
     area: 'leadership',
     title: 'Leadership photo upload and descriptions',
@@ -585,7 +655,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2025-12-22-core-portals',
-    date: '2025-12-22',
+    changedAt: '2025-12-21T19:11:01+13:00',
+    changedBy: 'Sara A. da Silva',
     kind: 'added',
     area: 'admin',
     title: 'Admin and member dashboards, prayer wall, and user management',
@@ -598,7 +669,8 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
   {
     id: '2025-12-21-public-site',
-    date: '2025-12-21',
+    changedAt: '2025-12-21T18:12:45+13:00',
+    changedBy: 'Sara A. da Silva',
     kind: 'added',
     area: 'public',
     title: 'Public church website and History page',
@@ -610,7 +682,7 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
 export function groupChangelogByMonth(entries: ChangelogEntry[]): { monthKey: string; label: string; entries: ChangelogEntry[] }[] {
   const groups = new Map<string, ChangelogEntry[]>();
   for (const entry of entries) {
-    const monthKey = entry.date.slice(0, 7);
+    const monthKey = entry.changedAt.slice(0, 7);
     const list = groups.get(monthKey);
     if (list) list.push(entry);
     else groups.set(monthKey, [entry]);

@@ -86,7 +86,7 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode, isSuperAdmin = f
                   Super Admins only: a left-menu tab (next to Logs) with the product history of everything that has been
                   changed on the website.
                 </li>
-                <li>Filter by type (Added / Changed / Fixed) or area, or search by title and summary.</li>
+                <li>Each row shows when the change shipped (date and time) and who made it. Filter by type or area, or search by title, summary, or user.</li>
                 <li>This is not the live audit trail — use Logs for who did what. Changelog records shipped product changes.</li>
               </Section>
             )}

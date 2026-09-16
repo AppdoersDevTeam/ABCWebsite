@@ -4,6 +4,7 @@ import { Navigate } from 'react-router-dom';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { useAuth } from '../../context/AuthContext';
 import { isSuperAdminUser } from '../../lib/constants';
+import { formatFullDateTimeInTimezone } from '../../lib/dateUtils';
 import {
   CHANGELOG_AREA_LABELS,
   CHANGELOG_AREA_OPTIONS,
@@ -19,17 +20,9 @@ import {
 const FILTER_INPUT_CLASS =
   'w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-charcoal focus:outline-none focus:ring-2 focus:ring-gold/40';
 
-function formatEntryDate(isoDate: string): string {
-  const [year, month, day] = isoDate.split('-').map(Number);
-  return new Date(year, month - 1, day).toLocaleDateString('en-NZ', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  });
-}
-
 export const AdminChangelog = () => {
   const { user } = useAuth();
+  const viewerTimezone = user?.user_timezone;
   const [kindFilter, setKindFilter] = useState<ChangelogKind | ''>('');
   const [areaFilter, setAreaFilter] = useState<ChangelogArea | ''>('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -43,6 +36,7 @@ export const AdminChangelog = () => {
       const haystack = [
         entry.title,
         entry.summary,
+        entry.changedBy,
         CHANGELOG_AREA_LABELS[entry.area],
         CHANGELOG_KIND_LABELS[entry.kind],
         ...(entry.details ?? []),
@@ -113,7 +107,7 @@ export const AdminChangelog = () => {
                 <input
                   id="changelog-search"
                   type="search"
-                  placeholder="Title, summary, or area…"
+                  placeholder="Title, summary, user, or area…"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className={`${FILTER_INPUT_CLASS} pl-9 pr-3`}
@@ -151,13 +145,17 @@ export const AdminChangelog = () => {
                       key={entry.id}
                       className="rounded-[12px] border border-gray-100 bg-white/70 p-4 md:p-5"
                     >
-                      <div className="flex flex-wrap items-center gap-2 mb-2">
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-2 mb-2 text-xs text-neutral">
                         <time
-                          dateTime={entry.date}
-                          className="text-xs text-neutral tabular-nums whitespace-nowrap"
+                          dateTime={entry.changedAt}
+                          className="tabular-nums whitespace-nowrap"
+                          title={formatFullDateTimeInTimezone(entry.changedAt, viewerTimezone)}
                         >
-                          {formatEntryDate(entry.date)}
+                          {formatFullDateTimeInTimezone(entry.changedAt, viewerTimezone)}
                         </time>
+                        <span className="text-charcoal font-medium whitespace-nowrap">
+                          by {entry.changedBy}
+                        </span>
                         <span
                           className={`inline-flex text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${CHANGELOG_KIND_COLORS[entry.kind]}`}
                         >
