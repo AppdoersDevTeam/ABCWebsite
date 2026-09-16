@@ -26,6 +26,7 @@ import {
   filterChangelogEntries,
   getChangelogYearOptions,
   groupChangelogByMonth,
+  presentChangelogEntries,
   type ChangelogArea,
   type ChangelogEntry,
   type ChangelogKind,
@@ -77,12 +78,19 @@ function ChangelogEntryRow({
 
       <article className={`min-w-0 flex-1 pb-8 ${isLast ? 'pb-2' : ''}`} style={{ color: TEXT_PRIMARY }}>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
-          <h3
-            className="text-base md:text-lg font-bold leading-snug tracking-tight"
-            style={{ color: TEXT_PRIMARY }}
-          >
-            {entry.title}
-          </h3>
+          <div className="min-w-0">
+            <h3
+              className="text-base md:text-lg font-bold leading-snug tracking-tight font-mono"
+              style={{ color: TEXT_PRIMARY }}
+            >
+              {entry.title}
+            </h3>
+            {entry.heading && (
+              <p className="mt-1 text-sm md:text-base font-bold leading-snug" style={{ color: TEXT_PRIMARY }}>
+                {entry.heading}
+              </p>
+            )}
+          </div>
           <span
             className={`inline-flex items-center gap-1.5 self-start shrink-0 text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md ${CHANGELOG_KIND_COLORS[entry.kind]}`}
           >
@@ -96,13 +104,18 @@ function ChangelogEntryRow({
         </p>
 
         {entry.details && entry.details.length > 0 && (
-          <ul className="mt-3 space-y-1.5 border-l-2 border-gold/40 pl-3">
-            {entry.details.map((detail) => (
-              <li key={detail} className="text-sm leading-relaxed" style={{ color: TEXT_PRIMARY }}>
-                {detail}
-              </li>
-            ))}
-          </ul>
+          <div className="mt-3 max-w-3xl">
+            <p className="text-xs font-bold uppercase tracking-wider mb-1.5" style={{ color: TEXT_MUTED }}>
+              What changed
+            </p>
+            <ul className="space-y-1.5 border-l-2 border-gold/40 pl-3">
+              {entry.details.map((detail) => (
+                <li key={detail} className="text-sm leading-relaxed list-disc ml-4" style={{ color: TEXT_PRIMARY }}>
+                  {detail}
+                </li>
+              ))}
+            </ul>
+          </div>
         )}
 
         <dl className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs" style={{ color: TEXT_MUTED }}>
@@ -161,7 +174,7 @@ export const AdminChangelog = () => {
   }, []);
 
   const allEntries = useMemo(
-    () => mergeChangelogEntries(CHANGELOG_ENTRIES, githubEntries),
+    () => presentChangelogEntries(mergeChangelogEntries(CHANGELOG_ENTRIES, githubEntries)),
     [githubEntries]
   );
 
@@ -221,7 +234,7 @@ export const AdminChangelog = () => {
     <div className="space-y-6 pb-12" style={{ color: TEXT_PRIMARY }}>
       <AdminPageHeader
         title="Changelog"
-        subtitle="Curated product history plus GitHub commits, newest first. Refresh to pull the latest commits."
+        subtitle="Each change has a Change ID, a short description, and bullet points of what was done."
         icon={<History size={28} className="text-gold" />}
         rightSlot={
           <div className="flex gap-2 flex-wrap justify-end">

@@ -7,7 +7,41 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
-## CHG-2026-0916-001 — Development governance, changelog, and CI validation
+## CHG-2026-1609-008 — Professional Changelog register with day/month Change IDs
+
+**Date:** 2026-09-16
+**Time:** 22:59:10
+**Timezone:** Pacific/Auckland
+**Version:** 1.0.0
+**Type:** Changed
+
+**Request**
+
+> Show Changelog as a professional register: Change ID titles, a clear description, and bullet points of what changed. Do not show GitHub commit URLs. Use [CHG-YYYY-DDMM-NNN] for every entry.
+
+**Changes**
+
+* Changed Change IDs from month/day to day/month (example [CHG-2026-1609-001]).
+* Re-numbered every existing changelog register to the new format, oldest-first within each day.
+* Changelog list now shows the Change ID as the title, a short heading, a summary, and What changed bullets.
+* Removed GitHub commit URLs from the Changelog view; GitHub updates are summarised in plain language.
+* Excel and PDF exports use the same Change ID, description, and bullet format.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: not run or failed
+* Notes: Changelog helper tests updated for DDMM Change IDs.
+
+## CHG-2026-1609-007 — Development governance, changelog, and CI validation
 
 **Date:** 2026-09-16
 **Time:** 22:30:04
@@ -24,7 +58,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Added AGENTS.md as the authoritative AI development-governance document.
 * Created CHANGELOG.json as the canonical machine-readable history and CHANGELOG.md as the generated human-readable form.
 * Migrated all 60 existing Super Admin product-changelog entries from lib/changelog.ts, preserving original IDs, titles, summaries, details, authors, areas, and timestamps.
-* Added Change ID generation (CHG-YYYY-MMDD-NNN) and validation that changelog Markdown and JSON stay synchronized.
+* Added Change ID generation (CHG-YYYY-DDMM-NNN) and validation that changelog Markdown and JSON stay synchronized.
 * Set package.json to 1.0.0 as the first official SemVer and the single version source.
 * Added Node validation scripts for changelog, version, migrations, and requiring a changelog update when application files change.
 * Added a GitHub Actions CI workflow that runs validation, governance tests, and the production build.
@@ -46,7 +80,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: passed
 * Notes: Governance tests (node --test) and vite build were executed. Project-wide tsc already fails on pre-existing application errors unrelated to this change. No ESLint config exists. No application integration or e2e suite exists.
 
-## 2026-09-16-changelog-date-filters — Changelog year, month, and date range filters
+## CHG-2026-1609-006 — Changelog year, month, and date range filters
 
 **Date:** 2026-09-16
 **Time:** 19:20:00
@@ -76,7 +110,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-09-16-changelog-contrast — Changelog text contrast on light background
+## CHG-2026-1609-005 — Changelog text contrast on light background
 
 **Date:** 2026-09-16
 **Time:** 19:08:00
@@ -106,7 +140,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-09-16-changelog-layout — Clearer Changelog timeline layout
+## CHG-2026-1609-004 — Clearer Changelog timeline layout
 
 **Date:** 2026-09-16
 **Time:** 18:58:00
@@ -137,7 +171,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-09-16-changelog-export — Export Changelog to Excel and PDF
+## CHG-2026-1609-003 — Export Changelog to Excel and PDF
 
 **Date:** 2026-09-16
 **Time:** 18:53:00
@@ -167,7 +201,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-09-16-changelog-datetime-user — Changelog shows date, time, and who made each change
+## CHG-2026-1609-002 — Changelog shows date, time, and who made each change
 
 **Date:** 2026-09-16
 **Time:** 18:49:00
@@ -198,7 +232,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-09-16-superadmin-changelog — Super Admin Changelog tab in the admin dashboard
+## CHG-2026-1609-001 — Super Admin Changelog tab in the admin dashboard
 
 **Date:** 2026-09-16
 **Time:** 18:30:16
@@ -230,7 +264,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-09-15-hold-access — Hold Access for existing accounts
+## CHG-2026-1509-003 — Hold Access for existing accounts
 
 **Date:** 2026-09-15
 **Time:** 02:35:23
@@ -262,7 +296,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-09-15-admin-role-emails — Emails when admin access is granted or removed
+## CHG-2026-1509-002 — Emails when admin access is granted or removed
 
 **Date:** 2026-09-15
 **Time:** 02:13:50
@@ -292,7 +326,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-09-15-delete-user — Delete a user from User Management
+## CHG-2026-1409-004 — Delete a user from User Management
 
 **Date:** 2026-09-14
 **Time:** 23:55:07
@@ -323,7 +357,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-09-15-user-export — Export User Management lists to CSV and PDF
+## CHG-2026-1509-004 — Export User Management lists to CSV and PDF
 
 **Date:** 2026-09-15
 **Time:** 02:48:09
@@ -353,7 +387,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-09-14-annual-calendar — Annual Calendar in admin and member portals
+## CHG-2026-1409-003 — Annual Calendar in admin and member portals
 
 **Date:** 2026-09-14
 **Time:** 23:10:29
@@ -384,7 +418,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-09-14-newsletters-week-date — Newsletters match devotionals: title, week date, latest-first archive
+## CHG-2026-1409-001 — Newsletters match devotionals: title, week date, latest-first archive
 
 **Date:** 2026-09-14
 **Time:** 19:05:44
@@ -414,7 +448,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-09-14-dashboard-nav-icons — Sidebar labels and icons for Prayers and Newsletters
+## CHG-2026-1409-002 — Sidebar labels and icons for Prayers and Newsletters
 
 **Date:** 2026-09-14
 **Time:** 22:28:05
@@ -444,7 +478,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-09-14-page-headers — Shared page headers across admin and member sections
+## CHG-2026-1509-006 — Shared page headers across admin and member sections
 
 **Date:** 2026-09-15
 **Time:** 03:14:00
@@ -474,7 +508,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-09-14-pending-oauth — Pending approval, OAuth, and HashRouter reliability
+## CHG-2026-1509-001 — Pending approval, OAuth, and HashRouter reliability
 
 **Date:** 2026-09-15
 **Time:** 00:53:03
@@ -504,7 +538,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-09-14-directory-linking — Leadership linking from User Management
+## CHG-2026-1509-005 — Leadership linking from User Management
 
 **Date:** 2026-09-15
 **Time:** 03:09:05
@@ -534,7 +568,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-08-28-watch-sermons-dashboard — Watch Sermons page in the member dashboard
+## CHG-2026-2808-001 — Watch Sermons page in the member dashboard
 
 **Date:** 2026-08-28
 **Time:** 10:15:25
@@ -564,7 +598,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-08-28-overview-typography — Overview card typography
+## CHG-2026-2808-002 — Overview card typography
 
 **Date:** 2026-08-28
 **Time:** 10:19:04
@@ -594,7 +628,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-08-27-devotional-of-the-week — Devotional of the Week with in-page PDF reader
+## CHG-2026-2708-003 — Devotional of the Week with in-page PDF reader
 
 **Date:** 2026-08-27
 **Time:** 15:53:00
@@ -626,7 +660,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-08-27-pdf-viewer-fixes — PDF viewer blank screens, flicker, and mobile layout
+## CHG-2026-2708-005 — PDF viewer blank screens, flicker, and mobile layout
 
 **Date:** 2026-08-27
 **Time:** 16:39:13
@@ -656,7 +690,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-08-27-turnstile — Cloudflare Turnstile on sign-in and admin email actions
+## CHG-2026-2308-001 — Cloudflare Turnstile on sign-in and admin email actions
 
 **Date:** 2026-08-23
 **Time:** 14:11:14
@@ -686,7 +720,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-08-27-user-actions-menu — User Management actions collapsed into a dropdown
+## CHG-2026-2708-001 — User Management actions collapsed into a dropdown
 
 **Date:** 2026-08-27
 **Time:** 15:23:49
@@ -716,7 +750,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-08-27-approval-email-errors — Clear errors when approval emails fail
+## CHG-2026-2708-002 — Clear errors when approval emails fail
 
 **Date:** 2026-08-27
 **Time:** 15:29:16
@@ -746,7 +780,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-08-27-multiday-events — Clearer multi-day event schedules
+## CHG-2026-2708-004 — Clearer multi-day event schedules
 
 **Date:** 2026-08-27
 **Time:** 16:23:22
@@ -776,7 +810,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-06-26-remove-community-lunch — Community Lunch removed from event categories
+## CHG-2026-2606-001 — Community Lunch removed from event categories
 
 **Date:** 2026-06-26
 **Time:** 10:35:46
@@ -806,7 +840,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-06-23-verse-of-the-day — Verse of the day on the member dashboard
+## CHG-2026-2306-003 — Verse of the day on the member dashboard
 
 **Date:** 2026-06-23
 **Time:** 20:23:38
@@ -836,7 +870,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-06-23-audit-logs — System Logs audit trail
+## CHG-2026-2306-002 — System Logs audit trail
 
 **Date:** 2026-06-23
 **Time:** 20:08:23
@@ -867,7 +901,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-06-23-event-images — Event posters display at the right size without stretching
+## CHG-2026-2306-001 — Event posters display at the right size without stretching
 
 **Date:** 2026-06-23
 **Time:** 19:49:21
@@ -897,7 +931,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-06-22-production-seo — Production domain, SEO, and leadership pages
+## CHG-2026-2206-001 — Production domain, SEO, and leadership pages
 
 **Date:** 2026-06-22
 **Time:** 19:45:28
@@ -927,7 +961,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-06-21-mobile-dashboards — Admin and member dashboards work on phones
+## CHG-2026-2106-004 — Admin and member dashboards work on phones
 
 **Date:** 2026-06-21
 **Time:** 19:24:16
@@ -957,7 +991,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-06-21-password-reset-hashrouter — Password reset works with HashRouter and recovery tokens
+## CHG-2026-2106-003 — Password reset works with HashRouter and recovery tokens
 
 **Date:** 2026-06-21
 **Time:** 18:43:59
@@ -987,7 +1021,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-06-21-shared-event-calendar — Shared event calendar grid for admin and members
+## CHG-2026-2106-002 — Shared event calendar grid for admin and members
 
 **Date:** 2026-06-21
 **Time:** 18:24:06
@@ -1017,7 +1051,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-06-21-statement-of-faith — Statement of Faith page
+## CHG-2026-2106-001 — Statement of Faith page
 
 **Date:** 2026-06-21
 **Time:** 16:46:36
@@ -1047,7 +1081,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-06-18-contact-form — Contact form connect-card fields and direct pastor email
+## CHG-2026-1806-006 — Contact form connect-card fields and direct pastor email
 
 **Date:** 2026-06-18
 **Time:** 16:50:55
@@ -1078,7 +1112,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-06-18-signup-email — Email-only signup with confirmation
+## CHG-2026-1806-007 — Email-only signup with confirmation
 
 **Date:** 2026-06-18
 **Time:** 18:05:17
@@ -1108,7 +1142,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-06-18-giving — Giving page bank details and coming-soon online giving
+## CHG-2026-1806-008 — Giving page bank details and coming-soon online giving
 
 **Date:** 2026-06-18
 **Time:** 18:26:31
@@ -1138,7 +1172,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-06-18-teens-youth — Teens & Youth events page
+## CHG-2026-1806-003 — Teens & Youth events page
 
 **Date:** 2026-06-18
 **Time:** 12:43:17
@@ -1168,7 +1202,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-06-18-sermons-search — Sermons playlist filter and title search
+## CHG-2026-1806-001 — Sermons playlist filter and title search
 
 **Date:** 2026-06-18
 **Time:** 12:09:39
@@ -1198,7 +1232,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-06-18-kids-programme — Kids Programme time set to 10am
+## CHG-2026-1806-004 — Kids Programme time set to 10am
 
 **Date:** 2026-06-18
 **Time:** 16:42:11
@@ -1228,7 +1262,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-06-18-hide-service-account — Appdoers service account hidden from other admins
+## CHG-2026-1806-009 — Appdoers service account hidden from other admins
 
 **Date:** 2026-06-18
 **Time:** 18:45:56
@@ -1258,7 +1292,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-06-18-history-mobile — History page content visible on mobile
+## CHG-2026-1806-002 — History page content visible on mobile
 
 **Date:** 2026-06-18
 **Time:** 12:12:41
@@ -1288,7 +1322,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-06-18-im-new-maps — I’m New location link and visitor PDF coming soon
+## CHG-2026-1806-005 — I’m New location link and visitor PDF coming soon
 
 **Date:** 2026-06-18
 **Time:** 16:42:21
@@ -1318,7 +1352,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-04-27-roster-ministries — Rosters per ministry with date ranges
+## CHG-2026-2704-005 — Rosters per ministry with date ranges
 
 **Date:** 2026-04-27
 **Time:** 14:29:22
@@ -1350,7 +1384,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-04-27-event-categories-settings — Event categories managed in System Setup
+## CHG-2026-2704-004 — Event categories managed in System Setup
 
 **Date:** 2026-04-27
 **Time:** 13:58:59
@@ -1380,7 +1414,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-04-27-password-reset — Forgot password and admin-sent password reset
+## CHG-2026-2704-003 — Forgot password and admin-sent password reset
 
 **Date:** 2026-04-27
 **Time:** 13:52:21
@@ -1410,7 +1444,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-04-27-rsvp-search-export — RSVP search and directory-styled CSV/PDF export
+## CHG-2026-2704-002 — RSVP search and directory-styled CSV/PDF export
 
 **Date:** 2026-04-27
 **Time:** 13:51:31
@@ -1440,7 +1474,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-04-27-directory-groups-roles — Leadership groups, job roles, filters, and export
+## CHG-2026-2704-001 — Leadership groups, job roles, filters, and export
 
 **Date:** 2026-04-27
 **Time:** 12:14:58
@@ -1471,7 +1505,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-04-27-help-pages — Help pages for admin and member portals
+## CHG-2026-2704-007 — Help pages for admin and member portals
 
 **Date:** 2026-04-27
 **Time:** 16:47:25
@@ -1501,7 +1535,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-04-27-remove-photos — Photos section removed from admin
+## CHG-2026-2704-008 — Photos section removed from admin
 
 **Date:** 2026-04-27
 **Time:** 17:07:28
@@ -1531,7 +1565,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-04-27-prayer-button — I’m praying button refreshes the count
+## CHG-2026-2704-006 — I’m praying button refreshes the count
 
 **Date:** 2026-04-27
 **Time:** 14:30:40
@@ -1561,7 +1595,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-04-16-super-admin-roles — Super Admin role and first/last name
+## CHG-2026-1604-001 — Super Admin role and first/last name
 
 **Date:** 2026-04-16
 **Time:** 20:49:20
@@ -1591,7 +1625,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-04-16-events-module — Events: images, detail pages, RSVP, and audience
+## CHG-2026-1404-003 — Events: images, detail pages, RSVP, and audience
 
 **Date:** 2026-04-14
 **Time:** 20:39:38
@@ -1623,7 +1657,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-04-14-directory-table — Admin Leadership directory table
+## CHG-2026-1404-001 — Admin Leadership directory table
 
 **Date:** 2026-04-14
 **Time:** 19:35:56
@@ -1653,7 +1687,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-04-14-oauth-callback — OAuth callback no longer 404s on refresh
+## CHG-2026-1404-002 — OAuth callback no longer 404s on refresh
 
 **Date:** 2026-04-14
 **Time:** 20:06:43
@@ -1683,7 +1717,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-02-01-sermons-youtube — Public Watch Sermons with YouTube embeds
+## CHG-2026-1304-001 — Public Watch Sermons with YouTube embeds
 
 **Date:** 2026-04-13
 **Time:** 08:03:07
@@ -1713,7 +1747,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-02-01-visual-refresh — Public pages match the home visual language
+## CHG-2026-0102-001 — Public pages match the home visual language
 
 **Date:** 2026-02-01
 **Time:** 19:54:54
@@ -1743,7 +1777,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-01-24-admin-responsive — Admin layout works on smaller screens
+## CHG-2026-2401-001 — Admin layout works on smaller screens
 
 **Date:** 2026-01-24
 **Time:** 19:28:11
@@ -1773,7 +1807,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2026-01-02-leadership-uploads — Leadership photo upload and descriptions
+## CHG-2026-0201-001 — Leadership photo upload and descriptions
 
 **Date:** 2026-01-02
 **Time:** 20:35:52
@@ -1803,7 +1837,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2025-12-22-core-portals — Admin and member dashboards, prayer wall, and user management
+## CHG-2025-2112-002 — Admin and member dashboards, prayer wall, and user management
 
 **Date:** 2025-12-21
 **Time:** 19:11:01
@@ -1834,7 +1868,7 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Build: not run or failed
 * Notes: Migrated from the pre-governance product changelog in lib/changelog.ts. Validation was not recorded at the time.
 
-## 2025-12-21-public-site — Public church website and History page
+## CHG-2025-2112-001 — Public church website and History page
 
 **Date:** 2025-12-21
 **Time:** 18:12:45

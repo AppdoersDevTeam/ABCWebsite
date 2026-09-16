@@ -27,7 +27,10 @@ export type ChangelogEntry = {
   changedBy: string;
   kind: ChangelogKind;
   area: ChangelogArea;
+  /** Display title, always `[CHG-YYYY-DDMM-NNN]` */
   title: string;
+  /** Short human heading under the Change ID */
+  heading?: string;
   summary: string;
   details?: string[];
 };
@@ -59,19 +62,28 @@ function toProductKind(type: string): ChangelogKind {
   return 'changed';
 }
 
+function sanitizeDetails(details?: string[]): string[] | undefined {
+  if (!details?.length) return undefined;
+  const cleaned = details
+    .map((item) => item.trim())
+    .filter((item) => item && !/^github:/i.test(item) && !/github\.com\//i.test(item));
+  return cleaned.length ? cleaned : undefined;
+}
+
 function toProductEntry(entry: ChangelogJsonEntry): ChangelogEntry {
   const request = entry.request?.trim() ?? '';
   const changes = Array.isArray(entry.changes) ? entry.changes.filter(Boolean) : [];
-  const details = changes.filter((change) => change.trim() !== request);
+  const details = sanitizeDetails(changes.filter((change) => change.trim() !== request));
   return {
     id: entry.id,
     changedAt: entry.changedAt || `${entry.date}T${entry.time}`,
     changedBy: entry.changedBy || 'Unknown',
     kind: toProductKind(entry.type),
     area: isChangelogArea(entry.area) ? entry.area : 'system',
-    title: entry.title,
+    title: `[${entry.id}]`,
+    heading: entry.title,
     summary: request || entry.title,
-    details: details.length > 0 ? details : undefined,
+    details,
   };
 }
 
@@ -200,6 +212,7 @@ export function filterChangelogEntries(entries: ChangelogEntry[], filters: Chang
     if (!q) return true;
     const haystack = [
       entry.title,
+      entry.heading,
       entry.summary,
       entry.changedBy,
       CHANGELOG_AREA_LABELS[entry.area],
@@ -233,4 +246,57 @@ export function groupChangelogByMonth(entries: ChangelogEntry[]): { monthKey: st
       });
       return { monthKey, label, entries: monthEntries };
     });
+}
+
+const CHANGE_CODE_RE = /^CHG-(\d{4})-(\d{2})(\d{2})-(\d{3})$/;
+
+function aucklandDayParts(iso: string): { year: string; ddmm: string } {
+  const parts = new Intl.DateTimeFormat('en-NZ', {
+    timeZone: 'Pacific/Auckland',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(new Date(iso));
+  const get = (type: string) => parts.find((part) => part.type === type)?.value ?? '';
+  return { year: get('year'), ddmm: `${get('day')}${get('month')}` };
+}
+
+/** Ensure every visible row uses [CHG-YYYY-DDMM-NNN] and no GitHub URLs. */
+export function presentChangelogEntries(entries: ChangelogEntry[]): ChangelogEntry[] {
+  const used = new Map<string, number>();
+  const sorted = [...entries].sort(
+    (a, b) => new Date(a.changedAt).getTime() - new Date(b.changedAt).getTime()
+  );
+
+  for (const entry of sorted) {
+    const match = CHANGE_CODE_RE.exec(entry.id);
+    if (!match) continue;
+    const key = `${match[1]}-${match[2]}${match[3]}`;
+    used.set(key, Math.max(used.get(key) ?? 0, Number(match[4])));
+  }
+
+  const presented = sorted.map((entry) => {
+    const { year, ddmm } = aucklandDayParts(entry.changedAt);
+    const dayKey = `${year}-${ddmm}`;
+    let id = entry.id;
+    const match = CHANGE_CODE_RE.exec(entry.id);
+    const idMatchesDay = match && `${match[1]}-${match[2]}${match[3]}` === dayKey;
+    if (!idMatchesDay) {
+      const next = (used.get(dayKey) ?? 0) + 1;
+      used.set(dayKey, next);
+      id = `CHG-${year}-${ddmm}-${String(next).padStart(3, '0')}`;
+    }
+    const heading =
+      entry.heading?.trim() ||
+      (entry.title.startsWith('[CHG-') ? entry.summary : entry.title);
+    return {
+      ...entry,
+      id,
+      title: `[${id}]`,
+      heading,
+      details: sanitizeDetails(entry.details),
+    };
+  });
+
+  return presented.sort((a, b) => new Date(b.changedAt).getTime() - new Date(a.changedAt).getTime());
 }

@@ -6,7 +6,40 @@
   "versionSource": "package.json",
   "entries": [
     {
-      "id": "CHG-2026-0916-001",
+      "id": "CHG-2026-1609-008",
+      "date": "2026-09-16",
+      "time": "22:59:10",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-16T10:59:10.798Z",
+      "version": "1.0.0",
+      "type": "changed",
+      "area": "admin",
+      "title": "Professional Changelog register with day/month Change IDs",
+      "request": "Show Changelog as a professional register: Change ID titles, a clear description, and bullet points of what changed. Do not show GitHub commit URLs. Use [CHG-YYYY-DDMM-NNN] for every entry.",
+      "changes": [
+        "Changed Change IDs from month/day to day/month (example [CHG-2026-1609-001]).",
+        "Re-numbered every existing changelog register to the new format, oldest-first within each day.",
+        "Changelog list now shows the Change ID as the title, a short heading, a summary, and What changed bullets.",
+        "Removed GitHub commit URLs from the Changelog view; GitHub updates are summarised in plain language.",
+        "Excel and PDF exports use the same Change ID, description, and bullet format."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Changelog helper tests updated for DDMM Change IDs."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "CHG-2026-1609-007",
       "date": "2026-09-16",
       "time": "22:30:04",
       "timezone": "Pacific/Auckland",
@@ -20,7 +53,7 @@
         "Added AGENTS.md as the authoritative AI development-governance document.",
         "Created CHANGELOG.json as the canonical machine-readable history and CHANGELOG.md as the generated human-readable form.",
         "Migrated all 60 existing Super Admin product-changelog entries from lib/changelog.ts, preserving original IDs, titles, summaries, details, authors, areas, and timestamps.",
-        "Added Change ID generation (CHG-YYYY-MMDD-NNN) and validation that changelog Markdown and JSON stay synchronized.",
+        "Added Change ID generation (CHG-YYYY-DDMM-NNN) and validation that changelog Markdown and JSON stay synchronized.",
         "Set package.json to 1.0.0 as the first official SemVer and the single version source.",
         "Added Node validation scripts for changelog, version, migrations, and requiring a changelog update when application files change.",
         "Added a GitHub Actions CI workflow that runs validation, governance tests, and the production build.",
@@ -44,7 +77,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-09-16-changelog-date-filters",
+      "id": "CHG-2026-1609-006",
       "date": "2026-09-16",
       "time": "19:20:00",
       "timezone": "Pacific/Auckland",
@@ -73,7 +106,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-09-16-changelog-contrast",
+      "id": "CHG-2026-1609-005",
       "date": "2026-09-16",
       "time": "19:08:00",
       "timezone": "Pacific/Auckland",
@@ -102,7 +135,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-09-16-changelog-layout",
+      "id": "CHG-2026-1609-004",
       "date": "2026-09-16",
       "time": "18:58:00",
       "timezone": "Pacific/Auckland",
@@ -132,7 +165,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-09-16-changelog-export",
+      "id": "CHG-2026-1609-003",
       "date": "2026-09-16",
       "time": "18:53:00",
       "timezone": "Pacific/Auckland",
@@ -161,7 +194,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-09-16-changelog-datetime-user",
+      "id": "CHG-2026-1609-002",
       "date": "2026-09-16",
       "time": "18:49:00",
       "timezone": "Pacific/Auckland",
@@ -191,7 +224,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-09-16-superadmin-changelog",
+      "id": "CHG-2026-1609-001",
       "date": "2026-09-16",
       "time": "18:30:16",
       "timezone": "Pacific/Auckland",
@@ -222,7 +255,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-09-15-hold-access",
+      "id": "CHG-2026-1509-003",
       "date": "2026-09-15",
       "time": "02:35:23",
       "timezone": "Pacific/Auckland",
@@ -253,7 +286,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-09-15-admin-role-emails",
+      "id": "CHG-2026-1509-002",
       "date": "2026-09-15",
       "time": "02:13:50",
       "timezone": "Pacific/Auckland",
@@ -282,7 +315,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-09-15-delete-user",
+      "id": "CHG-2026-1409-004",
       "date": "2026-09-14",
       "time": "23:55:07",
       "timezone": "Pacific/Auckland",
@@ -312,7 +345,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-09-15-user-export",
+      "id": "CHG-2026-1509-004",
       "date": "2026-09-15",
       "time": "02:48:09",
       "timezone": "Pacific/Auckland",
@@ -341,7 +374,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-09-14-annual-calendar",
+      "id": "CHG-2026-1409-003",
       "date": "2026-09-14",
       "time": "23:10:29",
       "timezone": "Pacific/Auckland",
@@ -371,7 +404,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-09-14-newsletters-week-date",
+      "id": "CHG-2026-1409-001",
       "date": "2026-09-14",
       "time": "19:05:44",
       "timezone": "Pacific/Auckland",
@@ -400,7 +433,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-09-14-dashboard-nav-icons",
+      "id": "CHG-2026-1409-002",
       "date": "2026-09-14",
       "time": "22:28:05",
       "timezone": "Pacific/Auckland",
@@ -429,7 +462,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-09-14-page-headers",
+      "id": "CHG-2026-1509-006",
       "date": "2026-09-15",
       "time": "03:14:00",
       "timezone": "Pacific/Auckland",
@@ -458,7 +491,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-09-14-pending-oauth",
+      "id": "CHG-2026-1509-001",
       "date": "2026-09-15",
       "time": "00:53:03",
       "timezone": "Pacific/Auckland",
@@ -487,7 +520,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-09-14-directory-linking",
+      "id": "CHG-2026-1509-005",
       "date": "2026-09-15",
       "time": "03:09:05",
       "timezone": "Pacific/Auckland",
@@ -516,7 +549,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-08-28-watch-sermons-dashboard",
+      "id": "CHG-2026-2808-001",
       "date": "2026-08-28",
       "time": "10:15:25",
       "timezone": "Pacific/Auckland",
@@ -545,7 +578,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-08-28-overview-typography",
+      "id": "CHG-2026-2808-002",
       "date": "2026-08-28",
       "time": "10:19:04",
       "timezone": "Pacific/Auckland",
@@ -574,7 +607,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-08-27-devotional-of-the-week",
+      "id": "CHG-2026-2708-003",
       "date": "2026-08-27",
       "time": "15:53:00",
       "timezone": "Pacific/Auckland",
@@ -605,7 +638,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-08-27-pdf-viewer-fixes",
+      "id": "CHG-2026-2708-005",
       "date": "2026-08-27",
       "time": "16:39:13",
       "timezone": "Pacific/Auckland",
@@ -634,7 +667,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-08-27-turnstile",
+      "id": "CHG-2026-2308-001",
       "date": "2026-08-23",
       "time": "14:11:14",
       "timezone": "Pacific/Auckland",
@@ -663,7 +696,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-08-27-user-actions-menu",
+      "id": "CHG-2026-2708-001",
       "date": "2026-08-27",
       "time": "15:23:49",
       "timezone": "Pacific/Auckland",
@@ -692,7 +725,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-08-27-approval-email-errors",
+      "id": "CHG-2026-2708-002",
       "date": "2026-08-27",
       "time": "15:29:16",
       "timezone": "Pacific/Auckland",
@@ -721,7 +754,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-08-27-multiday-events",
+      "id": "CHG-2026-2708-004",
       "date": "2026-08-27",
       "time": "16:23:22",
       "timezone": "Pacific/Auckland",
@@ -750,7 +783,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-06-26-remove-community-lunch",
+      "id": "CHG-2026-2606-001",
       "date": "2026-06-26",
       "time": "10:35:46",
       "timezone": "Pacific/Auckland",
@@ -779,7 +812,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-06-23-verse-of-the-day",
+      "id": "CHG-2026-2306-003",
       "date": "2026-06-23",
       "time": "20:23:38",
       "timezone": "Pacific/Auckland",
@@ -808,7 +841,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-06-23-audit-logs",
+      "id": "CHG-2026-2306-002",
       "date": "2026-06-23",
       "time": "20:08:23",
       "timezone": "Pacific/Auckland",
@@ -838,7 +871,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-06-23-event-images",
+      "id": "CHG-2026-2306-001",
       "date": "2026-06-23",
       "time": "19:49:21",
       "timezone": "Pacific/Auckland",
@@ -867,7 +900,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-06-22-production-seo",
+      "id": "CHG-2026-2206-001",
       "date": "2026-06-22",
       "time": "19:45:28",
       "timezone": "Pacific/Auckland",
@@ -896,7 +929,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-06-21-mobile-dashboards",
+      "id": "CHG-2026-2106-004",
       "date": "2026-06-21",
       "time": "19:24:16",
       "timezone": "Pacific/Auckland",
@@ -925,7 +958,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-06-21-password-reset-hashrouter",
+      "id": "CHG-2026-2106-003",
       "date": "2026-06-21",
       "time": "18:43:59",
       "timezone": "Pacific/Auckland",
@@ -954,7 +987,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-06-21-shared-event-calendar",
+      "id": "CHG-2026-2106-002",
       "date": "2026-06-21",
       "time": "18:24:06",
       "timezone": "Pacific/Auckland",
@@ -983,7 +1016,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-06-21-statement-of-faith",
+      "id": "CHG-2026-2106-001",
       "date": "2026-06-21",
       "time": "16:46:36",
       "timezone": "Pacific/Auckland",
@@ -1012,7 +1045,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-06-18-contact-form",
+      "id": "CHG-2026-1806-006",
       "date": "2026-06-18",
       "time": "16:50:55",
       "timezone": "Pacific/Auckland",
@@ -1042,7 +1075,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-06-18-signup-email",
+      "id": "CHG-2026-1806-007",
       "date": "2026-06-18",
       "time": "18:05:17",
       "timezone": "Pacific/Auckland",
@@ -1071,7 +1104,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-06-18-giving",
+      "id": "CHG-2026-1806-008",
       "date": "2026-06-18",
       "time": "18:26:31",
       "timezone": "Pacific/Auckland",
@@ -1100,7 +1133,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-06-18-teens-youth",
+      "id": "CHG-2026-1806-003",
       "date": "2026-06-18",
       "time": "12:43:17",
       "timezone": "Pacific/Auckland",
@@ -1129,7 +1162,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-06-18-sermons-search",
+      "id": "CHG-2026-1806-001",
       "date": "2026-06-18",
       "time": "12:09:39",
       "timezone": "Pacific/Auckland",
@@ -1158,7 +1191,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-06-18-kids-programme",
+      "id": "CHG-2026-1806-004",
       "date": "2026-06-18",
       "time": "16:42:11",
       "timezone": "Pacific/Auckland",
@@ -1187,7 +1220,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-06-18-hide-service-account",
+      "id": "CHG-2026-1806-009",
       "date": "2026-06-18",
       "time": "18:45:56",
       "timezone": "Pacific/Auckland",
@@ -1216,7 +1249,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-06-18-history-mobile",
+      "id": "CHG-2026-1806-002",
       "date": "2026-06-18",
       "time": "12:12:41",
       "timezone": "Pacific/Auckland",
@@ -1245,7 +1278,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-06-18-im-new-maps",
+      "id": "CHG-2026-1806-005",
       "date": "2026-06-18",
       "time": "16:42:21",
       "timezone": "Pacific/Auckland",
@@ -1274,7 +1307,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-04-27-roster-ministries",
+      "id": "CHG-2026-2704-005",
       "date": "2026-04-27",
       "time": "14:29:22",
       "timezone": "Pacific/Auckland",
@@ -1305,7 +1338,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-04-27-event-categories-settings",
+      "id": "CHG-2026-2704-004",
       "date": "2026-04-27",
       "time": "13:58:59",
       "timezone": "Pacific/Auckland",
@@ -1334,7 +1367,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-04-27-password-reset",
+      "id": "CHG-2026-2704-003",
       "date": "2026-04-27",
       "time": "13:52:21",
       "timezone": "Pacific/Auckland",
@@ -1363,7 +1396,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-04-27-rsvp-search-export",
+      "id": "CHG-2026-2704-002",
       "date": "2026-04-27",
       "time": "13:51:31",
       "timezone": "Pacific/Auckland",
@@ -1392,7 +1425,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-04-27-directory-groups-roles",
+      "id": "CHG-2026-2704-001",
       "date": "2026-04-27",
       "time": "12:14:58",
       "timezone": "Pacific/Auckland",
@@ -1422,7 +1455,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-04-27-help-pages",
+      "id": "CHG-2026-2704-007",
       "date": "2026-04-27",
       "time": "16:47:25",
       "timezone": "Pacific/Auckland",
@@ -1451,7 +1484,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-04-27-remove-photos",
+      "id": "CHG-2026-2704-008",
       "date": "2026-04-27",
       "time": "17:07:28",
       "timezone": "Pacific/Auckland",
@@ -1480,7 +1513,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-04-27-prayer-button",
+      "id": "CHG-2026-2704-006",
       "date": "2026-04-27",
       "time": "14:30:40",
       "timezone": "Pacific/Auckland",
@@ -1509,7 +1542,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-04-16-super-admin-roles",
+      "id": "CHG-2026-1604-001",
       "date": "2026-04-16",
       "time": "20:49:20",
       "timezone": "Pacific/Auckland",
@@ -1538,7 +1571,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-04-16-events-module",
+      "id": "CHG-2026-1404-003",
       "date": "2026-04-14",
       "time": "20:39:38",
       "timezone": "Pacific/Auckland",
@@ -1569,7 +1602,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-04-14-directory-table",
+      "id": "CHG-2026-1404-001",
       "date": "2026-04-14",
       "time": "19:35:56",
       "timezone": "Pacific/Auckland",
@@ -1598,7 +1631,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-04-14-oauth-callback",
+      "id": "CHG-2026-1404-002",
       "date": "2026-04-14",
       "time": "20:06:43",
       "timezone": "Pacific/Auckland",
@@ -1627,7 +1660,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-02-01-sermons-youtube",
+      "id": "CHG-2026-1304-001",
       "date": "2026-04-13",
       "time": "08:03:07",
       "timezone": "Pacific/Auckland",
@@ -1656,7 +1689,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-02-01-visual-refresh",
+      "id": "CHG-2026-0102-001",
       "date": "2026-02-01",
       "time": "19:54:54",
       "timezone": "Pacific/Auckland",
@@ -1685,7 +1718,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-01-24-admin-responsive",
+      "id": "CHG-2026-2401-001",
       "date": "2026-01-24",
       "time": "19:28:11",
       "timezone": "Pacific/Auckland",
@@ -1714,7 +1747,7 @@
       "breakingChange": false
     },
     {
-      "id": "2026-01-02-leadership-uploads",
+      "id": "CHG-2026-0201-001",
       "date": "2026-01-02",
       "time": "20:35:52",
       "timezone": "Pacific/Auckland",
@@ -1743,7 +1776,7 @@
       "breakingChange": false
     },
     {
-      "id": "2025-12-22-core-portals",
+      "id": "CHG-2025-2112-002",
       "date": "2025-12-21",
       "time": "19:11:01",
       "timezone": "Pacific/Auckland",
@@ -1773,7 +1806,7 @@
       "breakingChange": false
     },
     {
-      "id": "2025-12-21-public-site",
+      "id": "CHG-2025-2112-001",
       "date": "2025-12-21",
       "time": "18:12:45",
       "timezone": "Pacific/Auckland",

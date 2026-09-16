@@ -9,7 +9,7 @@ import path from 'node:path';
 export const DEFAULT_TIMEZONE = 'Pacific/Auckland';
 export const FORMAT_VERSION = 1;
 
-export const CHANGE_ID_RE = /^CHG-(\d{4})-(\d{4})-(\d{3})$/;
+export const CHANGE_ID_RE = /^CHG-(\d{4})-(\d{2})(\d{2})-(\d{3})$/;
 export const LEGACY_ID_RE = /^\d{4}-\d{2}-\d{2}-[a-z0-9-]+$/;
 export const SEMVER_RE = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;
 export const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -114,39 +114,42 @@ export function nowStamp(timeZone = DEFAULT_TIMEZONE) {
 export function parseChangeId(id) {
   const match = CHANGE_ID_RE.exec(id);
   if (!match) return null;
+  const day = Number(match[2]);
+  const month = Number(match[3]);
+  if (day < 1 || day > 31 || month < 1 || month > 12) return null;
   return {
     year: match[1],
-    mmdd: match[2],
-    n: Number(match[3]),
+    ddmm: `${match[2]}${match[3]}`,
+    n: Number(match[4]),
   };
 }
 
-export function formatChangeId(yyyy, mmdd, n) {
-  return `CHG-${yyyy}-${mmdd}-${String(n).padStart(3, '0')}`;
+export function formatChangeId(yyyy, ddmm, n) {
+  return `CHG-${yyyy}-${ddmm}-${String(n).padStart(3, '0')}`;
 }
 
 export function changeIdDateKey(stamp) {
-  const compact = stamp.date.replaceAll('-', '');
+  const [year, month, day] = String(stamp.date).split('-');
   return {
-    year: compact.slice(0, 4),
-    mmdd: compact.slice(4, 8),
+    year,
+    ddmm: `${day}${month}`,
   };
 }
 
 export function nextChangeId(entries, stamp = nowStamp()) {
-  const { year, mmdd } = changeIdDateKey(stamp);
-  const prefix = `CHG-${year}-${mmdd}-`;
+  const { year, ddmm } = changeIdDateKey(stamp);
+  const prefix = `CHG-${year}-${ddmm}-`;
   let max = 0;
   for (const entry of entries ?? []) {
     if (typeof entry?.id !== 'string' || !entry.id.startsWith(prefix)) continue;
     const parsed = parseChangeId(entry.id);
     if (parsed && parsed.n > max) max = parsed.n;
   }
-  return formatChangeId(year, mmdd, max + 1);
+  return formatChangeId(year, ddmm, max + 1);
 }
 
 export function isValidChangeId(id) {
-  return CHANGE_ID_RE.test(id) || LEGACY_ID_RE.test(id);
+  return Boolean(parseChangeId(id)) || LEGACY_ID_RE.test(id);
 }
 
 export function compareSemver(a, b) {

@@ -63,7 +63,7 @@ Do not assume the next Change ID or version. Run:
 npm run changelog:next-id
 ```
 
-That prints the next `CHG-YYYY-MMDD-NNN` and the actual Auckland date/time from the machine clock. Never invent timestamps.
+That prints the next `CHG-YYYY-DDMM-NNN` and the actual Auckland date/time from the machine clock. Never invent timestamps.
 
 ---
 
@@ -141,9 +141,9 @@ If Markdown and JSON drift, validation fails. Do not hand-edit Markdown into a d
 
 ### Change IDs
 
-Format: `CHG-YYYY-MMDD-NNN` (Auckland date, monotonic same-day sequence).
+Format: `CHG-YYYY-DDMM-NNN` (Auckland day/month/year, monotonic same-day sequence).
 
-Examples: `CHG-2026-0916-001`, then `CHG-2026-0916-002`.
+Examples: `CHG-2026-1609-001`, then `CHG-2026-1609-002`.
 
 - Detect existing IDs via `npm run changelog:next-id`
 - Do not reuse or invent IDs
@@ -205,9 +205,9 @@ Types: `feat`, `fix`, `docs`, `refactor`, `perf`, `security`, `chore`, `test`, `
 Examples:
 
 ```
-feat(notifications): add customer notification system [CHG-2026-0916-001]
-fix(auth): prevent duplicate password reset tokens [CHG-2026-0916-002]
-refactor(api): simplify customer service architecture [CHG-2026-0916-003]
+feat(notifications): add customer notification system [CHG-2026-1609-001]
+fix(auth): prevent duplicate password reset tokens [CHG-2026-1609-002]
+refactor(api): simplify customer service architecture [CHG-2026-1609-003]
 ```
 
 Create the commit when the change is complete unless the user forbade committing. Report the Change ID and the actual commit hash. Do not claim a commit exists unless `git log` shows it.

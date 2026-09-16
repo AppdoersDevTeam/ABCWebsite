@@ -23,7 +23,7 @@ function sampleDoc(overrides = {}) {
     versionSource: 'package.json',
     entries: [
       {
-        id: 'CHG-2026-0916-001',
+        id: 'CHG-2026-1609-001',
         date: '2026-09-16',
         time: '21:00:00',
         timezone: 'Pacific/Auckland',
@@ -53,21 +53,22 @@ function sampleDoc(overrides = {}) {
 }
 
 test('accepts canonical and legacy change IDs', () => {
-  assert.equal(CHANGE_ID_RE.test('CHG-2026-0916-001'), true);
-  assert.equal(isValidChangeId('CHG-2026-0916-001'), true);
+  assert.equal(CHANGE_ID_RE.test('CHG-2026-1609-001'), true);
+  assert.equal(isValidChangeId('CHG-2026-1609-001'), true);
   assert.equal(isValidChangeId('2026-09-16-changelog-date-filters'), true);
   assert.equal(isValidChangeId('not-an-id'), false);
   assert.equal(isValidChangeId('CHG-2026-916-1'), false);
+  assert.equal(isValidChangeId('CHG-2026-0916-001'), false);
 });
 
 test('generates the next Change ID for the same Auckland day', () => {
   const stamp = { date: '2026-09-16', time: '22:00:00', timezone: 'Pacific/Auckland' };
-  assert.equal(nextChangeId([], stamp), 'CHG-2026-0916-001');
+  assert.equal(nextChangeId([], stamp), 'CHG-2026-1609-001');
   assert.equal(
-    nextChangeId([{ id: 'CHG-2026-0916-001' }, { id: '2026-09-16-legacy' }], stamp),
-    'CHG-2026-0916-002'
+    nextChangeId([{ id: 'CHG-2026-1609-001' }, { id: '2026-09-16-legacy' }], stamp),
+    'CHG-2026-1609-002'
   );
-  assert.equal(formatChangeId('2026', '0916', 12), 'CHG-2026-0916-012');
+  assert.equal(formatChangeId('2026', '1609', 12), 'CHG-2026-1609-012');
 });
 
 test('detects duplicate IDs, missing fields, and invalid versions', () => {

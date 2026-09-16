@@ -36,7 +36,7 @@ function toRows(entries: ChangelogEntry[], meta: ChangelogExportMeta): ExportRow
     type: CHANGELOG_KIND_LABELS[entry.kind],
     area: CHANGELOG_AREA_LABELS[entry.area],
     title: entry.title,
-    summary: entry.summary,
+    summary: [entry.heading, entry.summary].filter(Boolean).join(' — '),
     details: (entry.details ?? []).join('; '),
   }));
 }
