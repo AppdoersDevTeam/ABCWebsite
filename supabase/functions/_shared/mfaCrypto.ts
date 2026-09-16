@@ -381,6 +381,28 @@ export function hasPasswordProvider(params: {
   return (params.identities || []).some((id) => String(id.provider || "").toLowerCase() === "email");
 }
 
+export function resolveRecipientEmail(params: {
+  profileEmail?: string | null;
+  authEmail?: string | null;
+  identities?: Array<{
+    email?: string | null;
+    provider?: string | null;
+    identity_data?: { email?: string | null } | Record<string, unknown> | null;
+  }> | null;
+}): string {
+  const identityEmails = (params.identities || []).flatMap((id) => {
+    const data = id.identity_data;
+    const fromData =
+      data && typeof data === "object" && "email" in data ? String((data as { email?: unknown }).email || "") : "";
+    return [id.email, fromData];
+  });
+  for (const value of [params.profileEmail, params.authEmail, ...identityEmails]) {
+    const email = String(value || "").trim();
+    if (email.includes("@")) return email;
+  }
+  return "";
+}
+
 export function availableLoginMethods(totpEnabled: boolean, emailEnabled: boolean): Array<"totp" | "email"> {
   const methods: Array<"totp" | "email"> = [];
   if (totpEnabled) methods.push("totp");

@@ -161,7 +161,7 @@ export async function mfaTotpDisable(params: {
   return invokeMfa<{ ok: boolean }>({ action: 'totp_disable', ...params });
 }
 
-export async function mfaEmailEnableStart(params: { password: string; captchaToken: string }) {
+export async function mfaEmailEnableStart(params: { password: string; captchaToken: string; resend?: boolean }) {
   return invokeMfa<{ maskedEmail?: string }>({ action: 'email_enable_start', ...params });
 }
 

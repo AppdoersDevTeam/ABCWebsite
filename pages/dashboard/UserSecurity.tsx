@@ -244,6 +244,20 @@ export const UserSecurity = () => {
     }
   };
 
+  const resendEmailCode = async () => {
+    setBusy(true);
+    setError(null);
+    try {
+      await mfaEmailEnableStart({ password: '', captchaToken: '', resend: true });
+      setCode('');
+      setSuccess('A new code was sent. Check inbox, Spam, and Promotions.');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Unable to send verification email.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const verifyEmail = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true);
@@ -558,7 +572,9 @@ export const UserSecurity = () => {
         {!emailSent ? (
           <form className="space-y-4" onSubmit={startEmail}>
             <DialogError message={error} />
-            <p className="text-sm text-neutral">A one-time code will be sent to {status?.maskedEmail}. Email MFA is not enabled until that code is verified.</p>
+            <p className="text-sm text-neutral">
+              A one-time code will be sent to {status?.maskedEmail}. Check the inbox for that Google or email account, including Spam and Promotions. Email MFA is not enabled until that code is verified.
+            </p>
             {needsSitePassword ? (
               <label className="block text-sm font-bold text-charcoal">
                 Current password
@@ -573,12 +589,22 @@ export const UserSecurity = () => {
         ) : (
           <form className="space-y-4" onSubmit={verifyEmail}>
             <DialogError message={error} />
-            <p className="text-sm text-neutral">Enter the 6-digit code sent to {status?.maskedEmail}.</p>
+            <p className="text-sm text-neutral">
+              Enter the 6-digit code sent to {status?.maskedEmail}. Look in Spam and Promotions if it is not in the inbox. The subject is “Your Ashburton Baptist Church verification code”.
+            </p>
             <label className="block text-sm font-bold text-charcoal">
               Verification code
-              <input inputMode="numeric" autoComplete="one-time-code" maxLength={6} className="mt-2 w-full border border-gray-300 rounded-[4px] px-4 py-3 tracking-[0.4em] text-center" value={code} onChange={(e) => setCode(e.target.value)} required />
+              <input id="email-enable-code" inputMode="numeric" autoComplete="one-time-code" maxLength={6} className="mt-2 w-full border border-gray-300 rounded-[4px] px-4 py-3 tracking-[0.4em] text-center" value={code} onChange={(e) => setCode(e.target.value)} required />
             </label>
             <GlowingButton type="submit" fullWidth disabled={busy || code.length < 6}>{busy ? 'Verifying...' : 'Enable email verification'}</GlowingButton>
+            <button
+              type="button"
+              className="w-full text-sm font-bold text-charcoal underline disabled:opacity-50"
+              disabled={busy}
+              onClick={() => void resendEmailCode()}
+            >
+              Send a new code
+            </button>
           </form>
         )}
       </Modal>

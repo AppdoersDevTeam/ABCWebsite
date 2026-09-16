@@ -30,6 +30,7 @@ import {
   isEligibleForMfaSetup,
   passwordLoginOutcome,
   hasPasswordProvider,
+  resolveRecipientEmail,
   recoveryCodeReusable,
   setupAuthorization,
   EMAIL_CODE_TTL_MS,
@@ -322,5 +323,20 @@ test('Google-only accounts do not have a site password; email identities do', ()
       providers: ['google', 'email'],
     }),
     true
+  );
+});
+
+test('recipient email falls back from profile to auth to Google identity', () => {
+  assert.equal(
+    resolveRecipientEmail({ profileEmail: 'member@example.com', authEmail: 'other@example.com' }),
+    'member@example.com'
+  );
+  assert.equal(
+    resolveRecipientEmail({
+      profileEmail: '',
+      authEmail: null,
+      identities: [{ provider: 'google', identity_data: { email: 'google.user@example.com' } }],
+    }),
+    'google.user@example.com'
   );
 });

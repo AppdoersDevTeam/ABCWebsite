@@ -6,6 +6,36 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-1709-013",
+      "date": "2026-09-17",
+      "time": "03:02:44",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-16T15:02:44.812Z",
+      "version": "1.2.6",
+      "type": "fixed",
+      "area": "auth",
+      "title": "Make Google-account email 2FA codes easier to receive",
+      "request": "Authenticator app bypass worked for Google accounts, but email verification did not send a code after Send code, even though the password bypass worked.",
+      "changes": [
+        "Email verification codes are now sent as both a normal email and a plain-text copy, with a unique header so Gmail does not hide a new code inside an earlier thread.",
+        "The setup screen names the destination inbox, reminds you to check Spam and Promotions, and lets you send a new code without starting over."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "38 unit tests and npm run validate. vite build. Typecheck still fails on pre-existing app errors. Live mfa and mfa-login functions redeployed after push. Browser E2E tools were not available."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-1709-012",
       "date": "2026-09-17",
       "time": "02:42:04",

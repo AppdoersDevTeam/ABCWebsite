@@ -1,9 +1,30 @@
 const LOGO_URL = "https://ashburtonbaptist.co.nz/abc-logo.png";
 const DEFAULT_SITE_URL = "https://ashburtonbaptist.co.nz";
 
-export const MFA_EMAIL_SUBJECT = "Your security verification code";
+export const MFA_EMAIL_SUBJECT = "Your Ashburton Baptist Church verification code";
 export const MFA_EMAIL_TEMPLATE_KEY = "mfa_verification";
 export const MFA_CODE_EXPIRY_MINUTES = 10;
+
+export function buildMfaCodeEmailText(params: {
+  firstName: string;
+  expiryMinutes?: number;
+  code: string;
+}): string {
+  const greetingName = params.firstName || "there";
+  const minutes = params.expiryMinutes ?? MFA_CODE_EXPIRY_MINUTES;
+  const code = params.code;
+  return [
+    `Kia ora ${greetingName},`,
+    "",
+    "Your Ashburton Baptist Church verification code is:",
+    "",
+    code,
+    "",
+    `This code expires in ${minutes} minutes and can be used only once.`,
+    "",
+    "If you did not request this code, please secure your account and contact the church office.",
+  ].join("\n");
+}
 
 export function buildMfaCodeEmailHtml(params: {
   firstName: string;

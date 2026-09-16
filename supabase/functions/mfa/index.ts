@@ -6,6 +6,7 @@ import {
   MFA_EMAIL_SUBJECT,
   MFA_EMAIL_TEMPLATE_KEY,
   buildMfaCodeEmailHtml,
+  buildMfaCodeEmailText,
 } from "./mfaEmailTemplate.ts";
 import {
   RATE_LIMITS,
@@ -18,6 +19,7 @@ import {
   expiredCode,
   firstNameOf,
   genericInvalid,
+  hasRecentEmailChallenge,
   loadSettings,
   loadUser,
   markSessionVerified,
@@ -34,6 +36,7 @@ import {
   checkRateLimit,
   isEligibleForSetup,
   hasPasswordProvider,
+  resolveRecipientEmail,
   type AdminClient,
   type UserRow,
 } from "./mfaService.ts";
@@ -112,10 +115,23 @@ async function sendMfaEmail(
   profile: UserRow,
   code: string,
   actorId: string | null,
-): Promise<{ ok: boolean; error?: string }> {
+  fallbackEmail?: string | null,
+): Promise<{ ok: boolean; error?: string; toEmail?: string }> {
   const resendApiKey = Deno.env.get("RESEND_API_KEY");
-  const toEmail = (profile.email || "").trim();
   if (!resendApiKey) return { ok: false, error: "Email service not configured" };
+
+  let toEmail = resolveRecipientEmail({
+    profileEmail: profile.email,
+    authEmail: fallbackEmail,
+  });
+  if (!toEmail) {
+    const { data } = await admin.auth.admin.getUserById(profile.id);
+    toEmail = resolveRecipientEmail({
+      profileEmail: profile.email,
+      authEmail: data?.user?.email || fallbackEmail,
+      identities: data?.user?.identities,
+    });
+  }
   if (!toEmail) return { ok: false, error: "User has no email" };
 
   const siteUrl = (Deno.env.get("SITE_URL") || DEFAULT_SITE_URL).replace(/\/$/, "");
@@ -125,6 +141,11 @@ async function sendMfaEmail(
     code,
     expiryMinutes: MFA_CODE_EXPIRY_MINUTES,
     loginUrl: `${siteUrl}/#/login`,
+  });
+  const text = buildMfaCodeEmailText({
+    firstName: firstNameOf(profile),
+    code,
+    expiryMinutes: MFA_CODE_EXPIRY_MINUTES,
   });
 
   const resendRes = await fetch("https://api.resend.com/emails", {
@@ -138,11 +159,13 @@ async function sendMfaEmail(
       to: [toEmail],
       subject: MFA_EMAIL_SUBJECT,
       html,
+      text,
+      headers: { "X-Entity-Ref-ID": crypto.randomUUID() },
     }),
   });
   const resendBody = await resendRes.json().catch(() => ({}));
   if (!resendRes.ok) {
-    console.error("mfa email send failed", resendRes.status);
+    console.error("mfa email send failed", resendRes.status, JSON.stringify(resendBody).slice(0, 300));
     return { ok: false, error: "Failed to send verification email" };
   }
   await recordEmailSend(admin, {
@@ -154,7 +177,7 @@ async function sendMfaEmail(
     actorId,
     metadata: { purpose: "mfa" },
   });
-  return { ok: true };
+  return { ok: true, toEmail };
 }
 
 async function passwordGrant(email: string, password: string, captchaToken: string) {
@@ -313,9 +336,9 @@ async function handleSessionSendEmail(req: Request, admin: AdminClient) {
   const profile = await loadUser(admin, caller.user.id);
   if (!profile) return fromError(publicError("User not found", 404));
   const code = await createEmailChallenge(admin, caller.user.id, "login");
-  const sent = await sendMfaEmail(admin, profile, code, caller.user.id);
+  const sent = await sendMfaEmail(admin, profile, code, caller.user.id, caller.user.email);
   if (!sent.ok) return fromError(publicError(sent.error || "Failed to send verification email", 502));
-  return jsonResponse({ ok: true, maskedEmail: maskEmail(profile.email || "") });
+  return jsonResponse({ ok: true, maskedEmail: maskEmail(sent.toEmail || profile.email || "") });
 }
 
 async function handleStatus(req: Request, admin: AdminClient) {
@@ -544,21 +567,27 @@ async function handleEmailEnableStart(req: Request, admin: AdminClient, body: Bo
   const { caller, profile } = authz as { caller: NonNullable<Awaited<ReturnType<typeof callerFromRequest>>>; profile: UserRow };
   const password = String(body.password || "");
   const captchaToken = String(body.captchaToken || "");
-  const denied = await confirmReauth(
-    admin,
-    caller.user.id,
-    profile.email || caller.user.email || "",
-    password,
-    captchaToken,
-  );
-  if (denied) return denied;
+  const isResend = Boolean(body.resend);
+  if (isResend) {
+    const recent = await hasRecentEmailChallenge(admin, caller.user.id, "enable");
+    if (!recent) return fromError(publicError("Start email setup first.", 400));
+  } else {
+    const denied = await confirmReauth(
+      admin,
+      caller.user.id,
+      profile.email || caller.user.email || "",
+      password,
+      captchaToken,
+    );
+    if (denied) return denied;
+  }
   const limit = await checkEmailSendLimits(admin, caller.user.id);
   if (!limit.allowed) return fromError(tooMany());
   await ensureSettings(admin, caller.user.id);
   const code = await createEmailChallenge(admin, caller.user.id, "enable");
-  const sent = await sendMfaEmail(admin, profile, code, caller.user.id);
+  const sent = await sendMfaEmail(admin, profile, code, caller.user.id, caller.user.email);
   if (!sent.ok) return fromError(publicError(sent.error || "Failed to send verification email", 502));
-  return jsonResponse({ ok: true, maskedEmail: maskEmail(profile.email || "") });
+  return jsonResponse({ ok: true, maskedEmail: maskEmail(sent.toEmail || profile.email || "") });
 }
 
 async function handleEmailEnableVerify(req: Request, admin: AdminClient, body: Body) {
@@ -616,7 +645,7 @@ async function handleEmailDisableStart(req: Request, admin: AdminClient, body: B
   const limit = await checkEmailSendLimits(admin, caller.user.id);
   if (!limit.allowed) return fromError(tooMany());
   const code = await createEmailChallenge(admin, caller.user.id, "disable");
-  const sent = await sendMfaEmail(admin, profile, code, caller.user.id);
+  const sent = await sendMfaEmail(admin, profile, code, caller.user.id, caller.user.email);
   if (!sent.ok) return fromError(publicError(sent.error || "Failed to send verification email", 502));
   return jsonResponse({ ok: true, maskedEmail: maskEmail(profile.email || "") });
 }

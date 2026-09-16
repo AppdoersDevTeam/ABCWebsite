@@ -6,6 +6,7 @@ import {
   MFA_EMAIL_SUBJECT,
   MFA_EMAIL_TEMPLATE_KEY,
   buildMfaCodeEmailHtml,
+  buildMfaCodeEmailText,
 } from "../_shared/mfaEmailTemplate.ts";
 import {
   RATE_LIMITS,
@@ -29,6 +30,7 @@ import {
   verifyStoredTotp,
   writeAudit,
   checkRateLimit,
+  resolveRecipientEmail,
   type AdminClient,
   type UserRow,
 } from "../_shared/mfaService.ts";
@@ -80,10 +82,23 @@ async function sendMfaEmail(
   profile: UserRow,
   code: string,
   actorId: string | null,
-): Promise<{ ok: boolean; error?: string }> {
+  fallbackEmail?: string | null,
+): Promise<{ ok: boolean; error?: string; toEmail?: string }> {
   const resendApiKey = Deno.env.get("RESEND_API_KEY");
-  const toEmail = (profile.email || "").trim();
   if (!resendApiKey) return { ok: false, error: "Email service not configured" };
+
+  let toEmail = resolveRecipientEmail({
+    profileEmail: profile.email,
+    authEmail: fallbackEmail,
+  });
+  if (!toEmail) {
+    const { data } = await admin.auth.admin.getUserById(profile.id);
+    toEmail = resolveRecipientEmail({
+      profileEmail: profile.email,
+      authEmail: data?.user?.email || fallbackEmail,
+      identities: data?.user?.identities,
+    });
+  }
   if (!toEmail) return { ok: false, error: "User has no email" };
 
   const siteUrl = (Deno.env.get("SITE_URL") || DEFAULT_SITE_URL).replace(/\/$/, "");
@@ -93,6 +108,11 @@ async function sendMfaEmail(
     code,
     expiryMinutes: MFA_CODE_EXPIRY_MINUTES,
     loginUrl: `${siteUrl}/#/login`,
+  });
+  const text = buildMfaCodeEmailText({
+    firstName: firstNameOf(profile),
+    code,
+    expiryMinutes: MFA_CODE_EXPIRY_MINUTES,
   });
 
   const resendRes = await fetch("https://api.resend.com/emails", {
@@ -106,11 +126,13 @@ async function sendMfaEmail(
       to: [toEmail],
       subject: MFA_EMAIL_SUBJECT,
       html,
+      text,
+      headers: { "X-Entity-Ref-ID": crypto.randomUUID() },
     }),
   });
   const resendBody = await resendRes.json().catch(() => ({}));
   if (!resendRes.ok) {
-    console.error("mfa email send failed", resendRes.status);
+    console.error("mfa email send failed", resendRes.status, JSON.stringify(resendBody).slice(0, 300));
     return { ok: false, error: "Failed to send verification email" };
   }
   await recordEmailSend(admin, {
@@ -122,7 +144,7 @@ async function sendMfaEmail(
     actorId,
     metadata: { purpose: "mfa" },
   });
-  return { ok: true };
+  return { ok: true, toEmail };
 }
 
 async function passwordGrant(email: string, password: string, captchaToken: string) {
@@ -338,9 +360,9 @@ async function handleLoginSendEmail(admin: AdminClient, body: Body) {
   const profile = await loadUser(admin, challenge.user_id);
   if (!profile) return fromError(publicError("User not found", 404));
   const code = await createEmailChallenge(admin, challenge.user_id, "login");
-  const sent = await sendMfaEmail(admin, profile, code, challenge.user_id);
+  const sent = await sendMfaEmail(admin, profile, code, challenge.user_id, profile.email);
   if (!sent.ok) return fromError(publicError(sent.error || "Failed to send verification email", 502));
-  return jsonResponse({ ok: true, maskedEmail: maskEmail(profile.email || "") });
+  return jsonResponse({ ok: true, maskedEmail: maskEmail(sent.toEmail || profile.email || "") });
 }
 
 async function handleLoginVerify(admin: AdminClient, body: Body) {

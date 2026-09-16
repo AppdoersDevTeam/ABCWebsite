@@ -7,6 +7,37 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-1709-013 — Make Google-account email 2FA codes easier to receive
+
+**Date:** 2026-09-17
+**Time:** 03:02:44
+**Timezone:** Pacific/Auckland
+**Version:** 1.2.6
+**Type:** Fixed
+
+**Request**
+
+> Authenticator app bypass worked for Google accounts, but email verification did not send a code after Send code, even though the password bypass worked.
+
+**Changes**
+
+* Email verification codes are now sent as both a normal email and a plain-text copy, with a unique header so Gmail does not hide a new code inside an earlier thread.
+* The setup screen names the destination inbox, reminds you to check Spam and Promotions, and lets you send a new code without starting over.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: 38 unit tests and npm run validate. vite build. Typecheck still fails on pre-existing app errors. Live mfa and mfa-login functions redeployed after push. Browser E2E tools were not available.
+
 ## CHG-2026-1709-012 — Google accounts can set up 2FA without a site password
 
 **Date:** 2026-09-17

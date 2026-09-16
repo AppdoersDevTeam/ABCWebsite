@@ -23,6 +23,7 @@ import {
   buildOtpauthUri,
   isEligibleForMfaSetup,
   hasPasswordProvider,
+  resolveRecipientEmail,
 } from "./mfaCrypto.ts";
 
 export type AdminClient = SupabaseClient;
@@ -304,6 +305,25 @@ export async function consumeEmailChallenge(
   return { ok: true };
 }
 
+export async function hasRecentEmailChallenge(
+  admin: AdminClient,
+  userId: string,
+  purpose: string,
+): Promise<boolean> {
+  const { data } = await admin
+    .from("mfa_email_challenges")
+    .select("created_at")
+    .eq("user_id", userId)
+    .eq("purpose", purpose)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (!data?.created_at) return false;
+  const created = Date.parse(String(data.created_at));
+  if (!Number.isFinite(created)) return false;
+  return Date.now() - created < EMAIL_CODE_TTL_MS;
+}
+
 export async function createEmailChallenge(
   admin: AdminClient,
   userId: string,
@@ -423,4 +443,4 @@ export async function startTotpEnroll(accountName: string): Promise<{
   };
 }
 
-export { RATE_LIMITS, maskEmail, ISSUER_NAME, hasPasswordProvider };
+export { RATE_LIMITS, maskEmail, ISSUER_NAME, hasPasswordProvider, resolveRecipientEmail };
