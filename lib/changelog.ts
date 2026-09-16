@@ -89,6 +89,16 @@ export const CHANGELOG_AREA_LABELS: Record<ChangelogArea, string> = {
  */
 export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   {
+    id: '2026-09-16-changelog-date-filters',
+    changedAt: '2026-09-16T07:20:00+00:00',
+    changedBy: 'Appdoers Dev Team',
+    kind: 'added',
+    area: 'admin',
+    title: 'Changelog year, month, and date range filters',
+    summary:
+      'Super Admins can narrow the Changelog by calendar year, month, and/or a from–to date range. Exports include only the filtered rows.',
+  },
+  {
     id: '2026-09-16-changelog-contrast',
     changedAt: '2026-09-16T07:08:00+00:00',
     changedBy: 'Appdoers Dev Team',
@@ -714,18 +724,70 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   },
 ];
 
-export function filterChangelogEntries(
-  entries: ChangelogEntry[],
-  filters: {
-    kind?: ChangelogKind | '';
-    area?: ChangelogArea | '';
-    search?: string;
+export const CHANGELOG_MONTH_OPTIONS: { value: string; label: string }[] = [
+  { value: '', label: 'All months' },
+  ...Array.from({ length: 12 }, (_, i) => ({
+    value: String(i + 1),
+    label: new Date(2000, i, 1).toLocaleString('en-NZ', { month: 'long' }),
+  })),
+];
+
+export function getChangelogYearOptions(entries: ChangelogEntry[]): { value: string; label: string }[] {
+  const years = new Set<number>();
+  for (const entry of entries) {
+    years.add(new Date(entry.changedAt).getFullYear());
   }
-): ChangelogEntry[] {
+  return [
+    { value: '', label: 'All years' },
+    ...Array.from(years)
+      .sort((a, b) => b - a)
+      .map((year) => ({ value: String(year), label: String(year) })),
+  ];
+}
+
+export type ChangelogEntryFilters = {
+  kind?: ChangelogKind | '';
+  area?: ChangelogArea | '';
+  search?: string;
+  year?: string;
+  month?: string;
+  dateFrom?: string;
+  dateTo?: string;
+};
+
+function changelogEntryInstantMs(changedAt: string): number {
+  return new Date(changedAt).getTime();
+}
+
+function localDayStartMs(yyyyMmDd: string): number {
+  return new Date(`${yyyyMmDd}T00:00:00`).getTime();
+}
+
+function localDayEndMs(yyyyMmDd: string): number {
+  return new Date(`${yyyyMmDd}T23:59:59.999`).getTime();
+}
+
+function matchesChangelogDateFilters(changedAt: string, filters: ChangelogEntryFilters): boolean {
+  const when = new Date(changedAt);
+  const year = (filters.year ?? '').trim();
+  const month = (filters.month ?? '').trim();
+  if (year && when.getFullYear() !== Number(year)) return false;
+  if (month && when.getMonth() + 1 !== Number(month)) return false;
+
+  const from = (filters.dateFrom ?? '').trim();
+  const to = (filters.dateTo ?? '').trim();
+  const ms = changelogEntryInstantMs(changedAt);
+  if (from && ms < localDayStartMs(from)) return false;
+  if (to && ms > localDayEndMs(to)) return false;
+  return true;
+}
+
+export function filterChangelogEntries(entries: ChangelogEntry[], filters: ChangelogEntryFilters): ChangelogEntry[] {
   const q = (filters.search ?? '').trim().toLowerCase();
   return entries.filter((entry) => {
     if (filters.kind && entry.kind !== filters.kind) return false;
     if (filters.area && entry.area !== filters.area) return false;
+    if (!matchesChangelogDateFilters(entry.changedAt, filters)) return false;
     if (!q) return true;
     const haystack = [
       entry.title,

@@ -22,7 +22,9 @@ import {
   CHANGELOG_KIND_COLORS,
   CHANGELOG_KIND_LABELS,
   CHANGELOG_KIND_OPTIONS,
+  CHANGELOG_MONTH_OPTIONS,
   filterChangelogEntries,
+  getChangelogYearOptions,
   groupChangelogByMonth,
   type ChangelogArea,
   type ChangelogEntry,
@@ -143,6 +145,12 @@ export const AdminChangelog = () => {
   const [kindFilter, setKindFilter] = useState<ChangelogKind | ''>('');
   const [areaFilter, setAreaFilter] = useState<ChangelogArea | ''>('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [yearFilter, setYearFilter] = useState('');
+  const [monthFilter, setMonthFilter] = useState('');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
+
+  const yearOptions = useMemo(() => getChangelogYearOptions(CHANGELOG_ENTRIES), []);
 
   const filteredEntries = useMemo(
     () =>
@@ -150,8 +158,12 @@ export const AdminChangelog = () => {
         kind: kindFilter,
         area: areaFilter,
         search: searchQuery,
+        year: yearFilter,
+        month: monthFilter,
+        dateFrom,
+        dateTo,
       }),
-    [kindFilter, areaFilter, searchQuery]
+    [kindFilter, areaFilter, searchQuery, yearFilter, monthFilter, dateFrom, dateTo]
   );
 
   const monthGroups = useMemo(() => groupChangelogByMonth(filteredEntries), [filteredEntries]);
@@ -161,8 +173,15 @@ export const AdminChangelog = () => {
     if (kindFilter) parts.push(`Type: ${CHANGELOG_KIND_LABELS[kindFilter]}`);
     if (areaFilter) parts.push(`Area: ${CHANGELOG_AREA_LABELS[areaFilter]}`);
     if (searchQuery.trim()) parts.push(`Search: ${searchQuery.trim()}`);
+    if (yearFilter) parts.push(`Year: ${yearFilter}`);
+    if (monthFilter) {
+      const monthLabel = CHANGELOG_MONTH_OPTIONS.find((o) => o.value === monthFilter)?.label ?? monthFilter;
+      parts.push(`Month: ${monthLabel}`);
+    }
+    if (dateFrom) parts.push(`From: ${dateFrom}`);
+    if (dateTo) parts.push(`To: ${dateTo}`);
     return parts.join(' · ');
-  }, [kindFilter, areaFilter, searchQuery]);
+  }, [kindFilter, areaFilter, searchQuery, yearFilter, monthFilter, dateFrom, dateTo]);
 
   const filenameBase = useMemo(() => {
     const d = new Date();
@@ -219,7 +238,7 @@ export const AdminChangelog = () => {
 
       <div className="glass-card bg-white border border-gray-100 rounded-[12px] overflow-hidden" style={{ color: TEXT_PRIMARY }}>
         <div className="p-4 md:p-5 border-b border-gray-100 space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
             <div>
               <label
                 htmlFor="changelog-kind"
@@ -285,6 +304,84 @@ export const AdminChangelog = () => {
                 />
               </div>
             </div>
+            <div>
+              <label
+                htmlFor="changelog-year"
+                className="block text-xs font-bold uppercase tracking-wider mb-1.5"
+                style={{ color: TEXT_MUTED }}
+              >
+                Year
+              </label>
+              <select
+                id="changelog-year"
+                value={yearFilter}
+                onChange={(e) => setYearFilter(e.target.value)}
+                className={FILTER_INPUT_CLASS}
+                style={{ color: TEXT_PRIMARY }}
+              >
+                {yearOptions.map((opt) => (
+                  <option key={opt.value || 'all-years'} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label
+                htmlFor="changelog-month"
+                className="block text-xs font-bold uppercase tracking-wider mb-1.5"
+                style={{ color: TEXT_MUTED }}
+              >
+                Month
+              </label>
+              <select
+                id="changelog-month"
+                value={monthFilter}
+                onChange={(e) => setMonthFilter(e.target.value)}
+                className={FILTER_INPUT_CLASS}
+                style={{ color: TEXT_PRIMARY }}
+              >
+                {CHANGELOG_MONTH_OPTIONS.map((opt) => (
+                  <option key={opt.value || 'all-months'} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label
+                htmlFor="changelog-date-from"
+                className="block text-xs font-bold uppercase tracking-wider mb-1.5"
+                style={{ color: TEXT_MUTED }}
+              >
+                From
+              </label>
+              <input
+                id="changelog-date-from"
+                type="date"
+                value={dateFrom}
+                onChange={(e) => setDateFrom(e.target.value)}
+                className={FILTER_INPUT_CLASS}
+                style={{ color: TEXT_PRIMARY }}
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="changelog-date-to"
+                className="block text-xs font-bold uppercase tracking-wider mb-1.5"
+                style={{ color: TEXT_MUTED }}
+              >
+                To
+              </label>
+              <input
+                id="changelog-date-to"
+                type="date"
+                value={dateTo}
+                onChange={(e) => setDateTo(e.target.value)}
+                className={FILTER_INPUT_CLASS}
+                style={{ color: TEXT_PRIMARY }}
+              />
+            </div>
           </div>
           <p className="text-xs" style={{ color: TEXT_MUTED }}>
             {filteredEntries.length} change{filteredEntries.length === 1 ? '' : 's'}
@@ -299,7 +396,7 @@ export const AdminChangelog = () => {
               No matching changes
             </p>
             <p className="text-sm mt-2 max-w-md mx-auto" style={{ color: TEXT_MUTED }}>
-              Try a different type, area, or search term.
+              Try a different type, area, date, or search term.
             </p>
           </div>
         ) : (
