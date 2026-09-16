@@ -778,13 +778,13 @@ export const AdminUsers = () => {
       )}
 
       {isLoadingUsers ? (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-[4px]">
           {Array.from({ length: 6 }).map((_, i) => (
             <SkeletonStatsCard key={i} className="!p-3" />
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-[4px]">
           {(
             [
               {
@@ -843,7 +843,7 @@ export const AdminUsers = () => {
                 key={card.id}
                 type="button"
                 onClick={() => setFilter(card.id)}
-                className={`text-left bg-white px-[15px] py-2 rounded-[12px] shadow-sm transition-all border min-w-0 w-full ${
+                className={`text-left bg-white px-[17px] py-2 rounded-[12px] shadow-sm transition-all border min-w-0 w-full ${
                   active
                     ? 'border-gold ring-2 ring-gold/30'
                     : 'border-gray-200 hover:border-gold'
@@ -851,7 +851,7 @@ export const AdminUsers = () => {
               >
                 <div className="flex items-center gap-2">
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${card.iconWrap}`}>{card.icon}</div>
-                  <p className="text-[15px] leading-tight text-charcoal font-bold min-w-0 truncate flex-1">{card.label}</p>
+                  <p className="text-[14px] leading-tight text-charcoal font-bold min-w-0 truncate flex-1">{card.label}</p>
                   <p className={`text-[18px] font-bold shrink-0 ${card.valueClass}`}>{card.value}</p>
                 </div>
               </button>
