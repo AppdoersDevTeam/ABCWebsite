@@ -20,7 +20,7 @@ import { notifyUserAdminRole, adminRoleEmailNote } from '../../lib/notifyUserAdm
 import { notifyUserAccessHold, accessHoldEmailNote } from '../../lib/notifyUserAccessHold';
 import { downloadAdminUsersCsv, downloadAdminUsersPdf } from '../../lib/exportAdminUsers';
 
-type UserFilter = 'all' | 'pending' | 'held' | 'approved' | 'linked';
+type UserFilter = 'all' | 'pending' | 'held' | 'approved' | 'linked' | 'admins';
 
 type LeadershipLink = {
   id: string;
@@ -532,6 +532,11 @@ export const AdminUsers = () => {
     [visibleUsers]
   );
 
+  const visibleAdminCount = useMemo(
+    () => visibleUsers.filter((u) => u.role === 'admin' && u.is_approved).length,
+    [visibleUsers]
+  );
+
   const visibleLinkedCount = useMemo(
     () => visibleUsers.filter((u) => !!directoryByUserId[u.id]).length,
     [visibleUsers, directoryByUserId]
@@ -662,6 +667,9 @@ export const AdminUsers = () => {
       case 'linked':
         list = list.filter((u) => !!directoryByUserId[u.id]);
         break;
+      case 'admins':
+        list = list.filter((u) => u.role === 'admin' && u.is_approved);
+        break;
       default:
         break;
     }
@@ -770,13 +778,13 @@ export const AdminUsers = () => {
       )}
 
       {isLoadingUsers ? (
-        <div className="grid sm:grid-cols-2 xl:grid-cols-5 gap-4">
-          {Array.from({ length: 5 }).map((_, i) => (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {Array.from({ length: 6 }).map((_, i) => (
             <SkeletonStatsCard key={i} />
           ))}
         </div>
       ) : (
-        <div className="grid sm:grid-cols-2 xl:grid-cols-5 gap-4">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {(
             [
               {
@@ -816,8 +824,16 @@ export const AdminUsers = () => {
                 label: 'Linked Account',
                 value: visibleLinkedCount,
                 valueClass: 'text-teal-700',
-                iconWrap: 'bg-teal-100',
-                icon: <Link2 size={24} className="text-teal-700" />,
+                iconWrap: 'bg-gray-200',
+                icon: <Link2 size={24} className="text-gray-600" />,
+              },
+              {
+                id: 'admins' as UserFilter,
+                label: 'Admin Users',
+                value: visibleAdminCount,
+                valueClass: 'text-purple-700',
+                iconWrap: 'bg-purple-100',
+                icon: <Shield size={24} className="text-purple-700" />,
               },
             ] as const
           ).map((card) => {
@@ -884,6 +900,7 @@ export const AdminUsers = () => {
                 <option value="held">Holding</option>
                 <option value="approved">Approved</option>
                 <option value="linked">Linked</option>
+                <option value="admins">Admin users</option>
               </select>
             </div>
             <button

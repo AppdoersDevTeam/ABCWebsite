@@ -63,7 +63,7 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode, isSuperAdmin = f
                 account while logged in.
               </li>
               <li>
-                Click the summary cards (All Users, Pending, Hold Access, Approved, Linked Account) or use Search and
+                Click the summary cards (All Users, Pending, Hold Access, Approved, Linked Account, Admin Users) or use Search and
                 Sort by to filter the list. Linked logins show the matching Leadership person on the same row, with Unlink.
               </li>
               <li>
