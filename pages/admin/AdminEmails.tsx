@@ -101,7 +101,7 @@ export const AdminEmails = () => {
             className="bg-white border-2 border-gray-200 px-4 py-2 rounded-[4px] font-bold hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-2 text-sm text-charcoal"
           >
             <ArrowLeft size={16} />
-            Overviews
+            Overview
           </Link>
         }
       />

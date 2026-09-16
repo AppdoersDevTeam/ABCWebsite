@@ -7,6 +7,37 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-1709-004 — Restore left-menu name Overview
+
+**Date:** 2026-09-17
+**Time:** 00:36:41
+**Timezone:** Pacific/Auckland
+**Version:** 1.1.3
+**Type:** Changed
+
+**Request**
+
+> Change back to Overview. push to live
+
+**Changes**
+
+* Restored the first left-menu item to Overview on the admin and member sidebars.
+* Restored Help section titles, the Emails sent back link, and Changelog location headings to Overview.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: not run or failed
+* Notes: Governance tests and changelog validation. Browser tools were not available; labels were checked in AdminLayout, DashboardLayout, Help, and Emails sent.
+
 ## CHG-2026-1709-003 — Rename left-menu Overview to Overviews
 
 **Date:** 2026-09-17

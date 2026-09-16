@@ -40,7 +40,7 @@ export const AdminLayout = () => {
   };
 
   const navItems = [
-    { label: 'Overviews', path: '/admin', icon: <Home size={20} />, iconClass: DASHBOARD_NAV_ICON.overview },
+    { label: 'Overview', path: '/admin', icon: <Home size={20} />, iconClass: DASHBOARD_NAV_ICON.overview },
     { label: 'Annual Calendar', path: '/admin/calendar', icon: <CalendarDays size={20} />, iconClass: DASHBOARD_NAV_ICON.calendar },
     { label: 'User Management', path: '/admin/users', icon: <UserCog size={20} />, iconClass: DASHBOARD_NAV_ICON.users },
     { label: 'Prayers', path: '/admin/prayer', icon: <HandHeart size={20} />, iconClass: DASHBOARD_NAV_ICON.prayers },
