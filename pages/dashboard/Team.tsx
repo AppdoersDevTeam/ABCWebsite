@@ -67,7 +67,7 @@ export const Team = () => {
               className="group bg-white shadow-sm hover:shadow-md hover:border-gold text-left py-3"
             >
               <div className="flex items-center gap-3">
-                <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-gray-100 group-hover:border-gold transition-colors flex-shrink-0">
+                <div className="w-[59px] h-[59px] rounded-full overflow-hidden border-2 border-gray-100 group-hover:border-gold transition-colors flex-shrink-0">
                   {member.img ? (
                     <img src={member.img} alt={member.name} className="w-full h-full object-cover" />
                   ) : (
