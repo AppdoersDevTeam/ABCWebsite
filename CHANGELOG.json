@@ -6,6 +6,37 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-1709-005",
+      "date": "2026-09-17",
+      "time": "00:48:30",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-16T12:48:30.232Z",
+      "version": "1.1.4",
+      "type": "changed",
+      "area": "newsletters",
+      "title": "Group newsletter archive by month",
+      "request": "On the Newsletter, group them by Month on the right Panel and just allow the last 4 months visible if the user want to see more they must roll the screen inside the square to see more options.",
+      "changes": [
+        "The Newsletters archive on the right is grouped by month, newest month first.",
+        "The archive sits in a boxed panel that shows the latest four months. Earlier months stay in the same list and are reached by scrolling inside the box.",
+        "The same month grouping and scroll panel is used on member Newsletters and admin Newsletter Management."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Governance tests and changelog validation. Browser tools were not available; layout was checked in NewsletterMonthArchive, member Newsletter, and AdminNewsletter."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-1709-004",
       "date": "2026-09-17",
       "time": "00:36:41",

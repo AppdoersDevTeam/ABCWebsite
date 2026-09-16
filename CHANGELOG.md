@@ -7,6 +7,38 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-1709-005 — Group newsletter archive by month
+
+**Date:** 2026-09-17
+**Time:** 00:48:30
+**Timezone:** Pacific/Auckland
+**Version:** 1.1.4
+**Type:** Changed
+
+**Request**
+
+> On the Newsletter, group them by Month on the right Panel and just allow the last 4 months visible if the user want to see more they must roll the screen inside the square to see more options.
+
+**Changes**
+
+* The Newsletters archive on the right is grouped by month, newest month first.
+* The archive sits in a boxed panel that shows the latest four months. Earlier months stay in the same list and are reached by scrolling inside the box.
+* The same month grouping and scroll panel is used on member Newsletters and admin Newsletter Management.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: not run or failed
+* Notes: Governance tests and changelog validation. Browser tools were not available; layout was checked in NewsletterMonthArchive, member Newsletter, and AdminNewsletter.
+
 ## CHG-2026-1709-004 — Restore left-menu name Overview
 
 **Date:** 2026-09-17

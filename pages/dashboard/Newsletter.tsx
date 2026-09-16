@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FileText, Eye, Newspaper } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import { DocumentReaderPanel } from '../../components/UI/DocumentReaderPanel';
+import { NewsletterMonthArchive } from '../../components/UI/NewsletterMonthArchive';
 import { Newsletter as NewsletterType } from '../../types';
 import { SkeletonPageHeader, SkeletonCard } from '../../components/UI/Skeleton';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
@@ -118,37 +119,35 @@ export const Newsletter = () => {
 
         <div className="min-w-0 flex flex-col">
           <h3 className="text-charcoal font-bold uppercase tracking-widest text-xs mb-4 shrink-0">Archive</h3>
-          {newsletters.length <= 1 ? (
-            <p className="text-neutral text-sm">No archived newsletters</p>
-          ) : (
-            <div className="space-y-3 max-h-[min(20rem,45vh)] md:max-h-[min(36rem,calc(100dvh-11rem))] overflow-y-auto overscroll-y-contain pr-1">
-              {newsletters.slice(1).map((newsletter) => {
-                const weekDate = resolveNewsletterWeekDate(newsletter);
-                return (
-                  <button
-                    key={newsletter.id}
-                    type="button"
-                    onClick={() => setViewing(newsletter)}
-                    className={`w-full bg-white border p-3 sm:p-4 flex justify-between items-center gap-3 cursor-pointer rounded-[4px] transition-all group min-w-0 text-left min-h-[44px] ${
-                      viewing?.id === newsletter.id
-                        ? 'border-gold shadow-md'
-                        : 'border-gray-200 hover:shadow-md hover:border-gold'
-                    }`}
-                  >
-                    <span className="min-w-0">
-                      <span className="block text-neutral font-medium group-hover:text-charcoal truncate">
-                        {newsletter.title}
-                      </span>
-                      {weekDate && (
-                        <span className="block text-xs text-neutral/80">Week of {formatWeekDate(weekDate)}</span>
-                      )}
+          <NewsletterMonthArchive
+            items={newsletters.slice(1)}
+            emptyMessage="No archived newsletters"
+            renderItem={(newsletter) => {
+              const weekDate = resolveNewsletterWeekDate(newsletter);
+              return (
+                <button
+                  key={newsletter.id}
+                  type="button"
+                  onClick={() => setViewing(newsletter)}
+                  className={`w-full bg-white border p-3 sm:p-4 flex justify-between items-center gap-3 cursor-pointer rounded-[4px] transition-all group min-w-0 text-left min-h-[44px] ${
+                    viewing?.id === newsletter.id
+                      ? 'border-gold shadow-md'
+                      : 'border-gray-200 hover:shadow-md hover:border-gold'
+                  }`}
+                >
+                  <span className="min-w-0">
+                    <span className="block text-neutral font-medium group-hover:text-charcoal truncate">
+                      {newsletter.title}
                     </span>
-                    <Eye size={16} className="text-neutral group-hover:text-gold shrink-0" />
-                  </button>
-                );
-              })}
-            </div>
-          )}
+                    {weekDate && (
+                      <span className="block text-xs text-neutral/80">Week of {formatWeekDate(weekDate)}</span>
+                    )}
+                  </span>
+                  <Eye size={16} className="text-neutral group-hover:text-gold shrink-0" />
+                </button>
+              );
+            }}
+          />
         </div>
       </div>
 

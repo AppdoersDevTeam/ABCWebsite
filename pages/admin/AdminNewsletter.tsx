@@ -4,6 +4,7 @@ import { useSearchParams } from 'react-router-dom';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { Modal } from '../../components/UI/Modal';
 import { DocumentReaderPanel } from '../../components/UI/DocumentReaderPanel';
+import { NewsletterMonthArchive } from '../../components/UI/NewsletterMonthArchive';
 import { supabase } from '../../lib/supabase';
 import { Newsletter as NewsletterType } from '../../types';
 import { SkeletonPageHeader, SkeletonCard } from '../../components/UI/Skeleton';
@@ -449,8 +450,10 @@ export const AdminNewsletter = () => {
 
         <div className="min-w-0 flex flex-col">
           <h3 className="text-charcoal font-bold uppercase tracking-widest text-xs mb-4 shrink-0">Archive</h3>
-          <div className="space-y-3 max-h-[min(20rem,45vh)] md:max-h-[min(36rem,calc(100dvh-11rem))] overflow-y-auto overscroll-y-contain pr-1">
-            {newsletters.map((newsletter) => {
+          <NewsletterMonthArchive
+            items={newsletters}
+            emptyMessage="No newsletters yet"
+            renderItem={(newsletter) => {
               const weekDate = resolveNewsletterWeekDate(newsletter);
               return (
                 <div
@@ -503,8 +506,8 @@ export const AdminNewsletter = () => {
                   </div>
                 </div>
               );
-            })}
-          </div>
+            }}
+          />
         </div>
       </div>
 
