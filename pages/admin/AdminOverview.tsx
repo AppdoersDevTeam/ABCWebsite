@@ -546,7 +546,7 @@ export const AdminOverview = () => {
 
   const stats = useMemo(() => [
     { 
-      label: 'Pending Approvals', 
+      label: 'Pending', 
       value: visiblePendingCount.toString(), 
       icon: <UserCheck size={20} />, 
       path: '#pending-users', 
@@ -715,7 +715,7 @@ export const AdminOverview = () => {
         ) : visiblePendingCount === 0 ? (
           <div className="text-center py-12 bg-gray-50 rounded-[8px] border border-gray-100">
             <UserCheck size={48} className="text-gray-300 mx-auto mb-4" />
-            <p className="text-neutral text-lg font-medium">No pending user approvals</p>
+            <p className="text-neutral text-lg font-medium">No pending users</p>
             <p className="text-neutral text-sm mt-2">All users have been reviewed</p>
             <div className="mt-6 space-y-3">
               {visibleUsers.length > 0 && (
@@ -873,7 +873,7 @@ export const AdminOverview = () => {
                 }}
                 className="block p-4 bg-white border-2 border-gold rounded-[4px] hover:border-gold hover:shadow-md transition-all"
               >
-                <span className="font-semibold text-base text-charcoal">Review Pending User Approvals</span>
+                <span className="font-semibold text-base text-charcoal">Review Pending Users</span>
                 <p className="text-sm text-neutral mt-1">{visiblePendingCount} {visiblePendingCount === 1 ? 'user' : 'users'} awaiting approval</p>
               </a>
             )}

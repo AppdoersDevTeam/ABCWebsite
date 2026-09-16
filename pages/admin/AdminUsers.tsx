@@ -797,7 +797,7 @@ export const AdminUsers = () => {
               },
               {
                 id: 'pending' as UserFilter,
-                label: 'Pending Approval',
+                label: 'Pending',
                 value: visiblePendingCount,
                 valueClass: 'text-gold',
                 iconWrap: 'bg-yellow-100',
