@@ -7,6 +7,7 @@ import {
   hasRecoveryParams,
 } from '../../lib/authCallback';
 import { GlowingButton } from '../../components/UI/GlowingButton';
+import { PasswordInput } from '../../components/UI/PasswordInput';
 
 /** Fix malformed HashRouter recovery URLs like `#/reset-password#access_token=...`. */
 function normalizeRecoveryUrl(): void {
@@ -160,12 +161,12 @@ export const ResetPassword = () => {
               <label htmlFor="new-password" className="block text-sm font-bold text-charcoal mb-2">
                 New password
               </label>
-              <input
+              <PasswordInput
                 id="new-password"
                 name="new-password"
-                type="password"
                 required
-                className="appearance-none rounded-[4px] relative block w-full px-4 py-4 border border-gray-300 bg-white text-charcoal placeholder-gray-400 focus:outline-none focus:ring-gold focus:border-gold focus:z-10 shadow-sm"
+                autoComplete="new-password"
+                className="appearance-none rounded-[4px] relative block w-full px-4 py-4 border border-gray-300 bg-white text-charcoal placeholder-gray-400 focus:outline-none focus:ring-gold focus:border-gold shadow-sm"
                 placeholder="New password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -177,12 +178,12 @@ export const ResetPassword = () => {
               <label htmlFor="confirm-password" className="block text-sm font-bold text-charcoal mb-2">
                 Confirm password
               </label>
-              <input
+              <PasswordInput
                 id="confirm-password"
                 name="confirm-password"
-                type="password"
                 required
-                className="appearance-none rounded-[4px] relative block w-full px-4 py-4 border border-gray-300 bg-white text-charcoal placeholder-gray-400 focus:outline-none focus:ring-gold focus:border-gold focus:z-10 shadow-sm"
+                autoComplete="new-password"
+                className="appearance-none rounded-[4px] relative block w-full px-4 py-4 border border-gray-300 bg-white text-charcoal placeholder-gray-400 focus:outline-none focus:ring-gold focus:border-gold shadow-sm"
                 placeholder="Confirm password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}

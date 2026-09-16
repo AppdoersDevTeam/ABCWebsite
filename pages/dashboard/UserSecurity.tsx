@@ -3,6 +3,7 @@ import { CheckCircle2, KeyRound, Mail, Shield, Smartphone } from 'lucide-react';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { Modal } from '../../components/UI/Modal';
+import { PasswordInput } from '../../components/UI/PasswordInput';
 import { TurnstileField, type TurnstileFieldHandle } from '../../components/UI/TurnstileField';
 import {
   mfaEmailDisable,
@@ -457,15 +458,15 @@ export const UserSecurity = () => {
           <DialogError message={error} />
           <label className="block text-sm font-bold text-charcoal">
             Current password
-            <input type="password" className="mt-2 w-full border border-gray-300 rounded-[4px] px-4 py-3" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" />
+            <PasswordInput wrapperClassName="mt-2" className="w-full border border-gray-300 rounded-[4px] px-4 py-3" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" />
           </label>
           <label className="block text-sm font-bold text-charcoal">
             New password
-            <input type="password" className="mt-2 w-full border border-gray-300 rounded-[4px] px-4 py-3" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required minLength={8} autoComplete="new-password" />
+            <PasswordInput wrapperClassName="mt-2" className="w-full border border-gray-300 rounded-[4px] px-4 py-3" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required minLength={8} autoComplete="new-password" />
           </label>
           <label className="block text-sm font-bold text-charcoal">
             Confirm new password
-            <input type="password" className="mt-2 w-full border border-gray-300 rounded-[4px] px-4 py-3" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required minLength={8} autoComplete="new-password" />
+            <PasswordInput wrapperClassName="mt-2" className="w-full border border-gray-300 rounded-[4px] px-4 py-3" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required minLength={8} autoComplete="new-password" />
           </label>
           <TurnstileField ref={turnstileRef} onToken={setCaptchaToken} onExpire={() => setCaptchaToken(null)} />
           <GlowingButton type="submit" fullWidth disabled={busy || !captchaToken}>{busy ? 'Saving...' : 'Update password'}</GlowingButton>
@@ -479,7 +480,7 @@ export const UserSecurity = () => {
             <p className="text-sm text-neutral">Confirm your password, then scan the QR code with your authenticator app. The method is not enabled until you enter a valid code.</p>
             <label className="block text-sm font-bold text-charcoal">
               Current password
-              <input type="password" className="mt-2 w-full border border-gray-300 rounded-[4px] px-4 py-3" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" />
+              <PasswordInput wrapperClassName="mt-2" className="w-full border border-gray-300 rounded-[4px] px-4 py-3" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" />
             </label>
             <TurnstileField ref={turnstileRef} onToken={setCaptchaToken} onExpire={() => setCaptchaToken(null)} />
             <GlowingButton type="submit" fullWidth disabled={busy || !captchaToken}>{busy ? 'Preparing...' : 'Continue'}</GlowingButton>
@@ -509,7 +510,7 @@ export const UserSecurity = () => {
           <p className="text-sm text-neutral">Confirm your password and a current authenticator code to disable this method.</p>
           <label className="block text-sm font-bold text-charcoal">
             Current password
-            <input type="password" className="mt-2 w-full border border-gray-300 rounded-[4px] px-4 py-3" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" />
+            <PasswordInput wrapperClassName="mt-2" className="w-full border border-gray-300 rounded-[4px] px-4 py-3" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" />
           </label>
           <label className="block text-sm font-bold text-charcoal">
             Authenticator code
@@ -527,7 +528,7 @@ export const UserSecurity = () => {
             <p className="text-sm text-neutral">A one-time code will be sent to {status?.maskedEmail}. Email MFA is not enabled until that code is verified.</p>
             <label className="block text-sm font-bold text-charcoal">
               Current password
-              <input type="password" className="mt-2 w-full border border-gray-300 rounded-[4px] px-4 py-3" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" />
+              <PasswordInput wrapperClassName="mt-2" className="w-full border border-gray-300 rounded-[4px] px-4 py-3" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" />
             </label>
             <TurnstileField ref={turnstileRef} onToken={setCaptchaToken} onExpire={() => setCaptchaToken(null)} />
             <GlowingButton type="submit" fullWidth disabled={busy || !captchaToken}>{busy ? 'Sending...' : 'Send code'}</GlowingButton>
@@ -552,7 +553,7 @@ export const UserSecurity = () => {
             <p className="text-sm text-neutral">Confirm your password. We will email a code before disabling this method.</p>
             <label className="block text-sm font-bold text-charcoal">
               Current password
-              <input type="password" className="mt-2 w-full border border-gray-300 rounded-[4px] px-4 py-3" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" />
+              <PasswordInput wrapperClassName="mt-2" className="w-full border border-gray-300 rounded-[4px] px-4 py-3" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" />
             </label>
             <TurnstileField ref={turnstileRef} onToken={setCaptchaToken} onExpire={() => setCaptchaToken(null)} />
             <GlowingButton type="submit" fullWidth disabled={busy || !captchaToken}>{busy ? 'Sending...' : 'Send code'}</GlowingButton>
@@ -567,7 +568,7 @@ export const UserSecurity = () => {
             </p>
             <label className="block text-sm font-bold text-charcoal">
               Current password
-              <input type="password" className="mt-2 w-full border border-gray-300 rounded-[4px] px-4 py-3" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" />
+              <PasswordInput wrapperClassName="mt-2" className="w-full border border-gray-300 rounded-[4px] px-4 py-3" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" />
             </label>
             <label className="block text-sm font-bold text-charcoal">
               {status?.totpEnabled ? 'Authenticator code' : 'Email code'}
@@ -589,7 +590,7 @@ export const UserSecurity = () => {
           <p className="text-sm text-neutral">This replaces all previous recovery codes. Confirm your password and a current MFA code.</p>
           <label className="block text-sm font-bold text-charcoal">
             Current password
-            <input type="password" className="mt-2 w-full border border-gray-300 rounded-[4px] px-4 py-3" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" />
+            <PasswordInput wrapperClassName="mt-2" className="w-full border border-gray-300 rounded-[4px] px-4 py-3" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" />
           </label>
           <label className="block text-sm font-bold text-charcoal">
             Current verification code

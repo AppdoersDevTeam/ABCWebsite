@@ -6,6 +6,35 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-1709-011",
+      "date": "2026-09-17",
+      "time": "02:32:04",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-16T14:32:04.920Z",
+      "version": "1.2.4",
+      "type": "added",
+      "area": "auth",
+      "title": "Show-password button on every password field",
+      "request": "In all the places that require the user password in any part of the system, add a button to view password. Push to live.",
+      "changes": [
+        "Password fields on sign in, sign up, reset password, and User Security now have a show/hide button so you can check what you typed."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "35 unit tests and npm run validate. vite build. Typecheck still fails on pre-existing app errors. Browser E2E tools were not available."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-1709-010",
       "date": "2026-09-17",
       "time": "02:17:47",

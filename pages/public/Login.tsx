@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { GlowingButton } from '../../components/UI/GlowingButton';
+import { PasswordInput } from '../../components/UI/PasswordInput';
 import { TurnstileField, type TurnstileFieldHandle } from '../../components/UI/TurnstileField';
 import { Shield, User as UserIcon } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
@@ -640,13 +641,13 @@ export const Login = () => {
               <label htmlFor="password" className="block text-sm font-bold text-charcoal mb-2">
                 Password
               </label>
-              <input
+              <PasswordInput
                 id="password"
                 name="password"
-                type="password"
                 className={fieldInputClass(!!fieldErrors.password)}
                 placeholder="At least 8 characters"
                 value={password}
+                autoComplete={isSignUp ? 'new-password' : 'current-password'}
                 onChange={(e) => {
                   setPassword(e.target.value);
                   clearFieldError('password');

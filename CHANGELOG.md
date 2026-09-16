@@ -7,6 +7,36 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-1709-011 — Show-password button on every password field
+
+**Date:** 2026-09-17
+**Time:** 02:32:04
+**Timezone:** Pacific/Auckland
+**Version:** 1.2.4
+**Type:** Added
+
+**Request**
+
+> In all the places that require the user password in any part of the system, add a button to view password. Push to live.
+
+**Changes**
+
+* Password fields on sign in, sign up, reset password, and User Security now have a show/hide button so you can check what you typed.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: 35 unit tests and npm run validate. vite build. Typecheck still fails on pre-existing app errors. Browser E2E tools were not available.
+
 ## CHG-2026-1709-010 — Keep forms and code screens when switching away from the tab
 
 **Date:** 2026-09-17
