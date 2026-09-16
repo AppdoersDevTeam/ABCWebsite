@@ -16,3 +16,9 @@ verify_jwt = true
 [functions.notify-user-access-hold]
 verify_jwt = true
 
+[functions.mfa]
+verify_jwt = true
+
+[functions.mfa-login]
+verify_jwt = false
+

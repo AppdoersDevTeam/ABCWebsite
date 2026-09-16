@@ -6,6 +6,8 @@ import { TurnstileField, type TurnstileFieldHandle } from '../../components/UI/T
 import { Shield, User as UserIcon } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { displayName, isAdminUser } from '../../lib/constants';
+import { MfaChallenge } from '../../components/Auth/MfaChallenge';
+import { MfaRequiredError } from '../../lib/mfaClient';
 import {
   getSignupSummaryError,
   validateEmailSignupFields,
@@ -57,6 +59,11 @@ export const Login = () => {
   const [pendingVerificationEmail, setPendingVerificationEmail] = useState('');
   const [isResendingConfirmation, setIsResendingConfirmation] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [mfaChallenge, setMfaChallenge] = useState<{
+    challengeId: string;
+    methods: Array<'totp' | 'email'>;
+    maskedEmail: string;
+  } | null>(null);
   const turnstileRef = useRef<TurnstileFieldHandle>(null);
   const {
     loginWithEmail,
@@ -65,8 +72,11 @@ export const Login = () => {
     signInWithGoogle,
     isLoading,
     user,
+    mfaPending,
+    clearMfaPending,
     refreshUserProfile,
     sendPasswordReset,
+    logout,
   } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -148,13 +158,13 @@ export const Login = () => {
   };
 
   useEffect(() => {
-    if (user && !isLoading && !isLoggingIn) {
+    if (user && !isLoading && !isLoggingIn && !mfaChallenge && !mfaPending) {
       setTimeout(() => {
         const redirectPath = getRedirectPath(user.role, user.is_approved);
         navigate(redirectPath, { replace: true });
       }, 100);
     }
-  }, [user, isLoading, navigate, isLoggingIn]);
+  }, [user, isLoading, navigate, isLoggingIn, mfaChallenge, mfaPending]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -294,6 +304,14 @@ export const Login = () => {
       console.error('Login error:', err);
       setIsLoggingIn(false);
       resetCaptcha();
+      if (err instanceof MfaRequiredError) {
+        setMfaChallenge({
+          challengeId: err.challengeId,
+          methods: err.methods,
+          maskedEmail: err.maskedEmail,
+        });
+        return;
+      }
       const message = (err?.message || '').toLowerCase();
 
       if (
@@ -374,6 +392,27 @@ export const Login = () => {
       navigate(`/login-error?error=oauth_failed`, { replace: true });
     }
   };
+
+  if (mfaChallenge || mfaPending) {
+    return (
+      <MfaChallenge
+        mode={mfaChallenge ? 'login' : 'session'}
+        challengeId={mfaChallenge?.challengeId}
+        methods={mfaChallenge?.methods || mfaPending?.methods || []}
+        maskedEmail={mfaChallenge?.maskedEmail || mfaPending?.maskedEmail || ''}
+        onVerified={async () => {
+          setMfaChallenge(null);
+          clearMfaPending();
+          await refreshUserProfile();
+        }}
+        onCancel={() => {
+          setMfaChallenge(null);
+          clearMfaPending();
+          void logout();
+        }}
+      />
+    );
+  }
 
   if (loginFlash) {
     return (

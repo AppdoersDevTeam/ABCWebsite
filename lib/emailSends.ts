@@ -22,6 +22,7 @@ export const EMAIL_TEMPLATE_LABELS: Record<string, string> = {
   admin_role_revoked: 'Admin role ended',
   intro_inquiry: 'Intro inquiry',
   account_deleted: 'Account deleted',
+  mfa_verification: 'MFA verification',
   system: 'Other',
 };
 

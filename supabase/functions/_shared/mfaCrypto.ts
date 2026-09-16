@@ -109,14 +109,16 @@ function counterToBytes(counter: number): Uint8Array {
 }
 
 export async function hmacSha1(key: Uint8Array, data: Uint8Array): Promise<Uint8Array> {
+  const keyCopy = Uint8Array.from(key);
+  const dataCopy = Uint8Array.from(data);
   const cryptoKey = await crypto.subtle.importKey(
     "raw",
-    key.buffer as ArrayBuffer,
+    keyCopy,
     { name: "HMAC", hash: "SHA-1" },
     false,
     ["sign"],
   );
-  const sig = await crypto.subtle.sign("HMAC", cryptoKey, data.buffer as ArrayBuffer);
+  const sig = await crypto.subtle.sign("HMAC", cryptoKey, dataCopy);
   return new Uint8Array(sig);
 }
 
@@ -344,4 +346,86 @@ export function totpCanActivate(verified: boolean, pendingExists: boolean): bool
 
 export function recoveryCodesInvalidatePrevious(): boolean {
   return true;
+}
+
+export function isEligibleForMfaSetup(profile: {
+  is_approved?: boolean | null;
+  is_access_held?: boolean | null;
+}): boolean {
+  return profile.is_approved === true && profile.is_access_held !== true;
+}
+
+export function setupAuthorization(params: {
+  callerId: string;
+  targetUserId: string;
+  isApproved: boolean;
+  isAccessHeld: boolean;
+}): "ok" | "forbidden_other_user" | "forbidden_setup" {
+  if (!params.callerId || params.callerId !== params.targetUserId) return "forbidden_other_user";
+  if (!params.isApproved || params.isAccessHeld) return "forbidden_setup";
+  return "ok";
+}
+
+export function passwordLoginOutcome(mfaOn: boolean): "complete_login" | "mfa_challenge" {
+  return mfaOn ? "mfa_challenge" : "complete_login";
+}
+
+export function availableLoginMethods(totpEnabled: boolean, emailEnabled: boolean): Array<"totp" | "email"> {
+  const methods: Array<"totp" | "email"> = [];
+  if (totpEnabled) methods.push("totp");
+  if (emailEnabled) methods.push("email");
+  return methods;
+}
+
+export type EmailChallengeDecision = {
+  ok: boolean;
+  reason?: "invalid" | "expired" | "used";
+};
+
+export function decideEmailChallenge(params: {
+  consumedAt: string | null;
+  expiresAt: string;
+  attemptCount: number;
+  maxAttempts: number;
+  hashMatches: boolean;
+  nowMs?: number;
+}): EmailChallengeDecision {
+  const nowMs = params.nowMs ?? Date.now();
+  if (params.consumedAt) return { ok: false, reason: "used" };
+  if (Date.parse(params.expiresAt) <= nowMs) return { ok: false, reason: "expired" };
+  if (params.attemptCount >= params.maxAttempts) return { ok: false, reason: "invalid" };
+  if (!params.hashMatches) return { ok: false, reason: "invalid" };
+  return { ok: true };
+}
+
+export function recoveryCodeReusable(consumedAt: string | null): boolean {
+  return consumedAt == null;
+}
+
+async function aesKeyFromMaterial(material: string): Promise<CryptoKey> {
+  const digest = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(`abc-mfa-aes-v1:${material}`),
+  );
+  return crypto.subtle.importKey("raw", digest, "AES-GCM", false, ["encrypt", "decrypt"]);
+}
+
+export async function aesGcmEncrypt(plain: string, material: string): Promise<string> {
+  if (!material) throw new Error("missing_mfa_key");
+  const key = await aesKeyFromMaterial(material);
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const encoded = new TextEncoder().encode(plain);
+  const buf = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, encoded);
+  return `${bytesToBase64(iv)}.${bytesToBase64(new Uint8Array(buf))}`;
+}
+
+export async function aesGcmDecrypt(payload: string, material: string): Promise<string> {
+  if (!material) throw new Error("missing_mfa_key");
+  const key = await aesKeyFromMaterial(material);
+  const [ivB64, dataB64] = payload.split(".");
+  if (!ivB64 || !dataB64) throw new Error("bad_ciphertext");
+  const iv = base64ToBytes(ivB64);
+  const data = base64ToBytes(dataB64);
+  const buf = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, data);
+  return new TextDecoder().decode(buf);
 }

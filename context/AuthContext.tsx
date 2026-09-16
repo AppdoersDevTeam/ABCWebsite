@@ -9,7 +9,14 @@ import { logAuditEventSafe } from '../lib/auditLog';
 import { getAuthEmailRedirectUrl } from '../lib/authRedirect';
 import { notifySignupReceivedOnce } from '../lib/notifyUserReview';
 import { clearPendingPublicBrowse } from '../lib/pendingAccess';
+import { applyAuthSession, mfaLoginBegin, mfaSessionStatus, MfaRequiredError } from '../lib/mfaClient';
 import type { AuthError, Session, User as SupabaseUser } from '@supabase/supabase-js';
+
+export type MfaPendingState = {
+  mode: 'session';
+  methods: Array<'totp' | 'email'>;
+  maskedEmail: string;
+};
 
 function splitName(fullName: string): { first_name: string; last_name: string } {
   const idx = fullName.indexOf(' ');
@@ -47,6 +54,8 @@ export type SignUpResult = {
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
+  mfaPending: MfaPendingState | null;
+  clearMfaPending: () => void;
   loginWithEmail: (email: string, password: string, captchaToken: string) => Promise<void>;
   signUpWithEmail: (
     email: string,
@@ -69,6 +78,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [mfaPending, setMfaPending] = useState<MfaPendingState | null>(null);
   // Cache user profile to avoid redundant fetches
   const userProfileCache = React.useRef<{ userId: string; profile: User; timestamp: number } | null>(null);
   const CACHE_DURATION = 30000; // 30 seconds cache
@@ -198,6 +208,23 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
     }
   };
 
+  const syncMfaGate = async () => {
+    try {
+      const status = await mfaSessionStatus();
+      if (status.mfaRequired) {
+        setMfaPending({
+          mode: 'session',
+          methods: status.methods,
+          maskedEmail: status.maskedEmail,
+        });
+      } else {
+        setMfaPending(null);
+      }
+    } catch {
+      setMfaPending(null);
+    }
+  };
+
   // Initialize session check
   useEffect(() => {
     console.log('AuthContext - Initializing auth');
@@ -322,6 +349,7 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
       if (event === 'SIGNED_OUT') {
         userProfileCache.current = null;
         setUser(null);
+        setMfaPending(null);
         setIsLoading(false);
         return;
       }
@@ -361,6 +389,7 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
           } else {
             setUser(null);
           }
+          void syncMfaGate();
           setIsLoading(false);
         }, 0);
         return;
@@ -408,6 +437,7 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
         if (!initialSessionReceived) {
           initialSessionReceived = true;
         }
+        void syncMfaGate();
         setIsLoading(false);
       }, 0);
     });
@@ -438,6 +468,7 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
             userProfile.user_timezone = userTimezone;
           }
           setUser(userProfile);
+          void syncMfaGate();
           logAuditEventSafe({
             action: 'login',
             category: 'auth',
@@ -469,35 +500,38 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
   const loginWithEmail = async (email: string, password: string, captchaToken: string) => {
     setIsLoading(true);
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-        options: { captchaToken },
-      });
-
-      if (error) throw error;
-
-      if (data.user) {
-        // Clear cache to force fresh fetch on login
-        userProfileCache.current = null;
-        // Single profile fetch (no redundant calls)
-        const userProfile = await fetchUserProfile(data.user, false);
-        
-        if (!userProfile) {
-          throw new Error('Failed to fetch or create user profile. Please contact support.');
-        }
-        setUser(userProfile);
-        logAuditEventSafe({
-          action: 'login',
-          category: 'auth',
-          entityType: 'users',
-          entityId: userProfile.id,
-          summary: `${userProfile.email} signed in with email and password`,
-          details: { method: 'email' },
-        });
+      const result = await mfaLoginBegin({ email, password, captchaToken });
+      if (!result.session?.access_token || !result.session.refresh_token) {
+        throw new Error('Failed to fetch or create user profile. Please contact support.');
       }
+      await applyAuthSession(result.session);
+
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (!authUser) {
+        throw new Error('Failed to fetch or create user profile. Please contact support.');
+      }
+
+      userProfileCache.current = null;
+      const userProfile = await fetchUserProfile(authUser, false);
+
+      if (!userProfile) {
+        throw new Error('Failed to fetch or create user profile. Please contact support.');
+      }
+      setMfaPending(null);
+      setUser(userProfile);
+      logAuditEventSafe({
+        action: 'login',
+        category: 'auth',
+        entityType: 'users',
+        entityId: userProfile.id,
+        summary: `${userProfile.email} signed in with email and password`,
+        details: { method: 'email' },
+      });
     } catch (error) {
       console.error('Login error:', error);
+      if (error instanceof MfaRequiredError) {
+        throw error;
+      }
       logAuditEventSafe({
         action: 'login_failed',
         category: 'auth',
@@ -765,6 +799,8 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
       value={{
         user,
         isLoading,
+        mfaPending,
+        clearMfaPending: () => setMfaPending(null),
         loginWithEmail,
         signUpWithEmail,
         resendSignupConfirmation,

@@ -32,6 +32,7 @@ import {
   verifyStoredTotp,
   writeAudit,
   checkRateLimit,
+  isEligibleForSetup,
   type AdminClient,
   type UserRow,
 } from "../_shared/mfaService.ts";
@@ -86,10 +87,6 @@ async function callerFromRequest(req: Request) {
   if (error || !user) return null;
   const token = authHeader.replace(/^Bearer\s+/i, "");
   return { user, token, sessionId: sessionIdFromJwt(token) };
-}
-
-function isEligibleForSetup(profile: UserRow): boolean {
-  return profile.is_approved === true && profile.is_access_held !== true;
 }
 
 async function requireApprovedCaller(req: Request, admin: AdminClient) {
@@ -957,12 +954,6 @@ Deno.serve(async (req: Request) => {
 
   try {
     switch (action) {
-      case "login_begin":
-        return await handleLoginBegin(admin, body);
-      case "login_send_email":
-        return await handleLoginSendEmail(admin, body);
-      case "login_verify":
-        return await handleLoginVerify(admin, body);
       case "session_status":
         return await handleSessionStatus(req, admin);
       case "session_send_email":

@@ -147,6 +147,11 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode, isSuperAdmin = f
                 or edit events; keep this list in sync with how you want events organised.
               </li>
             </Section>
+
+            <Section title="User Security">
+              <li>Admins can also open User Security to enable authenticator or email two-factor authentication on their own account.</li>
+              <li>2FA is required at sign-in once enabled. Recovery codes are shown only when generated.</li>
+            </Section>
           </>
         ) : (
           <>
@@ -191,6 +196,12 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode, isSuperAdmin = f
               <li>View ministry rosters (usually PDFs) for groups you belong to—schedules, serving teams, or similar.</li>
               <li>You only see rosters for your ministries. If nothing appears, your account may not be linked to Leadership yet, or no roster has been uploaded for your group.</li>
               <li>Ask an admin if you expect a roster but do not see one after you are correctly placed in a ministry group.</li>
+            </Section>
+
+            <Section title="User Security">
+              <li>Change your password and turn on two-factor authentication (2FA) for your approved member account.</li>
+              <li>Authenticator app uses a standard TOTP code (Google Authenticator, Microsoft Authenticator, Authy, 1Password, and similar apps).</li>
+              <li>Email verification sends a short-lived one-time code to your registered email. Recovery codes are shown once when you first enable 2FA.</li>
             </Section>
           </>
         )}

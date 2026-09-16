@@ -1,11 +1,12 @@
-import { createClient, type SupabaseClient } from "jsr:@supabase/supabase-js@2";
+import { type SupabaseClient } from "jsr:@supabase/supabase-js@2";
 import {
   RATE_LIMITS,
   type RateLimitConfig,
   type RateLimitState,
-  bytesToBase64,
-  base64ToBytes,
+  aesGcmDecrypt,
+  aesGcmEncrypt,
   decodeBase32,
+  decideEmailChallenge,
   evaluateRateLimit,
   generateEmailCode,
   generateRecoveryCodes,
@@ -16,11 +17,11 @@ import {
   timingSafeEqual,
   normalizeRecoveryCode,
   normalizeSixDigit,
-  sha256Hex,
   verifyTotpCode,
   EMAIL_CODE_TTL_MS,
   ISSUER_NAME,
   buildOtpauthUri,
+  isEligibleForMfaSetup,
 } from "./mfaCrypto.ts";
 
 export type AdminClient = SupabaseClient;
@@ -71,36 +72,22 @@ export function expiredCode() {
   return publicError(GENERIC_EXPIRED, 400);
 }
 
-async function deriveAesKey(): Promise<CryptoKey> {
+function encryptionMaterial(): string {
   const explicit = (Deno.env.get("MFA_ENCRYPTION_KEY") || "").trim();
   const fallback = (Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "").trim();
   const material = explicit || fallback;
   if (!material) {
     throw new Error("missing_mfa_key");
   }
-  const digest = await crypto.subtle.digest(
-    "SHA-256",
-    new TextEncoder().encode(`abc-mfa-aes-v1:${material}`),
-  );
-  return crypto.subtle.importKey("raw", digest, "AES-GCM", false, ["encrypt", "decrypt"]);
+  return material;
 }
 
 export async function encryptText(plain: string): Promise<string> {
-  const key = await deriveAesKey();
-  const iv = crypto.getRandomValues(new Uint8Array(12));
-  const encoded = new TextEncoder().encode(plain);
-  const buf = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, encoded);
-  return `${bytesToBase64(iv)}.${bytesToBase64(new Uint8Array(buf))}`;
+  return aesGcmEncrypt(plain, encryptionMaterial());
 }
 
 export async function decryptText(payload: string): Promise<string> {
-  const key = await deriveAesKey();
-  const [ivB64, dataB64] = payload.split(".");
-  if (!ivB64 || !dataB64) throw new Error("bad_ciphertext");
-  const iv = base64ToBytes(ivB64);
-  const data = base64ToBytes(dataB64);
-  const buf = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, data);
-  return new TextDecoder().decode(buf);
+  return aesGcmDecrypt(payload, encryptionMaterial());
 }
 
 export function firstNameOf(user: UserRow): string {
@@ -154,6 +141,10 @@ export function methodsOf(settings: MfaSettingsRow | null): Array<"totp" | "emai
 
 export function mfaEnabled(settings: MfaSettingsRow | null): boolean {
   return Boolean(settings?.totp_enabled || settings?.email_enabled);
+}
+
+export function isEligibleForSetup(profile: UserRow): boolean {
+  return isEligibleForMfaSetup(profile);
 }
 
 export async function checkRateLimit(
@@ -263,25 +254,37 @@ export async function consumeEmailChallenge(
 
   const row = rows?.[0];
   if (!row) return { ok: false, reason: "invalid" };
-  if (row.consumed_at) return { ok: false, reason: "used" };
-  if (Date.parse(row.expires_at) <= Date.now()) {
+
+  const hashed = await hashSecret(row.salt, cleaned);
+  const matches = timingSafeEqual(hashed, row.code_hash);
+  const decision = decideEmailChallenge({
+    consumedAt: row.consumed_at,
+    expiresAt: row.expires_at,
+    attemptCount: row.attempt_count,
+    maxAttempts: row.max_attempts,
+    hashMatches: matches,
+  });
+
+  if (decision.reason === "expired") {
     await admin
       .from("mfa_email_challenges")
       .update({ consumed_at: new Date().toISOString() })
       .eq("id", row.id);
     return { ok: false, reason: "expired" };
   }
-  if (row.attempt_count >= row.max_attempts) {
-    await admin
-      .from("mfa_email_challenges")
-      .update({ consumed_at: new Date().toISOString() })
-      .eq("id", row.id);
-    return { ok: false, reason: "invalid" };
+
+  if (decision.reason === "used") {
+    return { ok: false, reason: "used" };
   }
 
-  const hashed = await hashSecret(row.salt, cleaned);
-  const matches = timingSafeEqual(hashed, row.code_hash);
-  if (!matches) {
+  if (!decision.ok) {
+    if (row.attempt_count >= row.max_attempts) {
+      await admin
+        .from("mfa_email_challenges")
+        .update({ consumed_at: new Date().toISOString() })
+        .eq("id", row.id);
+      return { ok: false, reason: "invalid" };
+    }
     const nextAttempts = row.attempt_count + 1;
     await admin
       .from("mfa_email_challenges")

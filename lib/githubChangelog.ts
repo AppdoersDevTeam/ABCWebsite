@@ -86,6 +86,8 @@ function areaFromLocation(location: string): ChangelogArea {
       return 'calendar';
     case 'Sermons':
       return 'sermons';
+    case 'User Security':
+      return 'auth';
     case 'Overview':
     case 'Overviews':
     case 'Help':

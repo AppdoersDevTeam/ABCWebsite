@@ -45,6 +45,7 @@ import { Sermons as DashboardSermons } from './pages/dashboard/Sermons';
 import { Team } from './pages/dashboard/Team';
 import { EventsPrivate } from './pages/dashboard/EventsPrivate';
 import { DashboardHelp } from './pages/dashboard/Help';
+import { UserSecurity } from './pages/dashboard/UserSecurity';
 import { AnnualCalendarPage } from './pages/shared/AnnualCalendarPage';
 
 // Admin Pages
@@ -64,7 +65,7 @@ import { AdminEmails } from './pages/admin/AdminEmails';
 
 // Protected Route Component
 const ProtectedRoute = () => {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, mfaPending } = useAuth();
 
   // Only show loading during initial auth check
   if (isLoading) {
@@ -77,6 +78,10 @@ const ProtectedRoute = () => {
 
   if (!user) {
     console.log('ProtectedRoute - No user, redirecting to login');
+    return <Navigate to="/login" replace />;
+  }
+
+  if (mfaPending) {
     return <Navigate to="/login" replace />;
   }
 
@@ -100,7 +105,7 @@ const ProtectedRoute = () => {
 
 // Admin Route Component — any approved admin gets the full admin portal
 const AdminRoute = () => {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, mfaPending } = useAuth();
 
   if (isLoading) {
     return (
@@ -111,6 +116,10 @@ const AdminRoute = () => {
   }
 
   if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (mfaPending) {
     return <Navigate to="/login" replace />;
   }
 
@@ -137,7 +146,7 @@ const SuperAdminRoute = () => {
 };
 
 const AppRoutes = () => {
-    const { user } = useAuth();
+    const { user, mfaPending } = useAuth();
     
     return (
         <Routes>
@@ -161,7 +170,7 @@ const AppRoutes = () => {
               <Route path="need-prayer" element={<NeedPrayer />} />
               <Route path="contact" element={<Contact />} />
               <Route path="login" element={
-                user ? (
+                user && !mfaPending ? (
                   !user.is_approved ? <Navigate to="/pending-approval" replace /> :
                   isAdminUser(user) ? <Navigate to="/admin" replace /> : <Navigate to="/dashboard" replace />
                 ) : (
@@ -191,6 +200,7 @@ const AppRoutes = () => {
                 <Route path="team" element={<Team />} />
                 <Route path="events" element={<EventsPrivate />} />
                 <Route path="roster" element={<Roster />} />
+                <Route path="security" element={<UserSecurity />} />
                 <Route path="help" element={<DashboardHelp />} />
               </Route>
             </Route>
@@ -213,6 +223,7 @@ const AppRoutes = () => {
                 <Route path="events" element={<AdminEvents />} />
                 <Route path="roster" element={<AdminRoster />} />
                 <Route path="settings" element={<AdminSettings />} />
+                <Route path="security" element={<UserSecurity />} />
                 <Route path="help" element={<AdminHelp />} />
               </Route>
             </Route>

@@ -50,6 +50,7 @@ export const AdminLayout = () => {
     { label: 'Events', path: '/admin/events', icon: <Calendar size={20} />, iconClass: DASHBOARD_NAV_ICON.events },
     { label: 'Rosters (Beta)', path: '/admin/roster', icon: <ClipboardList size={20} />, iconClass: DASHBOARD_NAV_ICON.rosters },
     { label: 'System Setup', path: '/admin/settings', icon: <Settings size={20} />, iconClass: DASHBOARD_NAV_ICON.settings },
+    { label: 'User Security', path: '/admin/security', icon: <Shield size={20} />, iconClass: DASHBOARD_NAV_ICON.settings },
     { label: 'Help', path: '/admin/help', icon: <HelpCircle size={20} />, iconClass: DASHBOARD_NAV_ICON.help },
     { label: 'Logs', path: '/admin/logs', icon: <ScrollText size={20} />, iconClass: DASHBOARD_NAV_ICON.logs },
     ...(isSuperAdminUser(user)

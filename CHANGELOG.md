@@ -7,6 +7,44 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-1709-007 — Member MFA with authenticator, email codes, and recovery
+
+**Date:** 2026-09-17
+**Time:** 01:25:42
+**Timezone:** Pacific/Auckland
+**Version:** 1.2.0
+**Type:** Security
+**Status:** Partial
+
+**Request**
+
+> Implement production MFA/2FA on Member Dashboard → User Security for approved members, with standard TOTP authenticator apps, email verification codes, recovery codes, login integration, rate limiting, audit events, migrations, tests, changelog, and SemVer.
+
+**Changes**
+
+* Added User Security under the member and admin dashboards for password change, authenticator (standard TOTP), email verification, and one-time recovery codes.
+* Authenticator setup shows a standard otpauth QR code and manual key, and is enabled only after a valid 6-digit code is verified. Replacing the authenticator keeps the old method until the new one verifies.
+* Email MFA sends a hashed, single-use 6-digit code through the existing Resend church email template, with expiry, attempt limits, and send throttling.
+* Password login now goes through the mfa-login Edge Function. If MFA is enabled in the database, the client is supposed to challenge for TOTP, email, or a recovery code before the session is applied. Restrictive RLS requires a server-recorded MFA-verified session when MFA is on.
+* Recovery codes are stored as salted hashes, shown once, and invalidated when regenerated. Trusted/remember-this-device was not added because church computers are often shared.
+* Applied database migration member_mfa (user MFA settings, hashed email/recovery records, login challenges, verified sessions, rate-limit buckets, and mfa_session_satisfied RLS).
+* 35 automated tests cover TOTP RFC 6238, replay and clock windows, hashing, AES-GCM secret wrapping, rate limits, authorization, and the MFA email template.
+* Live mfa-login is currently a password-grant shim so sign-in keeps working. The full mfa and mfa-login sources are in the repo and still need `npx supabase functions deploy mfa` (JWT on) and `npx supabase functions deploy mfa-login --no-verify-jwt` before setup and MFA login challenges work in production.
+
+**Database**
+
+* supabase/migrations/20260916124100_member_mfa.sql
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: 35 unit tests passed. vite build passed. Typecheck still fails on pre-existing app errors and Deno Edge Function files, matching prior changelog practice. Migration member_mfa is applied on the ABC Website project. Browser E2E tools were not available. Live mfa-login v4 is password-grant only; the JWT mfa setup function is not deployed yet.
+
 ## CHG-2026-1709-006 — Open and close newsletter months with +
 
 **Date:** 2026-09-17

@@ -222,7 +222,21 @@ export type AuditLogAction =
   | 'unlink'
   | 'pray'
   | 'export'
-  | 'login_failed';
+  | 'login_failed'
+  | 'mfa_enabled'
+  | 'mfa_disabled'
+  | 'mfa_totp_enabled'
+  | 'mfa_totp_disabled'
+  | 'mfa_totp_replaced'
+  | 'mfa_totp_enroll_started'
+  | 'mfa_totp_replace_started'
+  | 'mfa_email_enabled'
+  | 'mfa_email_disabled'
+  | 'mfa_recovery_generated'
+  | 'mfa_recovery_used'
+  | 'mfa_verify_failed'
+  | 'mfa_verify_lockout'
+  | 'password_change';
 
 export interface AuditLog {
   id: string;

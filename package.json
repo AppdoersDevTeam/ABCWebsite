@@ -1,14 +1,14 @@
 {
   "name": "ashburton-baptist-church",
   "private": true,
-  "version": "1.1.5",
+  "version": "1.2.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "test": "node --test scripts/changelog/*.test.mjs",
+    "test": "node --experimental-strip-types --test scripts/changelog/*.test.mjs scripts/mfa/*.test.mjs",
     "validate": "node scripts/validate.mjs",
     "validate:changelog": "node scripts/changelog/validate.mjs",
     "validate:version": "node scripts/validate-version.mjs",
@@ -24,12 +24,14 @@
     "jspdf-autotable": "^5.0.7",
     "lucide-react": "^0.562.0",
     "pdfjs-dist": "^6.2.108",
+    "qrcode": "^1.5.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^7.11.0"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
+    "@types/qrcode": "^1.5.6",
     "@vitejs/plugin-react": "^5.0.0",
     "typescript": "~5.8.2",
     "vite": "^6.2.0"

@@ -11,6 +11,7 @@ import {
   X,
   ArrowRightLeft,
   HelpCircle,
+  Shield,
   Youtube,
   Newspaper,
   HandHeart,
@@ -45,6 +46,7 @@ export const DashboardLayout = () => {
     { label: 'Leadership', path: '/dashboard/team', icon: <Users size={20} />, iconClass: DASHBOARD_NAV_ICON.team },
     { label: 'Events', path: '/dashboard/events', icon: <Calendar size={20} />, iconClass: DASHBOARD_NAV_ICON.events },
     { label: 'Rosters (Beta)', path: '/dashboard/roster', icon: <ClipboardList size={20} />, iconClass: DASHBOARD_NAV_ICON.rosters },
+    { label: 'User Security', path: '/dashboard/security', icon: <Shield size={20} />, iconClass: DASHBOARD_NAV_ICON.settings },
     { label: 'Help', path: '/dashboard/help', icon: <HelpCircle size={20} />, iconClass: DASHBOARD_NAV_ICON.help },
   ];
 
