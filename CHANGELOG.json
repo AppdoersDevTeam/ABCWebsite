@@ -6,6 +6,36 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-1709-014",
+      "date": "2026-09-17",
+      "time": "03:22:21",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-16T15:22:21.728Z",
+      "version": "1.2.7",
+      "type": "fixed",
+      "area": "auth",
+      "title": "Google accounts can disable 2FA without a stuck CAPTCHA",
+      "request": "When trying to disable 2FA and email verification, the system says Unauthorized and/or Please fill the Captcha and does not allow me to continue. Why, and how to fix it?",
+      "changes": [
+        "Google-only members no longer have to complete a CAPTCHA to disable authenticator or email verification. You are already signed in, so an authenticator or email code is enough.",
+        "Disable requests now send a fresh sign-in token, so the page is less likely to show Unauthorized after you have already opened User Security."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "38 unit tests and npm run validate. vite build. Typecheck still fails on pre-existing app errors. Live mfa function redeployed after push. Browser E2E tools were not available."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-1709-013",
       "date": "2026-09-17",
       "time": "03:02:44",

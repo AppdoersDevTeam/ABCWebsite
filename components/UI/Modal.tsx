@@ -105,11 +105,7 @@ export const Modal: React.FC<ModalProps> = ({
       <div
         role="dialog"
         aria-modal="true"
-        className="bg-white rounded-[16px] max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative transition-all duration-300"
-        style={{
-          transform: isOpen ? 'scale(1)' : 'scale(0.95)',
-          opacity: isOpen ? 1 : 0,
-        }}
+        className="bg-white rounded-[16px] max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative"
         onClick={(e) => e.stopPropagation()}
       >
         {title && (

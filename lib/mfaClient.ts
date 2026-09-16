@@ -40,7 +40,18 @@ async function invokeMfa<T extends Record<string, unknown>>(
   body: Record<string, unknown>,
   fn: 'mfa' | 'mfa-login' = 'mfa'
 ): Promise<InvokeResult<T>> {
-  const { data, error } = await supabase.functions.invoke(fn, { body });
+  const { data: sessionData } = await supabase.auth.getSession();
+  let accessToken = sessionData.session?.access_token || '';
+  const expiresAtMs = (sessionData.session?.expires_at || 0) * 1000;
+  if (!accessToken || (expiresAtMs && expiresAtMs < Date.now() + 30_000)) {
+    const { data: refreshed } = await supabase.auth.refreshSession();
+    accessToken = refreshed.session?.access_token || accessToken;
+  }
+
+  const { data, error } = await supabase.functions.invoke(fn, {
+    body,
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+  });
 
   if (data && typeof data === 'object' && data !== null && 'error' in data) {
     const msg = (data as { error?: unknown }).error;
@@ -54,8 +65,13 @@ async function invokeMfa<T extends Record<string, unknown>>(
     if (err.context && typeof err.context.json === 'function') {
       try {
         const parsed = await err.context.json();
-        if (parsed?.error && typeof parsed.error === 'string') {
-          throw new Error(parsed.error);
+        const msg =
+          (typeof parsed?.error === 'string' && parsed.error) ||
+          (typeof parsed?.message === 'string' && parsed.message) ||
+          (typeof parsed?.msg === 'string' && parsed.msg) ||
+          '';
+        if (msg.trim()) {
+          throw new Error(msg);
         }
       } catch (inner) {
         if (inner instanceof Error && inner.message && inner.message !== error.message) {

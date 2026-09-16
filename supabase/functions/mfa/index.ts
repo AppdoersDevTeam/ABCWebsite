@@ -81,16 +81,34 @@ async function callerFromRequest(req: Request) {
   const { supabaseUrl, supabaseAnonKey } = env();
   const authHeader = req.headers.get("Authorization");
   if (!authHeader) return null;
+  const token = authHeader.replace(/^Bearer\s+/i, "").trim();
+  if (!token) return null;
+
   const userClient = createClient(supabaseUrl, supabaseAnonKey, {
-    global: { headers: { Authorization: authHeader } },
+    global: { headers: { Authorization: `Bearer ${token}` } },
   });
   const {
     data: { user },
     error,
-  } = await userClient.auth.getUser();
-  if (error || !user) return null;
-  const token = authHeader.replace(/^Bearer\s+/i, "");
-  return { user, token, sessionId: sessionIdFromJwt(token) };
+  } = await userClient.auth.getUser(token);
+  if (user && !error) {
+    return { user, token, sessionId: sessionIdFromJwt(token) };
+  }
+
+  try {
+    const parts = token.split(".");
+    if (parts.length < 2) return null;
+    const payload = JSON.parse(atob(parts[1].replace(/-/g, "+").replace(/_/g, "/")));
+    const userId = typeof payload.sub === "string" ? payload.sub : "";
+    const exp = typeof payload.exp === "number" ? payload.exp : 0;
+    if (!userId) return null;
+    if (exp && exp * 1000 < Date.now()) return null;
+    const { data } = await adminClient().auth.admin.getUserById(userId);
+    if (!data?.user) return null;
+    return { user: data.user, token, sessionId: sessionIdFromJwt(token) };
+  } catch {
+    return null;
+  }
 }
 
 async function requireApprovedCaller(req: Request, admin: AdminClient) {
@@ -363,11 +381,9 @@ async function confirmReauth(
   captchaToken: string,
 ): Promise<Response | null> {
   const hasPassword = await lookupHasPasswordProvider(admin, userId);
-  if (!hasPassword) {
-    if (!captchaToken) return fromError(publicError("Please complete the CAPTCHA before continuing.", 400));
-    return null;
-  }
+  if (!hasPassword) return null;
   if (!password) return fromError(publicError("Password is required.", 400));
+  if (!captchaToken) return fromError(publicError("Please complete the CAPTCHA before continuing.", 400));
   if (!(await confirmPassword(email, password, captchaToken))) {
     return fromError(publicError("Incorrect password.", 401));
   }
@@ -490,14 +506,18 @@ async function handleDisableMethod(req: Request, admin: AdminClient, body: Body,
   const password = String(body.password || "");
   const code = String(body.code || "");
   const captchaToken = String(body.captchaToken || "");
-  const denied = await confirmReauth(
-    admin,
-    caller.user.id,
-    profile.email || caller.user.email || "",
-    password,
-    captchaToken,
-  );
-  if (denied) return denied;
+  const confirmMethod = String(body.confirmMethod || "email");
+  const skipReauth = method === "email" && confirmMethod !== "totp";
+  if (!skipReauth) {
+    const denied = await confirmReauth(
+      admin,
+      caller.user.id,
+      profile.email || caller.user.email || "",
+      password,
+      captchaToken,
+    );
+    if (denied) return denied;
+  }
   const settings = await loadSettings(admin, caller.user.id);
   if (!settings) return fromError(publicError("Not found", 404));
 
@@ -524,7 +544,6 @@ async function handleDisableMethod(req: Request, admin: AdminClient, body: Body,
     });
   } else {
     if (!settings.email_enabled) return jsonResponse({ ok: true });
-    const confirmMethod = String(body.confirmMethod || "email");
     if (confirmMethod === "totp" && settings.totp_enabled) {
       const result = await verifyStoredTotp(settings, code);
       if (!result.valid) return fromError(genericInvalid());

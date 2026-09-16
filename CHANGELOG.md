@@ -7,6 +7,37 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-1709-014 — Google accounts can disable 2FA without a stuck CAPTCHA
+
+**Date:** 2026-09-17
+**Time:** 03:22:21
+**Timezone:** Pacific/Auckland
+**Version:** 1.2.7
+**Type:** Fixed
+
+**Request**
+
+> When trying to disable 2FA and email verification, the system says Unauthorized and/or Please fill the Captcha and does not allow me to continue. Why, and how to fix it?
+
+**Changes**
+
+* Google-only members no longer have to complete a CAPTCHA to disable authenticator or email verification. You are already signed in, so an authenticator or email code is enough.
+* Disable requests now send a fresh sign-in token, so the page is less likely to show Unauthorized after you have already opened User Security.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: 38 unit tests and npm run validate. vite build. Typecheck still fails on pre-existing app errors. Live mfa function redeployed after push. Browser E2E tools were not available.
+
 ## CHG-2026-1709-013 — Make Google-account email 2FA codes easier to receive
 
 **Date:** 2026-09-17

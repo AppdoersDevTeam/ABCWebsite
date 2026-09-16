@@ -80,6 +80,7 @@ export const UserSecurity = () => {
   const [emailSent, setEmailSent] = useState(false);
   const turnstileRef = useRef<TurnstileFieldHandle>(null);
   const needsSitePassword = status?.hasPasswordProvider !== false;
+  const needsCaptcha = needsSitePassword;
 
   const resetCaptcha = () => {
     setCaptchaToken(null);
@@ -130,7 +131,7 @@ export const UserSecurity = () => {
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!captchaToken) {
+    if (needsCaptcha && !captchaToken) {
       setError('Please complete the CAPTCHA before continuing.');
       return;
     }
@@ -158,7 +159,7 @@ export const UserSecurity = () => {
 
   const startTotp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!captchaToken) {
+    if (needsCaptcha && !captchaToken) {
       setError('Please complete the CAPTCHA before continuing.');
       return;
     }
@@ -203,7 +204,7 @@ export const UserSecurity = () => {
 
   const disableTotp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!captchaToken) {
+    if (needsCaptcha && !captchaToken) {
       setError('Please complete the CAPTCHA before continuing.');
       return;
     }
@@ -224,7 +225,7 @@ export const UserSecurity = () => {
 
   const startEmail = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!captchaToken) {
+    if (needsCaptcha && !captchaToken) {
       setError('Please complete the CAPTCHA before continuing.');
       return;
     }
@@ -279,7 +280,7 @@ export const UserSecurity = () => {
 
   const startEmailDisable = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!captchaToken) {
+    if (needsCaptcha && !captchaToken) {
       setError('Please complete the CAPTCHA before continuing.');
       return;
     }
@@ -299,7 +300,7 @@ export const UserSecurity = () => {
 
   const disableEmail = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!captchaToken && !emailSent) {
+    if (needsCaptcha && !captchaToken && !emailSent) {
       setError('Please complete the CAPTCHA before continuing.');
       return;
     }
@@ -326,7 +327,7 @@ export const UserSecurity = () => {
 
   const generateRecovery = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!captchaToken) {
+    if (needsCaptcha && !captchaToken) {
       setError('Please complete the CAPTCHA before continuing.');
       return;
     }
@@ -499,8 +500,8 @@ export const UserSecurity = () => {
             Confirm new password
             <PasswordInput wrapperClassName="mt-2" className="w-full border border-gray-300 rounded-[4px] px-4 py-3" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required minLength={8} autoComplete="new-password" />
           </label>
-          <TurnstileField ref={turnstileRef} onToken={setCaptchaToken} onExpire={() => setCaptchaToken(null)} />
-          <GlowingButton type="submit" fullWidth disabled={busy || !captchaToken}>{busy ? 'Saving...' : needsSitePassword ? 'Update password' : 'Set password'}</GlowingButton>
+          {needsCaptcha ? <TurnstileField ref={turnstileRef} onToken={setCaptchaToken} onExpire={() => setCaptchaToken(null)} /> : null}
+          <GlowingButton type="submit" fullWidth disabled={busy || (needsCaptcha && !captchaToken)}>{busy ? 'Saving...' : needsSitePassword ? 'Update password' : 'Set password'}</GlowingButton>
         </form>
       </Modal>
 
@@ -521,8 +522,8 @@ export const UserSecurity = () => {
             ) : (
               <GoogleAccountNote />
             )}
-            <TurnstileField ref={turnstileRef} onToken={setCaptchaToken} onExpire={() => setCaptchaToken(null)} />
-            <GlowingButton type="submit" fullWidth disabled={busy || !captchaToken}>{busy ? 'Preparing...' : 'Continue'}</GlowingButton>
+            {needsCaptcha ? <TurnstileField ref={turnstileRef} onToken={setCaptchaToken} onExpire={() => setCaptchaToken(null)} /> : null}
+            <GlowingButton type="submit" fullWidth disabled={busy || (needsCaptcha && !captchaToken)}>{busy ? 'Preparing...' : 'Continue'}</GlowingButton>
           </form>
         ) : (
           <form className="space-y-4" onSubmit={verifyTotp}>
@@ -563,8 +564,8 @@ export const UserSecurity = () => {
             Authenticator code
             <input inputMode="numeric" autoComplete="one-time-code" maxLength={6} className="mt-2 w-full border border-gray-300 rounded-[4px] px-4 py-3 tracking-[0.4em] text-center" value={code} onChange={(e) => setCode(e.target.value)} required />
           </label>
-          <TurnstileField ref={turnstileRef} onToken={setCaptchaToken} onExpire={() => setCaptchaToken(null)} />
-          <GlowingButton type="submit" fullWidth disabled={busy || !captchaToken}>{busy ? 'Disabling...' : 'Disable'}</GlowingButton>
+          {needsCaptcha ? <TurnstileField ref={turnstileRef} onToken={setCaptchaToken} onExpire={() => setCaptchaToken(null)} /> : null}
+          <GlowingButton type="submit" fullWidth disabled={busy || (needsCaptcha && !captchaToken)}>{busy ? 'Disabling...' : 'Disable'}</GlowingButton>
         </form>
       </Modal>
 
@@ -583,8 +584,8 @@ export const UserSecurity = () => {
             ) : (
               <GoogleAccountNote />
             )}
-            <TurnstileField ref={turnstileRef} onToken={setCaptchaToken} onExpire={() => setCaptchaToken(null)} />
-            <GlowingButton type="submit" fullWidth disabled={busy || !captchaToken}>{busy ? 'Sending...' : 'Send code'}</GlowingButton>
+            {needsCaptcha ? <TurnstileField ref={turnstileRef} onToken={setCaptchaToken} onExpire={() => setCaptchaToken(null)} /> : null}
+            <GlowingButton type="submit" fullWidth disabled={busy || (needsCaptcha && !captchaToken)}>{busy ? 'Sending...' : 'Send code'}</GlowingButton>
           </form>
         ) : (
           <form className="space-y-4" onSubmit={verifyEmail}>
@@ -626,8 +627,8 @@ export const UserSecurity = () => {
             ) : (
               <GoogleAccountNote />
             )}
-            <TurnstileField ref={turnstileRef} onToken={setCaptchaToken} onExpire={() => setCaptchaToken(null)} />
-            <GlowingButton type="submit" fullWidth disabled={busy || !captchaToken}>{busy ? 'Sending...' : 'Send code'}</GlowingButton>
+            {needsCaptcha ? <TurnstileField ref={turnstileRef} onToken={setCaptchaToken} onExpire={() => setCaptchaToken(null)} /> : null}
+            <GlowingButton type="submit" fullWidth disabled={busy || (needsCaptcha && !captchaToken)}>{busy ? 'Sending...' : 'Send code'}</GlowingButton>
           </form>
         ) : (
           <form className="space-y-4" onSubmit={disableEmail}>
@@ -639,22 +640,22 @@ export const UserSecurity = () => {
                   : 'Enter a current authenticator code.'
                 : `Enter the code sent to ${status?.maskedEmail}.`}
             </p>
-            {needsSitePassword ? (
+            {status?.totpEnabled && needsSitePassword ? (
               <label className="block text-sm font-bold text-charcoal">
                 Current password
                 <PasswordInput wrapperClassName="mt-2" className="w-full border border-gray-300 rounded-[4px] px-4 py-3" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" />
               </label>
-            ) : (
+            ) : status?.totpEnabled && !needsSitePassword ? (
               <GoogleAccountNote />
-            )}
+            ) : null}
             <label className="block text-sm font-bold text-charcoal">
               {status?.totpEnabled ? 'Authenticator code' : 'Email code'}
               <input inputMode="numeric" autoComplete="one-time-code" maxLength={6} className="mt-2 w-full border border-gray-300 rounded-[4px] px-4 py-3 tracking-[0.4em] text-center" value={code} onChange={(e) => setCode(e.target.value)} required />
             </label>
-            {status?.totpEnabled && (
+            {status?.totpEnabled && needsCaptcha ? (
               <TurnstileField ref={turnstileRef} onToken={setCaptchaToken} onExpire={() => setCaptchaToken(null)} />
-            )}
-            <GlowingButton type="submit" fullWidth disabled={busy || (Boolean(status?.totpEnabled) && !captchaToken)}>
+            ) : null}
+            <GlowingButton type="submit" fullWidth disabled={busy || (needsCaptcha && Boolean(status?.totpEnabled) && !captchaToken)}>
               {busy ? 'Disabling...' : 'Disable'}
             </GlowingButton>
           </form>
@@ -681,8 +682,8 @@ export const UserSecurity = () => {
             Current verification code
             <input inputMode="text" autoComplete="one-time-code" className="mt-2 w-full border border-gray-300 rounded-[4px] px-4 py-3 tracking-[0.3em] text-center" value={code} onChange={(e) => setCode(e.target.value)} required />
           </label>
-          <TurnstileField ref={turnstileRef} onToken={setCaptchaToken} onExpire={() => setCaptchaToken(null)} />
-          <GlowingButton type="submit" fullWidth disabled={busy || !captchaToken}>{busy ? 'Generating...' : 'Generate codes'}</GlowingButton>
+          {needsCaptcha ? <TurnstileField ref={turnstileRef} onToken={setCaptchaToken} onExpire={() => setCaptchaToken(null)} /> : null}
+          <GlowingButton type="submit" fullWidth disabled={busy || (needsCaptcha && !captchaToken)}>{busy ? 'Generating...' : 'Generate codes'}</GlowingButton>
         </form>
       </Modal>
 
