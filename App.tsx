@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { isAdminUser } from './lib/constants';
+import { isAdminUser, isSuperAdminUser } from './lib/constants';
 import { PublicLayout } from './components/Layouts/PublicLayout';
 import { DashboardLayout } from './components/Layouts/DashboardLayout';
 import { AdminLayout } from './components/Layouts/AdminLayout';
@@ -59,6 +59,7 @@ import { AdminRoster } from './pages/admin/AdminRoster';
 import { AdminSettings } from './pages/admin/AdminSettings';
 import { AdminHelp } from './pages/admin/Help';
 import { AdminLogs } from './pages/admin/AdminLogs';
+import { AdminChangelog } from './pages/admin/AdminChangelog';
 
 // Protected Route Component
 const ProtectedRoute = () => {
@@ -118,6 +119,17 @@ const AdminRoute = () => {
 
   if (!isAdminUser(user)) {
     return <Navigate to="/dashboard" replace />;
+  }
+
+  return <Outlet />;
+};
+
+// Super Admin only — regular admins are sent back to Overview
+const SuperAdminRoute = () => {
+  const { user } = useAuth();
+
+  if (!isSuperAdminUser(user)) {
+    return <Navigate to="/admin" replace />;
   }
 
   return <Outlet />;
@@ -189,6 +201,9 @@ const AppRoutes = () => {
                 <Route path="calendar" element={<AnnualCalendarPage audience="admin" />} />
                 <Route path="users" element={<AdminUsers />} />
                 <Route path="logs" element={<AdminLogs />} />
+                <Route element={<SuperAdminRoute />}>
+                  <Route path="changelog" element={<AdminChangelog />} />
+                </Route>
                 <Route path="prayer" element={<AdminPrayerWall />} />
                 <Route path="newsletter" element={<AdminNewsletter />} />
                 <Route path="devotional" element={<AdminDevotional />} />

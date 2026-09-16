@@ -13,4 +13,5 @@ export const DASHBOARD_NAV_ICON = {
   users: 'bg-sky-50 text-sky-600',
   settings: 'bg-slate-50 text-slate-600',
   logs: 'bg-rose-50 text-rose-600',
+  changelog: 'bg-violet-50 text-violet-600',
 } as const;

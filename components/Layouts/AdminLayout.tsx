@@ -17,10 +17,11 @@ import {
   ScrollText,
   Newspaper,
   HandHeart,
-  CalendarDays
+  CalendarDays,
+  History
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { displayName, displayInitial } from '../../lib/constants';
+import { displayName, displayInitial, isSuperAdminUser } from '../../lib/constants';
 import { ScrollToTop } from '../ScrollToTop';
 import { useAutoSectionReveal } from '../UI/useAutoSectionReveal';
 import { DASHBOARD_NAV_ICON } from '../../lib/dashboardNav';
@@ -51,6 +52,16 @@ export const AdminLayout = () => {
     { label: 'System Setup', path: '/admin/settings', icon: <Settings size={20} />, iconClass: DASHBOARD_NAV_ICON.settings },
     { label: 'Help', path: '/admin/help', icon: <HelpCircle size={20} />, iconClass: DASHBOARD_NAV_ICON.help },
     { label: 'Logs', path: '/admin/logs', icon: <ScrollText size={20} />, iconClass: DASHBOARD_NAV_ICON.logs },
+    ...(isSuperAdminUser(user)
+      ? [
+          {
+            label: 'Changelog',
+            path: '/admin/changelog',
+            icon: <History size={20} />,
+            iconClass: DASHBOARD_NAV_ICON.changelog,
+          },
+        ]
+      : []),
   ];
 
   return (

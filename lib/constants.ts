@@ -86,6 +86,13 @@ export function isAdminUser(
   return !!user && user.role === 'admin' && user.is_approved === true;
 }
 
+/** Super Admin — site owner account. Used to gate developer-only admin pages. */
+export function isSuperAdminUser(
+  user: { is_super_admin?: boolean | null } | null | undefined
+): boolean {
+  return user?.is_super_admin === true;
+}
+
 /** Whether the viewer may promote or demote this account's admin role. */
 export function canChangeUserAdminRole(
   viewer: { role?: string | null; is_approved?: boolean | null; id?: string } | null | undefined,
