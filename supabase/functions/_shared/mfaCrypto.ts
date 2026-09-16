@@ -308,7 +308,8 @@ export function evaluateRateLimit(
 
 export const RATE_LIMITS = {
   totpVerify: { maxAttempts: 5, windowMs: 5 * 60 * 1000, lockMs: 15 * 60 * 1000 },
-  emailSend: { maxAttempts: 3, windowMs: 15 * 60 * 1000, lockMs: 15 * 60 * 1000 },
+  emailSend: { maxAttempts: 1, windowMs: 60 * 1000, lockMs: 60 * 1000 },
+  emailSendHour: { maxAttempts: 5, windowMs: 60 * 60 * 1000, lockMs: 60 * 60 * 1000 },
   emailVerify: { maxAttempts: 5, windowMs: 15 * 60 * 1000, lockMs: 15 * 60 * 1000 },
   recovery: { maxAttempts: 5, windowMs: 15 * 60 * 1000, lockMs: 15 * 60 * 1000 },
   loginBegin: { maxAttempts: 8, windowMs: 15 * 60 * 1000, lockMs: 15 * 60 * 1000 },

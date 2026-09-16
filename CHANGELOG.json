@@ -6,6 +6,36 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-1709-006",
+      "date": "2026-09-17",
+      "time": "00:54:52",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-16T12:54:52.023Z",
+      "version": "1.1.5",
+      "type": "changed",
+      "area": "newsletters",
+      "title": "Open and close newsletter months with +",
+      "request": "Add a + in front of the Month to open and close the view for the newsletters of each month. puish to live",
+      "changes": [
+        "Each month in the Newsletters archive now has a + in front of its name. Click it to open that month’s issues, or − to close them again.",
+        "Months start closed so the boxed panel shows month names; open a month to read its newsletters."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Governance tests and changelog validation. Browser tools were not available; expand/collapse was checked in NewsletterMonthArchive."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-1709-005",
       "date": "2026-09-17",
       "time": "00:48:30",

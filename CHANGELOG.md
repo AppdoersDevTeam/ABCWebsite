@@ -7,6 +7,37 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-1709-006 — Open and close newsletter months with +
+
+**Date:** 2026-09-17
+**Time:** 00:54:52
+**Timezone:** Pacific/Auckland
+**Version:** 1.1.5
+**Type:** Changed
+
+**Request**
+
+> Add a + in front of the Month to open and close the view for the newsletters of each month. puish to live
+
+**Changes**
+
+* Each month in the Newsletters archive now has a + in front of its name. Click it to open that month’s issues, or − to close them again.
+* Months start closed so the boxed panel shows month names; open a month to read its newsletters.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: not run or failed
+* Notes: Governance tests and changelog validation. Browser tools were not available; expand/collapse was checked in NewsletterMonthArchive.
+
 ## CHG-2026-1709-005 — Group newsletter archive by month
 
 **Date:** 2026-09-17

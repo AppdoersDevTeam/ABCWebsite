@@ -18,6 +18,16 @@ export const NewsletterMonthArchive: React.FC<NewsletterMonthArchiveProps> = ({
   const groups = useMemo(() => groupNewslettersByMonth(items), [items]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [maxHeight, setMaxHeight] = useState<number | undefined>();
+  const [openMonths, setOpenMonths] = useState<Set<string>>(() => new Set());
+
+  const toggleMonth = (key: string) => {
+    setOpenMonths((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  };
 
   useLayoutEffect(() => {
     const root = scrollRef.current;
@@ -41,7 +51,7 @@ export const NewsletterMonthArchive: React.FC<NewsletterMonthArchiveProps> = ({
       observer.observe(child);
     }
     return () => observer.disconnect();
-  }, [groups]);
+  }, [groups, openMonths]);
 
   if (items.length === 0) {
     return <p className="text-neutral text-sm">{emptyMessage}</p>;
@@ -51,18 +61,40 @@ export const NewsletterMonthArchive: React.FC<NewsletterMonthArchiveProps> = ({
     <div className="min-w-0 rounded-[8px] border border-gray-200 bg-white overflow-hidden">
       <div
         ref={scrollRef}
-        className="relative overflow-y-auto overscroll-y-contain p-3 space-y-4"
+        className="relative overflow-y-auto overscroll-y-contain p-3 space-y-2"
         style={maxHeight ? { maxHeight } : undefined}
         aria-label="Newsletter archive grouped by month"
       >
-        {groups.map((group) => (
-          <section key={group.key} data-month-group className="min-w-0">
-            <h4 className="text-xs font-bold uppercase tracking-widest text-charcoal border-b border-gray-100 pb-1.5 mb-2">
-              {group.label}
-            </h4>
-            <div className="space-y-2">{group.items.map((item) => renderItem(item))}</div>
-          </section>
-        ))}
+        {groups.map((group) => {
+          const isOpen = openMonths.has(group.key);
+          const panelId = `newsletter-month-${group.key}`;
+          return (
+            <section key={group.key} data-month-group className="min-w-0">
+              <button
+                type="button"
+                onClick={() => toggleMonth(group.key)}
+                aria-expanded={isOpen}
+                aria-controls={panelId}
+                className="w-full flex items-center gap-2 text-left min-h-[44px] px-1 rounded-[4px] hover:bg-gray-50 transition-colors"
+              >
+                <span
+                  className="w-5 shrink-0 text-center text-base font-bold text-charcoal leading-none"
+                  aria-hidden="true"
+                >
+                  {isOpen ? '−' : '+'}
+                </span>
+                <span className="text-xs font-bold uppercase tracking-widest text-charcoal border-b border-transparent">
+                  {group.label}
+                </span>
+              </button>
+              {isOpen && (
+                <div id={panelId} className="space-y-2 pt-1 pl-7">
+                  {group.items.map((item) => renderItem(item))}
+                </div>
+              )}
+            </section>
+          );
+        })}
       </div>
     </div>
   );
