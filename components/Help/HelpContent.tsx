@@ -63,6 +63,10 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode, isSuperAdmin = f
                 account while logged in.
               </li>
               <li>
+                Click the summary cards (All Users, Pending, Hold Access, Approved, Linked Account) or use Search and
+                Sort by to filter the list. Linked logins show the matching Leadership person on the same row, with Unlink.
+              </li>
+              <li>
                 Link a login to a Leadership person so group memberships and rosters apply to that account. Use “Check
                 Leadership Links” to retry safe automatic matches; use “Link Leadership” when you need to pick the right
                 person manually.

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { Users, UserCheck, X, Shield, ShieldOff, Crown, KeyRound, AlertTriangle, Mail, ChevronDown, Link2, Trash2, PauseCircle, Download } from 'lucide-react';
+import { Users, UserCheck, X, Shield, ShieldOff, Crown, KeyRound, AlertTriangle, Mail, ChevronDown, Link2, Unlink, Trash2, PauseCircle, Download, Search } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { displayName, displayInitials, filterUsersForAdminView, canChangeUserAdminRole, isAdminUser, isOwnUserAccount, isServiceAccountEmail, isPendingApproval, isAccessHeld, CHURCH_NAME } from '../../lib/constants';
 import { User } from '../../types';
@@ -20,16 +20,33 @@ import { notifyUserAdminRole, adminRoleEmailNote } from '../../lib/notifyUserAdm
 import { notifyUserAccessHold, accessHoldEmailNote } from '../../lib/notifyUserAccessHold';
 import { downloadAdminUsersCsv, downloadAdminUsersPdf } from '../../lib/exportAdminUsers';
 
+type UserFilter = 'all' | 'pending' | 'held' | 'approved' | 'linked';
+
+type LeadershipLink = {
+  id: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  img?: string | null;
+  created_from_user_sync?: boolean | null;
+};
+
+function leadershipInitials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  const letters = `${parts[0]?.[0] || ''}${parts[1]?.[0] || ''}`.toUpperCase();
+  return letters || '?';
+}
+
 export const AdminUsers = () => {
   const { user, sendPasswordReset } = useAuth();
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [pendingUsers, setPendingUsers] = useState<User[]>([]);
   const [pendingCount, setPendingCount] = useState(0);
   const [isLoadingUsers, setIsLoadingUsers] = useState(true);
-  const [filter, setFilter] = useState<'all' | 'pending' | 'held' | 'approved' | 'admins'>('all');
-  const [directoryByUserId, setDirectoryByUserId] = useState<
-    Record<string, { id: string; created_from_user_sync?: boolean | null }>
-  >({});
+  const [filter, setFilter] = useState<UserFilter>('all');
+  const [searchText, setSearchText] = useState('');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
+  const [directoryByUserId, setDirectoryByUserId] = useState<Record<string, LeadershipLink>>({});
   const [linkModalUser, setLinkModalUser] = useState<User | null>(null);
   const [emailModalUser, setEmailModalUser] = useState<User | null>(null);
   const [isRelinking, setIsRelinking] = useState(false);
@@ -107,16 +124,23 @@ export const AdminUsers = () => {
       if (ids.length) {
         const { data: dirRows, error: dirErr } = await supabase
           .from('team_members')
-          .select('id,user_id,created_from_user_sync')
+          .select('id,user_id,name,email,phone,img,created_from_user_sync')
           .in('user_id', ids);
         if (dirErr) {
           console.warn('AdminUsers - directory link lookup failed (run ADD_TEAM_MEMBERS_USER_ID.sql):', dirErr);
           setDirectoryByUserId({});
         } else {
-          const map: Record<string, { id: string; created_from_user_sync?: boolean | null }> = {};
-          (dirRows || []).forEach((r: any) => {
+          const map: Record<string, LeadershipLink> = {};
+          (dirRows || []).forEach((r: LeadershipLink & { user_id?: string | null }) => {
             if (r.user_id) {
-              map[r.user_id] = { id: r.id, created_from_user_sync: r.created_from_user_sync };
+              map[r.user_id] = {
+                id: r.id,
+                name: r.name,
+                email: r.email ?? null,
+                phone: r.phone ?? null,
+                img: r.img ?? null,
+                created_from_user_sync: r.created_from_user_sync,
+              };
             }
           });
           setDirectoryByUserId(map);
@@ -508,9 +532,9 @@ export const AdminUsers = () => {
     [visibleUsers]
   );
 
-  const visibleAdminCount = useMemo(
-    () => visibleUsers.filter((u) => u.role === 'admin' && u.is_approved).length,
-    [visibleUsers]
+  const visibleLinkedCount = useMemo(
+    () => visibleUsers.filter((u) => !!directoryByUserId[u.id]).length,
+    [visibleUsers, directoryByUserId]
   );
 
   const formatDate = (dateString: string | undefined, userTimezone?: string) => {
@@ -598,20 +622,75 @@ export const AdminUsers = () => {
     }
   };
 
-  const filteredUsers = () => {
-    switch (filter) {
-      case 'pending':
-        return visibleUsers.filter((u) => isPendingApproval(u));
-      case 'held':
-        return visibleUsers.filter((u) => isAccessHeld(u));
-      case 'approved':
-        return visibleUsers.filter((u) => u.is_approved);
-      case 'admins':
-        return visibleUsers.filter((u) => u.role === 'admin' && u.is_approved);
-      default:
-        return visibleUsers;
+  const handleUnlinkLeadership = async (target: User) => {
+    if (
+      !window.confirm(
+        `Unlink ${displayName(target) || 'this user'} from Leadership? They will lose roster access until linked again.`
+      )
+    ) {
+      return;
+    }
+    try {
+      const { error } = await supabase.from('team_members').update({ user_id: null }).eq('user_id', target.id);
+      if (error) throw error;
+      logAuditEventSafe({
+        action: 'unlink',
+        category: 'users',
+        entityType: 'users',
+        entityId: target.id,
+        summary: `Removed leadership link for ${target.email}`,
+      });
+      await fetchUsers();
+    } catch (e: unknown) {
+      console.error(e);
+      alert(e instanceof Error ? e.message : 'Failed to unlink');
     }
   };
+
+  const listedUsers = useMemo(() => {
+    let list = visibleUsers;
+    switch (filter) {
+      case 'pending':
+        list = list.filter((u) => isPendingApproval(u));
+        break;
+      case 'held':
+        list = list.filter((u) => isAccessHeld(u));
+        break;
+      case 'approved':
+        list = list.filter((u) => u.is_approved);
+        break;
+      case 'linked':
+        list = list.filter((u) => !!directoryByUserId[u.id]);
+        break;
+      default:
+        break;
+    }
+
+    const q = searchText.trim().toLowerCase();
+    if (q) {
+      list = list.filter((u) => {
+        const link = directoryByUserId[u.id];
+        const haystack = [
+          displayName(u),
+          u.email,
+          u.phone,
+          u.role,
+          link?.name,
+          link?.email,
+          link?.phone,
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+        return haystack.includes(q);
+      });
+    }
+
+    const sorted = [...list].sort((a, b) =>
+      displayName(a).localeCompare(displayName(b), undefined, { sensitivity: 'base' })
+    );
+    return sortDir === 'desc' ? sorted.reverse() : sorted;
+  }, [visibleUsers, filter, searchText, directoryByUserId, sortDir]);
 
   const filenameBase = useMemo(() => {
     const d = new Date();
@@ -621,7 +700,7 @@ export const AdminUsers = () => {
     return `user-management-${yyyy}-${mm}-${dd}`;
   }, []);
 
-  const exportUsers = () => filteredUsers();
+  const exportUsers = () => listedUsers;
   const exportMeta = () => ({ churchName: CHURCH_NAME, exportedAt: new Date() });
   const exportContext = () => ({ directoryByUserId });
 
@@ -641,7 +720,7 @@ export const AdminUsers = () => {
               }
               disabled={isLoadingUsers || exportUsers().length === 0}
               className="bg-white border-2 border-gray-200 text-charcoal px-4 py-2 rounded-[4px] font-bold hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-2 text-sm disabled:opacity-60"
-              title="Download CSV (current tab)"
+              title="Download CSV (current view)"
             >
               <Download size={16} />
               CSV
@@ -653,7 +732,7 @@ export const AdminUsers = () => {
               }
               disabled={isLoadingUsers || exportUsers().length === 0}
               className="bg-white border-2 border-gray-200 text-charcoal px-4 py-2 rounded-[4px] font-bold hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-2 text-sm disabled:opacity-60"
-              title="Download PDF (current tab)"
+              title="Download PDF (current view)"
             >
               <Download size={16} />
               PDF
@@ -670,62 +749,6 @@ export const AdminUsers = () => {
           </div>
         }
       />
-
-      {/* Stats Cards */}
-      {isLoadingUsers ? (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <SkeletonStatsCard key={i} />
-          ))}
-        </div>
-      ) : (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-white border border-gray-200 p-6 rounded-[12px] shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-neutral font-bold">Total Users</p>
-                <p className="text-3xl font-bold text-charcoal mt-2">{visibleUsers.length}</p>
-              </div>
-              <div className="p-3 bg-blue-100 rounded-full">
-                <Users size={24} className="text-blue-600" />
-              </div>
-            </div>
-          </div>
-          <div className="bg-white border border-gray-200 p-6 rounded-[12px] shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-neutral font-bold">Pending Approval</p>
-                <p className="text-3xl font-bold text-gold mt-2">{visiblePendingCount}</p>
-              </div>
-              <div className="p-3 bg-yellow-100 rounded-full">
-                <UserCheck size={24} className="text-yellow-600" />
-              </div>
-            </div>
-          </div>
-          <div className="bg-white border border-gray-200 p-6 rounded-[12px] shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-neutral font-bold">Hold Access</p>
-                <p className="text-3xl font-bold text-orange-600 mt-2">{visibleHeldCount}</p>
-              </div>
-              <div className="p-3 bg-orange-100 rounded-full">
-                <PauseCircle size={24} className="text-orange-600" />
-              </div>
-            </div>
-          </div>
-          <div className="bg-white border border-gray-200 p-6 rounded-[12px] shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-neutral font-bold">Approved Users</p>
-                <p className="text-3xl font-bold text-green-600 mt-2">{visibleApprovedCount}</p>
-              </div>
-              <div className="p-3 bg-green-100 rounded-full">
-                <UserCheck size={24} className="text-green-600" />
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {!isLoadingUsers && directoryNeedsReviewCount > 0 && (
         <div className="rounded-[12px] border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-950 shadow-sm">
@@ -746,70 +769,149 @@ export const AdminUsers = () => {
         </div>
       )}
 
-      {/* Filter Tabs — inline color so tab labels stay readable on light page shell */}
-      <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 border-b border-gray-200">
-        <div className="flex flex-nowrap min-w-0 gap-2">
-        <button
-          type="button"
-          onClick={() => setFilter('all')}
-          style={{ color: filter === 'all' ? '#111111' : '#333333' }}
-          className={`px-4 sm:px-6 py-3 text-sm sm:text-base font-bold transition-opacity whitespace-nowrap ${
-            filter === 'all'
-              ? 'border-b-2 border-gold'
-              : 'opacity-70 hover:opacity-100'
-          }`}
-        >
-          All Users ({visibleUsers.length})
-        </button>
-        <button
-          type="button"
-          onClick={() => setFilter('pending')}
-          style={{ color: filter === 'pending' ? '#111111' : '#333333' }}
-          className={`px-4 sm:px-6 py-3 text-sm sm:text-base font-bold transition-opacity whitespace-nowrap ${
-            filter === 'pending'
-              ? 'border-b-2 border-gold'
-              : 'opacity-70 hover:opacity-100'
-          }`}
-        >
-          Pending ({visiblePendingCount})
-        </button>
-        <button
-          type="button"
-          onClick={() => setFilter('held')}
-          style={{ color: filter === 'held' ? '#111111' : '#333333' }}
-          className={`px-4 sm:px-6 py-3 text-sm sm:text-base font-bold transition-opacity whitespace-nowrap ${
-            filter === 'held'
-              ? 'border-b-2 border-gold'
-              : 'opacity-70 hover:opacity-100'
-          }`}
-        >
-          Hold Access ({visibleHeldCount})
-        </button>
-        <button
-          type="button"
-          onClick={() => setFilter('approved')}
-          style={{ color: filter === 'approved' ? '#111111' : '#333333' }}
-          className={`px-4 sm:px-6 py-3 text-sm sm:text-base font-bold transition-opacity whitespace-nowrap ${
-            filter === 'approved'
-              ? 'border-b-2 border-gold'
-              : 'opacity-70 hover:opacity-100'
-          }`}
-        >
-          Approved ({visibleApprovedCount})
-        </button>
-        <button
-          type="button"
-          onClick={() => setFilter('admins')}
-          style={{ color: filter === 'admins' ? '#111111' : '#333333' }}
-          className={`px-4 sm:px-6 py-3 text-sm sm:text-base font-bold transition-opacity whitespace-nowrap ${
-            filter === 'admins'
-              ? 'border-b-2 border-gold'
-              : 'opacity-70 hover:opacity-100'
-          }`}
-        >
-          Admins ({visibleAdminCount})
-        </button>
+      {isLoadingUsers ? (
+        <div className="grid sm:grid-cols-2 xl:grid-cols-5 gap-4">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <SkeletonStatsCard key={i} />
+          ))}
         </div>
+      ) : (
+        <div className="grid sm:grid-cols-2 xl:grid-cols-5 gap-4">
+          {(
+            [
+              {
+                id: 'all' as UserFilter,
+                label: 'All Users',
+                value: visibleUsers.length,
+                valueClass: 'text-charcoal',
+                iconWrap: 'bg-blue-100',
+                icon: <Users size={24} className="text-blue-600" />,
+              },
+              {
+                id: 'pending' as UserFilter,
+                label: 'Pending Approval',
+                value: visiblePendingCount,
+                valueClass: 'text-gold',
+                iconWrap: 'bg-yellow-100',
+                icon: <UserCheck size={24} className="text-yellow-600" />,
+              },
+              {
+                id: 'held' as UserFilter,
+                label: 'Hold Access',
+                value: visibleHeldCount,
+                valueClass: 'text-orange-600',
+                iconWrap: 'bg-orange-100',
+                icon: <PauseCircle size={24} className="text-orange-600" />,
+              },
+              {
+                id: 'approved' as UserFilter,
+                label: 'Approved Users',
+                value: visibleApprovedCount,
+                valueClass: 'text-green-600',
+                iconWrap: 'bg-green-100',
+                icon: <UserCheck size={24} className="text-green-600" />,
+              },
+              {
+                id: 'linked' as UserFilter,
+                label: 'Linked Account',
+                value: visibleLinkedCount,
+                valueClass: 'text-teal-700',
+                iconWrap: 'bg-teal-100',
+                icon: <Link2 size={24} className="text-teal-700" />,
+              },
+            ] as const
+          ).map((card) => {
+            const active = filter === card.id;
+            return (
+              <button
+                key={card.id}
+                type="button"
+                onClick={() => setFilter(card.id)}
+                className={`text-left bg-white p-6 rounded-[12px] shadow-sm transition-all border ${
+                  active
+                    ? 'border-gold ring-2 ring-gold/30'
+                    : 'border-gray-200 hover:border-gold'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-neutral font-bold">{card.label}</p>
+                    <p className={`text-3xl font-bold mt-2 ${card.valueClass}`}>{card.value}</p>
+                  </div>
+                  <div className={`p-3 rounded-full ${card.iconWrap}`}>{card.icon}</div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      <div className="glass-card bg-white/80 border border-white/60 rounded-[12px] p-4">
+        <div className="flex flex-col lg:flex-row gap-3 lg:items-end">
+          <div className="flex-1">
+            <label className="block text-sm font-bold text-charcoal mb-2">Search</label>
+            <div className="relative">
+              <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral" />
+              <input
+                type="text"
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                className="w-full pl-10 pr-10 py-3 rounded-[6px] border border-gray-200 focus:border-gold focus:outline-none bg-white"
+                placeholder="Search name, email, phone, or linked Leadership…"
+              />
+              {searchText.trim() && (
+                <button
+                  type="button"
+                  onClick={() => setSearchText('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral hover:text-charcoal transition-colors"
+                  title="Clear search"
+                >
+                  <X size={16} />
+                </button>
+              )}
+            </div>
+          </div>
+          <div className="flex flex-col sm:flex-row sm:items-end gap-3">
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-neutral mb-1">Sort by</label>
+              <select
+                value={filter}
+                onChange={(e) => setFilter(e.target.value as UserFilter)}
+                className="px-3 py-2 bg-white border border-gray-200 rounded-[6px] text-sm font-bold text-charcoal hover:border-gold focus:border-gold focus:outline-none transition-colors min-w-[160px]"
+              >
+                <option value="all">All users</option>
+                <option value="pending">Pending</option>
+                <option value="held">Holding</option>
+                <option value="approved">Approved</option>
+                <option value="linked">Linked</option>
+              </select>
+            </div>
+            <button
+              type="button"
+              onClick={() => setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))}
+              className="px-3 py-2 bg-white border border-gray-200 rounded-[6px] text-sm font-bold text-neutral hover:text-charcoal hover:border-gold transition-colors"
+              title={sortDir === 'asc' ? 'Ascending' : 'Descending'}
+            >
+              {sortDir === 'asc' ? 'A→Z' : 'Z→A'}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setFilter('all');
+                setSearchText('');
+                setSortDir('asc');
+              }}
+              className="px-4 py-2 bg-white border border-gray-200 rounded-[6px] text-sm font-bold text-neutral hover:text-charcoal hover:border-gold transition-colors"
+              title="Clear all filters"
+            >
+              Clear
+            </button>
+          </div>
+        </div>
+        <p className="text-xs text-neutral mt-3">
+          Showing <span className="font-bold text-charcoal">{listedUsers.length}</span> of{' '}
+          <span className="font-bold text-charcoal">{visibleUsers.length}</span> users
+        </p>
       </div>
 
       {/* Users List */}
@@ -819,14 +921,14 @@ export const AdminUsers = () => {
             <SkeletonUserCard key={i} />
           ))}
         </div>
-      ) : filteredUsers().length === 0 ? (
+      ) : listedUsers.length === 0 ? (
         <div className="text-center py-12 bg-white rounded-[12px] border border-gray-200">
           <Users size={48} className="text-gray-300 mx-auto mb-4" />
           <p className="text-neutral text-lg font-medium">No users found</p>
         </div>
       ) : (
         <div className="space-y-3">
-          {filteredUsers().map((u) => (
+          {listedUsers.map((u) => (
             <div
               key={u.id}
               className="bg-white border border-gray-200 p-6 rounded-[12px] hover:border-gold transition-all shadow-sm"
@@ -893,6 +995,51 @@ export const AdminUsers = () => {
                           </p>
                         )}
                       </div>
+
+                      {directoryByUserId[u.id] && (
+                        <div className="mt-4 pt-4 border-t border-teal-100">
+                          <p className="text-xs font-bold uppercase tracking-wider text-teal-700 mb-3 inline-flex items-center gap-1.5">
+                            <Link2 size={14} />
+                            Linked Leadership
+                          </p>
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-[10px] border border-teal-200 bg-teal-50/70 p-3">
+                            <div className="flex items-start gap-3 min-w-0">
+                              <div className="w-10 h-10 rounded-full bg-teal-100 text-teal-800 flex items-center justify-center font-bold text-xs tracking-wide flex-shrink-0 overflow-hidden">
+                                {directoryByUserId[u.id].img ? (
+                                  <img
+                                    src={directoryByUserId[u.id].img as string}
+                                    alt={directoryByUserId[u.id].name}
+                                    className="w-full h-full object-cover"
+                                  />
+                                ) : (
+                                  leadershipInitials(directoryByUserId[u.id].name)
+                                )}
+                              </div>
+                              <div className="min-w-0">
+                                <p className="font-bold text-charcoal truncate">{directoryByUserId[u.id].name}</p>
+                                {directoryByUserId[u.id].email && (
+                                  <p className="text-sm text-neutral truncate">
+                                    <span className="font-bold">Email:</span> {directoryByUserId[u.id].email}
+                                  </p>
+                                )}
+                                {directoryByUserId[u.id].phone && (
+                                  <p className="text-sm text-neutral truncate">
+                                    <span className="font-bold">Phone:</span> {directoryByUserId[u.id].phone}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => void handleUnlinkLeadership(u)}
+                              className="px-4 py-2 border border-red-200 text-red-700 rounded-[4px] font-bold hover:bg-red-50 inline-flex items-center justify-center gap-2 text-sm shrink-0"
+                            >
+                              <Unlink size={16} />
+                              Unlink
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -963,6 +1110,20 @@ export const AdminUsers = () => {
                           <Link2 size={16} className="text-blue-600" />
                           Link Leadership
                         </button>
+                        {directoryByUserId[u.id] && (
+                          <button
+                            type="button"
+                            role="menuitem"
+                            className="w-full flex items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-red-600 hover:bg-red-50"
+                            onClick={() => {
+                              setActionsMenuUserId(null);
+                              void handleUnlinkLeadership(u);
+                            }}
+                          >
+                            <Unlink size={16} />
+                            Unlink Leadership
+                          </button>
+                        )}
 
                         <button
                           type="button"
