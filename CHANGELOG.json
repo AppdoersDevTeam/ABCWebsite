@@ -6,6 +6,39 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-1709-008",
+      "date": "2026-09-17",
+      "time": "01:42:22",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-16T13:42:22.762Z",
+      "version": "1.2.1",
+      "type": "fixed",
+      "area": "auth",
+      "title": "User Security loads after missing MFA function",
+      "request": "Fix the User Security left-menu page on the Member Dashboard showing Failed to send a request to the Edge Function and stuck on Loading security settings.",
+      "changes": [
+        "Deployed the JWT-protected mfa Edge Function so User Security can load instead of a FunctionsFetchError from a missing function.",
+        "User Security clears the error and shows Try again if settings fail to load, instead of staying on Loading security settings.",
+        "Live mfa v2 serves status, session_status, and password change. Authenticator, email MFA, and recovery setup still need the full multi-file function deployed from the repo.",
+        "Copied MFA helpers into supabase/functions/mfa/ next to index.ts so a later functions deploy can include them."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "partial": true,
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "35 unit tests and npm run validate. vite build. Typecheck still fails on pre-existing app errors. Live mfa listed ACTIVE v2 via Supabase MCP. Browser E2E tools were not available; refresh User Security after deploy to confirm the red banner is gone."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-1709-007",
       "date": "2026-09-17",
       "time": "01:25:42",

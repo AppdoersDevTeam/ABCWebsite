@@ -83,6 +83,7 @@ export const UserSecurity = () => {
 
   const load = async () => {
     setLoading(true);
+    setError(null);
     try {
       const next = await mfaStatus();
       setStatus(next);
@@ -327,8 +328,15 @@ export const UserSecurity = () => {
         </div>
       )}
 
-      {loading || !status ? (
+      {loading ? (
         <div className="bg-white border border-gray-200 rounded-[12px] p-6 text-neutral">Loading security settings…</div>
+      ) : !status ? (
+        <div className="bg-white border border-gray-200 rounded-[12px] p-6 space-y-4">
+          <p className="text-sm text-neutral">Security settings could not be loaded. You can try again.</p>
+          <GlowingButton type="button" size="sm" onClick={() => { setError(null); void load(); }}>
+            Try again
+          </GlowingButton>
+        </div>
       ) : (
         <div className="space-y-6">
           <section className="bg-white border border-gray-200 rounded-[12px] p-6 space-y-4">

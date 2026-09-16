@@ -7,6 +7,40 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-1709-008 — User Security loads after missing MFA function
+
+**Date:** 2026-09-17
+**Time:** 01:42:22
+**Timezone:** Pacific/Auckland
+**Version:** 1.2.1
+**Type:** Fixed
+**Status:** Partial
+
+**Request**
+
+> Fix the User Security left-menu page on the Member Dashboard showing Failed to send a request to the Edge Function and stuck on Loading security settings.
+
+**Changes**
+
+* Deployed the JWT-protected mfa Edge Function so User Security can load instead of a FunctionsFetchError from a missing function.
+* User Security clears the error and shows Try again if settings fail to load, instead of staying on Loading security settings.
+* Live mfa v2 serves status, session_status, and password change. Authenticator, email MFA, and recovery setup still need the full multi-file function deployed from the repo.
+* Copied MFA helpers into supabase/functions/mfa/ next to index.ts so a later functions deploy can include them.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: 35 unit tests and npm run validate. vite build. Typecheck still fails on pre-existing app errors. Live mfa listed ACTIVE v2 via Supabase MCP. Browser E2E tools were not available; refresh User Security after deploy to confirm the red banner is gone.
+
 ## CHG-2026-1709-007 — Member MFA with authenticator, email codes, and recovery
 
 **Date:** 2026-09-17
