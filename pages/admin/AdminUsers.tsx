@@ -946,23 +946,21 @@ export const AdminUsers = () => {
       ) : (
         <div className="space-y-3">
           {listedUsers.map((u) => {
-            const isAdminAccount = u.role === 'admin' || !!u.is_super_admin;
-            const isLinkedAdmin = isAdminAccount && !!directoryByUserId[u.id];
+            const link = directoryByUserId[u.id];
+            const isLinked = !!link;
+            const completedCardClass =
+              'bg-purple-100 border-2 border-purple-400 p-6 rounded-[12px] shadow-sm transition-all';
+            const plainCardClass =
+              'bg-white border border-gray-200 p-6 rounded-[12px] hover:border-gold transition-all shadow-sm';
             return (
-            <div
-              key={u.id}
-              className={`p-6 rounded-[12px] hover:border-gold transition-all shadow-sm border ${
-                isLinkedAdmin
-                  ? 'bg-purple-50 border-purple-300'
-                  : 'bg-white border-gray-200'
-              }`}
-            >
+            <div key={u.id} className={isLinked ? 'space-y-2' : undefined}>
+            <div className={isLinked ? completedCardClass : plainCardClass}>
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div className="flex-1">
                   <div className="flex items-start gap-4">
                     <div
                       className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm tracking-wide flex-shrink-0 ${
-                        isLinkedAdmin ? 'bg-purple-200 text-purple-800' : 'bg-blue-100 text-blue-700'
+                        isLinked ? 'bg-purple-200 text-purple-900' : 'bg-blue-100 text-blue-700'
                       }`}
                     >
                       {displayInitials(u)}
@@ -977,26 +975,14 @@ export const AdminUsers = () => {
                           </span>
                         )}
                         {u.role === 'admin' && !u.is_super_admin && (
-                          <span
-                            className={`text-xs px-2 py-1 rounded uppercase font-bold flex items-center gap-1 ${
-                              isLinkedAdmin
-                                ? 'bg-purple-200 text-purple-800'
-                                : 'bg-red-100 text-red-700'
-                            }`}
-                          >
+                          <span className="bg-red-100 text-red-700 text-xs px-2 py-1 rounded uppercase font-bold flex items-center gap-1">
                             <Shield size={12} />
                             Admin
                           </span>
                         )}
-                        {directoryByUserId[u.id] ? (
-                          <span
-                            className={`text-xs px-2 py-1 rounded font-bold ${
-                              isLinkedAdmin
-                                ? 'bg-purple-200 text-purple-800'
-                                : 'bg-green-100 text-green-800'
-                            }`}
-                          >
-                            Leadership linked
+                        {isLinked ? (
+                          <span className="bg-purple-200 text-purple-900 text-xs px-2 py-1 rounded font-bold">
+                            Linked
                           </span>
                         ) : (
                           <span className="bg-red-100 text-red-800 text-xs px-2 py-1 rounded font-bold inline-flex items-center gap-1 border border-red-200">
@@ -1035,65 +1021,6 @@ export const AdminUsers = () => {
                           </p>
                         )}
                       </div>
-
-                      {directoryByUserId[u.id] && (
-                        <div className={`mt-4 pt-4 border-t ${isLinkedAdmin ? 'border-purple-200' : 'border-teal-100'}`}>
-                          <p
-                            className={`text-xs font-bold uppercase tracking-wider mb-3 inline-flex items-center gap-1.5 ${
-                              isLinkedAdmin ? 'text-purple-800' : 'text-teal-700'
-                            }`}
-                          >
-                            <Link2 size={14} />
-                            Linked Leadership
-                          </p>
-                          <div
-                            className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-[10px] border p-3 ${
-                              isLinkedAdmin
-                                ? 'border-purple-200 bg-purple-100/70'
-                                : 'border-teal-200 bg-teal-50/70'
-                            }`}
-                          >
-                            <div className="flex items-start gap-3 min-w-0">
-                              <div
-                                className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs tracking-wide flex-shrink-0 overflow-hidden ${
-                                  isLinkedAdmin ? 'bg-purple-200 text-purple-800' : 'bg-teal-100 text-teal-800'
-                                }`}
-                              >
-                                {directoryByUserId[u.id].img ? (
-                                  <img
-                                    src={directoryByUserId[u.id].img as string}
-                                    alt={directoryByUserId[u.id].name}
-                                    className="w-full h-full object-cover"
-                                  />
-                                ) : (
-                                  leadershipInitials(directoryByUserId[u.id].name)
-                                )}
-                              </div>
-                              <div className="min-w-0">
-                                <p className="font-bold text-charcoal truncate">{directoryByUserId[u.id].name}</p>
-                                {directoryByUserId[u.id].email && (
-                                  <p className="text-sm text-neutral truncate">
-                                    <span className="font-bold">Email:</span> {directoryByUserId[u.id].email}
-                                  </p>
-                                )}
-                                {directoryByUserId[u.id].phone && (
-                                  <p className="text-sm text-neutral truncate">
-                                    <span className="font-bold">Phone:</span> {directoryByUserId[u.id].phone}
-                                  </p>
-                                )}
-                              </div>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => void handleUnlinkLeadership(u)}
-                              className="px-4 py-2 border border-red-200 text-red-700 rounded-[4px] font-bold hover:bg-red-50 inline-flex items-center justify-center gap-2 text-sm shrink-0"
-                            >
-                              <Unlink size={16} />
-                              Unlink
-                            </button>
-                          </div>
-                        </div>
-                      )}
                     </div>
                   </div>
                 </div>
@@ -1288,6 +1215,57 @@ export const AdminUsers = () => {
                   </div>
                 </div>
               </div>
+            </div>
+            {link && (
+              <>
+                <div className="flex items-center gap-2 px-2 py-1 text-purple-800 text-xs font-bold uppercase tracking-wider">
+                  <Link2 size={14} />
+                  Linked to Leadership
+                </div>
+                <div className={completedCardClass}>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div className="flex items-start gap-4 min-w-0">
+                      <div className="w-12 h-12 rounded-full bg-purple-200 text-purple-900 flex items-center justify-center font-bold text-sm tracking-wide flex-shrink-0 overflow-hidden">
+                        {link.img ? (
+                          <img src={link.img} alt={link.name} className="w-full h-full object-cover" />
+                        ) : (
+                          leadershipInitials(link.name)
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 mb-2 flex-wrap">
+                          <h3 className="font-bold text-xl text-charcoal">{link.name}</h3>
+                          <span className="bg-purple-200 text-purple-900 text-xs px-2 py-1 rounded font-bold">
+                            Linked
+                          </span>
+                          <span className="bg-purple-200 text-purple-900 text-xs px-2 py-1 rounded uppercase font-bold">
+                            Leadership
+                          </span>
+                        </div>
+                        {link.email && (
+                          <p className="text-sm text-neutral">
+                            <span className="font-bold">Email:</span> {link.email}
+                          </p>
+                        )}
+                        {link.phone && (
+                          <p className="text-sm text-neutral">
+                            <span className="font-bold">Phone:</span> {link.phone}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => void handleUnlinkLeadership(u)}
+                      className="px-4 py-2 bg-white border border-red-200 text-red-700 rounded-[4px] font-bold hover:bg-red-50 inline-flex items-center justify-center gap-2 text-sm shrink-0"
+                    >
+                      <Unlink size={16} />
+                      Unlink
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
             </div>
             );
           })}
