@@ -11,6 +11,7 @@ export type MfaStatus = {
   recoveryGeneratedAt: string | null;
   maskedEmail: string;
   methods: Array<'totp' | 'email'>;
+  hasPasswordProvider?: boolean;
 };
 
 export type MfaLoginChallenge = {

@@ -33,6 +33,7 @@ import {
   writeAudit,
   checkRateLimit,
   isEligibleForSetup,
+  hasPasswordProvider,
   type AdminClient,
   type UserRow,
 } from "./mfaService.ts";
@@ -175,7 +176,11 @@ async function passwordGrant(email: string, password: string, captchaToken: stri
   return { ok: res.ok, status: res.status, body };
 }
 
-function statusPayload(profile: UserRow, settings: Awaited<ReturnType<typeof loadSettings>>) {
+function statusPayload(
+  profile: UserRow,
+  settings: Awaited<ReturnType<typeof loadSettings>>,
+  hasPassword: boolean,
+) {
   const methods = methodsOf(settings);
   return {
     totpEnabled: Boolean(settings?.totp_enabled),
@@ -186,8 +191,17 @@ function statusPayload(profile: UserRow, settings: Awaited<ReturnType<typeof loa
     recoveryGeneratedAt: settings?.recovery_generated_at ?? null,
     maskedEmail: maskEmail(profile.email || ""),
     methods,
-    hasPasswordProvider: true,
+    hasPasswordProvider: hasPassword,
   };
+}
+
+async function lookupHasPasswordProvider(admin: AdminClient, userId: string): Promise<boolean> {
+  const { data, error } = await admin.auth.admin.getUserById(userId);
+  if (error || !data?.user) return true;
+  return hasPasswordProvider({
+    identities: data.user.identities,
+    providers: data.user.app_metadata?.providers,
+  });
 }
 
 async function handleSessionStatus(req: Request, admin: AdminClient) {
@@ -309,12 +323,32 @@ async function handleStatus(req: Request, admin: AdminClient) {
   if ("error" in authz && authz.error) return fromError(authz.error);
   const { caller, profile } = authz as { caller: NonNullable<Awaited<ReturnType<typeof callerFromRequest>>>; profile: UserRow };
   const settings = await loadSettings(admin, caller.user.id);
-  return jsonResponse({ ok: true, ...statusPayload(profile, settings) });
+  const hasPassword = await lookupHasPasswordProvider(admin, caller.user.id);
+  return jsonResponse({ ok: true, ...statusPayload(profile, settings, hasPassword) });
 }
 
 async function confirmPassword(email: string, password: string, captchaToken: string) {
   const grant = await passwordGrant(email, password, captchaToken);
   return grant.ok;
+}
+
+async function confirmReauth(
+  admin: AdminClient,
+  userId: string,
+  email: string,
+  password: string,
+  captchaToken: string,
+): Promise<Response | null> {
+  const hasPassword = await lookupHasPasswordProvider(admin, userId);
+  if (!hasPassword) {
+    if (!captchaToken) return fromError(publicError("Please complete the CAPTCHA before continuing.", 400));
+    return null;
+  }
+  if (!password) return fromError(publicError("Password is required.", 400));
+  if (!(await confirmPassword(email, password, captchaToken))) {
+    return fromError(publicError("Incorrect password.", 401));
+  }
+  return null;
 }
 
 async function handleTotpEnrollStart(req: Request, admin: AdminClient, body: Body) {
@@ -323,10 +357,14 @@ async function handleTotpEnrollStart(req: Request, admin: AdminClient, body: Bod
   const { caller, profile } = authz as { caller: NonNullable<Awaited<ReturnType<typeof callerFromRequest>>>; profile: UserRow };
   const password = String(body.password || "");
   const captchaToken = String(body.captchaToken || "");
-  if (!password) return fromError(publicError("Password is required.", 400));
-  if (!(await confirmPassword(profile.email || caller.user.email || "", password, captchaToken))) {
-    return fromError(publicError("Incorrect password.", 401));
-  }
+  const denied = await confirmReauth(
+    admin,
+    caller.user.id,
+    profile.email || caller.user.email || "",
+    password,
+    captchaToken,
+  );
+  if (denied) return denied;
   const account = profile.email || caller.user.email || profile.id;
   const enroll = await startTotpEnroll(account);
   const settings = await ensureSettings(admin, caller.user.id);
@@ -429,10 +467,14 @@ async function handleDisableMethod(req: Request, admin: AdminClient, body: Body,
   const password = String(body.password || "");
   const code = String(body.code || "");
   const captchaToken = String(body.captchaToken || "");
-  if (!password) return fromError(publicError("Password is required.", 400));
-  if (!(await confirmPassword(profile.email || caller.user.email || "", password, captchaToken))) {
-    return fromError(publicError("Incorrect password.", 401));
-  }
+  const denied = await confirmReauth(
+    admin,
+    caller.user.id,
+    profile.email || caller.user.email || "",
+    password,
+    captchaToken,
+  );
+  if (denied) return denied;
   const settings = await loadSettings(admin, caller.user.id);
   if (!settings) return fromError(publicError("Not found", 404));
 
@@ -502,10 +544,14 @@ async function handleEmailEnableStart(req: Request, admin: AdminClient, body: Bo
   const { caller, profile } = authz as { caller: NonNullable<Awaited<ReturnType<typeof callerFromRequest>>>; profile: UserRow };
   const password = String(body.password || "");
   const captchaToken = String(body.captchaToken || "");
-  if (!password) return fromError(publicError("Password is required.", 400));
-  if (!(await confirmPassword(profile.email || caller.user.email || "", password, captchaToken))) {
-    return fromError(publicError("Incorrect password.", 401));
-  }
+  const denied = await confirmReauth(
+    admin,
+    caller.user.id,
+    profile.email || caller.user.email || "",
+    password,
+    captchaToken,
+  );
+  if (denied) return denied;
   const limit = await checkEmailSendLimits(admin, caller.user.id);
   if (!limit.allowed) return fromError(tooMany());
   await ensureSettings(admin, caller.user.id);
@@ -559,10 +605,14 @@ async function handleEmailDisableStart(req: Request, admin: AdminClient, body: B
   const { caller, profile } = authz as { caller: NonNullable<Awaited<ReturnType<typeof callerFromRequest>>>; profile: UserRow };
   const password = String(body.password || "");
   const captchaToken = String(body.captchaToken || "");
-  if (!password) return fromError(publicError("Password is required.", 400));
-  if (!(await confirmPassword(profile.email || caller.user.email || "", password, captchaToken))) {
-    return fromError(publicError("Incorrect password.", 401));
-  }
+  const denied = await confirmReauth(
+    admin,
+    caller.user.id,
+    profile.email || caller.user.email || "",
+    password,
+    captchaToken,
+  );
+  if (denied) return denied;
   const limit = await checkEmailSendLimits(admin, caller.user.id);
   if (!limit.allowed) return fromError(tooMany());
   const code = await createEmailChallenge(admin, caller.user.id, "disable");
@@ -578,10 +628,14 @@ async function handleRecoveryGenerate(req: Request, admin: AdminClient, body: Bo
   const password = String(body.password || "");
   const captchaToken = String(body.captchaToken || "");
   const code = String(body.code || "");
-  if (!password) return fromError(publicError("Password is required.", 400));
-  if (!(await confirmPassword(profile.email || caller.user.email || "", password, captchaToken))) {
-    return fromError(publicError("Incorrect password.", 401));
-  }
+  const denied = await confirmReauth(
+    admin,
+    caller.user.id,
+    profile.email || caller.user.email || "",
+    password,
+    captchaToken,
+  );
+  if (denied) return denied;
   const settings = await loadSettings(admin, caller.user.id);
   if (!mfaEnabled(settings)) {
     return fromError(publicError("Enable an authentication method first.", 400));
@@ -619,9 +673,14 @@ async function handlePasswordChange(req: Request, admin: AdminClient, body: Body
   if (newPassword.length < 8) {
     return fromError(publicError("Password must be at least 8 characters.", 400));
   }
-  if (!(await confirmPassword(profile.email || caller.user.email || "", currentPassword, captchaToken))) {
-    return fromError(publicError("Incorrect password.", 401));
-  }
+  const denied = await confirmReauth(
+    admin,
+    caller.user.id,
+    profile.email || caller.user.email || "",
+    currentPassword,
+    captchaToken,
+  );
+  if (denied) return denied;
   const { supabaseUrl, serviceRoleKey } = env();
   const service = createClient(supabaseUrl, serviceRoleKey);
   const { error } = await service.auth.admin.updateUserById(caller.user.id, { password: newPassword });

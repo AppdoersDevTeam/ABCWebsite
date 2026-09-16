@@ -22,6 +22,7 @@ import {
   ISSUER_NAME,
   buildOtpauthUri,
   isEligibleForMfaSetup,
+  hasPasswordProvider,
 } from "./mfaCrypto.ts";
 
 export type AdminClient = SupabaseClient;
@@ -422,4 +423,4 @@ export async function startTotpEnroll(accountName: string): Promise<{
   };
 }
 
-export { RATE_LIMITS, maskEmail, ISSUER_NAME };
+export { RATE_LIMITS, maskEmail, ISSUER_NAME, hasPasswordProvider };

@@ -6,6 +6,36 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-1709-012",
+      "date": "2026-09-17",
+      "time": "02:42:04",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-16T14:42:04.879Z",
+      "version": "1.2.5",
+      "type": "fixed",
+      "area": "auth",
+      "title": "Google accounts can set up 2FA without a site password",
+      "request": "When the account was created with Google, 2FA authenticator and email still require a password. Typing the Google account password is rejected as incorrect. Email/password sign-up does not have this issue. Fix it and push to live.",
+      "changes": [
+        "Google-only accounts no longer have to enter a website password to set up authenticator or email 2FA. That Google password is not stored here and cannot be checked.",
+        "Those members see a short explanation and continue from their signed-in session, plus the CAPTCHA. Members who signed up with email and password still confirm with that password."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "36 unit tests and npm run validate. vite build. Typecheck still fails on pre-existing app errors. Live mfa function redeployed after push so Google-only setup takes effect. Browser E2E tools were not available."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-1709-011",
       "date": "2026-09-17",
       "time": "02:32:04",

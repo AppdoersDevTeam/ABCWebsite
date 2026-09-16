@@ -7,6 +7,37 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-1709-012 — Google accounts can set up 2FA without a site password
+
+**Date:** 2026-09-17
+**Time:** 02:42:04
+**Timezone:** Pacific/Auckland
+**Version:** 1.2.5
+**Type:** Fixed
+
+**Request**
+
+> When the account was created with Google, 2FA authenticator and email still require a password. Typing the Google account password is rejected as incorrect. Email/password sign-up does not have this issue. Fix it and push to live.
+
+**Changes**
+
+* Google-only accounts no longer have to enter a website password to set up authenticator or email 2FA. That Google password is not stored here and cannot be checked.
+* Those members see a short explanation and continue from their signed-in session, plus the CAPTCHA. Members who signed up with email and password still confirm with that password.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: 36 unit tests and npm run validate. vite build. Typecheck still fails on pre-existing app errors. Live mfa function redeployed after push so Google-only setup takes effect. Browser E2E tools were not available.
+
 ## CHG-2026-1709-011 — Show-password button on every password field
 
 **Date:** 2026-09-17

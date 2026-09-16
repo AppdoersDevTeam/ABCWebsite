@@ -370,6 +370,17 @@ export function passwordLoginOutcome(mfaOn: boolean): "complete_login" | "mfa_ch
   return mfaOn ? "mfa_challenge" : "complete_login";
 }
 
+export function hasPasswordProvider(params: {
+  identities?: Array<{ provider?: string | null }> | null;
+  providers?: unknown;
+}): boolean {
+  const providers = params.providers;
+  if (Array.isArray(providers) && providers.some((p) => String(p).toLowerCase() === "email")) {
+    return true;
+  }
+  return (params.identities || []).some((id) => String(id.provider || "").toLowerCase() === "email");
+}
+
 export function availableLoginMethods(totpEnabled: boolean, emailEnabled: boolean): Array<"totp" | "email"> {
   const methods: Array<"totp" | "email"> = [];
   if (totpEnabled) methods.push("totp");

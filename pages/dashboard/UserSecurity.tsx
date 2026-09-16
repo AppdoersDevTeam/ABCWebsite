@@ -53,6 +53,14 @@ function DialogError({ message }: { message: string | null }) {
   );
 }
 
+function GoogleAccountNote() {
+  return (
+    <p className="text-sm text-neutral">
+      You signed in with Google, so this website does not have a separate password. Your Google account password will not work here. Continue while signed in to confirm it is you.
+    </p>
+  );
+}
+
 export const UserSecurity = () => {
   const [status, setStatus] = useState<MfaStatus | null>(null);
   const [loading, setLoading] = useState(true);
@@ -71,6 +79,7 @@ export const UserSecurity = () => {
   const [recoveryWarning, setRecoveryWarning] = useState('');
   const [emailSent, setEmailSent] = useState(false);
   const turnstileRef = useRef<TurnstileFieldHandle>(null);
+  const needsSitePassword = status?.hasPasswordProvider !== false;
 
   const resetCaptcha = () => {
     setCaptchaToken(null);
@@ -359,11 +368,15 @@ export const UserSecurity = () => {
               </div>
               <div>
                 <h2 className="text-xl font-bold text-charcoal">Password</h2>
-                <p className="text-sm text-neutral">Change the password used to sign in with email.</p>
+                <p className="text-sm text-neutral">
+                  {needsSitePassword
+                    ? 'Change the password used to sign in with email.'
+                    : 'Optionally set a password for this site. Google sign-in will still work.'}
+                </p>
               </div>
             </div>
             <GlowingButton type="button" size="sm" onClick={() => { setError(null); setDialog('password'); }}>
-              Change password
+              {needsSitePassword ? 'Change password' : 'Set a password'}
             </GlowingButton>
           </section>
 
@@ -453,13 +466,17 @@ export const UserSecurity = () => {
         </div>
       )}
 
-      <Modal isOpen={dialog === 'password'} onClose={closeDialog} title="Change password">
+      <Modal isOpen={dialog === 'password'} onClose={closeDialog} title={needsSitePassword ? 'Change password' : 'Set a password'}>
         <form className="space-y-4" onSubmit={handlePasswordChange}>
           <DialogError message={error} />
-          <label className="block text-sm font-bold text-charcoal">
-            Current password
-            <PasswordInput wrapperClassName="mt-2" className="w-full border border-gray-300 rounded-[4px] px-4 py-3" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" />
-          </label>
+          {needsSitePassword ? (
+            <label className="block text-sm font-bold text-charcoal">
+              Current password
+              <PasswordInput wrapperClassName="mt-2" className="w-full border border-gray-300 rounded-[4px] px-4 py-3" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" />
+            </label>
+          ) : (
+            <GoogleAccountNote />
+          )}
           <label className="block text-sm font-bold text-charcoal">
             New password
             <PasswordInput wrapperClassName="mt-2" className="w-full border border-gray-300 rounded-[4px] px-4 py-3" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required minLength={8} autoComplete="new-password" />
@@ -469,7 +486,7 @@ export const UserSecurity = () => {
             <PasswordInput wrapperClassName="mt-2" className="w-full border border-gray-300 rounded-[4px] px-4 py-3" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required minLength={8} autoComplete="new-password" />
           </label>
           <TurnstileField ref={turnstileRef} onToken={setCaptchaToken} onExpire={() => setCaptchaToken(null)} />
-          <GlowingButton type="submit" fullWidth disabled={busy || !captchaToken}>{busy ? 'Saving...' : 'Update password'}</GlowingButton>
+          <GlowingButton type="submit" fullWidth disabled={busy || !captchaToken}>{busy ? 'Saving...' : needsSitePassword ? 'Update password' : 'Set password'}</GlowingButton>
         </form>
       </Modal>
 
@@ -477,11 +494,19 @@ export const UserSecurity = () => {
         {!secret ? (
           <form className="space-y-4" onSubmit={startTotp}>
             <DialogError message={error} />
-            <p className="text-sm text-neutral">Confirm your password, then scan the QR code with your authenticator app. The method is not enabled until you enter a valid code.</p>
-            <label className="block text-sm font-bold text-charcoal">
-              Current password
-              <PasswordInput wrapperClassName="mt-2" className="w-full border border-gray-300 rounded-[4px] px-4 py-3" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" />
-            </label>
+            <p className="text-sm text-neutral">
+              {needsSitePassword
+                ? 'Confirm your password, then scan the QR code with your authenticator app. The method is not enabled until you enter a valid code.'
+                : 'Scan the QR code with your authenticator app after you continue. The method is not enabled until you enter a valid code.'}
+            </p>
+            {needsSitePassword ? (
+              <label className="block text-sm font-bold text-charcoal">
+                Current password
+                <PasswordInput wrapperClassName="mt-2" className="w-full border border-gray-300 rounded-[4px] px-4 py-3" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" />
+              </label>
+            ) : (
+              <GoogleAccountNote />
+            )}
             <TurnstileField ref={turnstileRef} onToken={setCaptchaToken} onExpire={() => setCaptchaToken(null)} />
             <GlowingButton type="submit" fullWidth disabled={busy || !captchaToken}>{busy ? 'Preparing...' : 'Continue'}</GlowingButton>
           </form>
@@ -507,11 +532,19 @@ export const UserSecurity = () => {
       <Modal isOpen={dialog === 'totp-disable'} onClose={closeDialog} title="Disable authenticator app">
         <form className="space-y-4" onSubmit={disableTotp}>
           <DialogError message={error} />
-          <p className="text-sm text-neutral">Confirm your password and a current authenticator code to disable this method.</p>
-          <label className="block text-sm font-bold text-charcoal">
-            Current password
-            <PasswordInput wrapperClassName="mt-2" className="w-full border border-gray-300 rounded-[4px] px-4 py-3" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" />
-          </label>
+          <p className="text-sm text-neutral">
+            {needsSitePassword
+              ? 'Confirm your password and a current authenticator code to disable this method.'
+              : 'Enter a current authenticator code to disable this method.'}
+          </p>
+          {needsSitePassword ? (
+            <label className="block text-sm font-bold text-charcoal">
+              Current password
+              <PasswordInput wrapperClassName="mt-2" className="w-full border border-gray-300 rounded-[4px] px-4 py-3" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" />
+            </label>
+          ) : (
+            <GoogleAccountNote />
+          )}
           <label className="block text-sm font-bold text-charcoal">
             Authenticator code
             <input inputMode="numeric" autoComplete="one-time-code" maxLength={6} className="mt-2 w-full border border-gray-300 rounded-[4px] px-4 py-3 tracking-[0.4em] text-center" value={code} onChange={(e) => setCode(e.target.value)} required />
@@ -526,10 +559,14 @@ export const UserSecurity = () => {
           <form className="space-y-4" onSubmit={startEmail}>
             <DialogError message={error} />
             <p className="text-sm text-neutral">A one-time code will be sent to {status?.maskedEmail}. Email MFA is not enabled until that code is verified.</p>
-            <label className="block text-sm font-bold text-charcoal">
-              Current password
-              <PasswordInput wrapperClassName="mt-2" className="w-full border border-gray-300 rounded-[4px] px-4 py-3" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" />
-            </label>
+            {needsSitePassword ? (
+              <label className="block text-sm font-bold text-charcoal">
+                Current password
+                <PasswordInput wrapperClassName="mt-2" className="w-full border border-gray-300 rounded-[4px] px-4 py-3" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" />
+              </label>
+            ) : (
+              <GoogleAccountNote />
+            )}
             <TurnstileField ref={turnstileRef} onToken={setCaptchaToken} onExpire={() => setCaptchaToken(null)} />
             <GlowingButton type="submit" fullWidth disabled={busy || !captchaToken}>{busy ? 'Sending...' : 'Send code'}</GlowingButton>
           </form>
@@ -550,11 +587,19 @@ export const UserSecurity = () => {
         {!emailSent && !status?.totpEnabled ? (
           <form className="space-y-4" onSubmit={startEmailDisable}>
             <DialogError message={error} />
-            <p className="text-sm text-neutral">Confirm your password. We will email a code before disabling this method.</p>
-            <label className="block text-sm font-bold text-charcoal">
-              Current password
-              <PasswordInput wrapperClassName="mt-2" className="w-full border border-gray-300 rounded-[4px] px-4 py-3" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" />
-            </label>
+            <p className="text-sm text-neutral">
+              {needsSitePassword
+                ? 'Confirm your password. We will email a code before disabling this method.'
+                : 'We will email a code before disabling this method.'}
+            </p>
+            {needsSitePassword ? (
+              <label className="block text-sm font-bold text-charcoal">
+                Current password
+                <PasswordInput wrapperClassName="mt-2" className="w-full border border-gray-300 rounded-[4px] px-4 py-3" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" />
+              </label>
+            ) : (
+              <GoogleAccountNote />
+            )}
             <TurnstileField ref={turnstileRef} onToken={setCaptchaToken} onExpire={() => setCaptchaToken(null)} />
             <GlowingButton type="submit" fullWidth disabled={busy || !captchaToken}>{busy ? 'Sending...' : 'Send code'}</GlowingButton>
           </form>
@@ -563,13 +608,19 @@ export const UserSecurity = () => {
             <DialogError message={error} />
             <p className="text-sm text-neutral">
               {status?.totpEnabled
-                ? 'Confirm your password and a current authenticator code.'
+                ? needsSitePassword
+                  ? 'Confirm your password and a current authenticator code.'
+                  : 'Enter a current authenticator code.'
                 : `Enter the code sent to ${status?.maskedEmail}.`}
             </p>
-            <label className="block text-sm font-bold text-charcoal">
-              Current password
-              <PasswordInput wrapperClassName="mt-2" className="w-full border border-gray-300 rounded-[4px] px-4 py-3" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" />
-            </label>
+            {needsSitePassword ? (
+              <label className="block text-sm font-bold text-charcoal">
+                Current password
+                <PasswordInput wrapperClassName="mt-2" className="w-full border border-gray-300 rounded-[4px] px-4 py-3" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" />
+              </label>
+            ) : (
+              <GoogleAccountNote />
+            )}
             <label className="block text-sm font-bold text-charcoal">
               {status?.totpEnabled ? 'Authenticator code' : 'Email code'}
               <input inputMode="numeric" autoComplete="one-time-code" maxLength={6} className="mt-2 w-full border border-gray-300 rounded-[4px] px-4 py-3 tracking-[0.4em] text-center" value={code} onChange={(e) => setCode(e.target.value)} required />
@@ -587,11 +638,19 @@ export const UserSecurity = () => {
       <Modal isOpen={dialog === 'recovery'} onClose={closeDialog} title="Generate new recovery codes">
         <form className="space-y-4" onSubmit={generateRecovery}>
           <DialogError message={error} />
-          <p className="text-sm text-neutral">This replaces all previous recovery codes. Confirm your password and a current MFA code.</p>
-          <label className="block text-sm font-bold text-charcoal">
-            Current password
-            <PasswordInput wrapperClassName="mt-2" className="w-full border border-gray-300 rounded-[4px] px-4 py-3" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" />
-          </label>
+          <p className="text-sm text-neutral">
+            {needsSitePassword
+              ? 'This replaces all previous recovery codes. Confirm your password and a current MFA code.'
+              : 'This replaces all previous recovery codes. Confirm with a current MFA code.'}
+          </p>
+          {needsSitePassword ? (
+            <label className="block text-sm font-bold text-charcoal">
+              Current password
+              <PasswordInput wrapperClassName="mt-2" className="w-full border border-gray-300 rounded-[4px] px-4 py-3" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" />
+            </label>
+          ) : (
+            <GoogleAccountNote />
+          )}
           <label className="block text-sm font-bold text-charcoal">
             Current verification code
             <input inputMode="text" autoComplete="one-time-code" className="mt-2 w-full border border-gray-300 rounded-[4px] px-4 py-3 tracking-[0.3em] text-center" value={code} onChange={(e) => setCode(e.target.value)} required />

@@ -29,6 +29,7 @@ import {
   decideEmailChallenge,
   isEligibleForMfaSetup,
   passwordLoginOutcome,
+  hasPasswordProvider,
   recoveryCodeReusable,
   setupAuthorization,
   EMAIL_CODE_TTL_MS,
@@ -310,4 +311,16 @@ test('recovery and setup verification share brute-force locks', () => {
     setup = evaluateRateLimit(setup, RATE_LIMITS.setupVerify, 20_000).next;
   }
   assert.equal(evaluateRateLimit(setup, RATE_LIMITS.setupVerify, 20_000).allowed, false);
+});
+
+test('Google-only accounts do not have a site password; email identities do', () => {
+  assert.equal(hasPasswordProvider({ identities: [{ provider: 'google' }], providers: ['google'] }), false);
+  assert.equal(hasPasswordProvider({ identities: [{ provider: 'email' }], providers: ['email'] }), true);
+  assert.equal(
+    hasPasswordProvider({
+      identities: [{ provider: 'google' }, { provider: 'email' }],
+      providers: ['google', 'email'],
+    }),
+    true
+  );
 });
