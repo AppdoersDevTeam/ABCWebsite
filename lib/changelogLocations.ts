@@ -2,7 +2,7 @@ export const INTERNAL_APP_LOCATION = 'Internal App';
 
 /** Left-menu names (admin + member) used as Changelog location headings. */
 export const MENU_LOCATION_LABELS = [
-  'Overview',
+  'Overviews',
   'Annual Calendar',
   'User Management',
   'Prayers',
@@ -27,7 +27,7 @@ const PATH_RULES: { test: RegExp; label: MenuLocationLabel }[] = [
   { test: /pages\/admin\/AdminUsers|LinkDirectoryUserModal|exportAdminUsers|CreateUserProfile|directoryUserLink/, label: 'User Management' },
   { test: /pages\/admin\/AdminTeam|pages\/dashboard\/Team|exportDirectoryPeople|teamMemberUtils/, label: 'Leadership' },
   { test: /pages\/admin\/AdminChangelog|lib\/changelog|lib\/githubChangelog|lib\/exportChangelog|CHANGELOG\.(json|md)|scripts\/changelog/, label: 'Changelog' },
-  { test: /pages\/admin\/AdminOverview|pages\/dashboard\/DashboardHome|pages\/admin\/AdminEmails/, label: 'Overview' },
+  { test: /pages\/admin\/AdminOverview|pages\/dashboard\/DashboardHome|pages\/admin\/AdminEmails/, label: 'Overviews' },
   { test: /AnnualCalendar|calendarItems|pages\/shared\/AnnualCalendar|components\/calendar\//, label: 'Annual Calendar' },
   { test: /PrayerWall|AdminPrayer|pages\/.*[Pp]rayer/, label: 'Prayers' },
   { test: /Newsletter/, label: 'Newsletters' },
@@ -101,7 +101,7 @@ export function locationFromArea(area: string, hint = ''): MenuLocationLabel {
   if (/\bhelp pages?\b/.test(h) || h.includes('help page')) addHit('Help');
   if (h.includes('system log') || h.includes('audit trail')) addHit('Logs');
   if (h.includes('system setup') || h.includes('adminsettings')) addHit('System Setup');
-  if (h.includes('overview') || h.includes('verse of the day')) addHit('Overview');
+  if (h.includes('overview') || h.includes('verse of the day')) addHit('Overviews');
   if (h.includes('user management') || h.includes('pending user') || h.includes('hold access')) {
     addHit('User Management');
   }
@@ -115,7 +115,7 @@ export function locationFromArea(area: string, hint = ''): MenuLocationLabel {
   if (h.includes('roster')) addHit('Rosters (Beta)');
 
   const fromArea = locationFromAreaCode(area);
-  const adminMenus: MenuLocationLabel[] = ['Changelog', 'Logs', 'System Setup', 'Help', 'Overview'];
+  const adminMenus: MenuLocationLabel[] = ['Changelog', 'Logs', 'System Setup', 'Help', 'Overviews'];
   if (hintHits.length === 1) return hintHits[0];
   if (hintHits.length > 1) {
     const adminHit = adminMenus.find((label) => hintHits.includes(label));

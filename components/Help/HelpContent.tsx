@@ -42,7 +42,7 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode, isSuperAdmin = f
       <div className="grid gap-6">
         {isAdmin ? (
           <>
-            <Section title="Overview">
+            <Section title="Overviews">
               <li>Your landing page after signing in as an admin: quick snapshot and shortcuts into the main tools.</li>
               <li>Use it to orient new admins before they open User Management or Leadership.</li>
             </Section>
@@ -150,7 +150,7 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode, isSuperAdmin = f
           </>
         ) : (
           <>
-            <Section title="Overview">
+            <Section title="Overviews">
               <li>Your home inside the member area: welcome content and pointers to the rest of the portal.</li>
               <li>Open this when you first log in to see what is new or highlighted for members.</li>
             </Section>

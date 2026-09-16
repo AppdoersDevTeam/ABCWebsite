@@ -7,6 +7,69 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-1709-003 — Rename left-menu Overview to Overviews
+
+**Date:** 2026-09-17
+**Time:** 00:32:27
+**Timezone:** Pacific/Auckland
+**Version:** 1.1.2
+**Type:** Changed
+
+**Request**
+
+> Change the Overview from left side menu to Overviews. Push to live.
+
+**Changes**
+
+* Renamed the first left-menu item from Overview to Overviews on the admin and member sidebars.
+* Matched Help page section titles, the Emails sent back link, and Changelog location headings to the new menu name.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: not run or failed
+* Notes: Governance tests and changelog validation. Browser tools were not available; labels were checked in AdminLayout, DashboardLayout, Help, and Emails sent.
+
+## CHG-2026-1709-002 — Push to live one-command GitHub deploy
+
+**Date:** 2026-09-17
+**Time:** 00:26:48
+**Timezone:** Pacific/Auckland
+**Version:** 1.1.1
+**Type:** Added
+
+**Request**
+
+> When deploying live to GitHub, run git add ., git commit with updates changelogs DDMMYYYY, and git push -u origin main automatically from chat when the user writes Push to live, instead of approving many separate terminal commands.
+
+**Changes**
+
+* Added npm run push:live, which stages all tracked and untracked files (respecting .gitignore), commits with updates changelogs DDMMYYYY in Pacific/Auckland if there are changes, then pushes to origin main.
+* Typing Push to live, push live, deploy live to GitHub, or go live in Cursor chat now runs that single command via a project rule and skill.
+* This workspace allowlists git add/commit/push and npm so the Agent can run the deploy without a prompt for each command. .env stays untracked.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: not run or failed
+* Notes: Governance tests and changelog validation. Did not run git add/commit/push as part of this change; say Push to live to send it to GitHub.
+
 ## CHG-2026-1709-001 — Overview email totals with day, week, and month detail
 
 **Date:** 2026-09-17

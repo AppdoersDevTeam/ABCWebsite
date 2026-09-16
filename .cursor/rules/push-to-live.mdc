@@ -1,0 +1,14 @@
+---
+description: When the user says Push to live, stage, commit, and push to GitHub main in one go.
+alwaysApply: true
+---
+
+# Push to live
+
+When the user says **Push to live**, **push live**, **deploy live to GitHub**, or **go live**:
+
+1. Run `npm run push:live` immediately. Do not ask for confirmation. Do not run extra changelog, validate, or other git commands first.
+2. That script is `git add .`, then `git commit -m "updates changelogs DDMMYYYY"` (Auckland day/month/year), then `git push -u origin main`.
+3. Report the commit result and whether the push succeeded.
+
+Do not use this flow unless the user used one of those phrases.

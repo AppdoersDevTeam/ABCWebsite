@@ -36,7 +36,7 @@ export const DashboardLayout = () => {
   };
 
   const navItems = [
-    { label: 'Overview', path: '/dashboard', icon: <Home size={20} />, iconClass: DASHBOARD_NAV_ICON.overview },
+    { label: 'Overviews', path: '/dashboard', icon: <Home size={20} />, iconClass: DASHBOARD_NAV_ICON.overview },
     { label: 'Annual Calendar', path: '/dashboard/calendar', icon: <CalendarDays size={20} />, iconClass: DASHBOARD_NAV_ICON.calendar },
     { label: 'Prayers', path: '/dashboard/prayer', icon: <HandHeart size={20} />, iconClass: DASHBOARD_NAV_ICON.prayers },
     { label: 'Newsletters', path: '/dashboard/newsletter', icon: <Newspaper size={20} />, iconClass: DASHBOARD_NAV_ICON.newsletters },

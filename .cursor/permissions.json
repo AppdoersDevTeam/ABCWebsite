@@ -1,0 +1,18 @@
+{
+  "terminalAllowlist": [
+    "git add",
+    "git commit",
+    "git push",
+    "git status",
+    "git diff",
+    "git log",
+    "npm",
+    "npx",
+    "node"
+  ],
+  "autoRun": {
+    "allow_instructions": [
+      "Allow npm run push:live and the git add, git commit, and git push steps it uses when the user asked to Push to live."
+    ]
+  }
+}
