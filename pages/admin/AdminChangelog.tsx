@@ -234,7 +234,7 @@ export const AdminChangelog = () => {
     <div className="space-y-6 pb-12" style={{ color: TEXT_PRIMARY }}>
       <AdminPageHeader
         title="Changelog"
-        subtitle="Each change has a Change ID, a short description, and bullet points of what was done."
+        subtitle="Each change has a Change ID, the left-menu location it affected, and detailed notes of what was done."
         icon={<History size={28} className="text-gold" />}
         rightSlot={
           <div className="flex gap-2 flex-wrap justify-end">

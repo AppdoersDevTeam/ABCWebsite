@@ -7,6 +7,40 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-1609-009 — Changelog location headings and detailed What-changed notes
+
+**Date:** 2026-09-16
+**Time:** 23:36:59
+**Timezone:** Pacific/Auckland
+**Version:** 1.0.0
+**Type:** Changed
+
+**Request**
+
+> On the Changelog subtitle, do not show Website Update. Show the left-menu location where the change happened, or Internal App when it is not a menu page. Write detailed What changed bullets from the Cursor update notes, split for readability, and apply this to every Changelog register.
+
+**Changes**
+
+* Replaced generic Website Update headings with the admin or member left-menu category for that change (Overview, Annual Calendar, User Management, Prayers, Newsletters, Devotionals, Sermons, Leadership, Events, Rosters (Beta), System Setup, Help, Logs, or Changelog).
+* When a change is not on a left-menu page, the heading now reads Internal App.
+* Applied the same location heading to every curated CHANGELOG.json register and every GitHub-sourced register.
+* What changed bullets now prefer the commit or request notes, then list the screens and files that were added, updated, or removed, with line counts when GitHub provides them.
+* Long combined notes are split into shorter bullets so each register is easier to read.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: not run or failed
+* Notes: Changelog helper tests plus changelog validation. Location headings are derived at display time from area, title, and changed files.
+
 ## CHG-2026-1609-008 — Professional Changelog register with day/month Change IDs
 
 **Date:** 2026-09-16

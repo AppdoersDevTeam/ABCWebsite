@@ -1,6 +1,7 @@
 /** Product changelog shown only to Super Admins in the admin dashboard. */
 
 import changelogDoc from '../CHANGELOG.json';
+import { locationForDisplay } from './changelogLocations';
 
 export type ChangelogKind = 'added' | 'changed' | 'fixed';
 
@@ -62,28 +63,63 @@ function toProductKind(type: string): ChangelogKind {
   return 'changed';
 }
 
-function sanitizeDetails(details?: string[]): string[] | undefined {
-  if (!details?.length) return undefined;
-  const cleaned = details
-    .map((item) => item.trim())
-    .filter((item) => item && !/^github:/i.test(item) && !/github\.com\//i.test(item));
-  return cleaned.length ? cleaned : undefined;
+function finishDetailSentence(text: string): string {
+  const trimmed = text.replace(/^[-*•]\s*/, '').replace(/\s+/g, ' ').trim();
+  if (!trimmed) return '';
+  return /[.!?]$/.test(trimmed) ? trimmed : `${trimmed}.`;
+}
+
+function splitReadableBullets(text: string): string[] {
+  const trimmed = finishDetailSentence(text);
+  if (!trimmed) return [];
+  if (trimmed.length > 140 && /;\s+/.test(trimmed)) {
+    return trimmed.split(/;\s+/).flatMap(splitReadableBullets);
+  }
+  if (trimmed.length > 220) {
+    const sentences = trimmed.match(/[^.!?]+[.!?]+|[^.!?]+$/g) ?? [trimmed];
+    if (sentences.length > 1) return sentences.flatMap((part) => splitReadableBullets(part));
+  }
+  return [trimmed];
+}
+
+function expandChangelogDetails(details?: string[], fallbacks: string[] = []): string[] | undefined {
+  const source = [...(details ?? []), ...fallbacks];
+  const seen = new Set<string>();
+  const expanded: string[] = [];
+  for (const raw of source) {
+    if (!raw?.trim() || /^github:/i.test(raw) || /github\.com\//i.test(raw)) continue;
+    for (const part of splitReadableBullets(raw)) {
+      const key = part.toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      expanded.push(part);
+      if (expanded.length >= 14) return expanded;
+    }
+  }
+  return expanded.length ? expanded : undefined;
 }
 
 function toProductEntry(entry: ChangelogJsonEntry): ChangelogEntry {
   const request = entry.request?.trim() ?? '';
   const changes = Array.isArray(entry.changes) ? entry.changes.filter(Boolean) : [];
-  const details = sanitizeDetails(changes.filter((change) => change.trim() !== request));
+  const area = isChangelogArea(entry.area) ? entry.area : 'system';
+  const heading = locationForDisplay({
+    area,
+    heading: entry.title,
+    summary: request,
+    title: entry.title,
+    id: entry.id,
+  });
   return {
     id: entry.id,
     changedAt: entry.changedAt || `${entry.date}T${entry.time}`,
     changedBy: entry.changedBy || 'Unknown',
     kind: toProductKind(entry.type),
-    area: isChangelogArea(entry.area) ? entry.area : 'system',
+    area,
     title: `[${entry.id}]`,
-    heading: entry.title,
+    heading,
     summary: request || entry.title,
-    details,
+    details: expandChangelogDetails(changes.length ? changes : [request || entry.title]),
   };
 }
 
@@ -286,15 +322,19 @@ export function presentChangelogEntries(entries: ChangelogEntry[]): ChangelogEnt
       used.set(dayKey, next);
       id = `CHG-${year}-${ddmm}-${String(next).padStart(3, '0')}`;
     }
-    const heading =
-      entry.heading?.trim() ||
-      (entry.title.startsWith('[CHG-') ? entry.summary : entry.title);
+    const heading = locationForDisplay({
+      area: entry.area,
+      heading: entry.heading,
+      summary: entry.summary,
+      title: entry.title,
+      id,
+    });
     return {
       ...entry,
       id,
       title: `[${id}]`,
       heading,
-      details: sanitizeDetails(entry.details),
+      details: expandChangelogDetails(entry.details),
     };
   });
 

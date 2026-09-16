@@ -6,6 +6,39 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-1609-009",
+      "date": "2026-09-16",
+      "time": "23:36:59",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-16T11:36:59.622Z",
+      "version": "1.0.0",
+      "type": "changed",
+      "area": "admin",
+      "title": "Changelog location headings and detailed What-changed notes",
+      "request": "On the Changelog subtitle, do not show Website Update. Show the left-menu location where the change happened, or Internal App when it is not a menu page. Write detailed What changed bullets from the Cursor update notes, split for readability, and apply this to every Changelog register.",
+      "changes": [
+        "Replaced generic Website Update headings with the admin or member left-menu category for that change (Overview, Annual Calendar, User Management, Prayers, Newsletters, Devotionals, Sermons, Leadership, Events, Rosters (Beta), System Setup, Help, Logs, or Changelog).",
+        "When a change is not on a left-menu page, the heading now reads Internal App.",
+        "Applied the same location heading to every curated CHANGELOG.json register and every GitHub-sourced register.",
+        "What changed bullets now prefer the commit or request notes, then list the screens and files that were added, updated, or removed, with line counts when GitHub provides them.",
+        "Long combined notes are split into shorter bullets so each register is easier to read."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Changelog helper tests plus changelog validation. Location headings are derived at display time from area, title, and changed files."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-1609-008",
       "date": "2026-09-16",
       "time": "22:59:10",

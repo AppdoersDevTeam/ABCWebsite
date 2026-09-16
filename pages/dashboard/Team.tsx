@@ -78,21 +78,23 @@ export const Team = () => {
                 </div>
                 <div className="min-w-0 flex-1">
                   <h4 className="font-bold text-lg text-charcoal truncate">{member.name}</h4>
-                  <p className="text-xs text-gold font-bold uppercase tracking-wider truncate">
-                    {getDisplayRole(member)}
-                  </p>
-                </div>
-                <div className="flex flex-col items-center justify-center gap-1 flex-shrink-0 text-neutral">
-                  {member.email && (
-                    <a href={`mailto:${member.email}`} className="hover:text-gold transition-colors" title={member.email}>
-                      <Mail size={18} />
-                    </a>
-                  )}
-                  {member.phone && (
-                    <a href={`tel:${member.phone}`} className="hover:text-gold transition-colors" title={member.phone}>
-                      <Phone size={18} />
-                    </a>
-                  )}
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="flex flex-col items-center justify-center gap-0.5 flex-shrink-0 text-neutral">
+                      {member.email && (
+                        <a href={`mailto:${member.email}`} className="hover:text-gold transition-colors" title={member.email}>
+                          <Mail size={16} />
+                        </a>
+                      )}
+                      {member.phone && (
+                        <a href={`tel:${member.phone}`} className="hover:text-gold transition-colors" title={member.phone}>
+                          <Phone size={16} />
+                        </a>
+                      )}
+                    </div>
+                    <p className="text-xs text-gold font-bold uppercase tracking-wider truncate">
+                      {getDisplayRole(member)}
+                    </p>
+                  </div>
                 </div>
               </div>
             </VibrantCard>
