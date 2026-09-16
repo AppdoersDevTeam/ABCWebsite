@@ -6,6 +6,38 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-1709-009",
+      "date": "2026-09-17",
+      "time": "02:03:01",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-16T14:03:01.140Z",
+      "version": "1.2.2",
+      "type": "fixed",
+      "area": "auth",
+      "title": "Authenticator QR and email MFA setup complete after password check",
+      "request": "After Setup Two-Factor Authentication, the password and human verification succeed but the Google Authenticator QR never appears and the code field is not shown. Email verification also never sends a code or shows the entry screen. Fix it and push to live.",
+      "changes": [
+        "Live mfa now serves authenticator enroll/verify/disable, email enable/disable, recovery codes, and password change, so Continue can show the QR code and Send code can email a verification code.",
+        "Live mfa-login now serves the full login challenge path so MFA cannot be skipped after a method is enabled.",
+        "User Security shows setup errors inside the dialog, and authenticator setup only advances when the server returns a secret and otpauth URI."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "partial": true,
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "35 unit tests and npm run validate. vite build. Typecheck still fails on pre-existing app errors. Live mfa v3 and mfa-login v5 were deployed via Supabase MCP as GitHub source imports of commit fd77d74. First-request boot of those versions was not yet in function logs. Browser E2E tools were not available."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-1709-008",
       "date": "2026-09-17",
       "time": "01:42:22",

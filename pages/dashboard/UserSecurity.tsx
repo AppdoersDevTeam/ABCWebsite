@@ -43,6 +43,15 @@ function StatusPill({ enabled }: { enabled: boolean }) {
   );
 }
 
+function DialogError({ message }: { message: string | null }) {
+  if (!message) return null;
+  return (
+    <div role="alert" className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-[4px] text-sm">
+      {message}
+    </div>
+  );
+}
+
 export const UserSecurity = () => {
   const [status, setStatus] = useState<MfaStatus | null>(null);
   const [loading, setLoading] = useState(true);
@@ -147,6 +156,9 @@ export const UserSecurity = () => {
     setError(null);
     try {
       const result = await mfaTotpEnrollStart({ password, captchaToken });
+      if (!result.secret || !result.otpauthUri) {
+        throw new Error('Unable to start authenticator setup.');
+      }
       setSecret(result.secret);
       setQrSvg(await otpauthQrSvg(result.otpauthUri));
       setPassword('');
@@ -317,7 +329,7 @@ export const UserSecurity = () => {
         icon={<Shield size={28} />}
       />
 
-      {error && (
+      {error && !dialog && (
         <div role="alert" className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-[4px] text-sm">
           {error}
         </div>
@@ -442,6 +454,7 @@ export const UserSecurity = () => {
 
       <Modal isOpen={dialog === 'password'} onClose={closeDialog} title="Change password">
         <form className="space-y-4" onSubmit={handlePasswordChange}>
+          <DialogError message={error} />
           <label className="block text-sm font-bold text-charcoal">
             Current password
             <input type="password" className="mt-2 w-full border border-gray-300 rounded-[4px] px-4 py-3" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" />
@@ -462,6 +475,7 @@ export const UserSecurity = () => {
       <Modal isOpen={dialog === 'totp-setup'} onClose={closeDialog} title={status?.totpEnabled ? 'Replace authenticator app' : 'Set up authenticator app'} closeOnBackdropClick={!secret}>
         {!secret ? (
           <form className="space-y-4" onSubmit={startTotp}>
+            <DialogError message={error} />
             <p className="text-sm text-neutral">Confirm your password, then scan the QR code with your authenticator app. The method is not enabled until you enter a valid code.</p>
             <label className="block text-sm font-bold text-charcoal">
               Current password
@@ -472,6 +486,7 @@ export const UserSecurity = () => {
           </form>
         ) : (
           <form className="space-y-4" onSubmit={verifyTotp}>
+            <DialogError message={error} />
             <p className="text-sm text-neutral">Scan this QR code, or enter the setup key manually. Then enter the 6-digit code from the app.</p>
             {qrSvg && (
               <div className="flex justify-center bg-white p-4 border border-gray-100 rounded-[8px]" dangerouslySetInnerHTML={{ __html: qrSvg }} />
@@ -490,6 +505,7 @@ export const UserSecurity = () => {
 
       <Modal isOpen={dialog === 'totp-disable'} onClose={closeDialog} title="Disable authenticator app">
         <form className="space-y-4" onSubmit={disableTotp}>
+          <DialogError message={error} />
           <p className="text-sm text-neutral">Confirm your password and a current authenticator code to disable this method.</p>
           <label className="block text-sm font-bold text-charcoal">
             Current password
@@ -507,6 +523,7 @@ export const UserSecurity = () => {
       <Modal isOpen={dialog === 'email-enable'} onClose={() => { closeDialog(); setEmailSent(false); }} title="Enable email verification">
         {!emailSent ? (
           <form className="space-y-4" onSubmit={startEmail}>
+            <DialogError message={error} />
             <p className="text-sm text-neutral">A one-time code will be sent to {status?.maskedEmail}. Email MFA is not enabled until that code is verified.</p>
             <label className="block text-sm font-bold text-charcoal">
               Current password
@@ -517,6 +534,7 @@ export const UserSecurity = () => {
           </form>
         ) : (
           <form className="space-y-4" onSubmit={verifyEmail}>
+            <DialogError message={error} />
             <p className="text-sm text-neutral">Enter the 6-digit code sent to {status?.maskedEmail}.</p>
             <label className="block text-sm font-bold text-charcoal">
               Verification code
@@ -530,6 +548,7 @@ export const UserSecurity = () => {
       <Modal isOpen={dialog === 'email-disable'} onClose={() => { closeDialog(); setEmailSent(false); }} title="Disable email verification">
         {!emailSent && !status?.totpEnabled ? (
           <form className="space-y-4" onSubmit={startEmailDisable}>
+            <DialogError message={error} />
             <p className="text-sm text-neutral">Confirm your password. We will email a code before disabling this method.</p>
             <label className="block text-sm font-bold text-charcoal">
               Current password
@@ -540,6 +559,7 @@ export const UserSecurity = () => {
           </form>
         ) : (
           <form className="space-y-4" onSubmit={disableEmail}>
+            <DialogError message={error} />
             <p className="text-sm text-neutral">
               {status?.totpEnabled
                 ? 'Confirm your password and a current authenticator code.'
@@ -565,6 +585,7 @@ export const UserSecurity = () => {
 
       <Modal isOpen={dialog === 'recovery'} onClose={closeDialog} title="Generate new recovery codes">
         <form className="space-y-4" onSubmit={generateRecovery}>
+          <DialogError message={error} />
           <p className="text-sm text-neutral">This replaces all previous recovery codes. Confirm your password and a current MFA code.</p>
           <label className="block text-sm font-bold text-charcoal">
             Current password

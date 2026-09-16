@@ -7,6 +7,39 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-1709-009 — Authenticator QR and email MFA setup complete after password check
+
+**Date:** 2026-09-17
+**Time:** 02:03:01
+**Timezone:** Pacific/Auckland
+**Version:** 1.2.2
+**Type:** Fixed
+**Status:** Partial
+
+**Request**
+
+> After Setup Two-Factor Authentication, the password and human verification succeed but the Google Authenticator QR never appears and the code field is not shown. Email verification also never sends a code or shows the entry screen. Fix it and push to live.
+
+**Changes**
+
+* Live mfa now serves authenticator enroll/verify/disable, email enable/disable, recovery codes, and password change, so Continue can show the QR code and Send code can email a verification code.
+* Live mfa-login now serves the full login challenge path so MFA cannot be skipped after a method is enabled.
+* User Security shows setup errors inside the dialog, and authenticator setup only advances when the server returns a secret and otpauth URI.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: 35 unit tests and npm run validate. vite build. Typecheck still fails on pre-existing app errors. Live mfa v3 and mfa-login v5 were deployed via Supabase MCP as GitHub source imports of commit fd77d74. First-request boot of those versions was not yet in function logs. Browser E2E tools were not available.
+
 ## CHG-2026-1709-008 — User Security loads after missing MFA function
 
 **Date:** 2026-09-17

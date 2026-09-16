@@ -29,3 +29,4 @@ scripts/changelog/.tmp-legacy.mjs
 .hub-session.json
 .hub-ticket-time.json
 supabase/.temp/
+supabase/functions/mfa/.deploy/
