@@ -419,6 +419,15 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
         timeoutId = null;
       }
 
+      // Tab focus / token churn often fires SIGNED_IN again. Flipping isLoading
+      // unmounts ProtectedRoute and wipes in-progress forms and modals.
+      if (initialSessionReceived) {
+        void fetchUserProfile(session.user, true).then((profile) => {
+          if (isMounted && profile) setUser(profile);
+        });
+        return;
+      }
+
       setIsLoading(true);
       setTimeout(async () => {
         let userProfile: User | null = null;

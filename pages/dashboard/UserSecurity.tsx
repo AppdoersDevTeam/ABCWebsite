@@ -472,7 +472,7 @@ export const UserSecurity = () => {
         </form>
       </Modal>
 
-      <Modal isOpen={dialog === 'totp-setup'} onClose={closeDialog} title={status?.totpEnabled ? 'Replace authenticator app' : 'Set up authenticator app'} closeOnBackdropClick={!secret}>
+      <Modal isOpen={dialog === 'totp-setup'} onClose={closeDialog} title={status?.totpEnabled ? 'Replace authenticator app' : 'Set up authenticator app'} closeOnBackdropClick={false}>
         {!secret ? (
           <form className="space-y-4" onSubmit={startTotp}>
             <DialogError message={error} />
@@ -520,7 +520,7 @@ export const UserSecurity = () => {
         </form>
       </Modal>
 
-      <Modal isOpen={dialog === 'email-enable'} onClose={() => { closeDialog(); setEmailSent(false); }} title="Enable email verification">
+      <Modal isOpen={dialog === 'email-enable'} onClose={() => { closeDialog(); setEmailSent(false); }} title="Enable email verification" closeOnBackdropClick={false}>
         {!emailSent ? (
           <form className="space-y-4" onSubmit={startEmail}>
             <DialogError message={error} />
@@ -545,7 +545,7 @@ export const UserSecurity = () => {
         )}
       </Modal>
 
-      <Modal isOpen={dialog === 'email-disable'} onClose={() => { closeDialog(); setEmailSent(false); }} title="Disable email verification">
+      <Modal isOpen={dialog === 'email-disable'} onClose={() => { closeDialog(); setEmailSent(false); }} title="Disable email verification" closeOnBackdropClick={false}>
         {!emailSent && !status?.totpEnabled ? (
           <form className="space-y-4" onSubmit={startEmailDisable}>
             <DialogError message={error} />

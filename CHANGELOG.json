@@ -6,6 +6,36 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-1709-010",
+      "date": "2026-09-17",
+      "time": "02:17:47",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-16T14:17:47.362Z",
+      "version": "1.2.3",
+      "type": "fixed",
+      "area": "auth",
+      "title": "Keep forms and code screens when switching away from the tab",
+      "request": "When receiving an email verification code and leaving the browser tab to read the email, coming back refreshes the screen and the code entry dialog disappears. This happens across the system whenever the browser tab loses focus.",
+      "changes": [
+        "Returning to the tab no longer remounts the member or admin dashboard, so open dialogs and in-progress forms stay on screen.",
+        "Dialogs ignore the accidental tap that often happens when you come back from another app, and authenticator and email setup only close with the X button."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "35 unit tests and npm run validate. vite build. Typecheck still fails on pre-existing app errors. Browser E2E tools were not available."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-1709-009",
       "date": "2026-09-17",
       "time": "02:03:01",

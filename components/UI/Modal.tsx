@@ -48,19 +48,24 @@ export const Modal: React.FC<ModalProps> = ({
       suppressBackdropCloseRef.current = true;
       focusTimerRef.current = window.setTimeout(() => {
         suppressBackdropCloseRef.current = false;
-      }, 400);
+      }, 2000);
+    };
+
+    const onVisibility = () => {
+      if (document.visibilityState === 'hidden') armSuppress();
+      else onFocus();
     };
 
     window.addEventListener('blur', armSuppress);
     window.addEventListener('focus', onFocus);
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'hidden') armSuppress();
-      else onFocus();
-    });
+    window.addEventListener('pageshow', onFocus);
+    document.addEventListener('visibilitychange', onVisibility);
 
     return () => {
       window.removeEventListener('blur', armSuppress);
       window.removeEventListener('focus', onFocus);
+      window.removeEventListener('pageshow', onFocus);
+      document.removeEventListener('visibilitychange', onVisibility);
       window.clearTimeout(focusTimerRef.current);
     };
   }, [isOpen]);
@@ -70,10 +75,20 @@ export const Modal: React.FC<ModalProps> = ({
     onClose();
   }, [onClose, preventClose]);
 
+  const shouldIgnoreBackdrop = () =>
+    !closeOnBackdropClick || preventClose || suppressBackdropCloseRef.current;
+
   const handleBackdropClick = (event: React.MouseEvent<HTMLDivElement>) => {
     if (event.target !== event.currentTarget) return;
-    if (!closeOnBackdropClick || preventClose || suppressBackdropCloseRef.current) return;
+    if (shouldIgnoreBackdrop()) return;
     onClose();
+  };
+
+  const handleBackdropPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (event.target !== event.currentTarget) return;
+    if (!shouldIgnoreBackdrop()) return;
+    event.preventDefault();
+    event.stopPropagation();
   };
 
   if (!isOpen) return null;
@@ -85,6 +100,7 @@ export const Modal: React.FC<ModalProps> = ({
       className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm transition-opacity duration-300"
       style={{ opacity: isOpen ? 1 : 0 }}
       onClick={handleBackdropClick}
+      onPointerDown={handleBackdropPointerDown}
     >
       <div
         role="dialog"

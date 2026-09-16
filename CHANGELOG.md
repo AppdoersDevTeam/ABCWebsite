@@ -7,6 +7,37 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-1709-010 — Keep forms and code screens when switching away from the tab
+
+**Date:** 2026-09-17
+**Time:** 02:17:47
+**Timezone:** Pacific/Auckland
+**Version:** 1.2.3
+**Type:** Fixed
+
+**Request**
+
+> When receiving an email verification code and leaving the browser tab to read the email, coming back refreshes the screen and the code entry dialog disappears. This happens across the system whenever the browser tab loses focus.
+
+**Changes**
+
+* Returning to the tab no longer remounts the member or admin dashboard, so open dialogs and in-progress forms stay on screen.
+* Dialogs ignore the accidental tap that often happens when you come back from another app, and authenticator and email setup only close with the X button.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: 35 unit tests and npm run validate. vite build. Typecheck still fails on pre-existing app errors. Browser E2E tools were not available.
+
 ## CHG-2026-1709-009 — Authenticator QR and email MFA setup complete after password check
 
 **Date:** 2026-09-17
