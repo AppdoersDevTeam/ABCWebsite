@@ -89,6 +89,20 @@ export const CHANGELOG_AREA_LABELS: Record<ChangelogArea, string> = {
  */
 export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   {
+    id: '2026-09-16-changelog-layout',
+    changedAt: '2026-09-16T06:58:00+00:00',
+    changedBy: 'Appdoers Dev Team',
+    kind: 'changed',
+    area: 'admin',
+    title: 'Clearer Changelog timeline layout',
+    summary:
+      'Changelog entries use a vertical timeline with a clear title, typed badges, and a tidy footer for when, who, and area.',
+    details: [
+      'Month headers show how many updates are in that period.',
+      'Type badges include icons so colour is not the only cue.',
+    ],
+  },
+  {
     id: '2026-09-16-changelog-export',
     changedAt: '2026-09-16T06:53:00+00:00',
     changedBy: 'Appdoers Dev Team',

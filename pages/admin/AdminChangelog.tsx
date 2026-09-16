@@ -1,10 +1,20 @@
 import React, { useMemo, useState } from 'react';
-import { Download, History, Search } from 'lucide-react';
+import {
+  Calendar,
+  Download,
+  History,
+  MapPin,
+  Plus,
+  RefreshCw,
+  Search,
+  User,
+  Wrench,
+} from 'lucide-react';
 import { Navigate } from 'react-router-dom';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { useAuth } from '../../context/AuthContext';
 import { CHURCH_NAME, isSuperAdminUser } from '../../lib/constants';
-import { formatFullDateTimeInTimezone } from '../../lib/dateUtils';
+import { formatDateInTimezone, formatFullDateTimeInTimezone } from '../../lib/dateUtils';
 import {
   CHANGELOG_AREA_LABELS,
   CHANGELOG_AREA_OPTIONS,
@@ -15,12 +25,108 @@ import {
   filterChangelogEntries,
   groupChangelogByMonth,
   type ChangelogArea,
+  type ChangelogEntry,
   type ChangelogKind,
 } from '../../lib/changelog';
 import { downloadChangelogCsv, downloadChangelogPdf } from '../../lib/exportChangelog';
 
 const FILTER_INPUT_CLASS =
   'w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-charcoal focus:outline-none focus:ring-2 focus:ring-gold/40';
+
+const KIND_DOT: Record<ChangelogKind, string> = {
+  added: 'bg-emerald-500 ring-emerald-100',
+  changed: 'bg-amber-500 ring-amber-100',
+  fixed: 'bg-sky-500 ring-sky-100',
+};
+
+const KIND_ICON: Record<ChangelogKind, React.ReactNode> = {
+  added: <Plus size={12} strokeWidth={2.5} aria-hidden="true" />,
+  changed: <RefreshCw size={12} strokeWidth={2.5} aria-hidden="true" />,
+  fixed: <Wrench size={12} strokeWidth={2.5} aria-hidden="true" />,
+};
+
+function formatChangelogWhen(iso: string, timezone?: string): string {
+  return formatDateInTimezone(iso, timezone, {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
+function ChangelogEntryRow({
+  entry,
+  viewerTimezone,
+  isLast,
+}: {
+  entry: ChangelogEntry;
+  viewerTimezone?: string;
+  isLast: boolean;
+}) {
+  const whenLabel = formatChangelogWhen(entry.changedAt, viewerTimezone);
+  const whenFull = formatFullDateTimeInTimezone(entry.changedAt, viewerTimezone);
+
+  return (
+    <li className="relative flex gap-4 md:gap-5">
+      <div className="relative flex w-5 shrink-0 flex-col items-center" aria-hidden="true">
+        <span
+          className={`mt-1.5 h-3.5 w-3.5 rounded-full ring-4 ${KIND_DOT[entry.kind]}`}
+        />
+        {!isLast && <span className="mt-1 w-px flex-1 bg-gray-200" />}
+      </div>
+
+      <article className={`min-w-0 flex-1 pb-8 ${isLast ? 'pb-2' : ''}`}>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+          <h3 className="text-base md:text-lg font-bold text-charcoal leading-snug tracking-tight">
+            {entry.title}
+          </h3>
+          <span
+            className={`inline-flex items-center gap-1.5 self-start shrink-0 text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md ${CHANGELOG_KIND_COLORS[entry.kind]}`}
+          >
+            {KIND_ICON[entry.kind]}
+            {CHANGELOG_KIND_LABELS[entry.kind]}
+          </span>
+        </div>
+
+        <p className="mt-2 text-sm text-neutral leading-relaxed max-w-3xl">{entry.summary}</p>
+
+        {entry.details && entry.details.length > 0 && (
+          <ul className="mt-3 space-y-1.5 border-l-2 border-gold/40 pl-3">
+            {entry.details.map((detail) => (
+              <li key={detail} className="text-sm text-charcoal leading-relaxed">
+                {detail}
+              </li>
+            ))}
+          </ul>
+        )}
+
+        <dl className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-neutral">
+          <div className="inline-flex items-center gap-1.5 min-w-0">
+            <Calendar size={13} className="shrink-0 text-gold" aria-hidden="true" />
+            <dt className="sr-only">When</dt>
+            <dd>
+              <time dateTime={entry.changedAt} title={whenFull}>
+                {whenLabel}
+              </time>
+            </dd>
+          </div>
+          <div className="inline-flex items-center gap-1.5 min-w-0">
+            <User size={13} className="shrink-0 text-gold" aria-hidden="true" />
+            <dt className="sr-only">Changed by</dt>
+            <dd className="truncate font-medium text-charcoal">{entry.changedBy}</dd>
+          </div>
+          <div className="inline-flex items-center gap-1.5 min-w-0">
+            <MapPin size={13} className="shrink-0 text-gold" aria-hidden="true" />
+            <dt className="sr-only">Area</dt>
+            <dd>{CHANGELOG_AREA_LABELS[entry.area]}</dd>
+          </div>
+        </dl>
+      </article>
+    </li>
+  );
+}
 
 export const AdminChangelog = () => {
   const { user } = useAuth();
@@ -169,51 +275,29 @@ export const AdminChangelog = () => {
             </p>
           </div>
         ) : (
-          <div className="p-4 md:p-6 space-y-10">
+          <div className="p-4 md:p-8 space-y-10">
             {monthGroups.map((group) => (
               <section key={group.monthKey} aria-labelledby={`changelog-${group.monthKey}`}>
-                <h2
-                  id={`changelog-${group.monthKey}`}
-                  className="text-lg font-serif font-normal text-gold mb-4"
-                >
-                  {group.label}
-                </h2>
-                <ol className="space-y-4">
-                  {group.entries.map((entry) => (
-                    <li
+                <div className="mb-5 flex items-baseline justify-between gap-3 border-b border-gray-100 pb-2">
+                  <h2
+                    id={`changelog-${group.monthKey}`}
+                    className="text-sm font-bold uppercase tracking-[0.14em] text-charcoal"
+                  >
+                    {group.label}
+                  </h2>
+                  <span className="text-xs text-neutral tabular-nums">
+                    {group.entries.length} update{group.entries.length === 1 ? '' : 's'}
+                  </span>
+                </div>
+
+                <ol className="ml-0.5">
+                  {group.entries.map((entry, index) => (
+                    <ChangelogEntryRow
                       key={entry.id}
-                      className="rounded-[12px] border border-gray-100 bg-white/70 p-4 md:p-5"
-                    >
-                      <div className="flex flex-wrap items-center gap-x-3 gap-y-2 mb-2 text-xs text-neutral">
-                        <time
-                          dateTime={entry.changedAt}
-                          className="tabular-nums whitespace-nowrap"
-                          title={formatFullDateTimeInTimezone(entry.changedAt, viewerTimezone)}
-                        >
-                          {formatFullDateTimeInTimezone(entry.changedAt, viewerTimezone)}
-                        </time>
-                        <span className="text-charcoal font-medium whitespace-nowrap">
-                          by {entry.changedBy}
-                        </span>
-                        <span
-                          className={`inline-flex text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${CHANGELOG_KIND_COLORS[entry.kind]}`}
-                        >
-                          {CHANGELOG_KIND_LABELS[entry.kind]}
-                        </span>
-                        <span className="inline-flex text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-gray-100 text-gray-700">
-                          {CHANGELOG_AREA_LABELS[entry.area]}
-                        </span>
-                      </div>
-                      <h3 className="text-base md:text-lg font-bold text-charcoal">{entry.title}</h3>
-                      <p className="mt-1 text-sm text-neutral leading-relaxed">{entry.summary}</p>
-                      {entry.details && entry.details.length > 0 && (
-                        <ul className="mt-3 text-sm text-charcoal space-y-1.5 list-disc list-inside marker:text-gold">
-                          {entry.details.map((detail) => (
-                            <li key={detail}>{detail}</li>
-                          ))}
-                        </ul>
-                      )}
-                    </li>
+                      entry={entry}
+                      viewerTimezone={viewerTimezone}
+                      isLast={index === group.entries.length - 1}
+                    />
                   ))}
                 </ol>
               </section>
