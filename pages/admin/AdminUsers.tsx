@@ -851,7 +851,7 @@ export const AdminUsers = () => {
               >
                 <div className="flex items-center justify-between gap-1.5">
                   <div className="min-w-0">
-                    <p className="text-[11px] leading-tight text-neutral font-bold">{card.label}</p>
+                    <p className="text-lg leading-tight text-charcoal font-bold">{card.label}</p>
                     <p className={`text-lg font-bold mt-0.5 ${card.valueClass}`}>{card.value}</p>
                   </div>
                   <div className={`p-1.5 rounded-full flex-shrink-0 ${card.iconWrap}`}>{card.icon}</div>
