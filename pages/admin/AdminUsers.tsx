@@ -793,7 +793,7 @@ export const AdminUsers = () => {
                 value: visibleUsers.length,
                 valueClass: 'text-charcoal',
                 iconWrap: 'bg-blue-100',
-                icon: <Users size={16} className="text-blue-600" />,
+                icon: <Users size={20} className="text-blue-600" />,
               },
               {
                 id: 'pending' as UserFilter,
@@ -801,7 +801,7 @@ export const AdminUsers = () => {
                 value: visiblePendingCount,
                 valueClass: 'text-gold',
                 iconWrap: 'bg-yellow-100',
-                icon: <UserCheck size={16} className="text-yellow-600" />,
+                icon: <UserCheck size={20} className="text-yellow-600" />,
               },
               {
                 id: 'held' as UserFilter,
@@ -809,7 +809,7 @@ export const AdminUsers = () => {
                 value: visibleHeldCount,
                 valueClass: 'text-orange-600',
                 iconWrap: 'bg-orange-100',
-                icon: <PauseCircle size={16} className="text-orange-600" />,
+                icon: <PauseCircle size={20} className="text-orange-600" />,
               },
               {
                 id: 'approved' as UserFilter,
@@ -817,7 +817,7 @@ export const AdminUsers = () => {
                 value: visibleApprovedCount,
                 valueClass: 'text-green-600',
                 iconWrap: 'bg-green-100',
-                icon: <UserCheck size={16} className="text-green-600" />,
+                icon: <UserCheck size={20} className="text-green-600" />,
               },
               {
                 id: 'linked' as UserFilter,
@@ -825,7 +825,7 @@ export const AdminUsers = () => {
                 value: visibleLinkedCount,
                 valueClass: 'text-teal-700',
                 iconWrap: 'bg-gray-200',
-                icon: <Link2 size={16} className="text-gray-600" />,
+                icon: <Link2 size={20} className="text-gray-600" />,
               },
               {
                 id: 'admins' as UserFilter,
@@ -833,7 +833,7 @@ export const AdminUsers = () => {
                 value: visibleAdminCount,
                 valueClass: 'text-purple-700',
                 iconWrap: 'bg-purple-100',
-                icon: <Shield size={16} className="text-purple-700" />,
+                icon: <Shield size={20} className="text-purple-700" />,
               },
             ] as const
           ).map((card) => {
@@ -851,10 +851,10 @@ export const AdminUsers = () => {
               >
                 <div className="flex items-center justify-between gap-1.5">
                   <div className="min-w-0">
-                    <p className="text-lg leading-tight text-charcoal font-bold">{card.label}</p>
-                    <p className={`text-lg font-bold mt-0.5 ${card.valueClass}`}>{card.value}</p>
+                    <p className="text-[13px] leading-tight text-charcoal font-bold">{card.label}</p>
+                    <p className={`text-[13px] font-bold mt-0.5 ${card.valueClass}`}>{card.value}</p>
                   </div>
-                  <div className={`p-1.5 rounded-full flex-shrink-0 ${card.iconWrap}`}>{card.icon}</div>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${card.iconWrap}`}>{card.icon}</div>
                 </div>
               </button>
             );
