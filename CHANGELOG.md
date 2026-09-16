@@ -7,6 +7,41 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-1709-001 — Overview email totals with day, week, and month detail
+
+**Date:** 2026-09-17
+**Time:** 00:04:28
+**Timezone:** Pacific/Auckland
+**Version:** 1.1.0
+**Type:** Added
+
+**Request**
+
+> Add an Overview card for emails sent to users or Leadership. Show the all-time total on the card. When Manage is opened, show Day, Week, and Month quantities. Make Overview cards a professional layout, increase the card title description by 4px, include emails from when the church email service started, and update the card automatically when a new email is sent.
+
+**Changes**
+
+* Added an Emails Sent card on Admin Overview that shows the all-time total of church emails sent to users and Leadership.
+* Manage opens a detail page with Day, Week, and Month counts, split by Users and Leadership, plus a full send history.
+* Recorded outbound Resend emails in a new email_sends table, backfilled the 10 successful sends already stored in audit logs, and log each new send from the email Edge Functions.
+* Deployed notify-user-approved, notify-user-review, notify-user-access-hold, notify-user-admin-role, notify-user-intro-inquiry, and delete-user so new emails increment the Overview total live.
+* The Overview total refreshes automatically when a new email is recorded, and again when the page is focused.
+* Tightened Overview card layout (equal height, icon beside title, pinned footer) and increased card title and description text by 4px to 18px on admin and member Overview.
+
+**Database**
+
+* supabase/migrations/20260916115500_create_email_sends.sql
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: Governance tests, changelog validation, and vite build passed. email_sends was created and backfilled with 10 historical Resend sends. All six email Edge Functions were deployed ACTIVE on the ABC Website project.
+
 ## CHG-2026-1609-009 — Changelog location headings and detailed What-changed notes
 
 **Date:** 2026-09-16

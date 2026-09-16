@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { recordEmailSend, resendIdFromBody } from "./recordEmailSend.ts";
 
 const corsHeaders: Record<string, string> = {
   "Access-Control-Allow-Origin": "*",
@@ -250,6 +251,15 @@ Deno.serve(async (req: Request) => {
         502,
       );
     }
+
+    await recordEmailSend(adminClient, {
+      recipientEmail: toEmail,
+      recipientUserId: target.id,
+      templateKey: "approval",
+      subject: "Your Ashburton Baptist Church account is approved",
+      resendId: resendIdFromBody(resendBody),
+      actorId: caller.id,
+    });
 
     return jsonResponse({
       ok: true,

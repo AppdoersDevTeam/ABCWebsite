@@ -60,6 +60,7 @@ import { AdminSettings } from './pages/admin/AdminSettings';
 import { AdminHelp } from './pages/admin/Help';
 import { AdminLogs } from './pages/admin/AdminLogs';
 import { AdminChangelog } from './pages/admin/AdminChangelog';
+import { AdminEmails } from './pages/admin/AdminEmails';
 
 // Protected Route Component
 const ProtectedRoute = () => {
@@ -200,6 +201,7 @@ const AppRoutes = () => {
                 <Route index element={<AdminOverview />} />
                 <Route path="calendar" element={<AnnualCalendarPage audience="admin" />} />
                 <Route path="users" element={<AdminUsers />} />
+                <Route path="emails" element={<AdminEmails />} />
                 <Route path="logs" element={<AdminLogs />} />
                 <Route element={<SuperAdminRoute />}>
                   <Route path="changelog" element={<AdminChangelog />} />

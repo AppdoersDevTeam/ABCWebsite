@@ -27,7 +27,7 @@ const PATH_RULES: { test: RegExp; label: MenuLocationLabel }[] = [
   { test: /pages\/admin\/AdminUsers|LinkDirectoryUserModal|exportAdminUsers|CreateUserProfile|directoryUserLink/, label: 'User Management' },
   { test: /pages\/admin\/AdminTeam|pages\/dashboard\/Team|exportDirectoryPeople|teamMemberUtils/, label: 'Leadership' },
   { test: /pages\/admin\/AdminChangelog|lib\/changelog|lib\/githubChangelog|lib\/exportChangelog|CHANGELOG\.(json|md)|scripts\/changelog/, label: 'Changelog' },
-  { test: /pages\/admin\/AdminOverview|pages\/dashboard\/DashboardHome/, label: 'Overview' },
+  { test: /pages\/admin\/AdminOverview|pages\/dashboard\/DashboardHome|pages\/admin\/AdminEmails/, label: 'Overview' },
   { test: /AnnualCalendar|calendarItems|pages\/shared\/AnnualCalendar|components\/calendar\//, label: 'Annual Calendar' },
   { test: /PrayerWall|AdminPrayer|pages\/.*[Pp]rayer/, label: 'Prayers' },
   { test: /Newsletter/, label: 'Newsletters' },

@@ -126,7 +126,7 @@ export const DashboardHome = () => {
         />
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
-            <Link to="/dashboard/calendar" className="block">
+            <Link to="/dashboard/calendar" className="block h-full">
               <OverviewStatCard
                 icon={<CalendarDays size={20} />}
                 iconClassName="bg-emerald-50 text-emerald-600"
@@ -137,7 +137,7 @@ export const DashboardHome = () => {
               />
             </Link>
 
-            <Link to="/dashboard/events" className="block">
+            <Link to="/dashboard/events" className="block h-full">
               <OverviewStatCard
                 icon={<Calendar size={20} />}
                 iconClassName="bg-green-50 text-green-600"
@@ -148,7 +148,7 @@ export const DashboardHome = () => {
               />
             </Link>
 
-            <Link to="/dashboard/prayer" className="block">
+            <Link to="/dashboard/prayer" className="block h-full">
               <OverviewStatCard
                 icon={<HandHeart size={20} />}
                 iconClassName="bg-blue-50 text-blue-600"
@@ -163,7 +163,7 @@ export const DashboardHome = () => {
               />
             </Link>
 
-            <Link to="/dashboard/newsletter" className="block">
+            <Link to="/dashboard/newsletter" className="block h-full">
               <OverviewStatCard
                 icon={<Newspaper size={20} />}
                 iconClassName="bg-orange-50 text-orange-600"
@@ -184,7 +184,7 @@ export const DashboardHome = () => {
               />
             </Link>
 
-            <Link to="/dashboard/devotional" className="block">
+            <Link to="/dashboard/devotional" className="block h-full">
               <OverviewStatCard
                 icon={<BookOpen size={20} />}
                 iconClassName="bg-purple-50 text-purple-600"
@@ -205,7 +205,7 @@ export const DashboardHome = () => {
               />
             </Link>
 
-            <Link to="/dashboard/sermons" className="block">
+            <Link to="/dashboard/sermons" className="block h-full">
               <OverviewStatCard
                 icon={<Youtube size={20} />}
                 iconClassName="bg-red-50 text-red-600"

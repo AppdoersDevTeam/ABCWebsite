@@ -15,6 +15,7 @@ import { notifyUserApproved } from '../../lib/notifyUserApproved';
 import { notifyUserReview } from '../../lib/notifyUserReview';
 import { notifyUserAdminRole, adminRoleEmailNote } from '../../lib/notifyUserAdminRole';
 import { IntroInquiryEmailModal } from './IntroInquiryEmailModal';
+import { fetchEmailSendTotal } from '../../lib/emailSends';
 
 export const AdminOverview = () => {
   const { user } = useAuth();
@@ -33,6 +34,7 @@ export const AdminOverview = () => {
   const [teamMembersCount, setTeamMembersCount] = useState(0);
   const [rosterAssignmentsCount, setRosterAssignmentsCount] = useState(0);
   const [pendingPrayerRequestsCount, setPendingPrayerRequestsCount] = useState(0);
+  const [emailsSentTotal, setEmailsSentTotal] = useState(0);
   const [recentActivities, setRecentActivities] = useState<Array<{
     id: string;
     type: 'prayer' | 'event' | 'team_member' | 'newsletter' | 'devotional' | 'roster';
@@ -47,6 +49,27 @@ export const AdminOverview = () => {
     fetchStats();
     fetchRecentActivities();
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const channel = supabase
+      .channel('overview-email-sends')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'email_sends' }, () => {
+        void fetchEmailSendTotal().then(setEmailsSentTotal);
+      })
+      .subscribe();
+
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') {
+        void fetchEmailSendTotal().then(setEmailsSentTotal);
+      }
+    };
+    document.addEventListener('visibilitychange', onVisible);
+
+    return () => {
+      supabase.removeChannel(channel);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
   }, []);
 
 
@@ -331,6 +354,9 @@ export const AdminOverview = () => {
       } else {
         setLastDevotionalDate(null);
       }
+
+      const emailTotal = await fetchEmailSendTotal();
+      setEmailsSentTotal(emailTotal);
     } catch (error) {
       console.error('Error fetching stats:', error);
     } finally {
@@ -600,7 +626,15 @@ export const AdminOverview = () => {
       color: 'text-indigo-600',
       subtitle: isLoadingStats ? 'Loading...' : undefined
     },
-  ], [visiblePendingCount, prayerRequests24h, nextService, lastNewsletterDate, lastNewsletterTitle, lastDevotionalDate, isLoadingStats, teamMembersCount, rosterAssignmentsCount]);
+    {
+      label: 'Emails Sent',
+      value: isLoadingStats ? '...' : emailsSentTotal.toString(),
+      icon: <Mail size={20} />,
+      path: '/admin/emails',
+      color: 'text-amber-700',
+      subtitle: isLoadingStats ? 'Loading...' : 'To users and Leadership',
+    },
+  ], [visiblePendingCount, prayerRequests24h, nextService, lastNewsletterDate, lastNewsletterTitle, lastDevotionalDate, isLoadingStats, teamMembersCount, rosterAssignmentsCount, emailsSentTotal]);
 
   console.log('AdminOverview - Rendering, user:', user, 'pendingCount:', pendingCount, 'isLoadingUsers:', isLoadingUsers);
 
@@ -610,7 +644,7 @@ export const AdminOverview = () => {
       <div className="space-y-8">
         <SkeletonPageHeader />
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Array.from({ length: 7 }).map((_, i) => (
+          {Array.from({ length: 8 }).map((_, i) => (
             <SkeletonCard key={i} />
           ))}
         </div>
@@ -633,7 +667,7 @@ export const AdminOverview = () => {
       />
 
       {/* Stats Grid */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
+      <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-5 md:gap-6">
         {stats.map((stat, i) => {
           const description =
             stat.label === 'Next Service' && nextService && !isLoadingStats
@@ -642,7 +676,9 @@ export const AdminOverview = () => {
                 ? `Week of ${lastNewsletterDate}`
                 : stat.label === 'Last Devotional' && lastDevotionalDate && !isLoadingStats
                   ? `Week of ${lastDevotionalDate}`
-                  : stat.subtitle;
+                  : stat.label === 'Emails Sent' && !isLoadingStats
+                    ? 'Users and Leadership, all time'
+                    : stat.subtitle;
 
           const card = (
             <OverviewStatCard
@@ -670,7 +706,7 @@ export const AdminOverview = () => {
                     element.scrollIntoView({ behavior: 'smooth' });
                   }
                 }}
-                className="block"
+                className="block h-full"
               >
                 {card}
               </a>
@@ -678,7 +714,7 @@ export const AdminOverview = () => {
           }
 
           return (
-            <Link key={i} to={stat.path} className="block">
+            <Link key={i} to={stat.path} className="block h-full">
               {card}
             </Link>
           );

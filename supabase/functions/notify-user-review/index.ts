@@ -1,4 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { recordEmailSend, resendIdFromBody } from "./recordEmailSend.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
 const corsHeaders: Record<string, string> = {
@@ -253,6 +254,15 @@ Deno.serve(async (req: Request) => {
       console.error("Resend error", resendRes.status, resendBody);
       return jsonResponse({ error: "Failed to send email", details: resendBody }, 502);
     }
+
+    await recordEmailSend(adminClient, {
+      recipientEmail: toEmail,
+      recipientUserId: target.id,
+      templateKey: kind === "denied" ? "denial" : "signup_received",
+      subject,
+      resendId: resendIdFromBody(resendBody),
+      actorId: caller.id,
+    });
 
     return jsonResponse({ ok: true, emailed: toEmail, kind, id: resendBody?.id ?? null });
   } catch (err) {

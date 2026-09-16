@@ -239,6 +239,21 @@ export interface AuditLog {
   details?: Record<string, unknown>;
 }
 
+export interface EmailSend {
+  id: string;
+  sent_at: string;
+  recipient_email: string;
+  recipient_kind: 'user' | 'leadership';
+  template_key: string;
+  subject?: string | null;
+  recipient_user_id?: string | null;
+  recipient_team_member_id?: string | null;
+  resend_id?: string | null;
+  source_audit_log_id?: string | null;
+  actor_id?: string | null;
+  metadata?: Record<string, unknown>;
+}
+
 export interface Database {
   public: {
     Tables: {
@@ -304,6 +319,11 @@ export interface Database {
       };
       audit_logs: {
         Row: AuditLog;
+        Insert: never;
+        Update: never;
+      };
+      email_sends: {
+        Row: EmailSend;
         Insert: never;
         Update: never;
       };

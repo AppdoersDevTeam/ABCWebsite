@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { recordEmailSend, resendIdFromBody } from "./recordEmailSend.ts";
 
 const corsHeaders: Record<string, string> = {
   "Access-Control-Allow-Origin": "*",
@@ -343,12 +344,19 @@ Deno.serve(async (req: Request) => {
           error: "Failed to send administrative role email",
         };
       }
+      const id = resendIdFromBody(resendBody);
+      await recordEmailSend(adminClient, {
+        recipientEmail: toEmail,
+        recipientUserId: target.id,
+        templateKey: kind === "revoked" ? "admin_role_revoked" : "admin_role_granted",
+        subject,
+        resendId: id,
+        actorId: caller.id,
+      });
       return {
         emailed: toEmail,
         emailSkipped: false,
-        resendId: typeof (resendBody as { id?: string })?.id === "string"
-          ? (resendBody as { id: string }).id
-          : null,
+        resendId: id,
       };
     };
 

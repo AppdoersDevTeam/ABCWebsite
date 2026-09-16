@@ -6,6 +6,42 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-1709-001",
+      "date": "2026-09-17",
+      "time": "00:04:28",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-16T12:04:28.250Z",
+      "version": "1.1.0",
+      "type": "added",
+      "area": "admin",
+      "title": "Overview email totals with day, week, and month detail",
+      "request": "Add an Overview card for emails sent to users or Leadership. Show the all-time total on the card. When Manage is opened, show Day, Week, and Month quantities. Make Overview cards a professional layout, increase the card title description by 4px, include emails from when the church email service started, and update the card automatically when a new email is sent.",
+      "changes": [
+        "Added an Emails Sent card on Admin Overview that shows the all-time total of church emails sent to users and Leadership.",
+        "Manage opens a detail page with Day, Week, and Month counts, split by Users and Leadership, plus a full send history.",
+        "Recorded outbound Resend emails in a new email_sends table, backfilled the 10 successful sends already stored in audit logs, and log each new send from the email Edge Functions.",
+        "Deployed notify-user-approved, notify-user-review, notify-user-access-hold, notify-user-admin-role, notify-user-intro-inquiry, and delete-user so new emails increment the Overview total live.",
+        "The Overview total refreshes automatically when a new email is recorded, and again when the page is focused.",
+        "Tightened Overview card layout (equal height, icon beside title, pinned footer) and increased card title and description text by 4px to 18px on admin and member Overview."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": [
+          "supabase/migrations/20260916115500_create_email_sends.sql"
+        ]
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "Governance tests, changelog validation, and vite build passed. email_sends was created and backfilled with 10 historical Resend sends. All six email Edge Functions were deployed ACTIVE on the ABC Website project."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-1609-009",
       "date": "2026-09-16",
       "time": "23:36:59",
