@@ -6,6 +6,7 @@ type Mode = 'member' | 'admin';
 
 interface HelpContentProps {
   mode: Mode;
+  isSuperAdmin?: boolean;
 }
 
 function Section({
@@ -23,7 +24,7 @@ function Section({
   );
 }
 
-export const HelpContent: React.FC<HelpContentProps> = ({ mode }) => {
+export const HelpContent: React.FC<HelpContentProps> = ({ mode, isSuperAdmin = false }) => {
   const isAdmin = mode === 'admin';
 
   return (
@@ -78,6 +79,14 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode }) => {
               <li>Database changes (groups, events, Leadership, etc.) are recorded automatically — you may occasionally see two entries for the same action (app + database).</li>
               <li>Contact form submissions are not stored in logs (email only). Logs cannot be edited or deleted in the portal.</li>
             </Section>
+
+            {isSuperAdmin && (
+              <Section title="Changelog">
+                <li>Super Admins only: a product history of everything that has been changed on the website.</li>
+                <li>Filter by type (Added / Changed / Fixed) or area, or search by title and summary.</li>
+                <li>This is not the live audit trail — use Logs for who did what. Changelog records shipped product changes.</li>
+              </Section>
+            )}
 
             <Section title="Prayers (admin)">
               <li>Moderate prayer requests: review what members post, hide or remove items if needed, and keep the wall respectful.</li>
