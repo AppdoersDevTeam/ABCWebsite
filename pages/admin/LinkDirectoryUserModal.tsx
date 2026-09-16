@@ -5,7 +5,7 @@ import { Modal } from '../../components/UI/Modal';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { displayName } from '../../lib/constants';
 import { logAuditEventSafe } from '../../lib/auditLog';
-import { Search, Link2, Unlink } from 'lucide-react';
+import { Search, Link2 } from 'lucide-react';
 
 type DirRow = {
   id: string;
@@ -131,33 +131,6 @@ export const LinkDirectoryUserModal: React.FC<LinkDirectoryUserModalProps> = ({
     }
   };
 
-  const unlink = async () => {
-    if (!targetUser?.id) return;
-    if (!window.confirm('Remove the Leadership link for this user? They will lose roster access until linked again.')) {
-      return;
-    }
-    setSaving(true);
-    try {
-      const { error } = await supabase.from('team_members').update({ user_id: null }).eq('user_id', targetUser.id);
-      if (error) throw error;
-      logAuditEventSafe({
-        action: 'unlink',
-        category: 'users',
-        entityType: 'users',
-        entityId: targetUser.id,
-        summary: `Removed leadership link for ${targetUser.email}`,
-      });
-      alert('Link removed.');
-      onSuccess();
-      onClose();
-    } catch (e: unknown) {
-      console.error(e);
-      alert(e instanceof Error ? e.message : 'Failed to unlink');
-    } finally {
-      setSaving(false);
-    }
-  };
-
   if (!targetUser) return null;
 
   return (
@@ -223,12 +196,11 @@ export const LinkDirectoryUserModal: React.FC<LinkDirectoryUserModalProps> = ({
         <div className="flex flex-col sm:flex-row gap-2 flex-wrap justify-end pt-2">
           <button
             type="button"
-            onClick={() => void unlink()}
+            onClick={onClose}
             disabled={saving}
-            className="px-4 py-2 border border-red-200 text-red-700 rounded-[4px] font-bold hover:bg-red-50 inline-flex items-center justify-center gap-2"
+            className="px-4 py-2 border border-gray-200 text-charcoal rounded-[4px] font-bold hover:bg-gray-50 inline-flex items-center justify-center gap-2"
           >
-            <Unlink size={16} />
-            Unlink Leadership
+            Cancel
           </button>
           <GlowingButton type="button" onClick={() => void linkSelected()} disabled={saving || !selectedId}>
             <Link2 size={16} className="inline mr-1" />

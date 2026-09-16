@@ -1320,15 +1320,17 @@ export const AdminTeam = () => {
                   return (
                     <tr
                       key={member.id}
-                      className={`border-b border-gray-100 hover:bg-gold/5 transition-colors ${
-                        idx % 2 === 0 ? 'bg-white/40' : 'bg-white/20'
+                      className={`border-b transition-colors ${
+                        member.user_id
+                          ? 'border-purple-400 [&>td]:bg-purple-200 hover:[&>td]:bg-purple-300 [&>td:first-child]:border-l-4 [&>td:first-child]:border-purple-600'
+                          : `border-gray-100 hover:bg-gold/5 ${idx % 2 === 0 ? 'bg-white/40' : 'bg-white/20'}`
                       } ${dupEmail ? 'ring-1 ring-inset ring-amber-200' : ''}`}
                     >
                       <td className="px-4 py-3">
                         <div className="font-bold text-charcoal">{member.name}</div>
                         <div className="flex flex-wrap gap-1 mt-1">
                           {member.user_id ? (
-                            <span className="text-[10px] font-bold uppercase tracking-wide text-green-800 bg-green-100 px-2 py-0.5 rounded">
+                            <span className="text-[10px] font-bold uppercase tracking-wide text-white bg-purple-600 px-2 py-0.5 rounded">
                               Linked account
                             </span>
                           ) : (

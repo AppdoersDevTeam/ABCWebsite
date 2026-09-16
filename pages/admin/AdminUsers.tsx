@@ -953,8 +953,7 @@ export const AdminUsers = () => {
             const plainCardClass =
               'bg-white border border-gray-200 p-6 rounded-[12px] hover:border-gold transition-all shadow-sm';
             return (
-            <div key={u.id} className={isLinked ? 'space-y-2' : undefined}>
-            <div className={isLinked ? completedCardClass : plainCardClass}>
+            <div key={u.id} className={isLinked ? completedCardClass : plainCardClass}>
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div className="flex-1">
                   <div className="flex items-start gap-4">
@@ -1215,14 +1214,12 @@ export const AdminUsers = () => {
                   </div>
                 </div>
               </div>
-            </div>
-            {link && (
-              <>
-                <div className="flex items-center gap-2 px-2 py-1 text-purple-800 text-xs font-bold uppercase tracking-wider">
-                  <Link2 size={14} />
-                  Linked to Leadership
-                </div>
-                <div className={completedCardClass}>
+              {link && (
+                <div className="mt-5 pt-5 border-t-2 border-purple-300">
+                  <div className="flex items-center gap-2 mb-3 text-purple-800 text-xs font-bold uppercase tracking-wider">
+                    <Link2 size={14} />
+                    Linked to Leadership
+                  </div>
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div className="flex items-start gap-4 min-w-0">
                       <div className="w-12 h-12 rounded-full bg-purple-200 text-purple-900 flex items-center justify-center font-bold text-sm tracking-wide flex-shrink-0 overflow-hidden">
@@ -1264,8 +1261,7 @@ export const AdminUsers = () => {
                     </button>
                   </div>
                 </div>
-              </>
-            )}
+              )}
             </div>
             );
           })}
