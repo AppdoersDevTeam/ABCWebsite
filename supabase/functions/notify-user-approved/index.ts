@@ -1,6 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import { recordEmailSend, resendIdFromBody } from "./recordEmailSend.ts";
+import { assertEmailQuota } from "../_shared/emailQuota.ts";
 
 const corsHeaders: Record<string, string> = {
   "Access-Control-Allow-Origin": "*",
@@ -224,6 +225,11 @@ Deno.serve(async (req: Request) => {
       (target.name || "").trim().split(/\s+/)[0] ||
       "";
     const loginUrl = `${siteUrl}/#/login`;
+
+    const quota = await assertEmailQuota(adminClient);
+    if (!quota.ok) {
+      return jsonResponse({ error: quota.error, code: "email_quota" }, 429);
+    }
 
     const resendRes = await fetch("https://api.resend.com/emails", {
       method: "POST",

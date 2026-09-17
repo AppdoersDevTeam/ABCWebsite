@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { recordEmailSend, resendIdFromBody } from "./recordEmailSend.ts";
+import { assertEmailQuota } from "../_shared/emailQuota.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
 const corsHeaders: Record<string, string> = {
@@ -235,6 +236,11 @@ Deno.serve(async (req: Request) => {
       kind === "denied"
         ? "Your Ashburton Baptist Church signup was not approved"
         : "We have received your Ashburton Baptist Church signup";
+
+    const quota = await assertEmailQuota(adminClient);
+    if (!quota.ok) {
+      return jsonResponse({ error: quota.error, code: "email_quota" }, 429);
+    }
 
     const resendRes = await fetch("https://api.resend.com/emails", {
       method: "POST",

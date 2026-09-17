@@ -2,10 +2,12 @@
 
 This is the authoritative development-governance document for the Ashburton Baptist Church website. Cursor and other AI agents must follow it for every request that changes the project.
 
-The workflow is mandatory. Do not skip changelog, version, validation, or commit steps because the user did not mention them.
+The workflow is mandatory. Do not skip Hub tickets, changelog, version, validation, or commit steps because the user did not mention them.
 
 ```
 USER REQUEST
+→ HUB SESSION (whoami + show-session)
+→ CREATE OR USE A HUB TICKET
 → INSPECT
 → PLAN
 → IMPLEMENT
@@ -43,6 +45,24 @@ Inspect the repository before changing anything. Do not assume frameworks that a
 | Timezone | Changelog timestamps use `Pacific/Auckland`. App display timezones stay per-user via `lib/dateUtils.ts` |
 
 If an equivalent mechanism already exists, extend it. Do not create a second changelog, version file, or migration system.
+
+---
+
+## Hub tickets (mandatory)
+
+Appdoers Hub is the source of truth for work in this repo. **Do not change files until a Hub ticket exists for the request.**
+
+This is not optional. The user does not have to mention tickets.
+
+1. Confirm client, project, and team member (`node tools/hub-workflow-cli.mjs whoami` then `show-session`).
+2. If the user did not give a ticket id, create one: `node tools/hub-workflow-cli.mjs create-ticket --title "..."`.
+3. Claim it and move to `developer` before implementation.
+4. Include the ticket id in progress notes and the final response.
+5. Never call Hub HTTP endpoints directly; only use `node tools/hub-workflow-cli.mjs`.
+
+Read-only work (inspect, git pull, answering questions) does not need a ticket. Any Write, StrReplace, Delete, migration, or commit does.
+
+A Cursor project hook in `.cursor/hooks.json` **blocks file edits** when `.hub-ticket-time.json` has no current ticket. Create and claim the ticket first, then retry the edit. One ticket per user request — do not open a new ticket on every keystroke.
 
 ---
 

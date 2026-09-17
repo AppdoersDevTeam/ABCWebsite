@@ -1,5 +1,21 @@
 import { supabase } from './supabase';
 import { formatDdMmYyyyHHmm } from './dateUtils';
+import {
+  emptyEmailQuotaStatus,
+  parseEmailQuotaHit,
+  type EmailQuotaStatus,
+} from './emailQuota';
+
+export type { EmailQuotaStatus } from './emailQuota';
+export {
+  EMAIL_DAY_LIMIT,
+  EMAIL_MONTH_LIMIT,
+  EMAIL_QUOTA_TIMEZONE,
+  emailQuotaBlockedMessage,
+  emailQuotaNearLimit,
+  emptyEmailQuotaStatus,
+  formatEmailQuotaUsed,
+} from './emailQuota';
 
 export type EmailRecipientKind = 'user' | 'leadership';
 
@@ -134,6 +150,39 @@ export async function fetchEmailSendTotal(): Promise<number> {
   }
 
   return count ?? 0;
+}
+
+export async function fetchEmailQuotaStatus(): Promise<EmailQuotaStatus | null> {
+  const { data, error } = await supabase.rpc('email_quota_status');
+  if (error) {
+    console.error('fetchEmailQuotaStatus', error);
+    return null;
+  }
+  if (!data || typeof data !== 'object') return emptyEmailQuotaStatus();
+
+  const row = data as Record<string, unknown>;
+  const dayLimit = Number(row.day_limit) || 50;
+  const monthLimit = Number(row.month_limit) || 1000;
+  const dayCount = Number(row.day_count) || 0;
+  const monthCount = Number(row.month_count) || 0;
+  const blocked = Boolean(row.blocked) || dayCount >= dayLimit || monthCount >= monthLimit;
+  const hit = parseEmailQuotaHit(row.hit);
+
+  return {
+    timezone: typeof row.timezone === 'string' ? row.timezone : 'Pacific/Auckland',
+    day_limit: dayLimit,
+    month_limit: monthLimit,
+    day_count: dayCount,
+    month_count: monthCount,
+    day_remaining: Number.isFinite(Number(row.day_remaining))
+      ? Math.max(0, Number(row.day_remaining))
+      : Math.max(dayLimit - dayCount, 0),
+    month_remaining: Number.isFinite(Number(row.month_remaining))
+      ? Math.max(0, Number(row.month_remaining))
+      : Math.max(monthLimit - monthCount, 0),
+    blocked,
+    hit: blocked ? hit || (dayCount >= dayLimit ? 'day' : 'month') : null,
+  };
 }
 
 export function formatEmailWhen(iso: string, timeZone?: string): string {

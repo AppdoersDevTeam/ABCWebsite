@@ -4,6 +4,7 @@ export type DeleteUserAccountResult = {
   ok: boolean;
   emailed?: string | null;
   emailSkipped?: boolean;
+  emailSkipReason?: string | null;
   error?: string;
 };
 
@@ -64,6 +65,7 @@ export async function deleteUserAccount(userId: string): Promise<DeleteUserAccou
       ok: true,
       emailed: data?.emailed ?? null,
       emailSkipped: Boolean(data?.emailSkipped),
+      emailSkipReason: typeof data?.emailSkipReason === 'string' ? data.emailSkipReason : null,
     };
   } catch (err) {
     console.error('deleteUserAccount unexpected error:', err);

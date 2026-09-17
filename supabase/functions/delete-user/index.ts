@@ -1,6 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import { recordEmailSend, resendIdFromBody } from "./recordEmailSend.ts";
+import { assertEmailQuota } from "../_shared/emailQuota.ts";
 
 const corsHeaders: Record<string, string> = {
   "Access-Control-Allow-Origin": "*",
@@ -271,6 +272,7 @@ Deno.serve(async (req: Request) => {
 
     let emailed: string | null = null;
     let emailSkipped = false;
+    let emailSkipReason: string | null = null;
     const toEmail = (target.email || "").trim();
 
     if (!toEmail) {
@@ -279,32 +281,38 @@ Deno.serve(async (req: Request) => {
       console.error("Missing RESEND_API_KEY");
       emailSkipped = true;
     } else {
-      const resendRes = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${resendApiKey}`,
-        },
-        body: JSON.stringify({
-          from: fromEmail,
-          to: [toEmail],
-          subject: "Your Ashburton Baptist Church account has been deleted",
-          html: buildDeletedEmailHtml(firstName),
-        }),
-      });
-      const resendBody = await resendRes.json().catch(() => ({}));
-      if (!resendRes.ok) {
-        console.error("Resend error", resendRes.status, resendBody);
+      const quota = await assertEmailQuota(adminClient);
+      if (!quota.ok) {
         emailSkipped = true;
+        emailSkipReason = quota.error;
       } else {
-        emailed = toEmail;
-        await recordEmailSend(adminClient, {
-          recipientEmail: toEmail,
-          templateKey: "account_deleted",
-          subject: "Your Ashburton Baptist Church account has been deleted",
-          resendId: resendIdFromBody(resendBody),
-          actorId: caller.id,
+        const resendRes = await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${resendApiKey}`,
+          },
+          body: JSON.stringify({
+            from: fromEmail,
+            to: [toEmail],
+            subject: "Your Ashburton Baptist Church account has been deleted",
+            html: buildDeletedEmailHtml(firstName),
+          }),
         });
+        const resendBody = await resendRes.json().catch(() => ({}));
+        if (!resendRes.ok) {
+          console.error("Resend error", resendRes.status, resendBody);
+          emailSkipped = true;
+        } else {
+          emailed = toEmail;
+          await recordEmailSend(adminClient, {
+            recipientEmail: toEmail,
+            templateKey: "account_deleted",
+            subject: "Your Ashburton Baptist Church account has been deleted",
+            resendId: resendIdFromBody(resendBody),
+            actorId: caller.id,
+          });
+        }
       }
     }
 
@@ -312,6 +320,7 @@ Deno.serve(async (req: Request) => {
       ok: true,
       emailed,
       emailSkipped,
+      emailSkipReason,
     });
   } catch (err) {
     console.error("delete-user unexpected error", err);

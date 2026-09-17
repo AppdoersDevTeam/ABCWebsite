@@ -1,6 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import { recordEmailSend, resendIdFromBody } from "../_shared/recordEmailSend.ts";
+import { assertEmailQuota } from "../_shared/emailQuota.ts";
 import {
   MFA_CODE_EXPIRY_MINUTES,
   MFA_EMAIL_SUBJECT,
@@ -100,6 +101,9 @@ async function sendMfaEmail(
     });
   }
   if (!toEmail) return { ok: false, error: "User has no email" };
+
+  const quota = await assertEmailQuota(admin);
+  if (!quota.ok) return { ok: false, error: quota.error };
 
   const siteUrl = (Deno.env.get("SITE_URL") || DEFAULT_SITE_URL).replace(/\/$/, "");
   const fromEmail = Deno.env.get("APPROVAL_FROM_EMAIL") || DEFAULT_FROM;

@@ -65,6 +65,7 @@ export async function notifyUserAdminRole(
       ok: true,
       emailed: data?.emailed ?? null,
       emailSkipped: Boolean(data?.emailSkipped),
+      error: typeof data?.error === 'string' ? data.error : undefined,
     };
   } catch (err) {
     console.error('notifyUserAdminRole unexpected error:', err);
@@ -86,7 +87,9 @@ export function adminRoleEmailNote(result: NotifyUserAdminRoleResult): string {
     return ` A confirmation email was sent to ${result.emailed}.`;
   }
   if (result.emailSkipped) {
-    return ' The role was updated, but the confirmation email could not be sent.';
+    return ` The role was updated, but the confirmation email could not be sent${
+      result.error ? ` (${result.error})` : ''
+    }.`;
   }
   return '';
 }

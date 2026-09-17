@@ -351,7 +351,9 @@ export const AdminUsers = () => {
       if (result.emailed) {
         message += ` A confirmation email was sent to ${result.emailed}.`;
       } else if (result.emailSkipped) {
-        message += ' The account was removed, but the confirmation email could not be sent.';
+        message += result.emailSkipReason
+          ? ` The account was removed, but the confirmation email was not sent (${result.emailSkipReason}).`
+          : ' The account was removed, but the confirmation email could not be sent.';
       }
       alert(message);
       fetchUsers();

@@ -5,10 +5,16 @@ import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
 import {
+  EMAIL_QUOTA_TIMEZONE,
+  emailQuotaBlockedMessage,
+  emailQuotaNearLimit,
   emailTemplateLabel,
+  fetchEmailQuotaStatus,
   fetchEmailSends,
+  formatEmailQuotaUsed,
   formatEmailWhen,
   summariseEmailSends,
+  type EmailQuotaStatus,
   type EmailRecipientKind,
   type EmailSendRow,
 } from '../../lib/emailSends';
@@ -21,17 +27,49 @@ function PeriodPanel({
   total,
   users,
   leadership,
+  limit,
+  remaining,
+  timezoneNote,
 }: {
   title: string;
   total: number;
   users: number;
   leadership: number;
+  limit?: number;
+  remaining?: number;
+  timezoneNote?: string;
 }) {
+  const capped = typeof limit === 'number';
+  const pct = capped && limit > 0 ? Math.min(100, (total / limit) * 100) : 0;
+  const atCap = capped && total >= limit;
+  const near = capped && typeof remaining === 'number' && remaining <= Math.max(5, Math.floor(limit * 0.2));
+
   return (
-    <div className="h-full rounded-[12px] border border-gray-100 bg-white p-5 md:p-6 shadow-sm">
+    <div
+      className={`h-full rounded-[12px] border bg-white p-5 md:p-6 shadow-sm ${
+        atCap ? 'border-red-200' : near ? 'border-amber-200' : 'border-gray-100'
+      }`}
+    >
       <p className="text-[18px] font-semibold text-charcoal">{title}</p>
-      <p className="mt-2 font-serif text-3xl text-charcoal leading-none">{total}</p>
-      <p className="mt-3 text-sm text-neutral">emails sent</p>
+      <p className="mt-2 font-serif text-3xl text-charcoal leading-none">
+        {capped ? formatEmailQuotaUsed(total, limit) : total}
+      </p>
+      <p className="mt-3 text-sm text-neutral">
+        {capped
+          ? atCap
+            ? 'limit reached'
+            : `${remaining} remaining`
+          : 'emails sent'}
+      </p>
+      {capped ? (
+        <div className="mt-3 h-2 rounded-full bg-gray-100 overflow-hidden" aria-hidden>
+          <div
+            className={`h-full rounded-full ${atCap ? 'bg-red-500' : near ? 'bg-amber-500' : 'bg-gold'}`}
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+      ) : null}
+      {timezoneNote ? <p className="mt-2 text-xs text-neutral">{timezoneNote}</p> : null}
       <dl className="mt-5 grid grid-cols-2 gap-3 text-sm">
         <div className="rounded-lg bg-sky-50 px-3 py-2">
           <dt className="text-sky-800 font-semibold">Users</dt>
@@ -50,12 +88,14 @@ export const AdminEmails = () => {
   const { user } = useAuth();
   const timeZone = user?.user_timezone || getUserTimezone();
   const [rows, setRows] = useState<EmailSendRow[]>([]);
+  const [quota, setQuota] = useState<EmailQuotaStatus | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [kindFilter, setKindFilter] = useState<KindFilter>('all');
 
   const load = useCallback(async () => {
-    const data = await fetchEmailSends();
+    const [data, nextQuota] = await Promise.all([fetchEmailSends(), fetchEmailQuotaStatus()]);
     setRows(data);
+    setQuota(nextQuota);
     setIsLoading(false);
   }, []);
 
@@ -93,7 +133,7 @@ export const AdminEmails = () => {
     <div className="space-y-8 pb-12">
       <AdminPageHeader
         title="Emails sent"
-        subtitle="Every email the church website has sent to users and Leadership, from the first Resend messages through to new sends."
+        subtitle="Every email the church website has sent to users and Leadership. Daily and monthly limits use New Zealand time."
         icon={<Mail size={28} />}
         rightSlot={
           <Link
@@ -105,6 +145,18 @@ export const AdminEmails = () => {
           </Link>
         }
       />
+
+      {quota?.blocked ? (
+        <div className="rounded-[12px] border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900">
+          <p className="font-semibold">Email sending is paused</p>
+          <p className="mt-1">{emailQuotaBlockedMessage(quota)}</p>
+        </div>
+      ) : quota && emailQuotaNearLimit(quota) ? (
+        <div className="rounded-[12px] border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
+          The church email allowance is getting low: {formatEmailQuotaUsed(quota.day_count, quota.day_limit)} today and{' '}
+          {formatEmailQuotaUsed(quota.month_count, quota.month_limit)} this month ({EMAIL_QUOTA_TIMEZONE.replace('_', ' ')}).
+        </div>
+      ) : null}
 
       <div className="flex flex-wrap gap-2">
         {(
@@ -131,9 +183,25 @@ export const AdminEmails = () => {
       </div>
 
       <div className="grid md:grid-cols-3 gap-5">
-        <PeriodPanel title="Day" total={stats.day.total} users={stats.day.users} leadership={stats.day.leadership} />
+        <PeriodPanel
+          title="Day"
+          total={quota?.day_count ?? stats.day.total}
+          users={stats.day.users}
+          leadership={stats.day.leadership}
+          limit={quota?.day_limit}
+          remaining={quota?.day_remaining}
+          timezoneNote="New Zealand time · 50 per day"
+        />
         <PeriodPanel title="Week" total={stats.week.total} users={stats.week.users} leadership={stats.week.leadership} />
-        <PeriodPanel title="Month" total={stats.month.total} users={stats.month.users} leadership={stats.month.leadership} />
+        <PeriodPanel
+          title="Month"
+          total={quota?.month_count ?? stats.month.total}
+          users={stats.month.users}
+          leadership={stats.month.leadership}
+          limit={quota?.month_limit}
+          remaining={quota?.month_remaining}
+          timezoneNote="New Zealand time · 1,000 per month"
+        />
       </div>
 
       <div className="rounded-[12px] border border-gray-100 bg-white p-5 md:p-6 shadow-sm">

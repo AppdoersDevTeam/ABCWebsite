@@ -1,0 +1,40 @@
+---
+description: Enforce Appdoers Hub workflow for all implementation requests
+alwaysApply: true
+---
+
+# Appdoers Hub Workflow Enforcement
+
+- Appdoers Hub is the source of truth for work tracking.
+- Follow `.cursor/rules/hub-session-start.mdc` before the first ticket in each agent chat.
+- **First action** of any request that will change files: create a Hub ticket (`create-ticket`) or use the user-supplied id, then `claim-ticket` / `move-ticket --stage developer`.
+- Do not Write, StrReplace, Delete, migrate, or commit without a ticket id. Planning that will lead to edits still creates the ticket first.
+- Use `node tools/hub-workflow-cli.mjs` for **all** Hub actions — never call Hub HTTP endpoints directly.
+- Include ticket id in updates and final responses.
+- A project hook (`.cursor/hooks.json`) denies file-edit tools when no current ticket is recorded in `.hub-ticket-time.json`.
+
+## Stage flow
+
+1. Intake at `pm`
+2. Claim ticket → `developer`
+3. Progress notes during implementation
+4. Complete → `qa` → `reviewer` → `done` (only after explicit QA + review)
+
+## Commands
+
+- Setup: `whoami`, `verify-setup`
+- Session: `show-session`, `list-clients`, `list-projects --client-id <uuid>`, `set-session`, `clear-session`
+- Tickets: `create-ticket`, `get-ticket`, `list-tickets`, `update-ticket`, `move-ticket`, `claim-ticket`, `note`
+- Time: `show-ticket-time`, `flush-ticket-time`
+
+## Automatic time tracking
+
+- Active work time is tracked locally in `.hub-ticket-time.json` (gitignored).
+- Timer starts on `claim-ticket` or `move-ticket --stage developer`.
+- Gaps longer than 5 minutes between Hub CLI touches count as idle and are **not** logged.
+- When implementation for a user request is complete, run `flush-ticket-time --ticket-id "<id>"` before responding.
+- Moving to `qa`, `reviewer`, or `done` auto-flushes and logs active time to the ticket.
+- **Never** manually pass hours or time_spent — the CLI calculates and logs active time automatically.
+- Time is attributed to the token owner; each team member should use their own `APPDOERS_CURSOR_TOKEN`.
+
+If blocked, keep stage and add note prefixed with `BLOCKED:`.

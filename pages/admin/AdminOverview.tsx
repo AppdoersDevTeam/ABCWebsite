@@ -15,7 +15,12 @@ import { notifyUserApproved } from '../../lib/notifyUserApproved';
 import { notifyUserReview } from '../../lib/notifyUserReview';
 import { notifyUserAdminRole, adminRoleEmailNote } from '../../lib/notifyUserAdminRole';
 import { IntroInquiryEmailModal } from './IntroInquiryEmailModal';
-import { fetchEmailSendTotal } from '../../lib/emailSends';
+import {
+  emailQuotaNearLimit,
+  fetchEmailQuotaStatus,
+  formatEmailQuotaUsed,
+  type EmailQuotaStatus,
+} from '../../lib/emailSends';
 
 export const AdminOverview = () => {
   const { user } = useAuth();
@@ -34,7 +39,7 @@ export const AdminOverview = () => {
   const [teamMembersCount, setTeamMembersCount] = useState(0);
   const [rosterAssignmentsCount, setRosterAssignmentsCount] = useState(0);
   const [pendingPrayerRequestsCount, setPendingPrayerRequestsCount] = useState(0);
-  const [emailsSentTotal, setEmailsSentTotal] = useState(0);
+  const [emailsQuota, setEmailsQuota] = useState<EmailQuotaStatus | null>(null);
   const [recentActivities, setRecentActivities] = useState<Array<{
     id: string;
     type: 'prayer' | 'event' | 'team_member' | 'newsletter' | 'devotional' | 'roster';
@@ -55,13 +60,13 @@ export const AdminOverview = () => {
     const channel = supabase
       .channel('overview-email-sends')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'email_sends' }, () => {
-        void fetchEmailSendTotal().then(setEmailsSentTotal);
+        void fetchEmailQuotaStatus().then(setEmailsQuota);
       })
       .subscribe();
 
     const onVisible = () => {
       if (document.visibilityState === 'visible') {
-        void fetchEmailSendTotal().then(setEmailsSentTotal);
+        void fetchEmailQuotaStatus().then(setEmailsQuota);
       }
     };
     document.addEventListener('visibilitychange', onVisible);
@@ -355,8 +360,8 @@ export const AdminOverview = () => {
         setLastDevotionalDate(null);
       }
 
-      const emailTotal = await fetchEmailSendTotal();
-      setEmailsSentTotal(emailTotal);
+      const quota = await fetchEmailQuotaStatus();
+      setEmailsQuota(quota);
     } catch (error) {
       console.error('Error fetching stats:', error);
     } finally {
@@ -628,13 +633,22 @@ export const AdminOverview = () => {
     },
     {
       label: 'Emails Sent',
-      value: isLoadingStats ? '...' : emailsSentTotal.toString(),
+      value: isLoadingStats
+        ? '...'
+        : emailsQuota
+          ? `${formatEmailQuotaUsed(emailsQuota.day_count, emailsQuota.day_limit)} today`
+          : '—',
       icon: <Mail size={20} />,
       path: '/admin/emails',
-      color: 'text-amber-700',
-      subtitle: isLoadingStats ? 'Loading...' : 'To users and Leadership',
+      color: emailsQuota?.blocked ? 'text-red-700' : 'text-amber-700',
+      subtitle: isLoadingStats
+        ? 'Loading...'
+        : emailsQuota
+          ? `${formatEmailQuotaUsed(emailsQuota.month_count, emailsQuota.month_limit)} this month · NZ time`
+          : 'To users and Leadership',
+      highlight: Boolean(emailsQuota && emailQuotaNearLimit(emailsQuota)),
     },
-  ], [visiblePendingCount, prayerRequests24h, nextService, lastNewsletterDate, lastNewsletterTitle, lastDevotionalDate, isLoadingStats, teamMembersCount, rosterAssignmentsCount, emailsSentTotal]);
+  ], [visiblePendingCount, prayerRequests24h, nextService, lastNewsletterDate, lastNewsletterTitle, lastDevotionalDate, isLoadingStats, teamMembersCount, rosterAssignmentsCount, emailsQuota]);
 
   console.log('AdminOverview - Rendering, user:', user, 'pendingCount:', pendingCount, 'isLoadingUsers:', isLoadingUsers);
 
@@ -677,7 +691,11 @@ export const AdminOverview = () => {
                 : stat.label === 'Last Devotional' && lastDevotionalDate && !isLoadingStats
                   ? `Week of ${lastDevotionalDate}`
                   : stat.label === 'Emails Sent' && !isLoadingStats
-                    ? 'Users and Leadership, all time'
+                    ? emailsQuota?.blocked
+                      ? 'Sending paused — daily or monthly limit reached'
+                      : emailsQuota
+                        ? 'Users and Leadership, New Zealand time'
+                        : 'Users and Leadership'
                     : stat.subtitle;
 
           const card = (

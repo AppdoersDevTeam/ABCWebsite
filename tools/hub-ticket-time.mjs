@@ -26,16 +26,17 @@ export function createTicketTimeStore(workspaceRoot) {
 
   function readState() {
     if (!fs.existsSync(timeFilePath)) {
-      return { active_ticket_id: null, sessions: {} }
+      return { active_ticket_id: null, current_ticket_id: null, sessions: {} }
     }
     try {
       const parsed = JSON.parse(fs.readFileSync(timeFilePath, 'utf8'))
       return {
         active_ticket_id: parsed.active_ticket_id ?? null,
+        current_ticket_id: parsed.current_ticket_id ?? parsed.active_ticket_id ?? null,
         sessions: parsed.sessions ?? {},
       }
     } catch {
-      return { active_ticket_id: null, sessions: {} }
+      return { active_ticket_id: null, current_ticket_id: null, sessions: {} }
     }
   }
 
@@ -90,8 +91,16 @@ export function createTicketTimeStore(workspaceRoot) {
     if (!session.started_at) session.started_at = nowIso
     session.last_tick_at = nowIso
     state.active_ticket_id = ticketId
+    state.current_ticket_id = ticketId
     writeState(state)
     return { ticket_id: ticketId, active_ms: session.active_ms, logged_ms: session.logged_ms }
+  }
+
+  function setCurrentTicket(ticketId) {
+    const state = readState()
+    state.current_ticket_id = ticketId
+    writeState(state)
+    return { ticket_id: ticketId }
   }
 
   function touchTicket(ticketId) {
@@ -155,6 +164,7 @@ export function createTicketTimeStore(workspaceRoot) {
 
     if (finalize) {
       if (state.active_ticket_id === ticketId) state.active_ticket_id = null
+      if (state.current_ticket_id === ticketId) state.current_ticket_id = null
       delete state.sessions[ticketId]
     }
 
@@ -166,12 +176,19 @@ export function createTicketTimeStore(workspaceRoot) {
     return readState().active_ticket_id
   }
 
+  function getCurrentTicketId() {
+    const state = readState()
+    return state.active_ticket_id || state.current_ticket_id || null
+  }
+
   return {
     timeFilePath,
     startTicket,
     touchTicket,
     getTicketTime,
     getActiveTicketId,
+    getCurrentTicketId,
+    setCurrentTicket,
     prepareFlush,
     msToHours,
   }

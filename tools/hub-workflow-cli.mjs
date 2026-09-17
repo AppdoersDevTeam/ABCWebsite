@@ -487,6 +487,8 @@ async function run() {
       method: 'POST',
       body: JSON.stringify(payload),
     })
+    const createdId = data?.ticket?.id
+    if (createdId) ticketTime.setCurrentTicket(createdId)
     print(data)
     return
   }

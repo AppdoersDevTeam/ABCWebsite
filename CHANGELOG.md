@@ -7,6 +7,72 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-1709-016 — Track and cap church emails at 50 per day and 1,000 per month
+
+**Date:** 2026-09-17
+**Time:** 20:02:05
+**Timezone:** Pacific/Auckland
+**Version:** 1.3.0
+**Type:** Added
+
+**Request**
+
+> In the admin dashboard there needs to be somewhere to track the amount of emails that have been send from the site monthly, and daily. with a max of 1,000 emails per month, and 50 per day.
+
+**Changes**
+
+* Admin Overview and Emails now show used versus remaining against 50 emails per day and 1,000 per month in New Zealand time, with a progress bar and a pause banner when a cap is reached.
+* A database function email_quota_status counts successful church Resend sends from email_sends for today and this month.
+* Notify, delete-user, mfa, and mfa-login Edge Functions check that allowance before sending. When a cap is reached they stop the email, including 2FA codes. Account approve, hold, and delete still complete, and the admin sees why the email was not sent.
+* Supabase Auth mail such as signup confirmation and password reset is not counted and is not stopped by this cap.
+
+**Database**
+
+* supabase/migrations/20260917080000_email_quota_status.sql
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: 45 unit tests and npm run validate. vite build. Typecheck still fails on pre-existing app errors. SQL email_quota_status is live on the ABC Website database (13 of 50 today and 23 of 1,000 this month at apply time). Edge Functions still need a live deploy before sending is blocked in production.
+
+## CHG-2026-1709-015 — Require a Hub ticket before any change in this repo
+
+**Date:** 2026-09-17
+**Time:** 20:01:12
+**Timezone:** Pacific/Auckland
+**Version:** 1.2.8
+**Type:** Infrastructure
+
+**Request**
+
+> Before you do anything ensure you always create a ticket in the hub. THERE NEEDS TO BE SETTINGS SOMEWHERE SO THAT ANY CHANGES TO ANYTHING IN THIS REPO CREATES HUB TICKETS.
+
+**Changes**
+
+* AGENTS.md now requires a Hub session and a Hub ticket before inspect, plan, or implementation. Read-only work still does not need a ticket.
+* Cursor always-apply rules tell agents to create and claim a ticket before Write, StrReplace, Delete, migrations, or commits.
+* A project hook in .cursor/hooks.json blocks those file-edit tools when .hub-ticket-time.json has no current ticket, and tells the agent to run create-ticket then claim-ticket.
+* create-ticket now stores the new ticket id locally so the hook can see it.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: 45 unit tests including Hub ticket hook tests. npm run validate and vite build recorded on CHG-2026-1709-016.
+
 ## CHG-2026-1709-014 — Google accounts can disable 2FA without a stuck CAPTCHA
 
 **Date:** 2026-09-17

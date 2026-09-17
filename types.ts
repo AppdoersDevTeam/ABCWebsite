@@ -342,5 +342,11 @@ export interface Database {
         Update: never;
       };
     };
+    Functions: {
+      email_quota_status: {
+        Args: Record<string, never>;
+        Returns: Record<string, unknown>;
+      };
+    };
   };
 }

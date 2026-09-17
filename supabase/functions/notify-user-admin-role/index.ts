@@ -1,6 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import { recordEmailSend, resendIdFromBody } from "./recordEmailSend.ts";
+import { assertEmailQuota } from "../_shared/emailQuota.ts";
 
 const corsHeaders: Record<string, string> = {
   "Access-Control-Allow-Origin": "*",
@@ -311,6 +312,16 @@ Deno.serve(async (req: Request) => {
           ? buildRevokedEmailHtml(firstName, loginUrl)
           : buildGrantedEmailHtml(firstName, loginUrl);
 
+      const quota = await assertEmailQuota(adminClient);
+      if (!quota.ok) {
+        return {
+          emailed: null,
+          emailSkipped: true,
+          resendId: null,
+          error: quota.error,
+        };
+      }
+
       const resendRes = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: {
@@ -368,8 +379,9 @@ Deno.serve(async (req: Request) => {
           {
             error: emailResult.error || "Failed to send administrative role email",
             emailSkipped: true,
+            code: /email limit/i.test(emailResult.error || "") ? "email_quota" : undefined,
           },
-          502,
+          /email limit/i.test(emailResult.error || "") ? 429 : 502,
         );
       }
 

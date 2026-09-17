@@ -7,7 +7,9 @@ alwaysApply: true
 
 Follow `AGENTS.md` for every project-changing request. This is not optional and does not require the user to mention it.
 
-Required sequence: inspect → plan → implement → migrate if needed → test → validate → update `CHANGELOG.json` and `CHANGELOG.md` → bump `package.json` SemVer when the change warrants it → review `git status` / `git diff` → commit with `type(scope): description [CHG-ID]`.
+Required sequence: Hub session → **create or use a Hub ticket** → inspect → plan → implement → migrate if needed → test → validate → update `CHANGELOG.json` and `CHANGELOG.md` → bump `package.json` SemVer when the change warrants it → review `git status` / `git diff` → commit with `type(scope): description [CHG-ID]`.
+
+Do not edit files until a Hub ticket exists for the request. Use `node tools/hub-workflow-cli.mjs create-ticket` when the user did not supply an id.
 
 - Run `npm run changelog:next-id` for the next Change ID and real `Pacific/Auckland` timestamp. Never invent IDs or times.
 - `CHANGELOG.json` is canonical. Run `npm run changelog:render` after editing it.
