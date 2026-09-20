@@ -7,21 +7,22 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
-## CHG-2026-2109-018 — Overview card titles and numbers are centred
+## CHG-2026-2109-018 — Overview card title and number sit on the centre of each line
 
 **Date:** 2026-09-21
-**Time:** 01:57:39
+**Time:** 02:03:29
 **Timezone:** Pacific/Auckland
 **Version:** 1.7.33
 **Type:** Changed
 
 **Request**
 
-> On the Overview cards Align the Title and Number in the Centre of the cards. push live
+> On the Overview cards Align the Title in the centre of the line card and Number in the Centre of the line cards. push live
 
 **Changes**
 
-* Overview card titles and numbers are centred on each card.
+* Overview card titles are centred on their line, with the left icon kept in place.
+* Overview card numbers are centred on their line.
 
 **Database**
 

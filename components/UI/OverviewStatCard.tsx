@@ -43,30 +43,29 @@ export const OverviewStatCard: React.FC<OverviewStatCardProps> = ({
       <div className="absolute top-5 right-5 text-gold">
         <ArrowUpRight size={CARD_ARROW_SIZE} strokeWidth={3} />
       </div>
-      <div className="flex items-start gap-3 pr-10 mb-2">
+      <div className="grid grid-cols-[2.75rem_minmax(0,1fr)_2.75rem] items-center gap-x-3 mb-2">
         <div
           className={`p-2.5 rounded-full w-11 h-11 flex items-center justify-center transition-colors shrink-0 ${iconClassName} group-hover:bg-gold group-hover:text-white ${highlight ? 'bg-gold/15' : ''}`}
         >
           {icon}
         </div>
-        <div className="min-w-0 flex-1">
-          <p className="flex min-h-11 items-center text-[18px] font-semibold text-charcoal leading-snug">
-            {label}
-          </p>
-          <div
-            className={`${valueSizeClasses[valueSize]} mb-2 normal-case ${highlight ? 'text-gold' : 'text-charcoal'} ${valueClassName}`}
-          >
-            {value}
-          </div>
-          {description ? (
-            <div className="flex min-h-[2.75rem] items-center text-[15px] text-neutral leading-relaxed">
-              {description}
-            </div>
-          ) : (
-            <div className="min-h-[2.75rem]" />
-          )}
-        </div>
+        <p className="min-h-11 flex items-center justify-center text-center text-[18px] font-semibold text-charcoal leading-snug">
+          {label}
+        </p>
+        <div aria-hidden="true" />
       </div>
+      <div
+        className={`${valueSizeClasses[valueSize]} mb-2 text-center normal-case ${highlight ? 'text-gold' : 'text-charcoal'} ${valueClassName}`}
+      >
+        {value}
+      </div>
+      {description ? (
+        <div className="flex min-h-[2.75rem] items-center text-[15px] text-neutral leading-relaxed">
+          {description}
+        </div>
+      ) : (
+        <div className="min-h-[2.75rem]" />
+      )}
       {footerLabel ? (
         <div className="pt-4 mt-auto border-t border-gray-100">
           <span className="text-gold font-semibold text-sm">{footerLabel}</span>
