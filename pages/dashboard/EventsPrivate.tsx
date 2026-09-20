@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase';
 import { Event } from '../../types';
 import { SkeletonPageHeader } from '../../components/UI/Skeleton';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
+import { WHATS_ON_LABEL } from '../../lib/constants';
 import { EventsCalendarGrid, EventsCalendarGridSkeleton } from '../../components/dashboard/EventsCalendarGrid';
 import { useAuth } from '../../context/AuthContext';
 
@@ -49,7 +50,7 @@ export const EventsPrivate = () => {
   return (
     <div className="space-y-8">
       <AdminPageHeader
-        title="Events"
+        title={WHATS_ON_LABEL}
         subtitle="Meetings & Rehearsals."
         icon={<CalIcon size={28} />}
       />
@@ -59,8 +60,8 @@ export const EventsPrivate = () => {
           <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <CalIcon className="text-gray-300" size={28} />
           </div>
-          <p className="text-neutral font-bold">No events scheduled yet.</p>
-          <p className="text-neutral text-sm mt-1">Check back soon for new events.</p>
+          <p className="text-neutral font-bold">Nothing listed yet.</p>
+          <p className="text-neutral text-sm mt-1">Check back soon for what is on.</p>
         </div>
       ) : (
         <EventsCalendarGrid events={events} showVisibilityBadges />

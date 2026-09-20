@@ -13,6 +13,9 @@ export const CHURCH_WEBSITE_URL = 'https://ashburtonbaptist.co.nz';
 export const CHURCH_LOGO_URL = 'https://ashburtonbaptist.co.nz/abc-logo.png';
 export const CHURCH_ADDRESS = '284 Havelock Street, Ashburton 7700';
 
+/** Visible name for the events section on the public site and dashboards. Routes stay `/events`. */
+export const WHATS_ON_LABEL = "What's On" as const;
+
 /** Soften stored ALL CAPS titles for overview cards and lists. */
 export function formatDisplayTitle(text: string | null | undefined): string {
   if (!text) return '';

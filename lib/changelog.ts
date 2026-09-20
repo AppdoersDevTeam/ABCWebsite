@@ -2,6 +2,7 @@
 
 import changelogDoc from '../CHANGELOG.json';
 import { locationForDisplay } from './changelogLocations';
+import { WHATS_ON_LABEL } from './constants';
 
 export type ChangelogKind = 'added' | 'changed' | 'fixed';
 
@@ -136,7 +137,7 @@ export const CHANGELOG_AREA_OPTIONS: { value: ChangelogArea | ''; label: string 
   { value: 'auth', label: 'Auth' },
   { value: 'calendar', label: 'Calendar' },
   { value: 'devotionals', label: 'Devotionals' },
-  { value: 'events', label: 'Events' },
+  { value: 'events', label: WHATS_ON_LABEL },
   { value: 'leadership', label: 'Leadership' },
   { value: 'newsletters', label: 'Newsletters' },
   { value: 'prayer', label: 'Prayer' },
@@ -164,7 +165,7 @@ export const CHANGELOG_AREA_LABELS: Record<ChangelogArea, string> = {
   auth: 'Auth',
   calendar: 'Calendar',
   devotionals: 'Devotionals',
-  events: 'Events',
+  events: WHATS_ON_LABEL,
   leadership: 'Leadership',
   newsletters: 'Newsletters',
   prayer: 'Prayer',

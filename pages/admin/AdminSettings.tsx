@@ -313,7 +313,7 @@ export const AdminSettings = () => {
     <div className="space-y-8">
       <AdminPageHeader
         title="System Setup"
-        subtitle="Manage Groups, Job Roles, and Event Categories used across Leadership, Events, and Rosters."
+        subtitle="Manage Groups, Job Roles, and Event Categories used across Leadership, What's On, and Rosters."
         icon={<Settings size={28} />}
       />
 
@@ -686,7 +686,7 @@ export const AdminSettings = () => {
           )}
 
           <p className="text-xs text-neutral">
-            Active categories ({activeEventCategories.length}) will show up in the Events create/edit form dropdown.
+            Active categories ({activeEventCategories.length}) will show up in the What's On create/edit form dropdown.
           </p>
         </div>
       )}

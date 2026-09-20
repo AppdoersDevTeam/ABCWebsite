@@ -13,6 +13,7 @@ import {
   getEventTimeCardDisplay,
 } from '../../lib/eventDateUtils';
 import { usePageMeta } from '../../lib/usePageMeta';
+import { WHATS_ON_LABEL } from '../../lib/constants';
 import { logAuditEventSafe } from '../../lib/auditLog';
 
 /** Light-card body copy — use text-charcoal + a single size class; responsive sizes break custom colors on Tailwind CDN. */
@@ -112,7 +113,7 @@ export const EventDetail = () => {
       <div className="max-w-3xl mx-auto px-4 py-20 space-y-6">
         <Link to="/events" className="inline-flex items-center text-sm font-bold text-gold hover:text-charcoal transition-colors">
           <ArrowLeft size={16} className="mr-2" />
-          Back to Events
+          Back to {WHATS_ON_LABEL}
         </Link>
         <div className="glass-card bg-white/80 border border-white/60 rounded-[12px] p-8">
           <p className="text-charcoal font-bold">Couldn't load this event.</p>
@@ -127,7 +128,7 @@ export const EventDetail = () => {
       <div className="max-w-3xl mx-auto px-4 py-20 space-y-6">
         <Link to="/events" className="inline-flex items-center text-sm font-bold text-gold hover:text-charcoal transition-colors">
           <ArrowLeft size={16} className="mr-2" />
-          Back to Events
+          Back to {WHATS_ON_LABEL}
         </Link>
         <div className="glass-card bg-white/80 border border-white/60 rounded-[12px] p-8">
           <p className="text-charcoal font-bold">Event not found.</p>
@@ -154,7 +155,7 @@ export const EventDetail = () => {
         <div className="max-w-3xl mx-auto px-4 py-20 space-y-6">
           <Link to="/events" className="inline-flex items-center text-sm font-bold text-gold hover:text-charcoal transition-colors">
             <ArrowLeft size={16} className="mr-2" />
-            Back to Events
+            Back to {WHATS_ON_LABEL}
           </Link>
           <div className="glass-card bg-white/80 border border-white/60 rounded-[12px] p-8">
             <p className="text-charcoal font-bold">This event is for approved members only.</p>
@@ -177,7 +178,7 @@ export const EventDetail = () => {
         <div className="max-w-3xl mx-auto px-4 py-20 space-y-6">
           <Link to="/events" className="inline-flex items-center text-sm font-bold text-gold hover:text-charcoal transition-colors">
             <ArrowLeft size={16} className="mr-2" />
-            Back to Events
+            Back to {WHATS_ON_LABEL}
           </Link>
           <div className="glass-card bg-white/80 border border-white/60 rounded-[12px] p-8">
             <p className="text-charcoal font-bold">This event is restricted.</p>
@@ -329,7 +330,7 @@ export const EventDetail = () => {
               className="inline-flex items-center text-sm font-bold text-gold hover:text-charcoal transition-colors group"
             >
               <ArrowLeft size={16} className="mr-2 transition-transform group-hover:-translate-x-1" />
-              Back to Events
+              Back to {WHATS_ON_LABEL}
             </Link>
 
             {hasEventImage && (

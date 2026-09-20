@@ -7,6 +7,37 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2009-001 — Rename Events to What's On across the site
+
+**Date:** 2026-09-20
+**Time:** 14:18:39
+**Timezone:** Pacific/Auckland
+**Version:** 1.3.1
+**Type:** Changed
+
+**Request**
+
+> On the front end website change the menu Events to What's ON and update all backend, dashboards and frontend as well.
+
+**Changes**
+
+* The public menu, footer, member dashboard, and admin dashboard now say What's On instead of Events.
+* Page titles, help text, calendar filters, logs, and the changelog area label match that name. Website addresses still use /events so existing links keep working.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: 45 unit tests and npm run validate. vite build. Typecheck still fails on pre-existing app errors. Browser E2E tools were not available.
+
 ## CHG-2026-1709-016 — Track and cap church emails at 50 per day and 1,000 per month
 
 **Date:** 2026-09-17

@@ -21,7 +21,7 @@ import {
   History
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { displayName, displayInitial, isSuperAdminUser } from '../../lib/constants';
+import { displayName, displayInitial, isSuperAdminUser, WHATS_ON_LABEL } from '../../lib/constants';
 import { ScrollToTop } from '../ScrollToTop';
 import { useAutoSectionReveal } from '../UI/useAutoSectionReveal';
 import { DASHBOARD_NAV_ICON } from '../../lib/dashboardNav';
@@ -47,7 +47,7 @@ export const AdminLayout = () => {
     { label: 'Newsletters', path: '/admin/newsletter', icon: <Newspaper size={20} />, iconClass: DASHBOARD_NAV_ICON.newsletters },
     { label: 'Devotionals', path: '/admin/devotional', icon: <BookOpen size={20} />, iconClass: DASHBOARD_NAV_ICON.devotionals },
     { label: 'Leadership', path: '/admin/team', icon: <Users size={20} />, iconClass: DASHBOARD_NAV_ICON.team },
-    { label: 'Events', path: '/admin/events', icon: <Calendar size={20} />, iconClass: DASHBOARD_NAV_ICON.events },
+    { label: WHATS_ON_LABEL, path: '/admin/events', icon: <Calendar size={20} />, iconClass: DASHBOARD_NAV_ICON.events },
     { label: 'Rosters (Beta)', path: '/admin/roster', icon: <ClipboardList size={20} />, iconClass: DASHBOARD_NAV_ICON.rosters },
     { label: 'System Setup', path: '/admin/settings', icon: <Settings size={20} />, iconClass: DASHBOARD_NAV_ICON.settings },
     { label: 'User Security', path: '/admin/security', icon: <Shield size={20} />, iconClass: DASHBOARD_NAV_ICON.settings },

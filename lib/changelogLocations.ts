@@ -1,3 +1,5 @@
+import { WHATS_ON_LABEL } from './constants';
+
 export const INTERNAL_APP_LOCATION = 'Internal App';
 
 /** Left-menu names (admin + member) used as Changelog location headings. */
@@ -11,7 +13,7 @@ export const MENU_LOCATION_LABELS = [
   'Devotionals',
   'Sermons',
   'Leadership',
-  'Events',
+  WHATS_ON_LABEL,
   'Rosters (Beta)',
   'System Setup',
   'Help',
@@ -34,7 +36,7 @@ const PATH_RULES: { test: RegExp; label: MenuLocationLabel }[] = [
   { test: /Newsletter/, label: 'Newsletters' },
   { test: /Devotional/, label: 'Devotionals' },
   { test: /[Ss]ermon|YouTubeSermon/, label: 'Sermons' },
-  { test: /AdminEvents|EventsCalendarGrid|pages\/.*[Ee]vent/, label: 'Events' },
+  { test: /AdminEvents|EventsCalendarGrid|pages\/.*[Ee]vent/, label: WHATS_ON_LABEL },
   { test: /[Rr]oster/, label: 'Rosters (Beta)' },
   { test: /pages\/admin\/Help|pages\/dashboard\/Help|HelpContent/, label: 'Help' },
   { test: /AdminLogs|exportAuditLogs|auditLog/, label: 'Logs' },
@@ -79,7 +81,7 @@ function locationFromAreaCode(area: string): MenuLocationLabel {
     case 'leadership':
       return 'Leadership';
     case 'events':
-      return 'Events';
+      return WHATS_ON_LABEL;
     case 'roster':
       return 'Rosters (Beta)';
     case 'calendar':
@@ -117,7 +119,7 @@ export function locationFromArea(area: string, hint = ''): MenuLocationLabel {
   if (h.includes('devotional')) addHit('Devotionals');
   if (h.includes('sermon')) addHit('Sermons');
   if (h.includes('leadership')) addHit('Leadership');
-  if (/\bevents?\b/.test(h)) addHit('Events');
+  if (/\bevents?\b/.test(h) || h.includes("what's on") || h.includes('whats on')) addHit(WHATS_ON_LABEL);
   if (h.includes('roster')) addHit('Rosters (Beta)');
 
   const fromArea = locationFromAreaCode(area);

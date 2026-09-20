@@ -7,6 +7,7 @@ import { ScrollToTop } from '../ScrollToTop';
 import { useAutoSectionReveal } from '../UI/useAutoSectionReveal';
 import { usePageMeta } from '../../lib/usePageMeta';
 import { getRouteMeta, ROUTE_META } from '../../lib/seoConfig';
+import { WHATS_ON_LABEL } from '../../lib/constants';
 
 export const PublicLayout = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -172,7 +173,7 @@ export const PublicLayout = () => {
       submenu: []
     },
     { 
-      label: 'Events', 
+      label: WHATS_ON_LABEL, 
       path: '/events',
       submenu: [
         { label: 'Sunday Service', path: '/events/sunday-service', hash: '' },
@@ -530,7 +531,7 @@ export const PublicLayout = () => {
               <ul id="footer-explore-links" className={`space-y-3 ${openFooterSection === 'explore' ? 'block' : 'hidden'} md:block`}>
                 <li><Link to="/" className="text-white hover:text-gold transition-colors text-sm">Home</Link></li>
                 <li><Link to="/about" className="text-white hover:text-gold transition-colors text-sm">About</Link></li>
-                <li><Link to="/events" className="text-white hover:text-gold transition-colors text-sm">Events</Link></li>
+                <li><Link to="/events" className="text-white hover:text-gold transition-colors text-sm">{WHATS_ON_LABEL}</Link></li>
                 <li><Link to="/im-new" className="text-white hover:text-gold transition-colors text-sm">I'm New</Link></li>
                 <li><Link to="/need-prayer" className="text-white hover:text-gold transition-colors text-sm">Prayer</Link></li>
                 <li><Link to="/giving" className="text-white hover:text-gold transition-colors text-sm">Giving</Link></li>

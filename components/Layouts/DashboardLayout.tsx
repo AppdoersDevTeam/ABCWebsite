@@ -18,7 +18,7 @@ import {
   CalendarDays
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { displayName, displayInitial, isAdminUser } from '../../lib/constants';
+import { displayName, displayInitial, isAdminUser, WHATS_ON_LABEL } from '../../lib/constants';
 import { ScrollToTop } from '../ScrollToTop';
 import { useAutoSectionReveal } from '../UI/useAutoSectionReveal';
 import { DASHBOARD_NAV_ICON } from '../../lib/dashboardNav';
@@ -44,7 +44,7 @@ export const DashboardLayout = () => {
     { label: 'Devotionals', path: '/dashboard/devotional', icon: <BookOpen size={20} />, iconClass: DASHBOARD_NAV_ICON.devotionals },
     { label: 'Sermons', path: '/dashboard/sermons', icon: <Youtube size={20} />, iconClass: DASHBOARD_NAV_ICON.sermons },
     { label: 'Leadership', path: '/dashboard/team', icon: <Users size={20} />, iconClass: DASHBOARD_NAV_ICON.team },
-    { label: 'Events', path: '/dashboard/events', icon: <Calendar size={20} />, iconClass: DASHBOARD_NAV_ICON.events },
+    { label: WHATS_ON_LABEL, path: '/dashboard/events', icon: <Calendar size={20} />, iconClass: DASHBOARD_NAV_ICON.events },
     { label: 'Rosters (Beta)', path: '/dashboard/roster', icon: <ClipboardList size={20} />, iconClass: DASHBOARD_NAV_ICON.rosters },
     { label: 'User Security', path: '/dashboard/security', icon: <Shield size={20} />, iconClass: DASHBOARD_NAV_ICON.settings },
     { label: 'Help', path: '/dashboard/help', icon: <HelpCircle size={20} />, iconClass: DASHBOARD_NAV_ICON.help },

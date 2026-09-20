@@ -137,7 +137,7 @@ export const Events = () => {
           <ScrollReveal direction="down" delay={0}>
             <div className="text-center mb-12 md:mb-16">
               <Calendar className="text-gold mx-auto mb-6" size={64} />
-              <h2 className="text-4xl md:text-5xl font-serif font-normal text-charcoal mb-4">Event Highlights</h2>
+              <h2 className="text-4xl md:text-5xl font-serif font-normal text-charcoal mb-4">What's On Highlights</h2>
               <p className="text-gold mt-2 text-base font-bold">Explore what is happening this season.</p>
             </div>
           </ScrollReveal>
@@ -187,7 +187,7 @@ export const Events = () => {
           <ScrollReveal direction="down" delay={0}>
             <div className="text-center mb-8">
               <Calendar className="text-gold mx-auto mb-6" size={64} />
-              <h2 className="text-4xl md:text-5xl font-serif font-normal text-white mb-4">Upcoming Events</h2>
+              <h2 className="text-4xl md:text-5xl font-serif font-normal text-white mb-4">What's On</h2>
               <p className="text-gold mt-2 text-base font-bold">Join us this week.</p>
             </div>
           </ScrollReveal>
@@ -238,10 +238,10 @@ export const Events = () => {
             </div>
             <p className="text-white/80 text-lg font-serif">
               {activeCategory === 'All'
-                ? 'No upcoming events scheduled'
-                : `No upcoming ${activeCategory} events`}
+                ? 'Nothing coming up yet'
+                : `No upcoming ${activeCategory} listings`}
             </p>
-            <p className="text-white/50 text-sm mt-2">Check back soon for new events!</p>
+            <p className="text-white/50 text-sm mt-2">Check back soon for what's on!</p>
             {activeCategory !== 'All' && (
               <button
                 onClick={() => setActiveCategory('All')}

@@ -238,7 +238,7 @@ export const Home = () => {
           </div>
       </section>
 
-      {/* Upcoming Events */}
+      {/* What's On */}
       <section className="section-plain py-12 md:py-20 relative z-10">
           <div className="container mx-auto px-4">
                <ScrollReveal direction="down" delay={0}>
@@ -274,8 +274,8 @@ export const Home = () => {
                      // Empty state
                      <div className="col-span-3 text-center py-12">
                        <Calendar className="text-gray-300 mx-auto mb-4" size={48} />
-                       <p className="text-neutral text-lg">No upcoming events scheduled</p>
-                       <p className="text-neutral text-sm mt-2">Check back soon for new events!</p>
+                       <p className="text-neutral text-lg">Nothing coming up yet</p>
+                       <p className="text-neutral text-sm mt-2">Check back soon for what's on!</p>
                      </div>
                   ) : (
                     upcomingEvents.map((evt, i) => {

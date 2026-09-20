@@ -6,6 +6,36 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2009-001",
+      "date": "2026-09-20",
+      "time": "14:18:39",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T02:18:39.980Z",
+      "version": "1.3.1",
+      "type": "changed",
+      "area": "events",
+      "title": "Rename Events to What's On across the site",
+      "request": "On the front end website change the menu Events to What's ON and update all backend, dashboards and frontend as well.",
+      "changes": [
+        "The public menu, footer, member dashboard, and admin dashboard now say What's On instead of Events.",
+        "Page titles, help text, calendar filters, logs, and the changelog area label match that name. Website addresses still use /events so existing links keep working."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "45 unit tests and npm run validate. vite build. Typecheck still fails on pre-existing app errors. Browser E2E tools were not available."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-1709-016",
       "date": "2026-09-17",
       "time": "20:02:05",

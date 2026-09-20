@@ -60,7 +60,7 @@ export const Sermons = () => {
                       className="mr-2 text-gold transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] group-hover:h-5 group-hover:w-5 group-hover:translate-x-1 group-hover:text-white"
                     />
                     <span className="text-white font-normal text-base leading-6 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] group-hover:font-semibold group-hover:tracking-wider">
-                      Back to Events
+                      Back to What's On
                     </span>
                   </GlowingButton>
                 </Link>

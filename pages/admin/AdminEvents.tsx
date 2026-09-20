@@ -17,6 +17,7 @@ import {
 } from '../../lib/eventDateUtils';
 import { logAuditEvent } from '../../lib/auditLog';
 import { notifyCalendarChanged } from '../../lib/calendarItems';
+import { WHATS_ON_LABEL } from '../../lib/constants';
 import metadata from '../../metadata.json';
 
 const DEFAULT_THUMB = '/ABC Logo.png';
@@ -429,8 +430,8 @@ export const AdminEvents = () => {
   return (
     <div className="space-y-8">
       <AdminPageHeader
-        title="Events"
-        subtitle="Create and manage church events and meetings."
+        title={WHATS_ON_LABEL}
+        subtitle="Create and manage what is on at church."
         icon={<CalIcon size={28} />}
         rightSlot={
           <GlowingButton size="sm" fullWidth className="md:w-auto" onClick={openCreateModal}>
@@ -445,8 +446,8 @@ export const AdminEvents = () => {
           <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <CalIcon className="text-gray-300" size={28} />
           </div>
-          <p className="text-neutral font-bold">No events yet.</p>
-          <p className="text-neutral text-sm mt-1">Create your first event to get started.</p>
+          <p className="text-neutral font-bold">Nothing listed yet.</p>
+          <p className="text-neutral text-sm mt-1">Create your first listing to get started.</p>
         </div>
       ) : (
         <EventsCalendarGrid

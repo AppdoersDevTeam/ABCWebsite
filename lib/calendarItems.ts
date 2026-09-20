@@ -2,6 +2,7 @@ import { supabase } from './supabase';
 import { fetchNewslettersOrdered } from './newsletters';
 import { resolveNewsletterWeekDate } from './dateUtils';
 import { getEventEndDate, getEventStartDate } from './eventDateUtils';
+import { WHATS_ON_LABEL } from './constants';
 import {
   fetchChannelPlaylistData,
   fetchPlaylistVideos,
@@ -28,7 +29,7 @@ export const CALENDAR_KIND_META: Record<
   { label: string; dotClass: string; chipClass: string }
 > = {
   event: {
-    label: 'Events',
+    label: WHATS_ON_LABEL,
     dotClass: 'bg-green-600',
     chipClass: 'bg-green-50 text-green-700 border-green-200',
   },

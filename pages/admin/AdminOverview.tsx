@@ -939,11 +939,11 @@ export const AdminOverview = () => {
             </Link>
             <Link to="/admin/calendar" className="block p-4 bg-white border border-gray-100 rounded-[4px] hover:border-gold hover:shadow-md transition-all">
               <span className="font-semibold text-base text-charcoal">Annual Calendar</span>
-              <p className="text-sm text-neutral mt-1">See this year’s events, sermons, devotionals, and newsletters</p>
+              <p className="text-sm text-neutral mt-1">See this year’s what’s on, sermons, devotionals, and newsletters</p>
             </Link>
             <Link to="/admin/events" className="block p-4 bg-white border border-gray-100 rounded-[4px] hover:border-gold hover:shadow-md transition-all">
-              <span className="font-semibold text-base text-charcoal">Add New Event</span>
-              <p className="text-sm text-neutral mt-1">Create upcoming church event</p>
+              <span className="font-semibold text-base text-charcoal">Add to What's On</span>
+              <p className="text-sm text-neutral mt-1">Create an upcoming listing</p>
             </Link>
             <Link to="/admin/newsletter" className="block p-4 bg-white border border-gray-100 rounded-[4px] hover:border-gold hover:shadow-md transition-all">
               <span className="font-semibold text-base text-charcoal">Upload Newsletter</span>

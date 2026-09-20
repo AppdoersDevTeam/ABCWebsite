@@ -17,7 +17,7 @@ const CATEGORY_OPTIONS: { value: string; label: string }[] = [
   { value: '', label: 'All categories' },
   { value: 'auth', label: 'Auth' },
   { value: 'users', label: 'Users' },
-  { value: 'events', label: 'Events' },
+  { value: 'events', label: "What's On" },
   { value: 'team', label: 'Leadership' },
   { value: 'prayer', label: 'Prayer' },
   { value: 'roster', label: 'Roster' },
@@ -66,7 +66,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 const CATEGORY_LABELS: Record<string, string> = {
   auth: 'Auth',
   users: 'Users',
-  events: 'Events',
+  events: "What's On",
   team: 'Leadership',
   prayer: 'Prayer',
   roster: 'Roster',
