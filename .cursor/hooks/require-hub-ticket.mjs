@@ -3,6 +3,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { decideHubTicketHook } from './require-hub-ticket-lib.mjs'
+import { readHubEnvPresence } from '../../tools/hub-laptop-setup.mjs'
 
 const workspaceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..')
 const timeFilePath = path.join(workspaceRoot, '.hub-ticket-time.json')
@@ -41,6 +42,9 @@ if (raw.trim()) {
   }
 }
 
-const decision = decideHubTicketHook(input, readTicketState())
+const presence = readHubEnvPresence({ workspaceRoot })
+const decision = decideHubTicketHook(input, readTicketState(), {
+  tokenPresent: presence.tokenSet,
+})
 process.stdout.write(`${JSON.stringify(decision)}\n`)
 process.exit(0)

@@ -7,6 +7,39 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2009-003 — Require each teammate laptop to use its own Hub token
+
+**Date:** 2026-09-20
+**Time:** 14:38:19
+**Timezone:** Pacific/Auckland
+**Version:** 1.3.3
+**Type:** Infrastructure
+
+**Request**
+
+> Ensure hub process is followed for other machines as well. eg someone else who has access to this repo locally and uses cursor to make changes
+
+**Changes**
+
+* Added HUB-SETUP.md and node tools/setup-hub-token.mjs so each person generates their own Hub token on their own laptop after cloning.
+* File-edit hook now blocks writes when this laptop has no Hub token, even if a leftover ticket file exists, and tells the agent to stop and run laptop setup.
+* New-chat sessionStart hook reminds the agent to run whoami and confirm session, or to stop if the token is missing.
+* AGENTS.md, always-apply Hub rules, and verify-setup now say not to copy another person's token.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: not run or failed
+* Notes: 57 unit tests including Hub laptop-setup and hook tests. npm run validate passed. No app UI change; browser verification not applicable. Change ID remapped from CHG-2026-2009-002 because that ID now belongs to the Hub-mandatory commit after the remote What's On rename.
+
 ## CHG-2026-2009-002 — Make Appdoers Hub mandatory on every agent request in this repo
 
 **Date:** 2026-09-20

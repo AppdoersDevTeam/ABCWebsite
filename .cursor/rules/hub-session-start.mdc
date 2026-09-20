@@ -44,10 +44,16 @@ If `tools/hub-workflow-cli.mjs` is missing, install from the project root before
 powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/AppdoersDevTeam/Appdoers-Hub/master/hub-cursor-kit/install-project.ps1 -OutFile $env:TEMP\hub-install.ps1; & $env:TEMP\hub-install.ps1"
 ```
 
-If that fails on token/setup, stop. Generate a token in Hub → My Account → Cursor setup, then run:
+If that fails on token/setup, stop. Generate a token in Hub → My Account → Cursor setup, then from this repo root run:
+
+```powershell
+node tools/setup-hub-token.mjs
+```
+
+Or:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/AppdoersDevTeam/Appdoers-Hub/master/hub-cursor-kit/setup-my-cursor-token.ps1 -OutFile $env:TEMP\setup-token.ps1; & $env:TEMP\setup-token.ps1"
 ```
 
-Requires `tools/hub-workflow-cli.mjs`, `tools/hub-ticket-time.mjs`, `.cursor/rules/` Hub rule files, and a laptop token in `%USERPROFILE%\.appdoers\hub.env` (or `.env.local` / `.env.hub`) with `APPDOERS_HUB_URL` and `APPDOERS_CURSOR_TOKEN`.
+Requires `tools/hub-workflow-cli.mjs`, `tools/hub-ticket-time.mjs`, `.cursor/rules/` Hub rule files, and a laptop token in `%USERPROFILE%\.appdoers\hub.env` (or `.env.local` / `.env.hub`) with `APPDOERS_HUB_URL` and `APPDOERS_CURSOR_TOKEN`. Each teammate uses their own token on their own machine — see `HUB-SETUP.md`.

@@ -31,9 +31,18 @@ export function resolveTicketId(state = {}) {
   return active || current || null
 }
 
-export function decideHubTicketHook(input = {}, state = {}) {
+export function decideHubTicketHook(input = {}, state = {}, options = {}) {
   if (!shouldRequireHubTicket(input)) {
     return { permission: 'allow' }
+  }
+
+  if (options.tokenPresent === false) {
+    return {
+      permission: 'deny',
+      user_message: 'Set up your Appdoers Hub token on this laptop before changing files.',
+      agent_message:
+        'BLOCKED: this laptop has no Appdoers Hub token. STOP. Tell the user: generate a token in Hub → My Account → Cursor setup, then run `node tools/setup-hub-token.mjs` from the repo root in a real terminal. Do not edit files and do not use someone else\'s token.',
+    }
   }
 
   const ticketId = resolveTicketId(state)

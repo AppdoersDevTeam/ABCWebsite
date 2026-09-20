@@ -104,6 +104,8 @@ Session:
 Required env vars (in ~/.appdoers/hub.env on your laptop, or legacy .env.hub):
   APPDOERS_HUB_URL
   APPDOERS_CURSOR_TOKEN
+
+New laptop: node tools/setup-hub-token.mjs  (see HUB-SETUP.md)
 `)
 }
 
@@ -254,7 +256,7 @@ async function run() {
         ...checks,
         ok: false,
         message:
-          'Missing APPDOERS_HUB_URL or APPDOERS_CURSOR_TOKEN. Add them to .env.local or .env.hub.',
+          'Missing APPDOERS_HUB_URL or APPDOERS_CURSOR_TOKEN. Generate a token in Hub → My Account → Cursor setup, then run `node tools/setup-hub-token.mjs` from the repo root. Each laptop needs its own token; do not copy a teammate\'s.',
       })
       process.exit(1)
     }

@@ -28,5 +28,6 @@ scripts/changelog/.tmp-legacy.mjs
 *.sw?
 .hub-session.json
 .hub-ticket-time.json
+.appdoers/
 supabase/.temp/
 supabase/functions/mfa/.deploy/

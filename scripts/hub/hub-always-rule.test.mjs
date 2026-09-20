@@ -41,6 +41,23 @@ test('ticket hook fails closed so edits cannot bypass Hub', () => {
   assert.equal(hubHook.failClosed, true);
 });
 
+test('sessionStart Hub hook is registered for every clone', () => {
+  const hooks = JSON.parse(fs.readFileSync(path.join(repoRoot, '.cursor/hooks.json'), 'utf8'));
+  const startHook = (hooks.hooks.sessionStart || []).find((hook) =>
+    String(hook.command || '').includes('hub-session-start')
+  );
+  assert.ok(startHook, 'hub-session-start hook must exist');
+  assert.equal(fs.existsSync(path.join(repoRoot, '.cursor/hooks/hub-session-start.mjs')), true);
+});
+
+test('teammate laptop Hub setup is in the repo', () => {
+  assert.equal(fs.existsSync(path.join(repoRoot, 'HUB-SETUP.md')), true);
+  assert.equal(fs.existsSync(path.join(repoRoot, 'tools/setup-hub-token.mjs')), true);
+  const setup = fs.readFileSync(path.join(repoRoot, 'HUB-SETUP.md'), 'utf8');
+  assert.match(setup, /Once per person, per laptop/);
+  assert.match(setup, /node tools\/setup-hub-token\.mjs/);
+});
+
 test('project Hub skill is present for every clone', () => {
   const skillPath = path.join(repoRoot, '.cursor/skills/appdoers-hub/SKILL.md');
   assert.equal(fs.existsSync(skillPath), true);

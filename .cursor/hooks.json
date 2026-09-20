@@ -7,6 +7,12 @@
         "matcher": "Write|StrReplace|Delete|EditNotebook",
         "failClosed": true
       }
+    ],
+    "sessionStart": [
+      {
+        "command": "node .cursor/hooks/hub-session-start.mjs",
+        "failClosed": false
+      }
     ]
   }
 }

@@ -19,11 +19,13 @@ If `tools/hub-workflow-cli.mjs` is missing, install the kit from the project roo
 powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/AppdoersDevTeam/Appdoers-Hub/master/hub-cursor-kit/install-project.ps1 -OutFile $env:TEMP\hub-install.ps1; & $env:TEMP\hub-install.ps1"
 ```
 
-If that fails on token/setup, stop and tell the user: generate a token in Hub → My Account → Cursor setup, then run:
+If that fails on token/setup, or this is a **new laptop / new teammate**, STOP. Each person must generate their own token in Hub → My Account → Cursor setup, then run:
 
 ```
-powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/AppdoersDevTeam/Appdoers-Hub/master/hub-cursor-kit/setup-my-cursor-token.ps1 -OutFile $env:TEMP\setup-token.ps1; & $env:TEMP\setup-token.ps1"
+node tools/setup-hub-token.mjs
 ```
+
+See `HUB-SETUP.md`. Do not copy another person's token. If `whoami` shows someone else, stop and tell them to update `APPDOERS_CURSOR_TOKEN` on that laptop.
 
 ## Session (every new agent chat, even if `.hub-session.json` exists)
 

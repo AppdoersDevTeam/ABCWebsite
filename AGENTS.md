@@ -66,11 +66,7 @@ If `tools/hub-workflow-cli.mjs` is missing, install the kit from the project roo
 powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/AppdoersDevTeam/Appdoers-Hub/master/hub-cursor-kit/install-project.ps1 -OutFile $env:TEMP\hub-install.ps1; & $env:TEMP\hub-install.ps1"
 ```
 
-If that fails on token/setup, stop. Generate a token in Hub → My Account → Cursor setup, then run:
-
-```powershell
-powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/AppdoersDevTeam/Appdoers-Hub/master/hub-cursor-kit/setup-my-cursor-token.ps1 -OutFile $env:TEMP\setup-token.ps1; & $env:TEMP\setup-token.ps1"
-```
+If that fails on token/setup, or this is a **new laptop / new teammate**, STOP. Each person must generate their own token in Hub → My Account → Cursor setup, then run `node tools/setup-hub-token.mjs` from the repo root (see `HUB-SETUP.md`). Do not copy another person's token.
 
 1. Every new agent chat: `whoami`, then `show-session`, then AskQuestion to confirm client / project / team member (even if `.hub-session.json` exists). Session team member must be the token owner.
 2. If the user did not give a ticket id, create one: `node tools/hub-workflow-cli.mjs create-ticket --title "..." --stage pm`, then `claim-ticket`.
@@ -81,7 +77,7 @@ powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.c
 
 Read-only work (inspect, git pull, answering questions) does not need a ticket. Any Write, StrReplace, Delete, migration, or commit does.
 
-A Cursor project hook in `.cursor/hooks.json` **blocks file edits** when `.hub-ticket-time.json` has no current ticket (`failClosed: true`). Create and claim the ticket first, then retry the edit. One ticket per user request — do not open a new ticket on every keystroke.
+A Cursor project hook in `.cursor/hooks.json` **blocks file edits** when this laptop has no Hub token, or when `.hub-ticket-time.json` has no current ticket (`failClosed: true`). New teammates: see `HUB-SETUP.md`. Create and claim the ticket first, then retry the edit. One ticket per user request — do not open a new ticket on every keystroke.
 
 ---
 

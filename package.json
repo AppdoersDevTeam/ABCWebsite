@@ -1,7 +1,7 @@
 {
   "name": "ashburton-baptist-church",
   "private": true,
-  "version": "1.3.2",
+  "version": "1.3.3",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -15,6 +15,7 @@
     "validate:migrations": "node scripts/validate-migrations.mjs",
     "changelog:next-id": "node scripts/changelog/next-id.mjs",
     "changelog:render": "node scripts/changelog/render.mjs",
+    "hub:setup": "node tools/setup-hub-token.mjs",
     "push:live": "node scripts/push-to-live.mjs"
   },
   "dependencies": {

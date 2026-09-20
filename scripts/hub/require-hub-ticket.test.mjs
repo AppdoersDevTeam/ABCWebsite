@@ -26,6 +26,16 @@ test('denies writes when no ticket is recorded', () => {
   assert.match(decision.agent_message, /create-ticket/);
 });
 
+test('denies writes when this laptop has no Hub token', () => {
+  const decision = decideHubTicketHook(
+    { tool_name: 'Write' },
+    { current_ticket_id: '58e4b526-65af-4663-a1c9-0e2b91975ddf' },
+    { tokenPresent: false }
+  );
+  assert.equal(decision.permission, 'deny');
+  assert.match(decision.agent_message, /setup-hub-token/);
+});
+
 test('allows writes when a ticket is recorded', () => {
   const decision = decideHubTicketHook(
     { tool_name: 'StrReplace' },
