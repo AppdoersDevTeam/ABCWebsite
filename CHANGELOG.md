@@ -7,6 +7,37 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2109-008 — Linked labels show the other person’s name
+
+**Date:** 2026-09-21
+**Time:** 00:58:56
+**Timezone:** Pacific/Auckland
+**Version:** 1.7.23
+**Type:** Changed
+
+**Request**
+
+> When one user or people has been with the account linked, show the name of the person linked to that account, Change the LINKED underneth the names and Add LINKED to + name of the person linked, use the same font color for LINKED. Push when complete.
+
+**Changes**
+
+* Users now shows Linked to plus the People record name under the login name, in the same purple as before.
+* People now shows Linked to plus the linked website login name under the person name, in the same purple as before.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: 68 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors. No browser MCP in this session; linked caption is covered by a unit test.
+
 ## CHG-2026-2109-007 — Dashboard message boxes stay centered and do not close on outside click
 
 **Date:** 2026-09-21

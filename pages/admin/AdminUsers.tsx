@@ -10,6 +10,7 @@ import { LinkDirectoryUserModal } from './LinkDirectoryUserModal';
 import { IntroInquiryEmailModal } from './IntroInquiryEmailModal';
 import { formatLastAccessParts } from '../../lib/dateUtils';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
+import { LinkedToBadge } from '../../components/UI/LinkedToBadge';
 import { PortalDropdown } from '../../components/UI/PortalDropdown';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { Modal } from '../../components/UI/Modal';
@@ -1066,9 +1067,7 @@ export const AdminUsers = () => {
                           </div>
                           <div className="min-w-0">
                             <p className="truncate font-medium text-gold">{displayNameLastFirst(u)}</p>
-                            {link ? (
-                              <p className="text-[11px] font-bold uppercase text-purple-700">Linked</p>
-                            ) : null}
+                            {link ? <LinkedToBadge name={link.name} /> : null}
                             {isPendingApproval(u) && (
                               <p className="text-[11px] font-bold uppercase text-red-600">Pending</p>
                             )}

@@ -6,6 +6,36 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2109-008",
+      "date": "2026-09-21",
+      "time": "00:58:56",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T12:58:56.257Z",
+      "version": "1.7.23",
+      "type": "changed",
+      "area": "admin",
+      "title": "Linked labels show the other person’s name",
+      "request": "When one user or people has been with the account linked, show the name of the person linked to that account, Change the LINKED underneth the names and Add LINKED to + name of the person linked, use the same font color for LINKED. Push when complete.",
+      "changes": [
+        "Users now shows Linked to plus the People record name under the login name, in the same purple as before.",
+        "People now shows Linked to plus the linked website login name under the person name, in the same purple as before."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "68 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors. No browser MCP in this session; linked caption is covered by a unit test."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2109-007",
       "date": "2026-09-21",
       "time": "00:53:45",

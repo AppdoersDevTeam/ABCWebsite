@@ -7,6 +7,7 @@ import { supabase } from '../../lib/supabase';
 import { appConfirm } from '../../lib/appDialog';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { PortalDropdown } from '../../components/UI/PortalDropdown';
+import { LinkedToBadge } from '../../components/UI/LinkedToBadge';
 import { buildStoredRole, getDisplayRole, inferProfileType } from '../../lib/teamMemberUtils';
 import { downloadDirectoryCsv, downloadDirectoryPdf } from '../../lib/exportDirectoryPeople';
 import { logAuditEventSafe } from '../../lib/auditLog';
@@ -296,6 +297,7 @@ export const AdminTeam = () => {
   const [alsoAffectLinkedAccount, setAlsoAffectLinkedAccount] = useState(false);
   const [linkedUser, setLinkedUser] = useState<LinkedWebsiteUser | null>(null);
   const [linkedUserLoading, setLinkedUserLoading] = useState(false);
+  const [linkedUserNameById, setLinkedUserNameById] = useState<Record<string, string>>({});
 
   const activeMembersList = useMemo(() => members.filter((m) => !m.is_archived), [members]);
   const archivedMembersList = useMemo(() => members.filter((m) => m.is_archived), [members]);
@@ -326,12 +328,13 @@ export const AdminTeam = () => {
         getDisplayRole(m) ?? '',
         (m.groups || []).map((g) => g.name).filter(Boolean).join(' '),
         (m.job_roles || []).map((r) => r.name).filter(Boolean).join(' '),
+        (m.user_id && linkedUserNameById[m.user_id]) || '',
       ]
         .join(' ')
         .toLowerCase();
       return haystack.includes(q);
     });
-  }, [filteredMembers, searchText]);
+  }, [filteredMembers, searchText, linkedUserNameById]);
 
   const churchName = (metadata as any)?.name ? String((metadata as any).name) : 'Church';
 
@@ -474,8 +477,31 @@ export const AdminTeam = () => {
         return member;
       });
       setMembers(withJoins);
+
+      const userIds = [
+        ...new Set(withJoins.map((m) => m.user_id).filter((id): id is string => Boolean(id))),
+      ];
+      if (userIds.length === 0) {
+        setLinkedUserNameById({});
+      } else {
+        const { data: linkedUsers, error: linkedUsersError } = await supabase
+          .from('users')
+          .select('id, name, first_name, last_name')
+          .in('id', userIds);
+        if (linkedUsersError) {
+          console.warn('AdminTeam - linked user names lookup failed:', linkedUsersError);
+          setLinkedUserNameById({});
+        } else {
+          const names: Record<string, string> = {};
+          for (const row of linkedUsers || []) {
+            names[row.id] = displayName(row);
+          }
+          setLinkedUserNameById(names);
+        }
+      }
     } catch (error) {
       console.error('Error fetching team members:', error);
+      setLinkedUserNameById({});
       alert(`Failed to load ${PEOPLE_LABEL}`);
     } finally {
       setIsLoading(false);
@@ -1351,7 +1377,7 @@ export const AdminTeam = () => {
                           <div className="min-w-0">
                             <p className="truncate font-medium text-gold">{lastFirstFromFullName(member.name)}</p>
                             {member.user_id ? (
-                              <p className="text-[11px] font-bold uppercase text-purple-700">Linked</p>
+                              <LinkedToBadge name={linkedUserNameById[member.user_id]} />
                             ) : (
                               <p className="text-[11px] font-bold uppercase text-neutral">No account</p>
                             )}

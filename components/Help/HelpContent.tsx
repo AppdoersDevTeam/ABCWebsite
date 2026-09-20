@@ -67,7 +67,7 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode, isSuperAdmin = f
                 account while logged in.
               </li>
               <li>Link a login to a {PEOPLE_LABEL} record so group memberships and rosters apply to that account. Use Check {PEOPLE_LABEL} Links to retry safe automatic matches.</li>
-              <li>When a login is linked, Users shows Linked under the name in the same purple as {PEOPLE_LABEL}. Pending shows in red.</li>
+              <li>When a login is linked, Users shows Linked to plus the {PEOPLE_LABEL} name under the login name, in the same purple as {PEOPLE_LABEL}. Pending shows in red.</li>
               <li>Not every login needs a {PEOPLE_LABEL} row—only link when they should appear in ministry lists or see group rosters.</li>
             </Section>
 
@@ -117,7 +117,7 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode, isSuperAdmin = f
               <li>Add and edit people shown on the public leadership pages and used for ministry structure.</li>
               <li>Assign groups (ministries) and job roles; photos and names feed leader lines on rosters and listings.</li>
               <li>Watch for duplicate emails and “linked account” vs “no account link” so logins and {PEOPLE_LABEL} rows stay aligned.</li>
-              <li>If a person shows Linked, the 3-dots menu includes Unlink account. That option is not shown when there is no linked login.</li>
+              <li>If a person is linked, the list shows Linked to plus the website login name in purple. The 3-dots menu includes Unlink account. That option is not shown when there is no linked login.</li>
               <li>If you archive or delete a person who has a linked website login, you are told the login will be unlinked. You can also choose to archive or delete that login at the same time.</li>
               <li>Adding, archiving, or deleting a person sends them a confirmation email about that action.</li>
             </Section>
