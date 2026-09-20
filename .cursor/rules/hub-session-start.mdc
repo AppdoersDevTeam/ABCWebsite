@@ -38,10 +38,16 @@ Run this checklist on the **first message** of every new Cursor agent conversati
 
 ## Portable setup (any repo)
 
-Install from `hub-cursor-kit/` in Appdoers CRM:
+If `tools/hub-workflow-cli.mjs` is missing, install from the project root before anything else:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File "path\to\hub-cursor-kit\install.ps1" -TargetProject "C:\path\to\your-project"
+powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/AppdoersDevTeam/Appdoers-Hub/master/hub-cursor-kit/install-project.ps1 -OutFile $env:TEMP\hub-install.ps1; & $env:TEMP\hub-install.ps1"
 ```
 
-Requires `tools/hub-workflow-cli.mjs`, `tools/hub-ticket-time.mjs`, `.cursor/rules/` Hub rule files, and `.env.local` (or parent `.env.hub`) with `APPDOERS_HUB_URL` and `APPDOERS_CURSOR_TOKEN`.
+If that fails on token/setup, stop. Generate a token in Hub → My Account → Cursor setup, then run:
+
+```powershell
+powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/AppdoersDevTeam/Appdoers-Hub/master/hub-cursor-kit/setup-my-cursor-token.ps1 -OutFile $env:TEMP\setup-token.ps1; & $env:TEMP\setup-token.ps1"
+```
+
+Requires `tools/hub-workflow-cli.mjs`, `tools/hub-ticket-time.mjs`, `.cursor/rules/` Hub rule files, and a laptop token in `%USERPROFILE%\.appdoers\hub.env` (or `.env.local` / `.env.hub`) with `APPDOERS_HUB_URL` and `APPDOERS_CURSOR_TOKEN`.

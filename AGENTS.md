@@ -50,19 +50,38 @@ If an equivalent mechanism already exists, extend it. Do not create a second cha
 
 ## Hub tickets (mandatory)
 
-Appdoers Hub is the source of truth for work in this repo. **Do not change files until a Hub ticket exists for the request.**
+Appdoers Hub is the source of truth for all work in this repo. Follow this on **every request**, including the first message of a new chat. Do not skip it because a folder looks unrelated, because the user asked for a small change, or because rules already exist.
 
-This is not optional. The user does not have to mention tickets.
+**Do not change files until session is confirmed and a Hub ticket exists.** This is not optional. The user does not have to mention tickets.
 
-1. Confirm client, project, and team member (`node tools/hub-workflow-cli.mjs whoami` then `show-session`).
-2. If the user did not give a ticket id, create one: `node tools/hub-workflow-cli.mjs create-ticket --title "..."`.
-3. Claim it and move to `developer` before implementation.
+Use the CLI only. Never call Hub HTTP endpoints yourself:
+
+```
+node tools/hub-workflow-cli.mjs <command>
+```
+
+If `tools/hub-workflow-cli.mjs` is missing, install the kit from the project root before anything else:
+
+```powershell
+powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/AppdoersDevTeam/Appdoers-Hub/master/hub-cursor-kit/install-project.ps1 -OutFile $env:TEMP\hub-install.ps1; & $env:TEMP\hub-install.ps1"
+```
+
+If that fails on token/setup, stop. Generate a token in Hub → My Account → Cursor setup, then run:
+
+```powershell
+powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/AppdoersDevTeam/Appdoers-Hub/master/hub-cursor-kit/setup-my-cursor-token.ps1 -OutFile $env:TEMP\setup-token.ps1; & $env:TEMP\setup-token.ps1"
+```
+
+1. Every new agent chat: `whoami`, then `show-session`, then AskQuestion to confirm client / project / team member (even if `.hub-session.json` exists). Session team member must be the token owner.
+2. If the user did not give a ticket id, create one: `node tools/hub-workflow-cli.mjs create-ticket --title "..." --stage pm`, then `claim-ticket`.
+3. If they gave an id, `get-ticket` and use it. If it is on the wrong client/project, `update-ticket --project-id "<correct-uuid>"` with a note.
 4. Include the ticket id in progress notes and the final response.
-5. Never call Hub HTTP endpoints directly; only use `node tools/hub-workflow-cli.mjs`.
+5. Stages: `pm` → `developer` → `qa` → `reviewer` → `done`. Move to `done` only after explicit QA pass AND reviewer approval.
+6. Flush time with `flush-ticket-time --ticket-id "<id>"` when implementation for a request is complete. Never pass hours yourself.
 
 Read-only work (inspect, git pull, answering questions) does not need a ticket. Any Write, StrReplace, Delete, migration, or commit does.
 
-A Cursor project hook in `.cursor/hooks.json` **blocks file edits** when `.hub-ticket-time.json` has no current ticket. Create and claim the ticket first, then retry the edit. One ticket per user request — do not open a new ticket on every keystroke.
+A Cursor project hook in `.cursor/hooks.json` **blocks file edits** when `.hub-ticket-time.json` has no current ticket (`failClosed: true`). Create and claim the ticket first, then retry the edit. One ticket per user request — do not open a new ticket on every keystroke.
 
 ---
 

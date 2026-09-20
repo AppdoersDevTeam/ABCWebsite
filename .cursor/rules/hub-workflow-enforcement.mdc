@@ -5,9 +5,11 @@ alwaysApply: true
 
 # Appdoers Hub Workflow Enforcement
 
-- Appdoers Hub is the source of truth for work tracking.
-- Follow `.cursor/rules/hub-session-start.mdc` before the first ticket in each agent chat.
-- **First action** of any request that will change files: create a Hub ticket (`create-ticket`) or use the user-supplied id, then `claim-ticket` / `move-ticket --stage developer`.
+- Appdoers Hub is the source of truth for all work in this repo.
+- Follow this on every request, including the first message of a new chat. Do not skip it because a folder looks unrelated, because the user asked for a small change, or because rules already exist.
+- Follow `.cursor/rules/hub-session-start.mdc` and `.cursor/rules/hub-always.mdc` before the first ticket in each agent chat.
+- **First action** of any request that will change files: create a Hub ticket (`create-ticket --stage pm`) or use the user-supplied id (`get-ticket`), then `claim-ticket` / `move-ticket --stage developer`.
+- If a supplied ticket is on the wrong client/project, `update-ticket --project-id "<correct-uuid>"` with a note.
 - Do not Write, StrReplace, Delete, migrate, or commit without a ticket id. Planning that will lead to edits still creates the ticket first.
 - Use `node tools/hub-workflow-cli.mjs` for **all** Hub actions — never call Hub HTTP endpoints directly.
 - Include ticket id in updates and final responses.

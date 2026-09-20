@@ -5,7 +5,7 @@
       {
         "command": "node .cursor/hooks/require-hub-ticket.mjs",
         "matcher": "Write|StrReplace|Delete|EditNotebook",
-        "failClosed": false
+        "failClosed": true
       }
     ]
   }

@@ -6,6 +6,38 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2009-002",
+      "date": "2026-09-20",
+      "time": "14:31:20",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T02:31:20.728Z",
+      "version": "1.3.2",
+      "type": "infrastructure",
+      "area": "system",
+      "title": "Make Appdoers Hub mandatory on every agent request in this repo",
+      "request": "SET UP SO EVERYONE IN THIS REPO ALWAYS USES THE HUB: Appdoers Hub is the source of truth for all work. Follow this on every request, including the first message of a new chat. Do not skip it because a folder looks unrelated, because the user asked for a small change, or because rules already exist. CLI only, session confirm, tickets before edits, stages, and time tracking.",
+      "changes": [
+        "Added an always-apply Cursor rule and a shared project skill so every agent chat must confirm Hub session, create or use a ticket before edits, use only node tools/hub-workflow-cli.mjs, follow stages, and flush time.",
+        "AGENTS.md and Hub rules now include GitHub install and token-setup fallbacks if the CLI is missing, and say not to skip Hub for small changes or unrelated-looking folders.",
+        "The require-hub-ticket Cursor hook now fails closed, so a broken hook cannot let file edits through without a ticket.",
+        "Added tests that Hub always-apply rules, the project skill, and failClosed exist."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "49 unit tests including new Hub always-apply rule tests. npm run validate passed. No app UI change; browser verification not applicable. Change ID remapped from CHG-2026-2009-001 because remote main already used that ID for the What's On rename."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2009-001",
       "date": "2026-09-20",
       "time": "14:18:39",

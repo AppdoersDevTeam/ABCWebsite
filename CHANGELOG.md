@@ -7,6 +7,39 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2009-002 — Make Appdoers Hub mandatory on every agent request in this repo
+
+**Date:** 2026-09-20
+**Time:** 14:31:20
+**Timezone:** Pacific/Auckland
+**Version:** 1.3.2
+**Type:** Infrastructure
+
+**Request**
+
+> SET UP SO EVERYONE IN THIS REPO ALWAYS USES THE HUB: Appdoers Hub is the source of truth for all work. Follow this on every request, including the first message of a new chat. Do not skip it because a folder looks unrelated, because the user asked for a small change, or because rules already exist. CLI only, session confirm, tickets before edits, stages, and time tracking.
+
+**Changes**
+
+* Added an always-apply Cursor rule and a shared project skill so every agent chat must confirm Hub session, create or use a ticket before edits, use only node tools/hub-workflow-cli.mjs, follow stages, and flush time.
+* AGENTS.md and Hub rules now include GitHub install and token-setup fallbacks if the CLI is missing, and say not to skip Hub for small changes or unrelated-looking folders.
+* The require-hub-ticket Cursor hook now fails closed, so a broken hook cannot let file edits through without a ticket.
+* Added tests that Hub always-apply rules, the project skill, and failClosed exist.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: not run or failed
+* Notes: 49 unit tests including new Hub always-apply rule tests. npm run validate passed. No app UI change; browser verification not applicable. Change ID remapped from CHG-2026-2009-001 because remote main already used that ID for the What's On rename.
+
 ## CHG-2026-2009-001 — Rename Events to What's On across the site
 
 **Date:** 2026-09-20
