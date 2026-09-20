@@ -244,7 +244,7 @@ export const PortalTopBar = ({
               }}
             >
               <LogOut size={18} />
-              Log Out
+              Sign Out
             </button>
           </div>
         )}

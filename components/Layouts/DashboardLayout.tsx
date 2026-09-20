@@ -6,7 +6,6 @@ import {
   Calendar, 
   BookOpen, 
   ClipboardList, 
-  LogOut, 
   X,
   ArrowRightLeft,
   HelpCircle,
@@ -126,9 +125,9 @@ export const DashboardLayout = () => {
             })}
           </nav>
 
+          {isAdminUser(user) && (
           <div className={`border-t border-gray-100 p-3 ${sidebarCollapsed ? 'lg:px-2' : ''}`}>
-            {isAdminUser(user) && (
-              <button 
+            <button 
                 title="Back to Admin"
                 onClick={() => {
                   sessionStorage.removeItem('testRoleOverride');
@@ -141,18 +140,8 @@ export const DashboardLayout = () => {
                 <ArrowRightLeft size={18} />
                 <span className={`text-sm font-bold ${sidebarCollapsed ? 'lg:hidden' : ''}`}>Back to Admin</span>
               </button>
-            )}
-            <button 
-              title="Sign out"
-              onClick={handleLogout}
-              className={`w-full flex items-center py-3 text-neutral hover:bg-red-50 hover:text-red-500 transition-colors rounded-[4px] ${
-                sidebarCollapsed ? 'lg:justify-center lg:space-x-0 lg:px-2 space-x-3 px-4' : 'space-x-3 px-4'
-              }`}
-            >
-              <LogOut size={18} />
-              <span className={`text-sm font-bold ${sidebarCollapsed ? 'lg:hidden' : ''}`}>Sign Out</span>
-            </button>
           </div>
+          )}
         </div>
         </aside>
 

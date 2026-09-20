@@ -6,7 +6,6 @@ import {
   Calendar, 
   BookOpen, 
   ClipboardList, 
-  LogOut, 
   X,
   UserCog,
   ArrowRightLeft,
@@ -244,16 +243,6 @@ export const AdminLayout = () => {
             >
               <ArrowRightLeft size={18} />
               <span className={`text-sm font-bold ${sidebarCollapsed ? 'lg:hidden' : ''}`}>View as Member</span>
-            </button>
-            <button 
-              title="Sign out"
-              onClick={handleLogout}
-              className={`w-full flex items-center py-3 text-neutral hover:bg-red-50 hover:text-red-500 transition-colors rounded-[4px] ${
-                sidebarCollapsed ? 'lg:justify-center lg:space-x-0 lg:px-2 space-x-3 px-4' : 'space-x-3 px-4'
-              }`}
-            >
-              <LogOut size={18} />
-              <span className={`text-sm font-bold ${sidebarCollapsed ? 'lg:hidden' : ''}`}>Sign Out</span>
             </button>
           </div>
         </div>

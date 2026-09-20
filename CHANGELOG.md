@@ -7,6 +7,37 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2009-017 — Sign Out in user menu; My Profile opens own user file
+
+**Date:** 2026-09-20
+**Time:** 21:26:09
+**Timezone:** Pacific/Auckland
+**Version:** 1.7.4
+**Type:** Changed
+
+**Request**
+
+> The Sign Out left button on the bootom of the left menu, put it inside of the top user buttom arrow when open  the arrow also create a User Profile as per image, when clicked on the User Profile take the user to its on User File View.
+
+**Changes**
+
+* Sign Out is removed from the bottom of the left menu and is only in the top user-arrow menu, with the same logout behaviour.
+* My Profile in that menu matches the attached sample (photo and gold label) and opens the signed-in person's own user file: name, contact, role, directory type, groups, job roles, baptism, and membership.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: Unit tests, validate, and vite build run after implementation. Push to live was not requested.
+
 ## CHG-2026-2009-016 — Solid white notification bell on the gold search bar
 
 **Date:** 2026-09-20

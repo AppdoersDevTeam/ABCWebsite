@@ -6,6 +6,36 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2009-017",
+      "date": "2026-09-20",
+      "time": "21:26:09",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T09:26:09.496Z",
+      "version": "1.7.4",
+      "type": "changed",
+      "area": "admin",
+      "title": "Sign Out in user menu; My Profile opens own user file",
+      "request": "The Sign Out left button on the bootom of the left menu, put it inside of the top user buttom arrow when open  the arrow also create a User Profile as per image, when clicked on the User Profile take the user to its on User File View.",
+      "changes": [
+        "Sign Out is removed from the bottom of the left menu and is only in the top user-arrow menu, with the same logout behaviour.",
+        "My Profile in that menu matches the attached sample (photo and gold label) and opens the signed-in person's own user file: name, contact, role, directory type, groups, job roles, baptism, and membership."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "Unit tests, validate, and vite build run after implementation. Push to live was not requested."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2009-016",
       "date": "2026-09-20",
       "time": "21:11:53",
