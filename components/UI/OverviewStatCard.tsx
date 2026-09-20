@@ -14,8 +14,6 @@ interface OverviewStatCardProps {
   valueSize?: OverviewValueSize;
   valueClassName?: string;
   className?: string;
-  descriptionClassName?: string;
-  descriptionUnderIcon?: boolean;
 }
 
 const valueSizeClasses: Record<OverviewValueSize, string> = {
@@ -40,17 +38,7 @@ export const OverviewStatCard: React.FC<OverviewStatCardProps> = ({
   valueSize = 'stat',
   valueClassName = '',
   className = '',
-  descriptionClassName = '',
-  descriptionUnderIcon = false,
 }) => {
-  const iconBadge = (
-    <div
-      className={`p-2.5 rounded-full w-11 h-11 flex items-center justify-center transition-colors shrink-0 ${iconClassName} group-hover:bg-gold group-hover:text-white ${highlight ? 'bg-gold/15' : ''}`}
-    >
-      {icon}
-    </div>
-  );
-
   return (
     <div
       className={`flex-1 h-full min-h-[148px] glass-card rounded-[12px] px-5 py-3 md:px-6 md:py-3 relative flex flex-col transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-lg group bg-white border border-gray-100 ${highlight ? 'border-2 border-gold shadow-sm' : ''} ${className}`}
@@ -58,46 +46,28 @@ export const OverviewStatCard: React.FC<OverviewStatCardProps> = ({
       <div className="absolute top-3 right-5 text-gold">
         <ArrowUpRight size={CARD_ARROW_SIZE} strokeWidth={3} />
       </div>
-      {descriptionUnderIcon ? (
-        <div className="flex min-h-0 flex-1 items-start gap-x-3">
-          <div className="flex shrink-0 flex-col items-start gap-1">
-            {iconBadge}
-            {description}
-          </div>
-          <div className="flex min-w-0 flex-1 flex-col">
-            <p className="min-h-11 flex items-center justify-center text-center text-[18px] font-semibold text-charcoal leading-snug">
-              {label}
-            </p>
-            <div
-              className={`${valueSizeClasses[valueSize]} flex flex-1 items-start justify-center pt-1 text-center normal-case text-gold ${valueClassName}`}
-            >
-              {value}
-            </div>
-          </div>
-          <div className="w-11 shrink-0" aria-hidden="true" />
+      <div className="grid grid-cols-[2.75rem_minmax(0,1fr)_2.75rem] items-center gap-x-3 shrink-0">
+        <div
+          className={`p-2.5 rounded-full w-11 h-11 flex items-center justify-center transition-colors shrink-0 ${iconClassName} group-hover:bg-gold group-hover:text-white ${highlight ? 'bg-gold/15' : ''}`}
+        >
+          {icon}
+        </div>
+        <p className="min-h-11 flex items-center justify-center text-center text-[18px] font-semibold text-charcoal leading-snug">
+          {label}
+        </p>
+        <div aria-hidden="true" />
+      </div>
+      <div
+        className={`${valueSizeClasses[valueSize]} flex flex-1 items-center justify-center text-center normal-case text-gold ${valueClassName}`}
+      >
+        {value}
+      </div>
+      {description ? (
+        <div className={`flex ${DESCRIPTION_ROW_MIN_HEIGHT} shrink-0 items-center justify-center text-[15px] text-neutral leading-relaxed`}>
+          {description}
         </div>
       ) : (
-        <>
-          <div className="grid grid-cols-[2.75rem_minmax(0,1fr)_2.75rem] items-center gap-x-3 shrink-0">
-            {iconBadge}
-            <p className="min-h-11 flex items-center justify-center text-center text-[18px] font-semibold text-charcoal leading-snug">
-              {label}
-            </p>
-            <div aria-hidden="true" />
-          </div>
-          <div
-            className={`${valueSizeClasses[valueSize]} flex flex-1 items-center justify-center text-center normal-case text-gold ${valueClassName}`}
-          >
-            {value}
-          </div>
-          {description ? (
-            <div className={`flex ${DESCRIPTION_ROW_MIN_HEIGHT} shrink-0 text-[15px] text-neutral leading-relaxed ${descriptionClassName || 'items-center justify-center'}`}>
-              {description}
-            </div>
-          ) : (
-            <div className={`${DESCRIPTION_ROW_MIN_HEIGHT} shrink-0`} />
-          )}
-        </>
+        <div className={`${DESCRIPTION_ROW_MIN_HEIGHT} shrink-0`} />
       )}
       {footerLabel ? (
         <div className="pt-4 mt-auto shrink-0 border-t border-gray-100">

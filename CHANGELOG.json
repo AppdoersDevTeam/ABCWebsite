@@ -6,6 +6,36 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2109-031",
+      "date": "2026-09-21",
+      "time": "02:55:09",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T14:55:09.194Z",
+      "version": "1.7.46",
+      "type": "changed",
+      "area": "admin",
+      "title": "Users status icons centred under the count, 4px smaller",
+      "request": "On the Users Card for Overview Bring back all  the Icons with its respective number into the center line alignemnt unterneth the count number, also decrease in 4px. all of the counts for each icon. push to live.",
+      "changes": [
+        "The Users Overview Approved, Pending, and Not linked icons sit on a centred line under the main count again.",
+        "Those icon counts are 4px smaller."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "73 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2109-030",
       "date": "2026-09-21",
       "time": "02:53:18",

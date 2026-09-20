@@ -7,6 +7,37 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2109-031 — Users status icons centred under the count, 4px smaller
+
+**Date:** 2026-09-21
+**Time:** 02:55:09
+**Timezone:** Pacific/Auckland
+**Version:** 1.7.46
+**Type:** Changed
+
+**Request**
+
+> On the Users Card for Overview Bring back all  the Icons with its respective number into the center line alignemnt unterneth the count number, also decrease in 4px. all of the counts for each icon. push to live.
+
+**Changes**
+
+* The Users Overview Approved, Pending, and Not linked icons sit on a centred line under the main count again.
+* Those icon counts are 4px smaller.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: 73 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors.
+
 ## CHG-2026-2109-030 — Left menu divider before View as Member matches Overview
 
 **Date:** 2026-09-21
