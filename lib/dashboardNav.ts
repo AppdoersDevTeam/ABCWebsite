@@ -11,6 +11,7 @@ export const DASHBOARD_NAV_ICON = {
   rosters: 'bg-indigo-50 text-indigo-600',
   help: 'bg-cyan-50 text-cyan-600',
   users: 'bg-sky-50 text-sky-600',
+  roles: 'bg-amber-50 text-amber-700',
   settings: 'bg-slate-50 text-slate-600',
   logs: 'bg-rose-50 text-rose-600',
   changelog: 'bg-violet-50 text-violet-600',

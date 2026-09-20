@@ -1,7 +1,7 @@
 // Application Constants
 
 // Super admin email — this account is always super admin.
-// Other admins are promoted via User Management by any approved admin.
+// Other admins are promoted via Users under Users & Roles by any approved admin.
 export const ADMIN_EMAIL = 'devteam@appdoers.co.nz';
 export const SUPER_ADMIN_EMAIL = ADMIN_EMAIL;
 export const CONTACT_FORM_RECIPIENT = 'pastor@ashburtonbaptist.co.nz';
@@ -35,6 +35,19 @@ export function displayName(user: { first_name?: string; last_name?: string; nam
   return full || user.name || 'User';
 }
 
+/** Last, First — matches the Users table name column. */
+export function displayNameLastFirst(
+  user: { first_name?: string; last_name?: string; name?: string } | null | undefined
+): string {
+  if (!user) return 'User';
+  const first = (user.first_name || '').trim();
+  const last = (user.last_name || '').trim();
+  if (last && first) return `${last}, ${first}`;
+  if (last) return last;
+  if (first) return first;
+  return user.name || 'User';
+}
+
 /** Get the user's first initial for compact avatars. */
 export function displayInitial(user: { first_name?: string; name?: string } | null | undefined): string {
   if (!user) return 'U';
@@ -47,7 +60,7 @@ function firstLetter(value?: string | null): string {
   return trimmed ? trimmed.charAt(0).toUpperCase() : '';
 }
 
-/** Initials from first name and last name for User Management avatars. */
+/** Initials from first name and last name for Users avatars. */
 export function displayInitials(
   user: { first_name?: string; last_name?: string; name?: string } | null | undefined
 ): string {
@@ -82,7 +95,7 @@ export function isAccessHeld(user: ApprovalFlags | null | undefined): boolean {
   return !!user && user.is_access_held === true && user.is_approved !== true;
 }
 
-/** Approved website admin — full admin portal, including User Management. */
+/** Approved website admin — full admin portal, including Users & Roles. */
 export function isAdminUser(
   user: { role?: string | null; is_approved?: boolean | null } | null | undefined
 ): boolean {

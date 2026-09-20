@@ -46,6 +46,24 @@ export function formatDdMmYyyyHHmm(input: Date | string | undefined, timeZone?: 
   return `${day} ${time}`;
 }
 
+/** Last-access display as dd/mm/yyyy and 12-hour time on separate lines. */
+export function formatLastAccessParts(
+  input: Date | string | undefined,
+  timeZone?: string
+): { date: string; time: string } | null {
+  const date = parseDisplayDate(input);
+  if (!date) return null;
+  const day = formatDdMmYyyy(date, timeZone);
+  const time = new Intl.DateTimeFormat('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+    ...(timeZone ? { timeZone } : {}),
+  }).format(date);
+  if (!day) return null;
+  return { date: day, time };
+}
+
 /**
  * Get the user's current timezone (IANA timezone identifier)
  * e.g., 'America/New_York', 'Europe/London', 'Asia/Tokyo'

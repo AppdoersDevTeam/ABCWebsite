@@ -90,7 +90,7 @@ export function downloadAdminUsersCsv(
     'Leadership',
     'Joined',
   ];
-  const title = `${meta.churchName} – User Management List`;
+  const title = `${meta.churchName} – Users List`;
   const exportedLine = `Exported: ${formatLocalDateTime(meta.exportedAt)}`;
 
   const lines = [
@@ -115,7 +115,7 @@ export function downloadAdminUsersPdf(
   const rows = toRows(users, context);
   const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
 
-  const headerText = `${meta.churchName} – User Management List`;
+  const headerText = `${meta.churchName} – Users List`;
   const exportedAtText = formatLocalDateTime(meta.exportedAt);
 
   autoTable(doc, {

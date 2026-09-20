@@ -45,8 +45,8 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode, isSuperAdmin = f
           <>
             <Section title="Overview">
               <li>Your landing page after signing in as an admin: quick snapshot and shortcuts into the main tools.</li>
-              <li>The Users card shows how many approved users are in the system. Click it to open User Management.</li>
-              <li>Use it to orient new admins before they open User Management or Leadership.</li>
+              <li>The Users card shows how many approved users are in the system. Click it to open Users under Users & Roles.</li>
+              <li>Use it to orient new admins before they open Users, Roles, or Leadership.</li>
             </Section>
 
             <Section title="Annual Calendar">
@@ -55,24 +55,16 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode, isSuperAdmin = f
               <li>The calendar updates when you add or change events, devotionals, or newsletters. Sermons follow the church YouTube channel.</li>
             </Section>
 
-            <Section title="User Management">
-              <li>Every approved admin can use this page — including User Management, Leadership, {EVENTS_LABEL}, and the rest of the admin menu.</li>
-              <li>See everyone who has a website login: email, role (member/admin), and approval status.</li>
-              <li>Approve new accounts as a member or as an admin, reset passwords, and promote or demote admin access.</li>
+            <Section title="Users & Roles">
+              <li>The Users & Roles menu opens Users and Roles. Roles are named labels (Owner, Admin, Member, Group Leader, plus any you add) — there is no permissions matrix.</li>
+              <li>On Users, search by name, username, email or mobile, filter by role, and export the current list. Row actions include notify, assign a role, edit, leadership linking, approval, and delete.</li>
+              <li>On Roles, add a role name and type (Account, Member, or Group Leader) and see how many people have that role. System roles cannot be deleted.</li>
               <li>
-                Use <span className="font-semibold text-charcoal">Actions → Delete user</span> to remove someone from
+                Use <span className="font-semibold text-charcoal">Delete</span> to remove someone from
                 the system after confirmation. They receive an email confirming the deletion. You cannot delete your own
                 account while logged in.
               </li>
-              <li>
-                Click the summary cards (All Users, Pending Users, Hold Access, Approved, Linked Account, Admin Users) or use Search and
-                Sort by to filter the list. Linked logins show the matching Leadership person on the same row, with Unlink.
-              </li>
-              <li>
-                Link a login to a Leadership person so group memberships and rosters apply to that account. Use “Check
-                Leadership Links” to retry safe automatic matches; use “Link Leadership” when you need to pick the right
-                person manually.
-              </li>
+              <li>Link a login to a Leadership person so group memberships and rosters apply to that account. Use Check Leadership Links to retry safe automatic matches.</li>
               <li>Not every login needs a Leadership row—only link when they should appear in ministry lists or see group rosters.</li>
             </Section>
 

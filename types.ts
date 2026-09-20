@@ -16,6 +16,8 @@ export interface User {
   is_super_admin?: boolean;
   created_at?: string;
   user_timezone?: string;
+  /** Named account role from public.account_roles (display label, not a permission matrix). */
+  account_role_id?: string | null;
 }
 
 export interface NavItem {

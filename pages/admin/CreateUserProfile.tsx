@@ -71,6 +71,12 @@ export const CreateUserProfile: React.FC<CreateUserProfileProps> = ({ isOpen, on
         return;
       }
 
+      const { data: memberRole } = await supabase
+        .from('account_roles')
+        .select('id')
+        .eq('slug', 'member')
+        .maybeSingle();
+
       const fName = firstName || email.split('@')[0];
       const lName = lastName || '';
       const newUser: User = {
@@ -82,6 +88,7 @@ export const CreateUserProfile: React.FC<CreateUserProfileProps> = ({ isOpen, on
         name: [fName, lName].filter(Boolean).join(' '),
         is_approved: false,
         role: 'member',
+        account_role_id: memberRole?.id || null,
       };
 
       const { data, error: insertError } = await supabase

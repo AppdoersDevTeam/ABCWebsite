@@ -54,6 +54,7 @@ import { AnnualCalendarPage } from './pages/shared/AnnualCalendarPage';
 // Admin Pages
 import { AdminOverview } from './pages/admin/AdminOverview';
 import { AdminUsers } from './pages/admin/AdminUsers';
+import { AdminRoles } from './pages/admin/AdminRoles';
 import { AdminPrayerWall } from './pages/admin/AdminPrayerWall';
 import { AdminNewsletter } from './pages/admin/AdminNewsletter';
 import { AdminDevotional } from './pages/admin/AdminDevotional';
@@ -229,6 +230,7 @@ const AppRoutes = () => {
                 <Route index element={<AdminOverview />} />
                 <Route path="calendar" element={<AnnualCalendarPage audience="admin" />} />
                 <Route path="users" element={<AdminUsers />} />
+                <Route path="roles" element={<AdminRoles />} />
                 <Route path="emails" element={<AdminEmails />} />
                 <Route path="logs" element={<AdminLogs />} />
                 <Route element={<SuperAdminRoute />}>

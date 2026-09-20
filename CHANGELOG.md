@@ -7,6 +7,39 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2009-010 — Admin Users & Roles menu with Users and Roles cards
+
+**Date:** 2026-09-20
+**Time:** 19:49:11
+**Timezone:** Pacific/Auckland
+**Version:** 1.5.0
+**Type:** Added
+
+**Request**
+
+> On the Left Side menu from Admin, Create a new Item called Users & Roles with an arrow to open up and down. Inside it add a new sub-menu called Users and another called Roles & Permissions. For Users create a card matching the attached Users image. For Roles create a card matching the attached Roles image, without a permissions editor.
+
+**Changes**
+
+* Replaced the Admin User Management left-menu item with an expandable Users & Roles section. Sub-items are Users and Roles & Permissions.
+* Users is now a searchable table card: add user, role filter, name/username/email/mobile search, export, checkboxes, last-access date, ministry group, and a row menu (notify, roles, edit, delete, plus existing approval and leadership actions).
+* Added a Roles card to add, edit, and delete named roles with a role type (Account, Member, or Group Leader) and a user count. There is no permissions matrix. Owner cannot be deleted.
+* Added account_roles in the database, assigned existing logins to Owner/Admin/Member, and an admin last-access lookup from sign-in time.
+
+**Database**
+
+* supabase/migrations/20260920074500_account_roles.sql
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: 57 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors. No browser MCP in this session; Users and Roles screens were verified by production build and by reading the new menu, table, and role-card code.
+
 ## CHG-2026-2009-009 — Auto-run allowlisted Cursor agent commands without Run prompts
 
 **Date:** 2026-09-20

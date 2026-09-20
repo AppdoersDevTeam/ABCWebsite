@@ -1,14 +1,13 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { Users, UserCheck, X, Shield, ShieldOff, Crown, KeyRound, AlertTriangle, Mail, ChevronDown, Link2, Unlink, Trash2, PauseCircle, Download, Search } from 'lucide-react';
+import { Users, UserCheck, X, Shield, ShieldOff, KeyRound, AlertTriangle, ChevronDown, Link2, Unlink, Trash2, PauseCircle, Download, Search, Plus, MoreVertical, Bell, Pencil, Building2, User as UserIcon, UsersRound } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { displayName, displayInitials, filterUsersForAdminView, canChangeUserAdminRole, isAdminUser, isOwnUserAccount, isServiceAccountEmail, isPendingApproval, isAccessHeld, CHURCH_NAME } from '../../lib/constants';
+import { displayName, displayNameLastFirst, displayInitials, filterUsersForAdminView, canChangeUserAdminRole, isAdminUser, isOwnUserAccount, isServiceAccountEmail, isPendingApproval, isAccessHeld, CHURCH_NAME } from '../../lib/constants';
 import { User } from '../../types';
 import { CreateUserProfile } from './CreateUserProfile';
 import { LinkDirectoryUserModal } from './LinkDirectoryUserModal';
 import { IntroInquiryEmailModal } from './IntroInquiryEmailModal';
-import { SkeletonPageHeader, SkeletonStatsCard, SkeletonUserCard } from '../../components/UI/Skeleton';
-import { formatRelativeDateInTimezone } from '../../lib/dateUtils';
+import { formatLastAccessParts } from '../../lib/dateUtils';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { Modal } from '../../components/UI/Modal';
@@ -19,6 +18,8 @@ import { notifyUserReview } from '../../lib/notifyUserReview';
 import { notifyUserAdminRole, adminRoleEmailNote } from '../../lib/notifyUserAdminRole';
 import { notifyUserAccessHold, accessHoldEmailNote } from '../../lib/notifyUserAccessHold';
 import { downloadAdminUsersCsv, downloadAdminUsersPdf } from '../../lib/exportAdminUsers';
+import { deleteUserAccount } from '../../lib/deleteUserAccount';
+import { roleForUser, userMatchesRoleFilter, websiteAccessForSlug, type AccountRole, type AccountRoleType } from '../../lib/accountRoles';
 
 type UserFilter = 'all' | 'pending' | 'held' | 'approved' | 'linked' | 'admins';
 
@@ -29,12 +30,29 @@ type LeadershipLink = {
   phone: string | null;
   img?: string | null;
   created_from_user_sync?: boolean | null;
+  profile_type?: string | null;
+  groups?: string[];
 };
 
 function leadershipInitials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
   const letters = `${parts[0]?.[0] || ''}${parts[1]?.[0] || ''}`.toUpperCase();
   return letters || '?';
+}
+
+function ministryGroupLabel(link?: LeadershipLink): string {
+  if (!link) return '';
+  const groups = (link.groups || []).filter(Boolean);
+  if (link.profile_type === 'staff') {
+    return groups.length ? `${CHURCH_NAME} ${groups.join(', ')}` : `${CHURCH_NAME} Staff`;
+  }
+  return groups.length ? groups.join(', ') : CHURCH_NAME;
+}
+
+function RoleGlyph({ roleType }: { roleType?: AccountRoleType }) {
+  if (roleType === 'member') return <UserIcon size={14} className="text-gold" />;
+  if (roleType === 'group_leader') return <UsersRound size={14} className="text-gold" />;
+  return <Building2 size={14} className="text-gold" />;
 }
 
 export const AdminUsers = () => {
@@ -47,6 +65,19 @@ export const AdminUsers = () => {
   const [searchText, setSearchText] = useState('');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
   const [directoryByUserId, setDirectoryByUserId] = useState<Record<string, LeadershipLink>>({});
+  const [accountRoles, setAccountRoles] = useState<AccountRole[]>([]);
+  const [roleFilter, setRoleFilter] = useState('all');
+  const [lastAccessByUserId, setLastAccessByUserId] = useState<Record<string, string>>({});
+  const [selectedIds, setSelectedIds] = useState<Record<string, boolean>>({});
+  const [showCreateUser, setShowCreateUser] = useState(false);
+  const [addUserMenuOpen, setAddUserMenuOpen] = useState(false);
+  const [exportMenuOpen, setExportMenuOpen] = useState(false);
+  const [editUser, setEditUser] = useState<User | null>(null);
+  const [editForm, setEditForm] = useState({ first_name: '', last_name: '', phone: '' });
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
+  const [roleAssignUser, setRoleAssignUser] = useState<User | null>(null);
+  const [roleAssignId, setRoleAssignId] = useState('');
+  const [isSavingRole, setIsSavingRole] = useState(false);
   const [linkModalUser, setLinkModalUser] = useState<User | null>(null);
   const [emailModalUser, setEmailModalUser] = useState<User | null>(null);
   const [isRelinking, setIsRelinking] = useState(false);
@@ -121,17 +152,32 @@ export const AdminUsers = () => {
       console.log('AdminUsers - Set users:', allUsers?.length || 0);
 
       const ids = list.map((u) => u.id).filter(Boolean);
+
+      const [{ data: roleRows }, { data: lastAccessRows }] = await Promise.all([
+        supabase.from('account_roles').select('id,name,slug,role_type,is_system,sort_order').order('sort_order'),
+        supabase.rpc('admin_list_user_last_access'),
+      ]);
+      setAccountRoles((roleRows || []) as AccountRole[]);
+      const lastMap: Record<string, string> = {};
+      (lastAccessRows || []).forEach((row: { user_id?: string; last_access_at?: string | null }) => {
+        if (row.user_id && row.last_access_at) lastMap[row.user_id] = row.last_access_at;
+      });
+      setLastAccessByUserId(lastMap);
+
       if (ids.length) {
         const { data: dirRows, error: dirErr } = await supabase
           .from('team_members')
-          .select('id,user_id,name,email,phone,img,created_from_user_sync')
+          .select('id,user_id,name,email,phone,img,created_from_user_sync,profile_type,team_member_groups(groups(name))')
           .in('user_id', ids);
         if (dirErr) {
           console.warn('AdminUsers - directory link lookup failed (run ADD_TEAM_MEMBERS_USER_ID.sql):', dirErr);
           setDirectoryByUserId({});
         } else {
           const map: Record<string, LeadershipLink> = {};
-          (dirRows || []).forEach((r: LeadershipLink & { user_id?: string | null }) => {
+          (dirRows || []).forEach((r: LeadershipLink & {
+            user_id?: string | null;
+            team_member_groups?: { groups?: { name?: string } | null }[] | null;
+          }) => {
             if (r.user_id) {
               map[r.user_id] = {
                 id: r.id,
@@ -140,6 +186,10 @@ export const AdminUsers = () => {
                 phone: r.phone ?? null,
                 img: r.img ?? null,
                 created_from_user_sync: r.created_from_user_sync,
+                profile_type: r.profile_type,
+                groups: (r.team_member_groups || [])
+                  .map((row) => row.groups?.name)
+                  .filter((name): name is string => !!name),
               };
             }
           });
@@ -168,7 +218,7 @@ export const AdminUsers = () => {
         asAdmin
           ? restoringHold
             ? `Restore website access for ${displayName(target) || 'this user'} as an admin?`
-            : 'Approve this user as an admin? They will get the full admin portal, including User Management.'
+            : 'Approve this user as an admin? They will get the full admin portal, including Users & Roles.'
           : restoringHold
             ? `Restore website access for ${displayName(target) || 'this user'}? They will again have member access.`
             : 'Are you sure you want to approve this user?'
@@ -429,6 +479,10 @@ export const AdminUsers = () => {
       });
 
       alert(`${userName} is now an admin.${adminRoleEmailNote(notifyResult)}`);
+      const adminRole = accountRoles.find((role) => role.slug === 'admin');
+      if (adminRole) {
+        await supabase.from('users').update({ account_role_id: adminRole.id }).eq('id', userId);
+      }
       fetchUsers();
     } catch (error) {
       console.error('Error making user admin:', error);
@@ -467,6 +521,10 @@ export const AdminUsers = () => {
       alert(
         `${userName} is no longer granted an Administrative role and has been returned to member access.${adminRoleEmailNote(notifyResult)}`
       );
+      const memberRole = accountRoles.find((role) => role.slug === 'member');
+      if (memberRole) {
+        await supabase.from('users').update({ account_role_id: memberRole.id }).eq('id', userId);
+      }
       fetchUsers();
     } catch (error) {
       console.error('Error revoking admin:', error);
@@ -543,11 +601,6 @@ export const AdminUsers = () => {
     () => visibleUsers.filter((u) => !!directoryByUserId[u.id]).length,
     [visibleUsers, directoryByUserId]
   );
-
-  const formatDate = (dateString: string | undefined, userTimezone?: string) => {
-    // For admin views, display dates in the admin's current timezone
-    return formatRelativeDateInTimezone(dateString, userTimezone);
-  };
 
   const directoryNeedsReviewCount = useMemo(() => {
     return visibleUsers.filter((u) => !directoryByUserId[u.id]).length;
@@ -676,15 +729,21 @@ export const AdminUsers = () => {
         break;
     }
 
+    list = list.filter((u) => userMatchesRoleFilter(u, roleFilter, accountRoles));
+
     const q = searchText.trim().toLowerCase();
     if (q) {
       list = list.filter((u) => {
         const link = directoryByUserId[u.id];
+        const assigned = roleForUser(u, accountRoles);
         const haystack = [
           displayName(u),
+          displayNameLastFirst(u),
           u.email,
           u.phone,
           u.role,
+          assigned?.name,
+          ministryGroupLabel(link),
           link?.name,
           link?.email,
           link?.phone,
@@ -697,10 +756,10 @@ export const AdminUsers = () => {
     }
 
     const sorted = [...list].sort((a, b) =>
-      displayName(a).localeCompare(displayName(b), undefined, { sensitivity: 'base' })
+      displayNameLastFirst(a).localeCompare(displayNameLastFirst(b), undefined, { sensitivity: 'base' })
     );
     return sortDir === 'desc' ? sorted.reverse() : sorted;
-  }, [visibleUsers, filter, searchText, directoryByUserId, sortDir]);
+  }, [visibleUsers, filter, roleFilter, accountRoles, searchText, directoryByUserId, sortDir]);
 
   const filenameBase = useMemo(() => {
     const d = new Date();
@@ -714,50 +773,115 @@ export const AdminUsers = () => {
   const exportMeta = () => ({ churchName: CHURCH_NAME, exportedAt: new Date() });
   const exportContext = () => ({ directoryByUserId });
 
+  const listedIds = listedUsers.map((u) => u.id);
+  const selectedCount = listedIds.filter((id) => selectedIds[id]).length;
+  const allListedSelected = listedIds.length > 0 && listedIds.every((id) => selectedIds[id]);
+
+  const toggleSelected = (id: string) => {
+    setSelectedIds((current) => ({ ...current, [id]: !current[id] }));
+  };
+
+  const toggleAllListed = () => {
+    setSelectedIds((current) => {
+      const next = { ...current };
+      const select = !allListedSelected;
+      listedIds.forEach((id) => {
+        next[id] = select;
+      });
+      return next;
+    });
+  };
+
+  const openEditUser = (target: User) => {
+    setActionsMenuUserId(null);
+    setEditUser(target);
+    setEditForm({
+      first_name: target.first_name || '',
+      last_name: target.last_name || '',
+      phone: target.phone || '',
+    });
+  };
+
+  const saveEditUser = async () => {
+    if (!editUser) return;
+    setIsSavingEdit(true);
+    try {
+      const first_name = editForm.first_name.trim();
+      const last_name = editForm.last_name.trim();
+      const phone = editForm.phone.trim();
+      const { error } = await supabase
+        .from('users')
+        .update({
+          first_name,
+          last_name,
+          phone: phone || null,
+          name: [first_name, last_name].filter(Boolean).join(' '),
+        })
+        .eq('id', editUser.id);
+      if (error) throw error;
+      logAuditEventSafe({
+        action: 'update',
+        category: 'users',
+        entityType: 'users',
+        entityId: editUser.id,
+        summary: `Updated profile for ${editUser.email}`,
+      });
+      setEditUser(null);
+      await fetchUsers();
+    } catch (error: unknown) {
+      alert(error instanceof Error ? error.message : 'Could not save user.');
+    } finally {
+      setIsSavingEdit(false);
+    }
+  };
+
+  const openRoleAssign = (target: User) => {
+    setActionsMenuUserId(null);
+    const current = roleForUser(target, accountRoles);
+    setRoleAssignUser(target);
+    setRoleAssignId(current?.id || '');
+  };
+
+  const saveRoleAssign = async () => {
+    if (!roleAssignUser || !roleAssignId) return;
+    const nextRole = accountRoles.find((role) => role.id === roleAssignId);
+    if (!nextRole) return;
+    if (nextRole.slug === 'owner' && !roleAssignUser.is_super_admin) {
+      alert('Owner is reserved for the site owner account and cannot be assigned here.');
+      return;
+    }
+    setIsSavingRole(true);
+    try {
+      const access = websiteAccessForSlug(nextRole.slug);
+      const payload: Record<string, unknown> = { account_role_id: nextRole.id };
+      if (access && !roleAssignUser.is_super_admin) {
+        payload.role = access.role;
+      }
+      const { error } = await supabase.from('users').update(payload).eq('id', roleAssignUser.id);
+      if (error) throw error;
+      logAuditEventSafe({
+        action: 'update',
+        category: 'users',
+        entityType: 'users',
+        entityId: roleAssignUser.id,
+        summary: `Set role ${nextRole.name} for ${roleAssignUser.email}`,
+        details: { role: nextRole.slug },
+      });
+      setRoleAssignUser(null);
+      await fetchUsers();
+    } catch (error: unknown) {
+      alert(error instanceof Error ? error.message : 'Could not update role.');
+    } finally {
+      setIsSavingRole(false);
+    }
+  };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <AdminPageHeader
-        title="User Management"
-        subtitle="Manage user permissions and approvals"
+        title="Users"
+        subtitle="Search, filter, and manage website logins and their roles."
         icon={<Users size={28} />}
-        rightSlot={
-          <div className="flex gap-2 flex-wrap justify-end">
-            <button
-              type="button"
-              onClick={() =>
-                downloadAdminUsersCsv(exportUsers(), filenameBase, exportMeta(), exportContext())
-              }
-              disabled={isLoadingUsers || exportUsers().length === 0}
-              className="bg-white border-2 border-gray-200 text-charcoal px-4 py-2 rounded-[4px] font-bold hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-2 text-sm disabled:opacity-60"
-              title="Download CSV (current view)"
-            >
-              <Download size={16} />
-              CSV
-            </button>
-            <button
-              type="button"
-              onClick={() =>
-                downloadAdminUsersPdf(exportUsers(), filenameBase, exportMeta(), exportContext())
-              }
-              disabled={isLoadingUsers || exportUsers().length === 0}
-              className="bg-white border-2 border-gray-200 text-charcoal px-4 py-2 rounded-[4px] font-bold hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-2 text-sm disabled:opacity-60"
-              title="Download PDF (current view)"
-            >
-              <Download size={16} />
-              PDF
-            </button>
-            <GlowingButton
-              size="sm"
-              variant="outline"
-              className="md:w-auto"
-              onClick={() => void recheckDirectoryLinks()}
-              disabled={isRelinking || isLoadingUsers}
-            >
-              {isRelinking ? 'Checking…' : 'Check Leadership Links'}
-            </GlowingButton>
-          </div>
-        }
       />
 
       {!isLoadingUsers && directoryNeedsReviewCount > 0 && (
@@ -771,502 +895,480 @@ export const AdminUsers = () => {
                 {directoryNeedsReviewCount} user{directoryNeedsReviewCount === 1 ? '' : 's'} not linked to Leadership
               </p>
               <p className="text-red-900 mt-1">
-                Users need a linked Leadership person to inherit ministry/group permissions (rosters). If they shouldn’t have one, you can ignore this. Otherwise click{' '}
-                <span className="font-bold">Link Leadership</span>.
+                Users need a linked Leadership person to inherit ministry/group permissions (rosters). If they shouldn’t have one, you can ignore this. Otherwise use Actions → Link Leadership.
               </p>
             </div>
           </div>
         </div>
       )}
 
-      {isLoadingUsers ? (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-[4px]">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <SkeletonStatsCard key={i} className="!p-3" />
-          ))}
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-[4px]">
-          {(
-            [
-              {
-                id: 'all' as UserFilter,
-                label: 'All Users',
-                value: visibleUsers.length,
-                valueClass: 'text-charcoal',
-                iconWrap: 'bg-blue-100',
-                icon: <Users size={20} className="text-blue-600" />,
-              },
-              {
-                id: 'pending' as UserFilter,
-                label: 'Pending Users',
-                value: visiblePendingCount,
-                valueClass: 'text-gold',
-                iconWrap: 'bg-yellow-100',
-                icon: <UserCheck size={20} className="text-yellow-600" />,
-              },
-              {
-                id: 'held' as UserFilter,
-                label: 'Hold Access',
-                value: visibleHeldCount,
-                valueClass: 'text-orange-600',
-                iconWrap: 'bg-orange-100',
-                icon: <PauseCircle size={20} className="text-orange-600" />,
-              },
-              {
-                id: 'approved' as UserFilter,
-                label: 'Approved Users',
-                value: visibleApprovedCount,
-                valueClass: 'text-green-600',
-                iconWrap: 'bg-green-100',
-                icon: <UserCheck size={20} className="text-green-600" />,
-              },
-              {
-                id: 'linked' as UserFilter,
-                label: 'Linked Account',
-                value: visibleLinkedCount,
-                valueClass: 'text-teal-700',
-                iconWrap: 'bg-gray-200',
-                icon: <Link2 size={20} className="text-gray-600" />,
-              },
-              {
-                id: 'admins' as UserFilter,
-                label: 'Admin Users',
-                value: visibleAdminCount,
-                valueClass: 'text-purple-700',
-                iconWrap: 'bg-purple-100',
-                icon: <Shield size={20} className="text-purple-700" />,
-              },
-            ] as const
-          ).map((card) => {
-            const active = filter === card.id;
-            return (
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div className="relative inline-flex">
+          <button
+            type="button"
+            onClick={() => {
+              setAddUserMenuOpen(false);
+              setShowCreateUser(true);
+            }}
+            className="inline-flex items-center gap-2 rounded-l-lg border-2 border-gold px-4 py-2.5 font-semibold text-gold hover:bg-gold/10 transition-colors"
+          >
+            <span className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-gold">
+              <Plus size={14} />
+            </span>
+            Add User
+          </button>
+          <button
+            type="button"
+            className="rounded-r-lg border-2 border-l-0 border-gold px-2 py-2.5 text-gold hover:bg-gold/10"
+            aria-label="More add-user actions"
+            onClick={() => setAddUserMenuOpen((open) => !open)}
+          >
+            <ChevronDown size={16} />
+          </button>
+          {addUserMenuOpen && (
+            <div className="absolute left-0 top-full z-20 mt-1 w-56 rounded-lg border border-gray-200 bg-white py-1 shadow-lg">
               <button
-                key={card.id}
                 type="button"
-                onClick={() => setFilter(card.id)}
-                className={`text-left bg-white px-[17px] py-2 rounded-[12px] shadow-sm transition-all border min-w-0 w-full ${
-                  active
-                    ? 'border-gold ring-2 ring-gold/30'
-                    : 'border-gray-200 hover:border-gold'
-                }`}
+                className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-charcoal hover:bg-gray-50"
+                onClick={() => {
+                  setAddUserMenuOpen(false);
+                  void recheckDirectoryLinks();
+                }}
               >
-                <div className="flex items-center gap-2">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${card.iconWrap}`}>{card.icon}</div>
-                  <p className="text-[14px] leading-tight text-charcoal font-bold min-w-0 truncate flex-1">{card.label}</p>
-                  <p className={`text-[18px] font-bold shrink-0 ${card.valueClass}`}>{card.value}</p>
-                </div>
+                <Link2 size={16} className="text-blue-600" />
+                {isRelinking ? 'Checking…' : 'Check Leadership Links'}
               </button>
-            );
-          })}
+            </div>
+          )}
         </div>
-      )}
 
-      <div className="glass-card bg-white/80 border border-white/60 rounded-[12px] p-4">
-        <div className="flex flex-col lg:flex-row gap-3 lg:items-end">
-          <div className="flex-1">
-            <label className="block text-sm font-bold text-charcoal mb-2">Search</label>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+          <label className="sm:w-40">
+            <span className="mb-1 block text-sm font-bold text-charcoal">Role</span>
+            <select
+              value={roleFilter}
+              onChange={(event) => setRoleFilter(event.target.value)}
+              className="w-full border-0 border-b border-gray-300 bg-transparent px-0 py-2 text-sm text-charcoal focus:border-gold focus:outline-none"
+            >
+              <option value="all">All</option>
+              {accountRoles.map((role) => (
+                <option key={role.id} value={role.id}>
+                  {role.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="sm:w-80">
+            <span className="mb-1 block text-sm font-bold text-charcoal">Search by name, username, email or mobile</span>
             <div className="relative">
-              <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral" />
+              <Search size={16} className="absolute left-0 top-1/2 -translate-y-1/2 text-neutral" />
               <input
                 type="text"
                 value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-                className="w-full pl-10 pr-10 py-3 rounded-[6px] border border-gray-200 focus:border-gold focus:outline-none bg-white"
-                placeholder="Search name, email, phone, or linked Leadership…"
+                onChange={(event) => setSearchText(event.target.value)}
+                className="w-full border-0 border-b border-gray-300 bg-transparent py-2 pl-6 pr-8 text-sm text-charcoal focus:border-gold focus:outline-none"
+                placeholder="Search"
               />
               {searchText.trim() && (
                 <button
                   type="button"
                   onClick={() => setSearchText('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral hover:text-charcoal transition-colors"
-                  title="Clear search"
+                  className="absolute right-0 top-1/2 -translate-y-1/2 text-neutral hover:text-charcoal"
                 >
-                  <X size={16} />
+                  <X size={14} />
                 </button>
               )}
             </div>
-          </div>
-          <div className="flex flex-col sm:flex-row sm:items-end gap-3">
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-neutral mb-1">Sort by</label>
-              <select
-                value={filter}
-                onChange={(e) => setFilter(e.target.value as UserFilter)}
-                className="px-3 py-2 bg-white border border-gray-200 rounded-[6px] text-sm font-bold text-charcoal hover:border-gold focus:border-gold focus:outline-none transition-colors min-w-[160px]"
-              >
-                <option value="all">All users</option>
-                <option value="pending">Pending Users</option>
-                <option value="held">Holding</option>
-                <option value="approved">Approved</option>
-                <option value="linked">Linked</option>
-                <option value="admins">Admin users</option>
-              </select>
-            </div>
-            <button
-              type="button"
-              onClick={() => setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))}
-              className="px-3 py-2 bg-white border border-gray-200 rounded-[6px] text-sm font-bold text-neutral hover:text-charcoal hover:border-gold transition-colors"
-              title={sortDir === 'asc' ? 'Ascending' : 'Descending'}
-            >
-              {sortDir === 'asc' ? 'A→Z' : 'Z→A'}
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setFilter('all');
-                setSearchText('');
-                setSortDir('asc');
-              }}
-              className="px-4 py-2 bg-white border border-gray-200 rounded-[6px] text-sm font-bold text-neutral hover:text-charcoal hover:border-gold transition-colors"
-              title="Clear all filters"
-            >
-              Clear
-            </button>
-          </div>
+          </label>
         </div>
-        <p className="text-xs text-neutral mt-3">
-          Showing <span className="font-bold text-charcoal">{listedUsers.length}</span> of{' '}
-          <span className="font-bold text-charcoal">{visibleUsers.length}</span> users
-        </p>
       </div>
 
-      {/* Users List */}
-      {isLoadingUsers ? (
-        <div className="space-y-3">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <SkeletonUserCard key={i} />
-          ))}
-        </div>
-      ) : listedUsers.length === 0 ? (
-        <div className="text-center py-12 bg-white rounded-[12px] border border-gray-200">
-          <Users size={48} className="text-gray-300 mx-auto mb-4" />
-          <p className="text-neutral text-lg font-medium">No users found</p>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {listedUsers.map((u) => {
-            const link = directoryByUserId[u.id];
-            const isLinked = !!link;
-            const completedCardClass =
-              'bg-purple-100 border-2 border-purple-400 p-6 rounded-[12px] shadow-sm transition-all';
-            const plainCardClass =
-              'bg-white border border-gray-200 p-6 rounded-[12px] hover:border-gold transition-all shadow-sm';
-            return (
-            <div key={u.id} className={isLinked ? completedCardClass : plainCardClass}>
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <div className="flex-1">
-                  <div className="flex items-start gap-4">
-                    <div
-                      className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm tracking-wide flex-shrink-0 ${
-                        isLinked ? 'bg-purple-200 text-purple-900' : 'bg-blue-100 text-blue-700'
-                      }`}
-                    >
-                      {displayInitials(u)}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2 flex-wrap">
-                        <h3 className="font-bold text-xl text-charcoal">{displayName(u)}</h3>
-                        {u.is_super_admin && (
-                          <span className="bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded uppercase font-bold flex items-center gap-1">
-                            <Crown size={12} />
-                            Super Admin
-                          </span>
-                        )}
-                        {u.role === 'admin' && !u.is_super_admin && (
-                          <span className="bg-red-100 text-red-700 text-xs px-2 py-1 rounded uppercase font-bold flex items-center gap-1">
-                            <Shield size={12} />
-                            Admin
-                          </span>
-                        )}
-                        {isLinked ? (
-                          <span className="bg-purple-200 text-purple-900 text-xs px-2 py-1 rounded font-bold">
-                            Linked
-                          </span>
-                        ) : (
-                          <span className="bg-red-100 text-red-800 text-xs px-2 py-1 rounded font-bold inline-flex items-center gap-1 border border-red-200">
-                            <AlertTriangle size={12} />
-                            Leadership not linked
-                          </span>
-                        )}
-                        {u.is_approved ? (
-                          <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded uppercase font-bold">
-                            Approved
-                          </span>
-                        ) : isAccessHeld(u) ? (
-                          <span className="bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded uppercase font-bold">
-                            Hold Access
-                          </span>
-                        ) : (
-                          <span className="bg-yellow-100 text-yellow-700 text-xs px-2 py-1 rounded uppercase font-bold">
-                            Pending
-                          </span>
-                        )}
-                      </div>
-                      <div className="space-y-1">
-                        {u.email && (
-                          <p className="text-sm text-neutral flex items-center gap-2">
-                            <span className="font-bold">Email:</span> {u.email}
-                          </p>
-                        )}
-                        {u.phone && (
-                          <p className="text-sm text-neutral flex items-center gap-2">
-                            <span className="font-bold">Phone:</span> {u.phone}
-                          </p>
-                        )}
-                        {u.created_at && (
-                          <p className="text-xs text-neutral flex items-center gap-2 mt-2">
-                            <span className="font-bold">Joined:</span> {formatDate(u.created_at, u.user_timezone)}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 flex-shrink-0 self-start md:self-center">
-                  {!u.is_approved && (
-                    <>
-                      <button
-                        type="button"
-                        onClick={() => handleApproveUser(u.id)}
-                        className="bg-gold text-charcoal px-4 py-2 rounded-[4px] font-bold hover:bg-gold/80 transition-colors shadow-sm flex items-center gap-2 text-sm"
-                        title={isAccessHeld(u) ? 'Restore member access' : 'Approve as member'}
-                      >
-                        <UserCheck size={16} />
-                        {isAccessHeld(u) ? 'Restore Access' : 'Approve'}
-                      </button>
-                      {u.role !== 'admin' && (
-                        <button
-                          type="button"
-                          onClick={() => handleApproveUser(u.id, true)}
-                          className="bg-white border-2 border-purple-200 text-purple-700 px-4 py-2 rounded-[4px] font-bold hover:bg-purple-50 transition-colors shadow-sm flex items-center gap-2 text-sm"
-                          title="Approve as admin"
-                        >
-                          <Shield size={16} />
-                          Approve as Admin
-                        </button>
-                      )}
-                    </>
-                  )}
-
-                  <div
-                    className="relative"
-                    ref={actionsMenuUserId === u.id ? actionsMenuRef : undefined}
-                  >
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setActionsMenuUserId((current) =>
-                          current === u.id ? null : u.id
-                        )
-                      }
-                      className="bg-white border-2 border-gray-200 text-charcoal px-4 py-2 rounded-[4px] font-bold hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-2 text-sm"
-                      aria-expanded={actionsMenuUserId === u.id}
-                      aria-haspopup="menu"
-                    >
-                      Actions
-                      <ChevronDown
-                        size={16}
-                        className={`transition-transform ${
-                          actionsMenuUserId === u.id ? 'rotate-180' : ''
-                        }`}
-                      />
-                    </button>
-
-                    {actionsMenuUserId === u.id && (
-                      <div
-                        role="menu"
-                        className="absolute right-0 top-full mt-2 z-30 w-56 rounded-[8px] border border-gray-200 bg-white py-1 shadow-lg"
-                      >
-                        <button
-                          type="button"
-                          role="menuitem"
-                          className="w-full flex items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-charcoal hover:bg-gray-50"
-                          onClick={() => {
-                            setActionsMenuUserId(null);
-                            setLinkModalUser(u);
-                          }}
-                        >
-                          <Link2 size={16} className="text-blue-600" />
-                          Link Leadership
-                        </button>
-                        {directoryByUserId[u.id] && (
-                          <button
-                            type="button"
-                            role="menuitem"
-                            className="w-full flex items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-red-600 hover:bg-red-50"
-                            onClick={() => {
-                              setActionsMenuUserId(null);
-                              void handleUnlinkLeadership(u);
-                            }}
-                          >
-                            <Unlink size={16} />
-                            Unlink Leadership
-                          </button>
-                        )}
-
-                        <button
-                          type="button"
-                          role="menuitem"
-                          className="w-full flex items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-charcoal hover:bg-gray-50"
-                          onClick={() => {
-                            setActionsMenuUserId(null);
-                            openPasswordReset(u.email);
-                          }}
-                        >
-                          <KeyRound size={16} />
-                          Reset Password
-                        </button>
-
-                        {!u.is_approved && (
-                          <button
-                            type="button"
-                            role="menuitem"
-                            className="w-full flex items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-charcoal hover:bg-gray-50"
-                            onClick={() => {
-                              setActionsMenuUserId(null);
-                              setEmailModalUser(u);
-                            }}
-                          >
-                            <Mail size={16} />
-                            Email
-                          </button>
-                        )}
-
-                        {canChangeUserAdminRole(user, u) &&
-                          !isAccessHeld(u) &&
-                          (u.role === 'member' ? (
-                            <button
-                              type="button"
-                              role="menuitem"
-                              className="w-full flex items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-purple-700 hover:bg-purple-50"
-                              onClick={() => {
-                                setActionsMenuUserId(null);
-                                void handleMakeAdmin(u.id, displayName(u));
-                              }}
-                            >
-                              <Shield size={16} />
-                              Make Admin
-                            </button>
-                          ) : (
-                            <button
-                              type="button"
-                              role="menuitem"
-                              className="w-full flex items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-orange-700 hover:bg-orange-50"
-                              onClick={() => {
-                                setActionsMenuUserId(null);
-                                void handleRevokeAdmin(u.id, displayName(u));
-                              }}
-                            >
-                              <ShieldOff size={16} />
-                              Revoke Admin
-                            </button>
-                          ))}
-
-                        {u.is_approved &&
-                          canChangeUserAdminRole(user, u) && (
-                            <button
-                              type="button"
-                              role="menuitem"
-                              className="w-full flex items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-orange-700 hover:bg-orange-50 border-t border-gray-100 mt-1"
-                              onClick={() => {
-                                setActionsMenuUserId(null);
-                                void handleHoldAccess(
-                                  u.id,
-                                  displayName(u)
-                                );
-                              }}
-                            >
-                              <PauseCircle size={16} />
-                              Hold Access
-                            </button>
-                          )}
-
-                        {isPendingApproval(u) && (
-                          <button
-                            type="button"
-                            role="menuitem"
-                            className="w-full flex items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-red-600 hover:bg-red-50 border-t border-gray-100 mt-1"
-                            onClick={() => {
-                              setActionsMenuUserId(null);
-                              void handleRejectUser(u.id);
-                            }}
-                          >
-                            <X size={16} />
-                            Reject
-                          </button>
-                        )}
-
-                        <button
-                          type="button"
-                          role="menuitem"
-                          disabled={deletingUserId === u.id}
-                          className="w-full flex items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-red-600 hover:bg-red-50 border-t border-gray-100 mt-1 disabled:opacity-60"
-                          onClick={() => {
-                            void handleDeleteUser(u);
-                          }}
-                        >
-                          <Trash2 size={16} />
-                          {deletingUserId === u.id ? 'Deleting…' : 'Delete user'}
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
+      <div className="overflow-hidden rounded-2xl border border-gray-100 bg-gray-50 shadow-sm">
+        <div className="flex justify-end px-4 py-3">
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setExportMenuOpen((open) => !open)}
+              disabled={isLoadingUsers || listedUsers.length === 0}
+              className="inline-flex items-center gap-2 rounded-lg border border-gold bg-white px-3 py-1.5 text-sm font-semibold text-gold hover:bg-gold/10 disabled:opacity-50"
+            >
+              <Download size={16} />
+              Export
+            </button>
+            {exportMenuOpen && (
+              <div className="absolute right-0 top-full z-20 mt-1 w-36 rounded-lg border border-gray-200 bg-white py-1 shadow-lg">
+                <button
+                  type="button"
+                  className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-50"
+                  onClick={() => {
+                    setExportMenuOpen(false);
+                    downloadAdminUsersCsv(exportUsers(), filenameBase, exportMeta(), exportContext());
+                  }}
+                >
+                  CSV
+                </button>
+                <button
+                  type="button"
+                  className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-50"
+                  onClick={() => {
+                    setExportMenuOpen(false);
+                    downloadAdminUsersPdf(exportUsers(), filenameBase, exportMeta(), exportContext());
+                  }}
+                >
+                  PDF
+                </button>
               </div>
-              {link && (
-                <div className="mt-5 pt-5 border-t-2 border-purple-300">
-                  <div className="flex items-center gap-2 mb-3 text-purple-800 text-xs font-bold uppercase tracking-wider">
-                    <Link2 size={14} />
-                    Linked to Leadership
-                  </div>
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <div className="flex items-start gap-4 min-w-0">
-                      <div className="w-12 h-12 rounded-full bg-purple-200 text-purple-900 flex items-center justify-center font-bold text-sm tracking-wide flex-shrink-0 overflow-hidden">
-                        {link.img ? (
-                          <img src={link.img} alt={link.name} className="w-full h-full object-cover" />
-                        ) : (
-                          leadershipInitials(link.name)
-                        )}
-                      </div>
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2 mb-2 flex-wrap">
-                          <h3 className="font-bold text-xl text-charcoal">{link.name}</h3>
-                          <span className="bg-purple-200 text-purple-900 text-xs px-2 py-1 rounded font-bold">
-                            Linked
-                          </span>
-                          <span className="bg-purple-200 text-purple-900 text-xs px-2 py-1 rounded uppercase font-bold">
-                            Leadership
-                          </span>
-                        </div>
-                        {link.email && (
-                          <p className="text-sm text-neutral">
-                            <span className="font-bold">Email:</span> {link.email}
-                          </p>
-                        )}
-                        {link.phone && (
-                          <p className="text-sm text-neutral">
-                            <span className="font-bold">Phone:</span> {link.phone}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => void handleUnlinkLeadership(u)}
-                      className="px-4 py-2 bg-white border border-red-200 text-red-700 rounded-[4px] font-bold hover:bg-red-50 inline-flex items-center justify-center gap-2 text-sm shrink-0"
-                    >
-                      <Unlink size={16} />
-                      Unlink
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-            );
-          })}
+            )}
+          </div>
         </div>
-      )}
+
+        <div className="overflow-x-auto">
+          <table className="min-w-full text-left">
+            <thead>
+              <tr className="border-y border-gray-200 bg-white text-[11px] font-bold uppercase tracking-wider text-neutral">
+                <th className="w-10 px-4 py-3">
+                  <input
+                    type="checkbox"
+                    checked={allListedSelected}
+                    onChange={toggleAllListed}
+                    aria-label="Select all users"
+                    className="h-4 w-4 rounded border-gray-300 text-gold focus:ring-gold"
+                  />
+                </th>
+                <th className="px-3 py-3">
+                  <button type="button" onClick={() => setSortDir((dir) => (dir === 'asc' ? 'desc' : 'asc'))}>
+                    Name {sortDir === 'asc' ? '↑' : '↓'}
+                  </button>
+                </th>
+                <th className="px-3 py-3">Username</th>
+                <th className="px-3 py-3">Role</th>
+                <th className="px-3 py-3">Ministry Group</th>
+                <th className="px-3 py-3">Last Access Date</th>
+                <th className="w-12 px-2 py-3">
+                  <span className="sr-only">Actions</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white">
+              {isLoadingUsers ? (
+                <tr>
+                  <td colSpan={7} className="px-6 py-12 text-center text-neutral">
+                    Loading users…
+                  </td>
+                </tr>
+              ) : listedUsers.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="px-6 py-12 text-center text-neutral">
+                    No users found
+                  </td>
+                </tr>
+              ) : (
+                listedUsers.map((u) => {
+                  const link = directoryByUserId[u.id];
+                  const assigned = roleForUser(u, accountRoles);
+                  const lastAccess = formatLastAccessParts(lastAccessByUserId[u.id], u.user_timezone);
+                  return (
+                    <tr key={u.id} className="border-t border-gray-100">
+                      <td className="px-4 py-3">
+                        <input
+                          type="checkbox"
+                          checked={!!selectedIds[u.id]}
+                          onChange={() => toggleSelected(u.id)}
+                          aria-label={`Select ${displayNameLastFirst(u)}`}
+                          className="h-4 w-4 rounded border-gray-300 text-gold focus:ring-gold"
+                        />
+                      </td>
+                      <td className="px-3 py-3">
+                        <div className="flex items-center gap-3 min-w-[180px]">
+                          <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-gray-100 text-xs font-bold text-neutral flex items-center justify-center">
+                            {link?.img ? (
+                              <img src={link.img} alt="" className="h-full w-full object-cover" />
+                            ) : (
+                              displayInitials(u)
+                            )}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="truncate font-medium text-gold">{displayNameLastFirst(u)}</p>
+                            {isPendingApproval(u) && (
+                              <p className="text-[11px] font-bold uppercase text-yellow-700">Pending</p>
+                            )}
+                            {isAccessHeld(u) && (
+                              <p className="text-[11px] font-bold uppercase text-orange-700">Hold Access</p>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-3 py-3 text-sm text-charcoal">{u.email || '—'}</td>
+                      <td className="px-3 py-3">
+                        <span className="inline-flex items-center gap-2 text-sm font-medium text-gold">
+                          <RoleGlyph roleType={assigned?.role_type} />
+                          {assigned?.name || (u.is_super_admin ? 'Owner' : u.role === 'admin' ? 'Admin' : 'Member')}
+                        </span>
+                      </td>
+                      <td className="px-3 py-3 text-sm text-charcoal">{ministryGroupLabel(link) || '—'}</td>
+                      <td className="px-3 py-3 text-sm text-charcoal whitespace-nowrap">
+                        {lastAccess ? (
+                          <span>
+                            {lastAccess.date}
+                            <br />
+                            {lastAccess.time}
+                          </span>
+                        ) : (
+                          '—'
+                        )}
+                      </td>
+                      <td className="px-2 py-3 text-right">
+                        <div
+                          className="relative inline-block"
+                          ref={actionsMenuUserId === u.id ? actionsMenuRef : undefined}
+                        >
+                          <button
+                            type="button"
+                            className="rounded-full p-1.5 text-neutral hover:bg-gray-100 hover:text-charcoal"
+                            aria-label={`${displayName(u)} actions`}
+                            onClick={() =>
+                              setActionsMenuUserId((current) => (current === u.id ? null : u.id))
+                            }
+                          >
+                            <MoreVertical size={18} />
+                          </button>
+                          {actionsMenuUserId === u.id && (
+                            <div
+                              role="menu"
+                              className="absolute right-0 top-full z-30 mt-1 w-60 rounded-lg border border-gray-200 bg-white py-1 shadow-lg"
+                            >
+                              <button
+                                type="button"
+                                className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-gold hover:bg-gray-50"
+                                onClick={() => {
+                                  setActionsMenuUserId(null);
+                                  setEmailModalUser(u);
+                                }}
+                              >
+                                <Bell size={16} />
+                                Send Push Notifications
+                              </button>
+                              <button
+                                type="button"
+                                className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-gold hover:bg-gray-50"
+                                onClick={() => openRoleAssign(u)}
+                              >
+                                <Users size={16} />
+                                Roles
+                              </button>
+                              <button
+                                type="button"
+                                className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-gold hover:bg-gray-50"
+                                onClick={() => openEditUser(u)}
+                              >
+                                <Pencil size={16} />
+                                Edit
+                              </button>
+                              <div className="my-1 border-t border-gray-100" />
+                              <button
+                                type="button"
+                                className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-charcoal hover:bg-gray-50"
+                                onClick={() => {
+                                  setActionsMenuUserId(null);
+                                  setLinkModalUser(u);
+                                }}
+                              >
+                                <Link2 size={16} className="text-blue-600" />
+                                Link Leadership
+                              </button>
+                              {directoryByUserId[u.id] && (
+                                <button
+                                  type="button"
+                                  className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-red-600 hover:bg-red-50"
+                                  onClick={() => {
+                                    setActionsMenuUserId(null);
+                                    void handleUnlinkLeadership(u);
+                                  }}
+                                >
+                                  <Unlink size={16} />
+                                  Unlink Leadership
+                                </button>
+                              )}
+                              <button
+                                type="button"
+                                className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-charcoal hover:bg-gray-50"
+                                onClick={() => {
+                                  setActionsMenuUserId(null);
+                                  openPasswordReset(u.email);
+                                }}
+                              >
+                                <KeyRound size={16} />
+                                Reset Password
+                              </button>
+                              {!u.is_approved && (
+                                <button
+                                  type="button"
+                                  className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-charcoal hover:bg-gray-50"
+                                  onClick={() => {
+                                    setActionsMenuUserId(null);
+                                    void handleApproveUser(u.id);
+                                  }}
+                                >
+                                  <UserCheck size={16} />
+                                  {isAccessHeld(u) ? 'Restore Access' : 'Approve'}
+                                </button>
+                              )}
+                              {canChangeUserAdminRole(user, u) &&
+                                !isAccessHeld(u) &&
+                                (u.role === 'member' ? (
+                                  <button
+                                    type="button"
+                                    className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-purple-700 hover:bg-purple-50"
+                                    onClick={() => {
+                                      setActionsMenuUserId(null);
+                                      void handleMakeAdmin(u.id, displayName(u));
+                                    }}
+                                  >
+                                    <Shield size={16} />
+                                    Make Admin
+                                  </button>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-orange-700 hover:bg-orange-50"
+                                    onClick={() => {
+                                      setActionsMenuUserId(null);
+                                      void handleRevokeAdmin(u.id, displayName(u));
+                                    }}
+                                  >
+                                    <ShieldOff size={16} />
+                                    Revoke Admin
+                                  </button>
+                                ))}
+                              {u.is_approved && canChangeUserAdminRole(user, u) && (
+                                <button
+                                  type="button"
+                                  className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-orange-700 hover:bg-orange-50"
+                                  onClick={() => {
+                                    setActionsMenuUserId(null);
+                                    void handleHoldAccess(u.id, displayName(u));
+                                  }}
+                                >
+                                  <PauseCircle size={16} />
+                                  Hold Access
+                                </button>
+                              )}
+                              {isPendingApproval(u) && (
+                                <button
+                                  type="button"
+                                  className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-red-600 hover:bg-red-50"
+                                  onClick={() => {
+                                    setActionsMenuUserId(null);
+                                    void handleRejectUser(u.id);
+                                  }}
+                                >
+                                  <X size={16} />
+                                  Reject
+                                </button>
+                              )}
+                              <div className="my-1 border-t border-gray-100" />
+                              <button
+                                type="button"
+                                disabled={deletingUserId === u.id}
+                                className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-red-600 hover:bg-red-50 disabled:opacity-60"
+                                onClick={() => void handleDeleteUser(u)}
+                              >
+                                <Trash2 size={16} />
+                                {deletingUserId === u.id ? 'Deleting…' : 'Delete'}
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+        <div className="border-t border-gray-100 bg-white px-6 py-3 text-right text-sm text-neutral">
+          {listedUsers.length} {listedUsers.length === 1 ? 'item' : 'items'}
+        </div>
+      </div>
+
+      <CreateUserProfile
+        isOpen={showCreateUser}
+        onClose={() => setShowCreateUser(false)}
+        onSuccess={() => void fetchUsers()}
+      />
+
+      <Modal isOpen={!!editUser} onClose={() => setEditUser(null)} title="Edit User">
+        <div className="space-y-4 p-1">
+          <label className="block">
+            <span className="mb-1 block text-sm font-bold text-charcoal">First Name</span>
+            <input
+              type="text"
+              value={editForm.first_name}
+              onChange={(event) => setEditForm((current) => ({ ...current, first_name: event.target.value }))}
+              className="w-full rounded-md border border-gray-200 px-3 py-2 focus:border-gold focus:outline-none"
+            />
+          </label>
+          <label className="block">
+            <span className="mb-1 block text-sm font-bold text-charcoal">Last Name</span>
+            <input
+              type="text"
+              value={editForm.last_name}
+              onChange={(event) => setEditForm((current) => ({ ...current, last_name: event.target.value }))}
+              className="w-full rounded-md border border-gray-200 px-3 py-2 focus:border-gold focus:outline-none"
+            />
+          </label>
+          <label className="block">
+            <span className="mb-1 block text-sm font-bold text-charcoal">Mobile</span>
+            <input
+              type="tel"
+              value={editForm.phone}
+              onChange={(event) => setEditForm((current) => ({ ...current, phone: event.target.value }))}
+              className="w-full rounded-md border border-gray-200 px-3 py-2 focus:border-gold focus:outline-none"
+            />
+          </label>
+          <div className="flex justify-end gap-2 pt-2">
+            <button type="button" onClick={() => setEditUser(null)} className="px-4 py-2 text-sm font-bold text-neutral">
+              Cancel
+            </button>
+            <GlowingButton type="button" onClick={() => void saveEditUser()} disabled={isSavingEdit}>
+              {isSavingEdit ? 'Saving…' : 'Save'}
+            </GlowingButton>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal isOpen={!!roleAssignUser} onClose={() => setRoleAssignUser(null)} title="Roles">
+        <div className="space-y-4 p-1">
+          <p className="text-sm text-neutral">
+            Choose a named role for {roleAssignUser ? displayName(roleAssignUser) : 'this user'}. Owner, Admin, and Member also update website access. Other roles are labels only.
+          </p>
+          <label className="block">
+            <span className="mb-1 block text-sm font-bold text-charcoal">Role</span>
+            <select
+              value={roleAssignId}
+              onChange={(event) => setRoleAssignId(event.target.value)}
+              className="w-full rounded-md border border-gray-200 px-3 py-2 focus:border-gold focus:outline-none"
+            >
+              {accountRoles
+                .filter((role) => role.slug !== 'owner' || roleAssignUser?.is_super_admin)
+                .map((role) => (
+                  <option key={role.id} value={role.id}>
+                    {role.name}
+                  </option>
+                ))}
+            </select>
+          </label>
+          <div className="flex justify-end gap-2 pt-2">
+            <button type="button" onClick={() => setRoleAssignUser(null)} className="px-4 py-2 text-sm font-bold text-neutral">
+              Cancel
+            </button>
+            <GlowingButton type="button" onClick={() => void saveRoleAssign()} disabled={isSavingRole || !roleAssignId}>
+              {isSavingRole ? 'Saving…' : 'Save Role'}
+            </GlowingButton>
+          </div>
+        </div>
+      </Modal>
 
       <LinkDirectoryUserModal
         isOpen={!!linkModalUser}

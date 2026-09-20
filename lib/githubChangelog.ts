@@ -70,6 +70,7 @@ function inferKind(message: string): ChangelogKind {
 function areaFromLocation(location: string): ChangelogArea {
   switch (location) {
     case 'User Management':
+    case 'Users & Roles':
       return 'users';
     case 'Prayers':
       return 'prayer';

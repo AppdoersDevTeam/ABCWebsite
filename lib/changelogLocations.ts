@@ -6,6 +6,7 @@ export const INTERNAL_APP_LOCATION = 'Internal App';
 export const MENU_LOCATION_LABELS = [
   'Overview',
   'Annual Calendar',
+  'Users & Roles',
   'User Management',
   'User Security',
   'Prayers',
@@ -42,6 +43,7 @@ const PATH_RULES: { test: RegExp; label: MenuLocationLabel }[] = [
   { test: /pages\/admin\/Help|pages\/dashboard\/Help|HelpContent/, label: 'Help' },
   { test: /AdminLogs|exportAuditLogs|auditLog/, label: 'Logs' },
   { test: /AdminSettings/, label: 'System Setup' },
+  { test: /AdminUsers|AdminRoles|CreateUserProfile|exportAdminUsers|accountRoles|LinkDirectoryUserModal/, label: 'Users & Roles' },
 ];
 
 export function isMenuLocation(value?: string): value is MenuLocationLabel {
@@ -72,7 +74,7 @@ export function locationFromFiles(filenames: string[]): MenuLocationLabel {
 function locationFromAreaCode(area: string): MenuLocationLabel {
   switch (area) {
     case 'users':
-      return 'User Management';
+      return 'Users & Roles';
     case 'prayer':
       return 'Prayers';
     case 'newsletters':
@@ -111,8 +113,14 @@ export function locationFromArea(area: string, hint = ''): MenuLocationLabel {
   if (h.includes('user security') || h.includes('mfa') || h.includes('two-factor') || h.includes('2fa')) {
     addHit('User Security');
   }
-  if (h.includes('user management') || h.includes('pending user') || h.includes('hold access')) {
-    addHit('User Management');
+  if (
+    h.includes('user management') ||
+    h.includes('users & roles') ||
+    h.includes('pending user') ||
+    h.includes('hold access') ||
+    h.includes('account role')
+  ) {
+    addHit('Users & Roles');
   }
   if (h.includes('annual calendar')) addHit('Annual Calendar');
   if (h.includes('prayer')) addHit('Prayers');

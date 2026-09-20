@@ -137,7 +137,7 @@ export const AdminOverview = () => {
     if (
       !window.confirm(
         asAdmin
-          ? 'Approve this user as an admin? They will get the full admin portal, including User Management.'
+          ? 'Approve this user as an admin? They will get the full admin portal, including Users & Roles.'
           : 'Are you sure you want to approve this user?'
       )
     ) {
@@ -790,14 +790,14 @@ export const AdminOverview = () => {
                 <p className="text-sm text-yellow-800 font-bold mb-2">User Not Appearing?</p>
                 <p className="text-xs text-yellow-700 mb-3">
                   If a user signed up but doesn't appear here, the database trigger may not have created their profile.
-                  Go to User Management to manually create their profile.
+                  Go to Users to manually create their profile.
                 </p>
                 <Link
                   to="/admin/users"
                   className="bg-yellow-600 text-white px-4 py-2 rounded-[4px] text-sm font-bold hover:bg-yellow-700 transition-colors flex items-center gap-2 inline-block"
                 >
                   <Plus size={16} />
-                  Go to User Management
+                  Go to Users
                 </Link>
               </div>
             </div>
