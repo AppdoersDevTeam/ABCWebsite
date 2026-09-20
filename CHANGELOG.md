@@ -7,6 +7,37 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2109-007 — Dashboard message boxes stay centered and do not close on outside click
+
+**Date:** 2026-09-21
+**Time:** 00:53:45
+**Timezone:** Pacific/Auckland
+**Version:** 1.7.22
+**Type:** Changed
+
+**Request**
+
+> ALl the message box from the system bring it into the middle of the screen by default in all Dashboard. also correct the focus when clicked outside of the box it miss the screenand desapear do not allow it to happen. push to live.
+
+**Changes**
+
+* Admin and Member dashboards now show system alerts and confirmations as a centered box in the middle of the screen.
+* Clicking outside a message box or modal no longer closes it. Use OK, Cancel, or the X button.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: 67 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors. No browser MCP in this session; dialog host behaviour is covered by a unit test.
+
 ## CHG-2026-2109-006 — Users 3-dots menu opens in front of the card
 
 **Date:** 2026-09-21

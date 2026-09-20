@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { Users, UserCheck, X, Shield, ShieldOff, KeyRound, AlertTriangle, ChevronDown, Link2, Unlink, Trash2, PauseCircle, Download, Search, Plus, MoreVertical, Bell, Pencil, Building2, User as UserIcon, UsersRound } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { appConfirm } from '../../lib/appDialog';
 import { displayName, displayNameLastFirst, displayInitials, filterUsersForAdminView, canChangeUserAdminRole, isAdminUser, isOwnUserAccount, isServiceAccountEmail, isPendingApproval, isAccessHeld, CHURCH_NAME, PEOPLE_LABEL } from '../../lib/constants';
 import { User } from '../../types';
 import { CreateUserProfile } from './CreateUserProfile';
@@ -190,7 +191,7 @@ export const AdminUsers = () => {
     const target = allUsers.find((u) => u.id === userId);
     const restoringHold = isAccessHeld(target);
     if (
-      !window.confirm(
+      !await appConfirm(
         asAdmin
           ? restoringHold
             ? `Restore website access for ${displayName(target) || 'this user'} as an admin?`
@@ -296,7 +297,7 @@ export const AdminUsers = () => {
   };
 
   const handleRejectUser = async (userId: string) => {
-    if (!window.confirm('Are you sure you want to reject this user? They will need to sign up again.')) {
+    if (!await appConfirm('Are you sure you want to reject this user? They will need to sign up again.')) {
       return;
     }
 
@@ -351,7 +352,7 @@ export const AdminUsers = () => {
     }
 
     const label = `${displayName(target)}${target.email ? ` (${target.email})` : ''}`;
-    const confirmed = window.confirm(
+    const confirmed = await appConfirm(
       `Delete ${label} from the Ashburton Baptist Church system?\n\nThis cannot be undone. Their login and related records will be removed, and they will receive a confirmation email.`
     );
     if (!confirmed) return;
@@ -393,7 +394,7 @@ export const AdminUsers = () => {
 
   const handleHoldAccess = async (userId: string, userName: string) => {
     if (
-      !window.confirm(
+      !await appConfirm(
         `Place ${userName}'s website access on hold? They will not be able to use member or admin areas until access is restored.`
       )
     ) {
@@ -430,7 +431,7 @@ export const AdminUsers = () => {
   };
 
   const handleMakeAdmin = async (userId: string, userName: string) => {
-    if (!window.confirm(`Make ${userName} an admin? They will be able to access the admin dashboard.`)) {
+    if (!await appConfirm(`Make ${userName} an admin? They will be able to access the admin dashboard.`)) {
       return;
     }
 
@@ -468,7 +469,7 @@ export const AdminUsers = () => {
 
   const handleRevokeAdmin = async (userId: string, userName: string) => {
     if (
-      !window.confirm(
+      !await appConfirm(
         `Revoke the Administrative role from ${userName}? They will be returned to member access only.`
       )
     ) {
@@ -660,7 +661,7 @@ export const AdminUsers = () => {
 
   const handleUnlinkLeadership = async (target: User) => {
     if (
-      !window.confirm(
+      !await appConfirm(
         `Unlink ${displayName(target) || 'this user'} from ${PEOPLE_LABEL}? They will lose roster access until linked again.`
       )
     ) {

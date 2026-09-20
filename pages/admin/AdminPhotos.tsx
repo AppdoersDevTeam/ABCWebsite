@@ -3,6 +3,7 @@ import { GlowingButton } from '../../components/UI/GlowingButton';
 import { Modal } from '../../components/UI/Modal';
 import { FolderPlus, Image as ImageIcon, Upload, Edit, Trash2, X, Plus } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { appConfirm } from '../../lib/appDialog';
 import { PhotoFolder, Photo } from '../../types';
 import { SkeletonPageHeader, SkeletonCard } from '../../components/UI/Skeleton';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
@@ -130,7 +131,7 @@ export const AdminPhotos = () => {
   };
 
   const handleDeleteFolder = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this folder and all its photos?')) {
+    if (!await appConfirm('Are you sure you want to delete this folder and all its photos?')) {
       return;
     }
 
@@ -273,7 +274,7 @@ export const AdminPhotos = () => {
   };
 
   const handleDeletePhoto = async (photo: Photo) => {
-    if (!window.confirm('Are you sure you want to delete this photo?')) {
+    if (!await appConfirm('Are you sure you want to delete this photo?')) {
       return;
     }
 

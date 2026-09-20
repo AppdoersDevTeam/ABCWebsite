@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Settings, Tag, Briefcase, Plus, Save, Trash2 } from 'lucide-react';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { supabase } from '../../lib/supabase';
+import { appConfirm } from '../../lib/appDialog';
 import type { EventCategory, Group, JobRole } from '../../types';
 import { logAuditEvent } from '../../lib/auditLog';
 import { EVENTS_LABEL, PEOPLE_LABEL } from '../../lib/constants';
@@ -196,7 +197,7 @@ export const AdminSettings = () => {
   };
 
   const deleteGroup = async (id: string) => {
-    if (!window.confirm('Delete this group? If it is assigned to people, deletion may fail.')) return;
+    if (!await appConfirm('Delete this group? If it is assigned to people, deletion may fail.')) return;
     const g = groups.find((x) => x.id === id);
     try {
       const { error } = await supabase.from('groups').delete().eq('id', id);
@@ -211,7 +212,7 @@ export const AdminSettings = () => {
   };
 
   const deleteJobRole = async (id: string) => {
-    if (!window.confirm('Delete this job role? If it is assigned to people, deletion may fail.')) return;
+    if (!await appConfirm('Delete this job role? If it is assigned to people, deletion may fail.')) return;
     const r = jobRoles.find((x) => x.id === id);
     try {
       const { error } = await supabase.from('job_roles').delete().eq('id', id);
@@ -226,7 +227,7 @@ export const AdminSettings = () => {
   };
 
   const deleteEventCategory = async (id: string) => {
-    if (!window.confirm('Delete this category? Existing events may still reference it by name.')) return;
+    if (!await appConfirm('Delete this category? Existing events may still reference it by name.')) return;
     const c = eventCategories.find((x) => x.id === id);
     try {
       const { error } = await supabase.from('event_categories').delete().eq('id', id);
@@ -283,7 +284,7 @@ export const AdminSettings = () => {
   useEffect(() => {
     lastHashRef.current = window.location.hash;
 
-    const onHashChange = () => {
+    const onHashChange = async () => {
       if (isRevertingHashRef.current) {
         isRevertingHashRef.current = false;
         lastHashRef.current = window.location.hash;
@@ -296,7 +297,7 @@ export const AdminSettings = () => {
         return;
       }
 
-      const leave = window.confirm('You have unsaved changes. Leave without saving? Your changes will be discarded.');
+      const leave = await appConfirm('You have unsaved changes. Leave without saving? Your changes will be discarded.');
       if (leave) {
         discardChanges();
         lastHashRef.current = nextHash;
@@ -321,10 +322,10 @@ export const AdminSettings = () => {
       <div className="glass-card bg-white/80 border border-white/60 rounded-[12px] p-2 flex gap-2 flex-wrap">
         <button
           type="button"
-          onClick={() => {
+          onClick={async () => {
             if (tab === 'groups') return;
             if (hasUnsavedChanges) {
-              const leave = window.confirm(
+              const leave = await appConfirm(
                 'You have unsaved changes. Switch tabs without saving? Your changes will be discarded.'
               );
               if (!leave) return;
@@ -341,10 +342,10 @@ export const AdminSettings = () => {
         </button>
         <button
           type="button"
-          onClick={() => {
+          onClick={async () => {
             if (tab === 'job_roles') return;
             if (hasUnsavedChanges) {
-              const leave = window.confirm(
+              const leave = await appConfirm(
                 'You have unsaved changes. Switch tabs without saving? Your changes will be discarded.'
               );
               if (!leave) return;
@@ -361,10 +362,10 @@ export const AdminSettings = () => {
         </button>
         <button
           type="button"
-          onClick={() => {
+          onClick={async () => {
             if (tab === 'event_categories') return;
             if (hasUnsavedChanges) {
-              const leave = window.confirm(
+              const leave = await appConfirm(
                 'You have unsaved changes. Switch tabs without saving? Your changes will be discarded.'
               );
               if (!leave) return;

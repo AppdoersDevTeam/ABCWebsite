@@ -5,6 +5,7 @@ import { GlowingButton } from '../../components/UI/GlowingButton';
 import { Modal } from '../../components/UI/Modal';
 import { DocumentReaderPanel } from '../../components/UI/DocumentReaderPanel';
 import { supabase } from '../../lib/supabase';
+import { appConfirm } from '../../lib/appDialog';
 import { Devotional as DevotionalType } from '../../types';
 import { SkeletonPageHeader, SkeletonCard } from '../../components/UI/Skeleton';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
@@ -335,7 +336,7 @@ export const AdminDevotional = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this devotional?')) {
+    if (!await appConfirm('Are you sure you want to delete this devotional?')) {
       return;
     }
 

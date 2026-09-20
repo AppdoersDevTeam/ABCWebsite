@@ -6,6 +6,36 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2109-007",
+      "date": "2026-09-21",
+      "time": "00:53:45",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T12:53:45.043Z",
+      "version": "1.7.22",
+      "type": "changed",
+      "area": "admin",
+      "title": "Dashboard message boxes stay centered and do not close on outside click",
+      "request": "ALl the message box from the system bring it into the middle of the screen by default in all Dashboard. also correct the focus when clicked outside of the box it miss the screenand desapear do not allow it to happen. push to live.",
+      "changes": [
+        "Admin and Member dashboards now show system alerts and confirmations as a centered box in the middle of the screen.",
+        "Clicking outside a message box or modal no longer closes it. Use OK, Cancel, or the X button."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "67 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors. No browser MCP in this session; dialog host behaviour is covered by a unit test."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2109-006",
       "date": "2026-09-21",
       "time": "00:48:17",

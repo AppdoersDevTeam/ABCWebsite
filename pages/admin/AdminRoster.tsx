@@ -4,6 +4,7 @@ import { GlowingButton } from '../../components/UI/GlowingButton';
 import { Modal } from '../../components/UI/Modal';
 import type { Group, JobRole, RosterImage, TeamMember } from '../../types';
 import { supabase } from '../../lib/supabase';
+import { appConfirm } from '../../lib/appDialog';
 import { SkeletonPageHeader } from '../../components/UI/Skeleton';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { logAuditEventSafe } from '../../lib/auditLog';
@@ -413,7 +414,7 @@ export const AdminRoster = () => {
   };
 
   const handleDelete = async (id: string, pdfUrl: string) => {
-    if (!window.confirm('Are you sure you want to delete this roster PDF?')) {
+    if (!await appConfirm('Are you sure you want to delete this roster PDF?')) {
       return;
     }
 

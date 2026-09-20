@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
+import { appConfirm } from '../../lib/appDialog';
 import type { User } from '../../types';
 import { Modal } from '../../components/UI/Modal';
 import { GlowingButton } from '../../components/UI/GlowingButton';
@@ -98,7 +99,7 @@ export const LinkDirectoryUserModal: React.FC<LinkDirectoryUserModalProps> = ({
     if (!row) return;
     if (row.user_id && row.user_id !== targetUser.id) {
       if (
-        !window.confirm(
+        !await appConfirm(
           `This ${PEOPLE_LABEL} record is already linked to another website user. Replace the link with this user?`
         )
       ) {

@@ -7,7 +7,7 @@ interface ModalProps {
   onClose: () => void;
   children: React.ReactNode;
   title?: string;
-  /** When false, only the X button (or explicit Cancel in content) closes the modal. Default true. */
+  /** When false, only the X button (or explicit Cancel in content) closes the modal. Default false. */
   closeOnBackdropClick?: boolean;
   /** Block close via backdrop or X (e.g. while uploading). */
   preventClose?: boolean;
@@ -18,7 +18,7 @@ export const Modal: React.FC<ModalProps> = ({
   onClose,
   children,
   title,
-  closeOnBackdropClick = true,
+  closeOnBackdropClick = false,
   preventClose = false,
 }) => {
   const suppressBackdropCloseRef = useRef(false);

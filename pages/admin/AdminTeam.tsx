@@ -4,6 +4,7 @@ import { Modal } from '../../components/UI/Modal';
 import { CalendarDays, Trash2, User, Upload, X, Download, Search, Archive, ArchiveRestore, Plus, MoreVertical, Pencil, Building2, UsersRound, Unlink } from 'lucide-react';
 import type { Group, JobRole, TeamMember, User } from '../../types';
 import { supabase } from '../../lib/supabase';
+import { appConfirm } from '../../lib/appDialog';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { PortalDropdown } from '../../components/UI/PortalDropdown';
 import { buildStoredRole, getDisplayRole, inferProfileType } from '../../lib/teamMemberUtils';
@@ -846,7 +847,7 @@ export const AdminTeam = () => {
   const handleUnlinkWebsiteAccount = async (member: TeamMember) => {
     if (!member.user_id) return;
     if (
-      !window.confirm(
+      !await appConfirm(
         `Unlink the website account from ${member.name}? They will lose roster access until linked again. This does not delete the login or the People record.`
       )
     ) {

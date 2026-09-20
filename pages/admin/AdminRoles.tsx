@@ -4,6 +4,7 @@ import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { Modal } from '../../components/UI/Modal';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { supabase } from '../../lib/supabase';
+import { appConfirm } from '../../lib/appDialog';
 import { logAuditEventSafe } from '../../lib/auditLog';
 import {
   ACCOUNT_ROLE_TYPE_LABELS,
@@ -198,7 +199,7 @@ export const AdminRoles = () => {
       alert('System roles cannot be deleted.');
       return;
     }
-    if (!window.confirm(`Delete the ${role.name} role? People on this role will be moved to Member.`)) {
+    if (!await appConfirm(`Delete the ${role.name} role? People on this role will be moved to Member.`)) {
       return;
     }
     const member = roles.find((item) => item.slug === 'member');

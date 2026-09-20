@@ -4,6 +4,7 @@ import { GlowingButton } from '../../components/UI/GlowingButton';
 import { Modal } from '../../components/UI/Modal';
 import { Heart, Edit, Trash2, HandHeart } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { appConfirm } from '../../lib/appDialog';
 import { useAuth } from '../../context/AuthContext';
 import { PrayerRequest } from '../../types';
 import { SkeletonPageHeader, SkeletonPrayerCard } from '../../components/UI/Skeleton';
@@ -153,7 +154,7 @@ export const PrayerWall = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this prayer request? This action cannot be undone.')) {
+    if (!await appConfirm('Are you sure you want to delete this prayer request? This action cannot be undone.')) {
       return;
     }
 

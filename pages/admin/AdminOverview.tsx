@@ -4,6 +4,7 @@ import { OverviewStatCard } from '../../components/UI/OverviewStatCard';
 import { Calendar, BookOpen, Users, ClipboardList, UserCheck, X, Plus, Shield, Mail, Newspaper, HandHeart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
+import { appConfirm } from '../../lib/appDialog';
 import { displayName, displayNameLastFirst, displayInitials, EVENTS_LABEL, PEOPLE_LABEL, filterUsersForAdminView, isPendingApproval } from '../../lib/constants';
 import { User } from '../../types';
 import { SkeletonPageHeader, SkeletonCard, SkeletonUserCard, SkeletonStatsCard } from '../../components/UI/Skeleton';
@@ -157,7 +158,7 @@ export const AdminOverview = () => {
 
   const handleApproveUser = async (userId: string, asAdmin = false) => {
     if (
-      !window.confirm(
+      !await appConfirm(
         asAdmin
           ? 'Approve this user as an admin? They will get the full admin portal, including Users & Roles.'
           : 'Are you sure you want to approve this user?'
@@ -228,7 +229,7 @@ export const AdminOverview = () => {
   };
 
   const handleRejectUser = async (userId: string) => {
-    if (!window.confirm('Are you sure you want to reject this user? They will need to sign up again.')) {
+    if (!await appConfirm('Are you sure you want to reject this user? They will need to sign up again.')) {
       return;
     }
 

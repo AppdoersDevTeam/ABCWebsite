@@ -20,6 +20,7 @@ import { ScrollToTop } from '../ScrollToTop';
 import { useAutoSectionReveal } from '../UI/useAutoSectionReveal';
 import { DASHBOARD_NAV_ICON, portalNavNeedsDivider, sortPortalNavItems } from '../../lib/dashboardNav';
 import { flattenPortalSearchItems, portalPageTitle, PortalTopBar, usePortalSidebarCollapsed } from './PortalTopBar';
+import { AppDialogHost } from '../UI/AppDialogHost';
 
 export const DashboardLayout = () => {
   const { user, logout } = useAuth();
@@ -51,6 +52,7 @@ export const DashboardLayout = () => {
   return (
     <div className="flex h-dvh flex-col bg-dash font-sans text-charcoal lg:h-screen">
       <ScrollToTop />
+      <AppDialogHost />
       <PortalTopBar
         variant="member"
         pageTitle={portalPageTitle(location.pathname, navItems)}

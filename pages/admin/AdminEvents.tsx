@@ -4,6 +4,7 @@ import { Modal } from '../../components/UI/Modal';
 import { Calendar as CalIcon, Edit, Trash2, Plus, Users, Image, Upload } from 'lucide-react';
 import type { Event, EventCategory } from '../../types';
 import { supabase } from '../../lib/supabase';
+import { appConfirm } from '../../lib/appDialog';
 import { SkeletonPageHeader } from '../../components/UI/Skeleton';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { EventsCalendarGrid, EventsCalendarGridSkeleton } from '../../components/dashboard/EventsCalendarGrid';
@@ -253,7 +254,7 @@ export const AdminEvents = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this event?')) {
+    if (!await appConfirm('Are you sure you want to delete this event?')) {
       return;
     }
 

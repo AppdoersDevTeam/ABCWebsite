@@ -6,6 +6,7 @@ import { Modal } from '../../components/UI/Modal';
 import { DocumentReaderPanel } from '../../components/UI/DocumentReaderPanel';
 import { NewsletterMonthArchive } from '../../components/UI/NewsletterMonthArchive';
 import { supabase } from '../../lib/supabase';
+import { appConfirm } from '../../lib/appDialog';
 import { Newsletter as NewsletterType } from '../../types';
 import { SkeletonPageHeader, SkeletonCard } from '../../components/UI/Skeleton';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
@@ -335,7 +336,7 @@ export const AdminNewsletter = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this newsletter?')) {
+    if (!await appConfirm('Are you sure you want to delete this newsletter?')) {
       return;
     }
 
