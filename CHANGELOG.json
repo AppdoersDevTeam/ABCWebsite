@@ -6,6 +6,35 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2009-016",
+      "date": "2026-09-20",
+      "time": "21:11:53",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T09:11:53.967Z",
+      "version": "1.7.3",
+      "type": "changed",
+      "area": "admin",
+      "title": "Solid white notification bell on the gold search bar",
+      "request": "make the notification icon completed white on the search bar.",
+      "changes": [
+        "The notification bell on the gold top bar is now a solid white icon instead of a thin outline."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "Unit tests, validate, and vite build run after implementation. Push to live was not requested."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2009-015",
       "date": "2026-09-20",
       "time": "21:01:29",

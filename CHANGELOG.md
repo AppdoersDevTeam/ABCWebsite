@@ -7,6 +7,36 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2009-016 — Solid white notification bell on the gold search bar
+
+**Date:** 2026-09-20
+**Time:** 21:11:53
+**Timezone:** Pacific/Auckland
+**Version:** 1.7.3
+**Type:** Changed
+
+**Request**
+
+> make the notification icon completed white on the search bar.
+
+**Changes**
+
+* The notification bell on the gold top bar is now a solid white icon instead of a thin outline.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: Unit tests, validate, and vite build run after implementation. Push to live was not requested.
+
 ## CHG-2026-2009-015 — User menu Profile, Security, and Log Out; white bold top bar
 
 **Date:** 2026-09-20

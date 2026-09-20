@@ -312,7 +312,7 @@ export const PortalTopBar = ({
             aria-expanded={notifyOpen}
             title="Notifications"
           >
-            <Bell size={25} />
+            <Bell size={25} color="#ffffff" fill="#ffffff" stroke="#ffffff" />
           </button>
           {notifyOpen && (
             <div className="absolute right-0 top-full z-40 mt-1 w-64 rounded-[11px] border border-gray-200 bg-white px-4 py-3 text-sm text-neutral shadow-lg">
