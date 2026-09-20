@@ -7,6 +7,37 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2109-020 — Overview cards drop extra description lines; Emails retitled
+
+**Date:** 2026-09-21
+**Time:** 02:10:16
+**Timezone:** Pacific/Auckland
+**Version:** 1.7.35
+**Type:** Changed
+
+**Request**
+
+> For the cars Next Service remove the description line : Every Sunday at 10:00 AM, for the card Last Newsletter remove the description line: Week of, for the last devotional remove the description liine Week of For the Emails sent remove the description line of users and Change the Title Description Emails Sent to E-mails Sent. Pusb live
+
+**Changes**
+
+* The Next Service, Last Newsletter, and Last Devotional cards no longer show the Sunday time or Week of lines.
+* The Emails Sent card is now titled E-mails Sent and no longer shows the users description line.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: 73 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors.
+
 ## CHG-2026-2109-019 — Overview Users status counts are centred and larger
 
 **Date:** 2026-09-21

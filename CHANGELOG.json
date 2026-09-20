@@ -6,6 +6,36 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2109-020",
+      "date": "2026-09-21",
+      "time": "02:10:16",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T14:10:16.186Z",
+      "version": "1.7.35",
+      "type": "changed",
+      "area": "admin",
+      "title": "Overview cards drop extra description lines; Emails retitled",
+      "request": "For the cars Next Service remove the description line : Every Sunday at 10:00 AM, for the card Last Newsletter remove the description line: Week of, for the last devotional remove the description liine Week of For the Emails sent remove the description line of users and Change the Title Description Emails Sent to E-mails Sent. Pusb live",
+      "changes": [
+        "The Next Service, Last Newsletter, and Last Devotional cards no longer show the Sunday time or Week of lines.",
+        "The Emails Sent card is now titled E-mails Sent and no longer shows the users description line."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "73 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2109-019",
       "date": "2026-09-21",
       "time": "02:07:40",

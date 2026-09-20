@@ -694,7 +694,7 @@ export const AdminOverview = () => {
       subtitle: isLoadingStats ? 'Loading...' : undefined
     },
     {
-      label: 'Emails Sent',
+      label: 'E-mails Sent',
       value: isLoadingStats
         ? '...'
         : emailsQuota
@@ -707,7 +707,7 @@ export const AdminOverview = () => {
         ? 'Loading...'
         : emailsQuota
           ? `${formatEmailQuotaUsed(emailsQuota.month_count, emailsQuota.month_limit)} this month · NZ time`
-          : `To users and ${PEOPLE_LABEL}`,
+          : undefined,
       highlight: Boolean(emailsQuota && emailQuotaNearLimit(emailsQuota)),
     },
   ], [visibleUsers.length, visibleApprovedCount, visiblePendingCount, visibleNotLinkedCount, isLoadingUsers, prayerRequests24h, nextService, lastNewsletterDate, lastNewsletterTitle, lastDevotionalDate, isLoadingStats, teamMembersCount, rosterAssignmentsCount, emailsQuota]);
@@ -746,19 +746,9 @@ export const AdminOverview = () => {
       <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-5 md:gap-6">
         {stats.map((stat, i) => {
           const description =
-            stat.label === 'Next Service' && nextService && !isLoadingStats
-              ? 'Every Sunday at 10:00 AM'
-              : stat.label === 'Last Newsletter' && lastNewsletterDate && !isLoadingStats
-                ? `Week of ${lastNewsletterDate}`
-                : stat.label === 'Last Devotional' && lastDevotionalDate && !isLoadingStats
-                  ? `Week of ${lastDevotionalDate}`
-                  : stat.label === 'Emails Sent' && !isLoadingStats
-                    ? emailsQuota?.blocked
-                      ? 'Sending paused — daily or monthly limit reached'
-                      : emailsQuota
-                        ? `Users and ${PEOPLE_LABEL}, New Zealand time`
-                        : `Users and ${PEOPLE_LABEL}`
-                    : stat.subtitle;
+            stat.label === 'E-mails Sent' && !isLoadingStats && emailsQuota?.blocked
+              ? 'Sending paused — daily or monthly limit reached'
+              : stat.subtitle;
 
           const card = (
             <OverviewStatCard
