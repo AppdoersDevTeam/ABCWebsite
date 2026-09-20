@@ -6,6 +6,36 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2109-016",
+      "date": "2026-09-21",
+      "time": "01:43:12",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T13:43:12.352Z",
+      "version": "1.7.31",
+      "type": "changed",
+      "area": "admin",
+      "title": "Overview card arrows are larger, gold, and descriptions align with the icon",
+      "request": "For all cards increase the size of the arrow as per image in 35%, make it bold, also for each card description align it in the middle of the line to be in the middle of the aligment of the ICON on left. push to live.",
+      "changes": [
+        "Overview card arrows are 35% larger, gold, and bolder.",
+        "Each card title, number, and description now sit in line with the left icon, with the description vertically centred on its row."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "73 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2109-015",
       "date": "2026-09-21",
       "time": "01:37:05",

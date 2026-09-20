@@ -7,6 +7,37 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2109-016 — Overview card arrows are larger, gold, and descriptions align with the icon
+
+**Date:** 2026-09-21
+**Time:** 01:43:12
+**Timezone:** Pacific/Auckland
+**Version:** 1.7.31
+**Type:** Changed
+
+**Request**
+
+> For all cards increase the size of the arrow as per image in 35%, make it bold, also for each card description align it in the middle of the line to be in the middle of the aligment of the ICON on left. push to live.
+
+**Changes**
+
+* Overview card arrows are 35% larger, gold, and bolder.
+* Each card title, number, and description now sit in line with the left icon, with the description vertically centred on its row.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: 73 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors.
+
 ## CHG-2026-2109-015 — Overview Users card is icons and counts only, cards are narrower
 
 **Date:** 2026-09-21
