@@ -7,6 +7,37 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2109-010 — Overview Users card shows approved, pending, and not linked totals
+
+**Date:** 2026-09-21
+**Time:** 01:16:39
+**Timezone:** Pacific/Auckland
+**Version:** 1.7.25
+**Type:** Changed
+
+**Request**
+
+> On Overview Menu ON users option, update the card to View Approved, Pending and Not Linked Total Users.  Remove the description from the card: approved users inn the system, Also Change the Card People to People's Directory also remove from the People Card Description which says : People in The System. Push when completed.
+
+**Changes**
+
+* The Overview Users card now shows total users plus Approved, Pending, and Not linked counts. The old approved users in the system line is gone.
+* The Overview People card is now labelled People's Directory, without the People in the system description.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: 72 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors.
+
 ## CHG-2026-2109-009 — System message boxes are centred with professional, role-aware wording
 
 **Date:** 2026-09-21

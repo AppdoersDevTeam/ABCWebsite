@@ -142,13 +142,8 @@ export const DashboardHome = () => {
               <OverviewStatCard
                 icon={<Users size={20} />}
                 iconClassName="bg-teal-50 text-teal-600"
-                label={PEOPLE_LABEL}
+                label="People's Directory"
                 value={isLoadingStats ? '...' : peopleCount}
-                description={
-                  isLoadingStats
-                    ? 'Loading...'
-                    : `${peopleCount === 1 ? 'person' : 'people'} in the system`
-                }
                 footerLabel={`View ${PEOPLE_LABEL} →`}
               />
             </Link>

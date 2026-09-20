@@ -7,6 +7,7 @@ import { supabase } from '../../lib/supabase';
 import { appConfirm } from '../../lib/appDialog';
 import { cannotComplete, namedPerson, withSystemDetail } from '../../lib/systemMessage';
 import { displayName, displayNameLastFirst, displayInitials, EVENTS_LABEL, PEOPLE_LABEL, filterUsersForAdminView, isPendingApproval } from '../../lib/constants';
+import { formatOverviewUserBreakdown } from '../../lib/overviewUserCounts';
 import { User } from '../../types';
 import { SkeletonPageHeader, SkeletonCard, SkeletonUserCard, SkeletonStatsCard } from '../../components/UI/Skeleton';
 import { formatRelativeDateInTimezone, formatFullDateTimeInTimezone, formatWeekDate, formatDdMmYyyy, resolveNewsletterWeekDate } from '../../lib/dateUtils';
@@ -29,6 +30,7 @@ export const AdminOverview = () => {
   const [pendingUsers, setPendingUsers] = useState<User[]>([]);
   const [pendingCount, setPendingCount] = useState(0);
   const [photoByUserId, setPhotoByUserId] = useState<Record<string, string>>({});
+  const [linkedByUserId, setLinkedByUserId] = useState<Record<string, true>>({});
   const [isLoadingUsers, setIsLoadingUsers] = useState(true);
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [showAllUsers, setShowAllUsers] = useState(false);
@@ -136,21 +138,29 @@ export const AdminOverview = () => {
         if (dirErr) {
           console.warn('AdminOverview - directory photo lookup failed:', dirErr);
           setPhotoByUserId({});
+          setLinkedByUserId({});
         } else {
           const map: Record<string, string> = {};
+          const linked: Record<string, true> = {};
           (dirRows || []).forEach((row: { user_id?: string | null; img?: string | null }) => {
-            if (row.user_id && row.img) map[row.user_id] = row.img;
+            if (row.user_id) {
+              linked[row.user_id] = true;
+              if (row.img) map[row.user_id] = row.img;
+            }
           });
           setPhotoByUserId(map);
+          setLinkedByUserId(linked);
         }
       } else {
         setPhotoByUserId({});
+        setLinkedByUserId({});
       }
     } catch (error) {
       console.error('AdminOverview - Error fetching pending users:', error);
       setPendingUsers([]);
       setPendingCount(0);
       setPhotoByUserId({});
+      setLinkedByUserId({});
     } finally {
       setIsLoadingUsers(false);
       console.log('AdminOverview - fetchPendingUsers completed');
@@ -605,6 +615,11 @@ export const AdminOverview = () => {
     [visibleUsers]
   );
 
+  const visibleNotLinkedCount = useMemo(
+    () => visibleUsers.filter((u) => !linkedByUserId[u.id]).length,
+    [visibleUsers, linkedByUserId]
+  );
+
   const formatDate = (dateString: string | undefined, userTimezone?: string) => {
     // For admin views, display dates in the admin's current timezone
     return formatRelativeDateInTimezone(dateString, userTimezone);
@@ -613,20 +628,26 @@ export const AdminOverview = () => {
   const stats = useMemo(() => [
     { 
       label: 'Users', 
-      value: isLoadingUsers ? '...' : visibleApprovedCount.toString(), 
+      value: isLoadingUsers ? '...' : visibleUsers.length.toString(), 
       icon: <Users size={20} />, 
       path: '/admin/users', 
       color: 'text-gold', 
       highlight: false,
-      subtitle: isLoadingUsers ? 'Loading...' : 'Approved users in the system',
+      subtitle: isLoadingUsers
+        ? undefined
+        : formatOverviewUserBreakdown({
+            approved: visibleApprovedCount,
+            pending: visiblePendingCount,
+            notLinked: visibleNotLinkedCount,
+          }),
     },
     { 
-      label: PEOPLE_LABEL, 
+      label: "People's Directory", 
       value: isLoadingStats ? '...' : teamMembersCount.toString(), 
       icon: <Users size={20} />, 
       path: '/admin/team', 
       color: 'text-teal-600',
-      subtitle: isLoadingStats ? 'Loading...' : 'People in the system',
+      subtitle: undefined,
     },
     { 
       label: 'New Prayer Requests (24h)', 
@@ -686,7 +707,7 @@ export const AdminOverview = () => {
           : `To users and ${PEOPLE_LABEL}`,
       highlight: Boolean(emailsQuota && emailQuotaNearLimit(emailsQuota)),
     },
-  ], [visibleApprovedCount, isLoadingUsers, prayerRequests24h, nextService, lastNewsletterDate, lastNewsletterTitle, lastDevotionalDate, isLoadingStats, teamMembersCount, rosterAssignmentsCount, emailsQuota]);
+  ], [visibleUsers.length, visibleApprovedCount, visiblePendingCount, visibleNotLinkedCount, isLoadingUsers, prayerRequests24h, nextService, lastNewsletterDate, lastNewsletterTitle, lastDevotionalDate, isLoadingStats, teamMembersCount, rosterAssignmentsCount, emailsQuota]);
 
   console.log('AdminOverview - Rendering, user:', user, 'pendingCount:', pendingCount, 'isLoadingUsers:', isLoadingUsers);
 
@@ -734,10 +755,6 @@ export const AdminOverview = () => {
                       : emailsQuota
                         ? `Users and ${PEOPLE_LABEL}, New Zealand time`
                         : `Users and ${PEOPLE_LABEL}`
-                    : stat.label === 'Users' && !isLoadingUsers
-                    ? `${visibleApprovedCount === 1 ? 'approved user' : 'approved users'} in the system`
-                    : stat.label === PEOPLE_LABEL && !isLoadingStats
-                    ? `${teamMembersCount === 1 ? 'person' : 'people'} in the system`
                     : stat.subtitle;
 
           const card = (

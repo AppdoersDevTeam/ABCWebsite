@@ -6,6 +6,36 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2109-010",
+      "date": "2026-09-21",
+      "time": "01:16:39",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T13:16:39.039Z",
+      "version": "1.7.25",
+      "type": "changed",
+      "area": "admin",
+      "title": "Overview Users card shows approved, pending, and not linked totals",
+      "request": "On Overview Menu ON users option, update the card to View Approved, Pending and Not Linked Total Users.  Remove the description from the card: approved users inn the system, Also Change the Card People to People's Directory also remove from the People Card Description which says : People in The System. Push when completed.",
+      "changes": [
+        "The Overview Users card now shows total users plus Approved, Pending, and Not linked counts. The old approved users in the system line is gone.",
+        "The Overview People card is now labelled People's Directory, without the People in the system description."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "72 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2109-009",
       "date": "2026-09-21",
       "time": "01:13:05",
