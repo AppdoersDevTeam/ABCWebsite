@@ -16,6 +16,9 @@ export const CHURCH_ADDRESS = '284 Havelock Street, Ashburton 7700';
 /** Visible name for the events section on dashboards and admin. Routes stay `/events`. */
 export const EVENTS_LABEL = 'Events' as const;
 
+/** Visible name for the people directory on dashboards and admin. Routes stay `/team`. */
+export const PEOPLE_LABEL = 'People' as const;
+
 /** Soften stored ALL CAPS titles for overview cards and lists. */
 export function formatDisplayTitle(text: string | null | undefined): string {
   if (!text) return '';

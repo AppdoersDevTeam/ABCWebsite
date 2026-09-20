@@ -4,7 +4,7 @@ import { OverviewStatCard } from '../../components/UI/OverviewStatCard';
 import { Calendar, BookOpen, Users, ClipboardList, UserCheck, X, Plus, Shield, Mail, Newspaper, HandHeart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
-import { displayName, EVENTS_LABEL, filterUsersForAdminView, isPendingApproval } from '../../lib/constants';
+import { displayName, EVENTS_LABEL, PEOPLE_LABEL, filterUsersForAdminView, isPendingApproval } from '../../lib/constants';
 import { User } from '../../types';
 import { SkeletonPageHeader, SkeletonCard, SkeletonUserCard, SkeletonStatsCard } from '../../components/UI/Skeleton';
 import { formatRelativeDateInTimezone, formatFullDateTimeInTimezone, formatWeekDate, formatDdMmYyyy, resolveNewsletterWeekDate } from '../../lib/dateUtils';
@@ -484,7 +484,7 @@ export const AdminOverview = () => {
           activities.push({
             id: member.id,
             type: 'team_member',
-            title: isUpdate ? `Leadership updated: ${member.name}` : `Leadership added: ${member.name}`,
+            title: isUpdate ? `${PEOPLE_LABEL} updated: ${member.name}` : `${PEOPLE_LABEL} added: ${member.name}`,
             date: mostRecentDate
           });
         });
@@ -622,7 +622,7 @@ export const AdminOverview = () => {
       subtitle: isLoadingStats ? 'Loading...' : undefined
     },
     { 
-      label: 'Leadership', 
+      label: PEOPLE_LABEL, 
       value: isLoadingStats ? '...' : teamMembersCount.toString(), 
       icon: <Users size={20} />, 
       path: '/admin/team', 
@@ -651,7 +651,7 @@ export const AdminOverview = () => {
         ? 'Loading...'
         : emailsQuota
           ? `${formatEmailQuotaUsed(emailsQuota.month_count, emailsQuota.month_limit)} this month · NZ time`
-          : 'To users and Leadership',
+          : `To users and ${PEOPLE_LABEL}`,
       highlight: Boolean(emailsQuota && emailQuotaNearLimit(emailsQuota)),
     },
   ], [visibleApprovedCount, isLoadingUsers, prayerRequests24h, nextService, lastNewsletterDate, lastNewsletterTitle, lastDevotionalDate, isLoadingStats, teamMembersCount, rosterAssignmentsCount, emailsQuota]);
@@ -700,8 +700,8 @@ export const AdminOverview = () => {
                     ? emailsQuota?.blocked
                       ? 'Sending paused — daily or monthly limit reached'
                       : emailsQuota
-                        ? 'Users and Leadership, New Zealand time'
-                        : 'Users and Leadership'
+                        ? `Users and ${PEOPLE_LABEL}, New Zealand time`
+                        : `Users and ${PEOPLE_LABEL}`
                     : stat.label === 'Users' && !isLoadingUsers
                     ? `${visibleApprovedCount === 1 ? 'approved user' : 'approved users'} in the system`
                     : stat.subtitle;

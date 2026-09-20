@@ -6,6 +6,36 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2009-023",
+      "date": "2026-09-20",
+      "time": "22:40:44",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T10:40:44.973Z",
+      "version": "1.7.10",
+      "type": "changed",
+      "area": "leadership",
+      "title": "Rename Leadership menu to People",
+      "request": "Change the leadership name on the left menu to People and update all system when changed push it to live.",
+      "changes": [
+        "Admin and member left menus now say People instead of Leadership, including the People page titles, Overview card, Help, Logs, emails, System Setup copy, Users linking actions, and directory exports.",
+        "The public website About Leadership section is unchanged."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "57 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors. No browser MCP in this session; menus and labels were checked in code."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2009-022",
       "date": "2026-09-20",
       "time": "22:26:43",

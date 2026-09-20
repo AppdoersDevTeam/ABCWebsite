@@ -1,4 +1,4 @@
-import { EVENTS_LABEL } from './constants';
+import { EVENTS_LABEL, PEOPLE_LABEL } from './constants';
 
 export const INTERNAL_APP_LOCATION = 'Internal App';
 
@@ -13,7 +13,7 @@ export const MENU_LOCATION_LABELS = [
   'Newsletters',
   'Devotionals',
   'Sermons',
-  'Leadership',
+  PEOPLE_LABEL,
   EVENTS_LABEL,
   'Rosters (Beta)',
   'System Setup',
@@ -29,7 +29,7 @@ const MENU_LOCATION_SET = new Set<string>(MENU_LOCATION_LABELS);
 
 const PATH_RULES: { test: RegExp; label: MenuLocationLabel }[] = [
   { test: /pages\/dashboard\/UserSecurity|lib\/mfa|components\/Auth\/Mfa|supabase\/functions\/mfa/, label: 'User Security' },
-  { test: /pages\/admin\/AdminTeam|pages\/dashboard\/Team|exportDirectoryPeople|teamMemberUtils/, label: 'Leadership' },
+  { test: /pages\/admin\/AdminTeam|pages\/dashboard\/Team|exportDirectoryPeople|teamMemberUtils/, label: PEOPLE_LABEL },
   { test: /pages\/admin\/AdminChangelog|lib\/changelog|lib\/githubChangelog|lib\/exportChangelog|CHANGELOG\.(json|md)|scripts\/changelog/, label: 'Changelog' },
   { test: /pages\/admin\/AdminOverview|pages\/dashboard\/DashboardHome|pages\/admin\/AdminEmails|PortalTopBar|Layouts\/AdminLayout|Layouts\/DashboardLayout/, label: 'Overview' },
   { test: /AnnualCalendar|calendarItems|pages\/shared\/AnnualCalendar|components\/calendar\//, label: 'Annual Calendar' },
@@ -48,6 +48,14 @@ const PATH_RULES: { test: RegExp; label: MenuLocationLabel }[] = [
 
 export function isMenuLocation(value?: string): value is MenuLocationLabel {
   return Boolean(value && MENU_LOCATION_SET.has(value.trim()));
+}
+
+function normalizeMenuLocation(value?: string): MenuLocationLabel | undefined {
+  const t = (value || '').trim();
+  if (!t) return undefined;
+  if (t === 'Leadership') return PEOPLE_LABEL;
+  if (isMenuLocation(t)) return t;
+  return undefined;
 }
 
 export function locationFromPath(filename: string): MenuLocationLabel {
@@ -82,7 +90,7 @@ function locationFromAreaCode(area: string): MenuLocationLabel {
     case 'devotionals':
       return 'Devotionals';
     case 'leadership':
-      return 'Leadership';
+      return PEOPLE_LABEL;
     case 'events':
       return EVENTS_LABEL;
     case 'roster':
@@ -127,7 +135,7 @@ export function locationFromArea(area: string, hint = ''): MenuLocationLabel {
   if (h.includes('newsletter')) addHit('Newsletters');
   if (h.includes('devotional')) addHit('Devotionals');
   if (h.includes('sermon')) addHit('Sermons');
-  if (h.includes('leadership')) addHit('Leadership');
+  if (h.includes('leadership')) addHit(PEOPLE_LABEL);
   if (/\bevents?\b/.test(h) || h.includes("what's on") || h.includes('whats on')) addHit(EVENTS_LABEL);
   if (h.includes('roster')) addHit('Rosters (Beta)');
 
@@ -155,8 +163,9 @@ export function locationForDisplay(input: {
   title?: string;
   id?: string;
 }): MenuLocationLabel {
-  if (!isGenericChangelogHeading(input.heading) && isMenuLocation(input.heading)) {
-    return input.heading;
+  const fromHeading = normalizeMenuLocation(input.heading);
+  if (!isGenericChangelogHeading(input.heading) && fromHeading) {
+    return fromHeading;
   }
   return locationFromArea(
     input.area,

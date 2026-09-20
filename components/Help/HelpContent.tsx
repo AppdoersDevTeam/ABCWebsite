@@ -1,7 +1,7 @@
 import React from 'react';
 import { HelpCircle } from 'lucide-react';
 import { AdminPageHeader } from '../UI/AdminPageHeader';
-import { EVENTS_LABEL } from '../../lib/constants';
+import { EVENTS_LABEL, PEOPLE_LABEL } from '../../lib/constants';
 
 type Mode = 'member' | 'admin';
 
@@ -47,7 +47,7 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode, isSuperAdmin = f
               <li>Your landing page after signing in as an admin: quick snapshot and shortcuts into the main tools.</li>
               <li>The yellow bar at the top has the church name, the person signed in, a search box for admin pages, and Help.</li>
               <li>The Users card shows how many approved users are in the system. Click it to open Users under Users & Roles.</li>
-              <li>Use it to orient new admins before they open Users, Roles, or Leadership.</li>
+              <li>Use it to orient new admins before they open Users, Roles, or {PEOPLE_LABEL}.</li>
             </Section>
 
             <Section title="Annual Calendar">
@@ -58,15 +58,15 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode, isSuperAdmin = f
 
             <Section title="Users & Roles">
               <li>The Users & Roles menu opens Users and Roles. Roles are named labels (Owner, Admin, Member, Group Leader, plus any you add) — there is no permissions matrix.</li>
-              <li>On Users, search by name, username, email or mobile, filter by role, and export the current list. Row actions include notify, assign a role, edit, leadership linking, approval, and delete.</li>
+              <li>On Users, search by name, username, email or mobile, filter by role, and export the current list. Row actions include notify, assign a role, edit, {PEOPLE_LABEL.toLowerCase()} linking, approval, and delete.</li>
               <li>On Roles, add a role name and type (Account, Member, or Group Leader) and see how many people have that role. System roles cannot be deleted.</li>
               <li>
                 Use <span className="font-semibold text-charcoal">Delete</span> to remove someone from
                 the system after confirmation. They receive an email confirming the deletion. You cannot delete your own
                 account while logged in.
               </li>
-              <li>Link a login to a Leadership person so group memberships and rosters apply to that account. Use Check Leadership Links to retry safe automatic matches.</li>
-              <li>Not every login needs a Leadership row—only link when they should appear in ministry lists or see group rosters.</li>
+              <li>Link a login to a {PEOPLE_LABEL} record so group memberships and rosters apply to that account. Use Check {PEOPLE_LABEL} Links to retry safe automatic matches.</li>
+              <li>Not every login needs a {PEOPLE_LABEL} row—only link when they should appear in ministry lists or see group rosters.</li>
             </Section>
 
             <Section title="Logs">
@@ -75,7 +75,7 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode, isSuperAdmin = f
                 when this feature was enabled.
               </li>
               <li>Filter by category, action, date, or search by email or summary. Export filtered results to CSV for records.</li>
-              <li>Database changes (groups, events, Leadership, etc.) are recorded automatically — you may occasionally see two entries for the same action (app + database).</li>
+              <li>Database changes (groups, events, {PEOPLE_LABEL}, etc.) are recorded automatically — you may occasionally see two entries for the same action (app + database).</li>
               <li>Contact form submissions are not stored in logs (email only). Logs cannot be edited or deleted in the portal.</li>
             </Section>
 
@@ -111,10 +111,10 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode, isSuperAdmin = f
               <li>Members open devotionals in the dashboard viewer — no download or new-tab links.</li>
             </Section>
 
-            <Section title="Leadership">
+            <Section title={PEOPLE_LABEL}>
               <li>Add and edit people shown on the public leadership pages and used for ministry structure.</li>
               <li>Assign groups (ministries) and job roles; photos and names feed leader lines on rosters and listings.</li>
-              <li>Watch for duplicate emails and “linked account” vs “no account link” so logins and Leadership rows stay aligned.</li>
+              <li>Watch for duplicate emails and “linked account” vs “no account link” so logins and {PEOPLE_LABEL} rows stay aligned.</li>
             </Section>
 
             <Section title={EVENTS_LABEL}>
@@ -125,7 +125,7 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode, isSuperAdmin = f
             <Section title="Roster">
               <li>Publish rosters per ministry (group): PDF upload, date range, and which group the file belongs to.</li>
               <li>Edit existing rosters to change ministry, dates, or replace the file without re-creating the entry.</li>
-              <li>Only members who are in that group (via their linked Leadership person) can see that roster on their dashboard.</li>
+              <li>Only members who are in that group (via their linked {PEOPLE_LABEL} record) can see that roster on their dashboard.</li>
             </Section>
 
             <Section title="System Setup">
@@ -135,7 +135,7 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode, isSuperAdmin = f
               </li>
               <li>
                 <span className="font-semibold text-charcoal">Job Roles</span> — titles and leader roles (e.g. “Worship
-                Leader”) shown with people in Leadership and on roster cards.
+                Leader”) shown with people in {PEOPLE_LABEL} and on roster cards.
               </li>
               <li>
                 <span className="font-semibold text-charcoal">Event Categories</span> — dropdown options when admins create
@@ -178,7 +178,7 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode, isSuperAdmin = f
               <li>PDFs open only inside this page so you can reflect without leaving the portal.</li>
             </Section>
 
-            <Section title="Leadership">
+            <Section title={PEOPLE_LABEL}>
               <li>Browse staff and key people: names, roles, and photos the church has chosen to show members.</li>
               <li>Use it to learn who leads which areas and how to recognise people on a Sunday.</li>
             </Section>
@@ -190,7 +190,7 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode, isSuperAdmin = f
 
             <Section title="Roster">
               <li>View ministry rosters (usually PDFs) for groups you belong to—schedules, serving teams, or similar.</li>
-              <li>You only see rosters for your ministries. If nothing appears, your account may not be linked to Leadership yet, or no roster has been uploaded for your group.</li>
+              <li>You only see rosters for your ministries. If nothing appears, your account may not be linked to {PEOPLE_LABEL} yet, or no roster has been uploaded for your group.</li>
               <li>Ask an admin if you expect a roster but do not see one after you are correctly placed in a ministry group.</li>
             </Section>
 

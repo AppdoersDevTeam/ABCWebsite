@@ -3,7 +3,7 @@ import { supabase } from '../../lib/supabase';
 import type { User } from '../../types';
 import { Modal } from '../../components/UI/Modal';
 import { GlowingButton } from '../../components/UI/GlowingButton';
-import { displayName } from '../../lib/constants';
+import { displayName, PEOPLE_LABEL } from '../../lib/constants';
 import { logAuditEventSafe } from '../../lib/auditLog';
 import { Search, Link2 } from 'lucide-react';
 
@@ -85,7 +85,7 @@ export const LinkDirectoryUserModal: React.FC<LinkDirectoryUserModalProps> = ({
       setSelectedId(null);
     } catch (e) {
       console.error('Directory search failed', e);
-      alert('Could not search Leadership. Check Supabase connection and RLS.');
+      alert(`Could not search ${PEOPLE_LABEL}. Check Supabase connection and RLS.`);
       setRows([]);
     } finally {
       setLoading(false);
@@ -99,7 +99,7 @@ export const LinkDirectoryUserModal: React.FC<LinkDirectoryUserModalProps> = ({
     if (row.user_id && row.user_id !== targetUser.id) {
       if (
         !window.confirm(
-          'This Leadership person is already linked to another website user. Replace the link with this user?'
+          `This ${PEOPLE_LABEL} record is already linked to another website user. Replace the link with this user?`
         )
       ) {
         return;
@@ -117,10 +117,10 @@ export const LinkDirectoryUserModal: React.FC<LinkDirectoryUserModalProps> = ({
         category: 'users',
         entityType: 'team_members',
         entityId: selectedId,
-        summary: `Linked leadership person "${row.name}" to login ${targetUser.email}`,
+        summary: `Linked ${PEOPLE_LABEL} record "${row.name}" to login ${targetUser.email}`,
         details: { user_id: targetUser.id, directory_id: selectedId },
       });
-      alert('Leadership link saved.');
+      alert(`${PEOPLE_LABEL} link saved.`);
       onSuccess();
       onClose();
     } catch (e: unknown) {
@@ -134,10 +134,10 @@ export const LinkDirectoryUserModal: React.FC<LinkDirectoryUserModalProps> = ({
   if (!targetUser) return null;
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={`Link to Leadership — ${displayName(targetUser)}`}>
+    <Modal isOpen={isOpen} onClose={onClose} title={`Link to ${PEOPLE_LABEL} — ${displayName(targetUser)}`}>
       <div className="space-y-4">
         <p className="text-sm text-neutral">
-          Search for an existing Leadership person (unlinked or linked). Linking connects this login to that Leadership
+          Search for an existing {PEOPLE_LABEL} record (unlinked or linked). Linking connects this login to that {PEOPLE_LABEL}
           record so ministry groups and rosters apply.
         </p>
 

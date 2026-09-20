@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { Users, UserCheck, X, Shield, ShieldOff, KeyRound, AlertTriangle, ChevronDown, Link2, Unlink, Trash2, PauseCircle, Download, Search, Plus, MoreVertical, Bell, Pencil, Building2, User as UserIcon, UsersRound } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { displayName, displayNameLastFirst, displayInitials, filterUsersForAdminView, canChangeUserAdminRole, isAdminUser, isOwnUserAccount, isServiceAccountEmail, isPendingApproval, isAccessHeld, CHURCH_NAME } from '../../lib/constants';
+import { displayName, displayNameLastFirst, displayInitials, filterUsersForAdminView, canChangeUserAdminRole, isAdminUser, isOwnUserAccount, isServiceAccountEmail, isPendingApproval, isAccessHeld, CHURCH_NAME, PEOPLE_LABEL } from '../../lib/constants';
 import { User } from '../../types';
 import { CreateUserProfile } from './CreateUserProfile';
 import { LinkDirectoryUserModal } from './LinkDirectoryUserModal';
@@ -673,7 +673,7 @@ export const AdminUsers = () => {
         if (ok) linked += 1;
       }
       await fetchUsers();
-      alert(linked > 0 ? `Linked ${linked} user(s) to Leadership.` : 'No safe matches found. Manual linking required.');
+      alert(linked > 0 ? `Linked ${linked} user(s) to ${PEOPLE_LABEL}.` : 'No safe matches found. Manual linking required.');
     } catch (e) {
       console.error(e);
       alert('Failed to recheck directory links.');
@@ -685,7 +685,7 @@ export const AdminUsers = () => {
   const handleUnlinkLeadership = async (target: User) => {
     if (
       !window.confirm(
-        `Unlink ${displayName(target) || 'this user'} from Leadership? They will lose roster access until linked again.`
+        `Unlink ${displayName(target) || 'this user'} from ${PEOPLE_LABEL}? They will lose roster access until linked again.`
       )
     ) {
       return;
@@ -892,10 +892,10 @@ export const AdminUsers = () => {
             </div>
             <div className="flex-1">
               <p className="font-bold">
-                {directoryNeedsReviewCount} user{directoryNeedsReviewCount === 1 ? '' : 's'} not linked to Leadership
+                {directoryNeedsReviewCount} user{directoryNeedsReviewCount === 1 ? '' : 's'} not linked to {PEOPLE_LABEL}
               </p>
               <p className="text-red-900 mt-1">
-                Users need a linked Leadership person to inherit ministry/group permissions (rosters). If they shouldn’t have one, you can ignore this. Otherwise use Actions → Link Leadership.
+                Users need a linked {PEOPLE_LABEL} record to inherit ministry/group permissions (rosters). If they shouldn’t have one, you can ignore this. Otherwise use Actions → Link {PEOPLE_LABEL}.
               </p>
             </div>
           </div>
@@ -936,7 +936,7 @@ export const AdminUsers = () => {
                 }}
               >
                 <Link2 size={16} className="text-blue-600" />
-                {isRelinking ? 'Checking…' : 'Check Leadership Links'}
+                {isRelinking ? 'Checking…' : `Check ${PEOPLE_LABEL} Links`}
               </button>
             </div>
           )}
@@ -1174,7 +1174,7 @@ export const AdminUsers = () => {
                                 }}
                               >
                                 <Link2 size={16} className="text-blue-600" />
-                                Link Leadership
+                                Link {PEOPLE_LABEL}
                               </button>
                               {directoryByUserId[u.id] && (
                                 <button
@@ -1186,7 +1186,7 @@ export const AdminUsers = () => {
                                   }}
                                 >
                                   <Unlink size={16} />
-                                  Unlink Leadership
+                                  Unlink {PEOPLE_LABEL}
                                 </button>
                               )}
                               <button

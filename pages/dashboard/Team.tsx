@@ -6,6 +6,7 @@ import { supabase } from '../../lib/supabase';
 import { getDisplayRole, inferProfileType } from '../../lib/teamMemberUtils';
 import { SkeletonPageHeader } from '../../components/UI/Skeleton';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
+import { PEOPLE_LABEL } from '../../lib/constants';
 
 export const Team = () => {
   const [members, setMembers] = useState<TeamMember[]>([]);
@@ -50,7 +51,7 @@ export const Team = () => {
   return (
     <div className="space-y-8">
       <AdminPageHeader
-        title="Leadership"
+        title={PEOPLE_LABEL}
         subtitle="Staff and church leadership."
         icon={<Users size={28} />}
       />

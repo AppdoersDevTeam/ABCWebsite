@@ -19,6 +19,7 @@ import {
   type EmailSendRow,
 } from '../../lib/emailSends';
 import { getUserTimezone } from '../../lib/dateUtils';
+import { PEOPLE_LABEL } from '../../lib/constants';
 
 type KindFilter = 'all' | EmailRecipientKind;
 
@@ -76,7 +77,7 @@ function PeriodPanel({
           <dd className="text-xl font-serif text-charcoal mt-1">{users}</dd>
         </div>
         <div className="rounded-lg bg-teal-50 px-3 py-2">
-          <dt className="text-teal-800 font-semibold">Leadership</dt>
+          <dt className="text-teal-800 font-semibold">{PEOPLE_LABEL}</dt>
           <dd className="text-xl font-serif text-charcoal mt-1">{leadership}</dd>
         </div>
       </dl>
@@ -133,7 +134,7 @@ export const AdminEmails = () => {
     <div className="space-y-8 pb-12">
       <AdminPageHeader
         title="Emails sent"
-        subtitle="Every email the church website has sent to users and Leadership. Daily and monthly limits use New Zealand time."
+        subtitle={`Every email the church website has sent to users and ${PEOPLE_LABEL}. Daily and monthly limits use New Zealand time.`}
         icon={<Mail size={28} />}
         rightSlot={
           <Link
@@ -163,7 +164,7 @@ export const AdminEmails = () => {
           [
             { id: 'all', label: 'All', icon: <Mail size={14} /> },
             { id: 'user', label: 'Users', icon: <User size={14} /> },
-            { id: 'leadership', label: 'Leadership', icon: <Users size={14} /> },
+            { id: 'leadership', label: PEOPLE_LABEL, icon: <Users size={14} /> },
           ] as const
         ).map((opt) => (
           <button
@@ -209,7 +210,7 @@ export const AdminEmails = () => {
           <div>
             <h2 className="text-[18px] font-semibold text-charcoal">All-time total</h2>
             <p className="text-sm text-neutral mt-1">
-              {isLoading ? 'Loading…' : `${stats.allTime.total} email${stats.allTime.total === 1 ? '' : 's'} · ${stats.allTime.users} to users · ${stats.allTime.leadership} to Leadership`}
+              {isLoading ? 'Loading…' : `${stats.allTime.total} email${stats.allTime.total === 1 ? '' : 's'} · ${stats.allTime.users} to users · ${stats.allTime.leadership} to ${PEOPLE_LABEL}`}
             </p>
           </div>
         </div>
@@ -244,7 +245,7 @@ export const AdminEmails = () => {
                             : 'bg-sky-50 text-sky-800'
                         }`}
                       >
-                        {row.recipient_kind === 'leadership' ? 'Leadership' : 'User'}
+                        {row.recipient_kind === 'leadership' ? PEOPLE_LABEL : 'User'}
                       </span>
                     </td>
                     <td className="py-3 text-sm text-charcoal">

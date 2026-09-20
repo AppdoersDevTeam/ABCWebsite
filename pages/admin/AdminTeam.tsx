@@ -10,7 +10,7 @@ import { downloadDirectoryCsv, downloadDirectoryPdf } from '../../lib/exportDire
 import { logAuditEventSafe } from '../../lib/auditLog';
 import { formatDdMmYyyy } from '../../lib/dateUtils';
 import { useAuth } from '../../context/AuthContext';
-import { CHURCH_NAME, displayInitials } from '../../lib/constants';
+import { CHURCH_NAME, displayInitials, PEOPLE_LABEL } from '../../lib/constants';
 import metadata from '../../metadata.json';
 
 type ProfileType = 'staff' | 'attendee' | 'member';
@@ -254,7 +254,7 @@ export const AdminTeam = () => {
     const yyyy = d.getFullYear();
     const mm = String(d.getMonth() + 1).padStart(2, '0');
     const dd = String(d.getDate()).padStart(2, '0');
-    return `leadership-${yyyy}-${mm}-${dd}`;
+    return `people-${yyyy}-${mm}-${dd}`;
   }, []);
 
   /** Normalized emails that appear on more than one active directory row (data hygiene warning). */
@@ -356,7 +356,7 @@ export const AdminTeam = () => {
       setMembers(withJoins);
     } catch (error) {
       console.error('Error fetching team members:', error);
-      alert('Failed to load Leadership');
+      alert(`Failed to load ${PEOPLE_LABEL}`);
     } finally {
       setIsLoading(false);
     }
@@ -612,7 +612,7 @@ export const AdminTeam = () => {
         category: 'team',
         entityType: 'team_members',
         entityId: created.id,
-        summary: `Added leadership person "${trimmed.name}"`,
+        summary: `Added person "${trimmed.name}"`,
         details: { profile_type: trimmed.profile_type },
       });
 
@@ -621,7 +621,7 @@ export const AdminTeam = () => {
       setIsModalOpen(false);
     } catch (error: unknown) {
       console.error('Error creating team member:', error);
-      const msg = getSupabaseErrorMessage(error) || 'Failed to add person to Leadership';
+      const msg = getSupabaseErrorMessage(error) || `Failed to add person to ${PEOPLE_LABEL}`;
       alert(msg + teamMemberSaveErrorHint(msg));
     } finally {
       setIsUploading(false);
@@ -694,7 +694,7 @@ export const AdminTeam = () => {
         category: 'team',
         entityType: 'team_members',
         entityId: editingMember.id,
-        summary: `Updated leadership person "${trimmed.name}"`,
+        summary: `Updated person "${trimmed.name}"`,
       });
 
       await fetchMembers();
@@ -703,7 +703,7 @@ export const AdminTeam = () => {
       setIsModalOpen(false);
     } catch (error: unknown) {
       console.error('Error updating team member:', error);
-      const msg = getSupabaseErrorMessage(error) || 'Failed to update Leadership person';
+      const msg = getSupabaseErrorMessage(error) || `Failed to update ${PEOPLE_LABEL} person`;
       alert(msg + teamMemberSaveErrorHint(msg));
     } finally {
       setIsUploading(false);
@@ -729,14 +729,14 @@ export const AdminTeam = () => {
         category: 'team',
         entityType: 'team_members',
         entityId: deleteTarget.id,
-        summary: `Permanently deleted leadership person "${deleteTarget.name}"`,
+        summary: `Permanently deleted person "${deleteTarget.name}"`,
       });
       setDeleteTarget(null);
       setDeleteConfirmText('');
       await fetchMembers();
     } catch (error: unknown) {
       console.error('Error deleting team member:', error);
-      alert(getSupabaseErrorMessage(error) || 'Failed to delete Leadership person');
+      alert(getSupabaseErrorMessage(error) || `Failed to delete ${PEOPLE_LABEL} person`);
     } finally {
       setIsDeleting(false);
     }
@@ -764,13 +764,13 @@ export const AdminTeam = () => {
         category: 'team',
         entityType: 'team_members',
         entityId: archiveTarget.id,
-        summary: `Archived leadership person "${archiveTarget.name}"`,
+        summary: `Archived person "${archiveTarget.name}"`,
       });
       setArchiveTarget(null);
       await fetchMembers();
     } catch (error: unknown) {
       console.error('Error archiving team member:', error);
-      alert(getSupabaseErrorMessage(error) || 'Failed to archive Leadership person');
+      alert(getSupabaseErrorMessage(error) || `Failed to archive ${PEOPLE_LABEL} person`);
     } finally {
       setIsArchiving(false);
     }
@@ -789,12 +789,12 @@ export const AdminTeam = () => {
         category: 'team',
         entityType: 'team_members',
         entityId: id,
-        summary: `Restored leadership person "${member?.name || id}" from archive`,
+        summary: `Restored person "${member?.name || id}" from archive`,
       });
       await fetchMembers();
     } catch (error: unknown) {
       console.error('Error unarchiving team member:', error);
-      alert(getSupabaseErrorMessage(error) || 'Failed to restore Leadership person');
+      alert(getSupabaseErrorMessage(error) || `Failed to restore ${PEOPLE_LABEL} person`);
     }
   };
 
@@ -852,7 +852,7 @@ export const AdminTeam = () => {
   return (
     <div className="space-y-6">
       <AdminPageHeader
-        title="Leadership"
+        title={PEOPLE_LABEL}
         subtitle="Search, filter, and manage staff, attendees, and members."
         icon={<User size={28} />}
       />
@@ -1001,10 +1001,10 @@ export const AdminTeam = () => {
 
         {activeTab === 'active' && duplicateEmails.size > 0 && (
           <div className="mx-4 mb-3 rounded-[12px] border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-            <p className="font-bold">Duplicate Leadership emails detected</p>
+            <p className="font-bold">Duplicate {PEOPLE_LABEL} emails detected</p>
             <p className="mt-1 text-amber-800">
-              Some people share the same email address. User ↔ Leadership auto-link and roster permissions use
-              email matching — resolve duplicates in Leadership so each login email maps to one person.
+              Some people share the same email address. User ↔ {PEOPLE_LABEL} auto-link and roster permissions use
+              email matching — resolve duplicates in {PEOPLE_LABEL} so each login email maps to one person.
             </p>
           </div>
         )}
@@ -1051,7 +1051,7 @@ export const AdminTeam = () => {
                         ? 'No archived people'
                         : 'No archived people match your search'
                       : activeMembersList.length === 0
-                        ? 'No people in Leadership yet. Add your first person to get started.'
+                        ? `No people in ${PEOPLE_LABEL} yet. Add your first person to get started.`
                         : 'No people found'}
                   </td>
                 </tr>
@@ -1238,7 +1238,7 @@ export const AdminTeam = () => {
                 </option>
               ))}
             </select>
-            <p className="text-xs text-neutral mt-1">Staff, Attendee, or Member (Leadership).</p>
+            <p className="text-xs text-neutral mt-1">Staff, Attendee, or Member ({PEOPLE_LABEL}).</p>
           </div>
 
           {formData.profile_type !== 'attendee' && (groups.length > 0 || jobRoles.length > 0) && (
@@ -1463,7 +1463,7 @@ export const AdminTeam = () => {
                       );
 
                   if (isImage && previewUrl) {
-                    return <img src={previewUrl} alt="Leadership person" className="w-full h-full object-cover" />;
+                    return <img src={previewUrl} alt={`${PEOPLE_LABEL} person`} className="w-full h-full object-cover" />;
                   }
                   return (
                     <div className="w-full h-full bg-gold/10 flex items-center justify-center">
@@ -1579,7 +1579,7 @@ export const AdminTeam = () => {
             <div className="rounded-[8px] border border-red-200 bg-red-50 p-4 text-sm text-red-900">
               <p className="font-bold">This action is permanent and cannot be undone.</p>
               <p className="mt-2">
-                All Leadership data for <span className="font-bold">{deleteTarget.name}</span> will be removed from the
+                All {PEOPLE_LABEL} data for <span className="font-bold">{deleteTarget.name}</span> will be removed from the
                 database, including groups, job roles, and any linked profile information.
               </p>
             </div>
@@ -1631,7 +1631,7 @@ export const AdminTeam = () => {
           <div className="space-y-4">
             <p className="text-sm text-neutral">
               <span className="font-bold text-charcoal">{archiveTarget.name}</span> will be hidden from the public site,
-              Leadership, and rosters. Only admins can view archived people and restore them later.
+              {PEOPLE_LABEL}, and rosters. Only admins can view archived people and restore them later.
             </p>
             <div className="flex flex-col-reverse sm:flex-row gap-3 justify-end pt-2">
               <button

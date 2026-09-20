@@ -20,7 +20,7 @@ import {
   ChevronDown
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { isSuperAdminUser, EVENTS_LABEL } from '../../lib/constants';
+import { isSuperAdminUser, EVENTS_LABEL, PEOPLE_LABEL } from '../../lib/constants';
 import { ScrollToTop } from '../ScrollToTop';
 import { useAutoSectionReveal } from '../UI/useAutoSectionReveal';
 import { DASHBOARD_NAV_ICON } from '../../lib/dashboardNav';
@@ -66,7 +66,7 @@ export const AdminLayout = () => {
     { label: 'Prayers', path: '/admin/prayer', icon: <HandHeart size={16} />, iconClass: DASHBOARD_NAV_ICON.prayers },
     { label: 'Newsletters', path: '/admin/newsletter', icon: <Newspaper size={16} />, iconClass: DASHBOARD_NAV_ICON.newsletters },
     { label: 'Devotionals', path: '/admin/devotional', icon: <BookOpen size={16} />, iconClass: DASHBOARD_NAV_ICON.devotionals },
-    { label: 'Leadership', path: '/admin/team', icon: <Users size={16} />, iconClass: DASHBOARD_NAV_ICON.team },
+    { label: PEOPLE_LABEL, path: '/admin/team', icon: <Users size={16} />, iconClass: DASHBOARD_NAV_ICON.team },
     { label: EVENTS_LABEL, path: '/admin/events', icon: <Calendar size={16} />, iconClass: DASHBOARD_NAV_ICON.events },
     { label: 'Rosters (Beta)', path: '/admin/roster', icon: <ClipboardList size={16} />, iconClass: DASHBOARD_NAV_ICON.rosters },
     { label: 'System Setup', path: '/admin/settings', icon: <Settings size={16} />, iconClass: DASHBOARD_NAV_ICON.settings },

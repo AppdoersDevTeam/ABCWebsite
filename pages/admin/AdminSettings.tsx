@@ -4,7 +4,7 @@ import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { supabase } from '../../lib/supabase';
 import type { EventCategory, Group, JobRole } from '../../types';
 import { logAuditEvent } from '../../lib/auditLog';
-import { EVENTS_LABEL } from '../../lib/constants';
+import { EVENTS_LABEL, PEOPLE_LABEL } from '../../lib/constants';
 
 type Tab = 'groups' | 'job_roles' | 'event_categories';
 
@@ -314,7 +314,7 @@ export const AdminSettings = () => {
     <div className="space-y-8">
       <AdminPageHeader
         title="System Setup"
-        subtitle={`Manage Groups, Job Roles, and Event Categories used across Leadership, ${EVENTS_LABEL}, and Rosters.`}
+        subtitle={`Manage Groups, Job Roles, and Event Categories used across ${PEOPLE_LABEL}, ${EVENTS_LABEL}, and Rosters.`}
         icon={<Settings size={28} />}
       />
 
@@ -483,7 +483,7 @@ export const AdminSettings = () => {
           )}
 
           <p className="text-xs text-neutral">
-            Active groups ({activeGroups.length}) will show up in the Leadership create/edit form and filters.
+            Active groups ({activeGroups.length}) will show up in the {PEOPLE_LABEL} create/edit form and filters.
           </p>
         </div>
       ) : tab === 'job_roles' ? (
@@ -584,7 +584,7 @@ export const AdminSettings = () => {
           )}
 
           <p className="text-xs text-neutral">
-            Active job roles ({activeJobRoles.length}) will show up in the Leadership create/edit form and filters.
+            Active job roles ({activeJobRoles.length}) will show up in the {PEOPLE_LABEL} create/edit form and filters.
           </p>
         </div>
       ) : (

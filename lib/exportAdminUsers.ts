@@ -1,7 +1,7 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import type { User } from '../types';
-import { displayName, isAccessHeld } from './constants';
+import { displayName, isAccessHeld, PEOPLE_LABEL } from './constants';
 import { formatDdMmYyyy, formatDdMmYyyyHHmm } from './dateUtils';
 
 type ExportRow = {
@@ -10,7 +10,7 @@ type ExportRow = {
   Phone: string;
   Role: string;
   Status: string;
-  Leadership: string;
+  People: string;
   Joined: string;
 };
 
@@ -50,7 +50,7 @@ function toRows(users: User[], context: UserExportContext): ExportRow[] {
     Phone: u.phone ?? '',
     Role: roleLabel(u),
     Status: accessStatus(u),
-    Leadership: context.directoryByUserId[u.id] ? 'Linked' : 'Not linked',
+    People: context.directoryByUserId[u.id] ? 'Linked' : 'Not linked',
     Joined: formatJoined(u.created_at),
   }));
 }
@@ -87,7 +87,7 @@ export function downloadAdminUsersCsv(
     'Phone',
     'Role',
     'Status',
-    'Leadership',
+    PEOPLE_LABEL,
     'Joined',
   ];
   const title = `${meta.churchName} – Users List`;
@@ -120,8 +120,8 @@ export function downloadAdminUsersPdf(
 
   autoTable(doc, {
     startY: 80,
-    head: [['Name', 'Email', 'Phone', 'Role', 'Status', 'Leadership', 'Joined']],
-    body: rows.map((r) => [r.Name, r.Email, r.Phone, r.Role, r.Status, r.Leadership, r.Joined]),
+    head: [['Name', 'Email', 'Phone', 'Role', 'Status', PEOPLE_LABEL, 'Joined']],
+    body: rows.map((r) => [r.Name, r.Email, r.Phone, r.Role, r.Status, r.People, r.Joined]),
     styles: { fontSize: 9, cellPadding: 6 },
     headStyles: { fillColor: [210, 167, 74] },
     margin: { left: 40, right: 40, top: 80, bottom: 50 },
