@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { Modal } from '../../components/UI/Modal';
 import { CalendarDays, Trash2, User, Upload, X, Download, Search, Archive, ArchiveRestore, Plus, MoreVertical, Pencil, Building2, UsersRound, Unlink } from 'lucide-react';
 import type { Group, JobRole, TeamMember, User } from '../../types';
 import { supabase } from '../../lib/supabase';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
+import { PortalDropdown } from '../../components/UI/PortalDropdown';
 import { buildStoredRole, getDisplayRole, inferProfileType } from '../../lib/teamMemberUtils';
 import { downloadDirectoryCsv, downloadDirectoryPdf } from '../../lib/exportDirectoryPeople';
 import { logAuditEventSafe } from '../../lib/auditLog';
@@ -286,7 +287,6 @@ export const AdminTeam = () => {
   const [selectedIds, setSelectedIds] = useState<Record<string, boolean>>({});
   const [exportMenuOpen, setExportMenuOpen] = useState(false);
   const [actionsMenuId, setActionsMenuId] = useState<string | null>(null);
-  const actionsMenuRef = useRef<HTMLDivElement | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<TeamMember | null>(null);
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [archiveTarget, setArchiveTarget] = useState<TeamMember | null>(null);
@@ -413,24 +413,6 @@ export const AdminTeam = () => {
     fetchMembers();
     fetchLookups();
   }, []);
-
-  useEffect(() => {
-    if (!actionsMenuId) return;
-    const handlePointerDown = (event: MouseEvent) => {
-      if (actionsMenuRef.current && !actionsMenuRef.current.contains(event.target as Node)) {
-        setActionsMenuId(null);
-      }
-    };
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setActionsMenuId(null);
-    };
-    document.addEventListener('mousedown', handlePointerDown);
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('mousedown', handlePointerDown);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [actionsMenuId]);
 
   const fetchLookups = async () => {
     try {
@@ -1390,25 +1372,23 @@ export const AdminTeam = () => {
                         {activeTab === 'archived' ? formatArchivedDate(member.archived_at) : member.phone || '—'}
                       </td>
                       <td className="px-2 py-3 text-right">
-                        <div
-                          className="relative inline-block"
-                          ref={actionsMenuId === member.id ? actionsMenuRef : undefined}
-                        >
-                          <button
-                            type="button"
-                            className="rounded-full p-1.5 text-neutral hover:bg-gray-100 hover:text-charcoal"
-                            aria-label={`${member.name} actions`}
-                            onClick={() =>
-                              setActionsMenuId((current) => (current === member.id ? null : member.id))
-                            }
-                          >
-                            <MoreVertical size={18} />
-                          </button>
-                          {actionsMenuId === member.id && (
-                            <div
-                              role="menu"
-                              className="absolute right-0 top-full z-30 mt-1 w-52 rounded-lg border border-gray-200 bg-white py-1 shadow-lg"
+                        <PortalDropdown
+                          open={actionsMenuId === member.id}
+                          onClose={() => setActionsMenuId(null)}
+                          trigger={
+                            <button
+                              type="button"
+                              className="rounded-full p-1.5 text-neutral hover:bg-gray-100 hover:text-charcoal"
+                              aria-label={`${member.name} actions`}
+                              aria-expanded={actionsMenuId === member.id}
+                              onClick={() =>
+                                setActionsMenuId((current) => (current === member.id ? null : member.id))
+                              }
                             >
+                              <MoreVertical size={18} />
+                            </button>
+                          }
+                        >
                               {activeTab === 'archived' ? (
                                 <>
                                   <button
@@ -1499,9 +1479,7 @@ export const AdminTeam = () => {
                                   </button>
                                 </>
                               )}
-                            </div>
-                          )}
-                        </div>
+                        </PortalDropdown>
                       </td>
                     </tr>
                   );

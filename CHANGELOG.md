@@ -7,6 +7,36 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2109-005 — People 3-dots menu opens in front of the card
+
+**Date:** 2026-09-21
+**Time:** 00:42:41
+**Timezone:** Pacific/Auckland
+**Version:** 1.7.20
+**Type:** Fixed
+
+**Request**
+
+> Yet on People when I am clicking on the 3 dots the pouppep menu is hiden behind the Card as per picture bring it in front .
+
+**Changes**
+
+* The People row actions menu now opens in a portal above the table card, so Edit, Archive, Unlink, and Delete are no longer clipped by the footer.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: 66 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors. No browser MCP in this session; portal menu placement is covered by unit tests.
+
 ## CHG-2026-2109-004 — People 3-dots menu can unlink a linked account
 
 **Date:** 2026-09-21

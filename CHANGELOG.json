@@ -6,6 +6,35 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2109-005",
+      "date": "2026-09-21",
+      "time": "00:42:41",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T12:42:41.102Z",
+      "version": "1.7.20",
+      "type": "fixed",
+      "area": "leadership",
+      "title": "People 3-dots menu opens in front of the card",
+      "request": "Yet on People when I am clicking on the 3 dots the pouppep menu is hiden behind the Card as per picture bring it in front .",
+      "changes": [
+        "The People row actions menu now opens in a portal above the table card, so Edit, Archive, Unlink, and Delete are no longer clipped by the footer."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "66 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors. No browser MCP in this session; portal menu placement is covered by unit tests."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2109-004",
       "date": "2026-09-21",
       "time": "00:37:29",
