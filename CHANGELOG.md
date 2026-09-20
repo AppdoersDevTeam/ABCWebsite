@@ -7,6 +7,36 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2109-011 — Overview Users totals use status colours and icons
+
+**Date:** 2026-09-21
+**Time:** 01:23:33
+**Timezone:** Pacific/Auckland
+**Version:** 1.7.26
+**Type:** Changed
+
+**Request**
+
+> Change the Approved to Green colour font, the Pending to Red colour and not linked to Purple color same like LINKED on Users. add the icons for each one of it.
+
+**Changes**
+
+* Overview Users card now shows Approved in green with a check icon, Pending in red with a clock icon, and Not linked in the same purple as Linked on Users with an unlink icon.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: 72 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors.
+
 ## CHG-2026-2109-010 — Overview Users card shows approved, pending, and not linked totals
 
 **Date:** 2026-09-21

@@ -6,6 +6,35 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2109-011",
+      "date": "2026-09-21",
+      "time": "01:23:33",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T13:23:33.594Z",
+      "version": "1.7.26",
+      "type": "changed",
+      "area": "admin",
+      "title": "Overview Users totals use status colours and icons",
+      "request": "Change the Approved to Green colour font, the Pending to Red colour and not linked to Purple color same like LINKED on Users. add the icons for each one of it.",
+      "changes": [
+        "Overview Users card now shows Approved in green with a check icon, Pending in red with a clock icon, and Not linked in the same purple as Linked on Users with an unlink icon."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "72 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2109-010",
       "date": "2026-09-21",
       "time": "01:16:39",

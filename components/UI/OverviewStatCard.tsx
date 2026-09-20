@@ -54,7 +54,7 @@ export const OverviewStatCard: React.FC<OverviewStatCardProps> = ({
         {value}
       </div>
       {description ? (
-        <p className="text-[18px] text-neutral leading-relaxed min-h-[2.75rem]">{description}</p>
+        <div className="text-[15px] text-neutral leading-relaxed min-h-[2.75rem]">{description}</div>
       ) : (
         <div className="min-h-[2.75rem]" />
       )}

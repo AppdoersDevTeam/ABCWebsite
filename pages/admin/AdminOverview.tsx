@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { OverviewStatCard } from '../../components/UI/OverviewStatCard';
+import { OverviewUserBreakdown } from '../../components/UI/OverviewUserBreakdown';
 import { Calendar, BookOpen, Users, ClipboardList, UserCheck, X, Plus, Shield, Mail, Newspaper, HandHeart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { appConfirm } from '../../lib/appDialog';
 import { cannotComplete, namedPerson, withSystemDetail } from '../../lib/systemMessage';
 import { displayName, displayNameLastFirst, displayInitials, EVENTS_LABEL, PEOPLE_LABEL, filterUsersForAdminView, isPendingApproval } from '../../lib/constants';
-import { formatOverviewUserBreakdown } from '../../lib/overviewUserCounts';
 import { User } from '../../types';
 import { SkeletonPageHeader, SkeletonCard, SkeletonUserCard, SkeletonStatsCard } from '../../components/UI/Skeleton';
 import { formatRelativeDateInTimezone, formatFullDateTimeInTimezone, formatWeekDate, formatDdMmYyyy, resolveNewsletterWeekDate } from '../../lib/dateUtils';
@@ -635,11 +635,13 @@ export const AdminOverview = () => {
       highlight: false,
       subtitle: isLoadingUsers
         ? undefined
-        : formatOverviewUserBreakdown({
-            approved: visibleApprovedCount,
-            pending: visiblePendingCount,
-            notLinked: visibleNotLinkedCount,
-          }),
+        : (
+            <OverviewUserBreakdown
+              approved={visibleApprovedCount}
+              pending={visiblePendingCount}
+              notLinked={visibleNotLinkedCount}
+            />
+          ),
     },
     { 
       label: "People's Directory", 
