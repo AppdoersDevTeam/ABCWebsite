@@ -35,7 +35,7 @@ export const AdminOverview = () => {
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [showAllUsers, setShowAllUsers] = useState(false);
   const [emailModalUser, setEmailModalUser] = useState<User | null>(null);
-  const [prayerRequests24h, setPrayerRequests24h] = useState(0);
+  const [prayerRequestsCount, setPrayerRequestsCount] = useState(0);
   const [nextService, setNextService] = useState<string | null>(null);
   const [newsletterCount, setNewsletterCount] = useState(0);
   const [devotionalsCount, setDevotionalsCount] = useState(0);
@@ -288,24 +288,15 @@ export const AdminOverview = () => {
   const fetchStats = async () => {
     setIsLoadingStats(true);
     try {
-      // Fetch prayer requests from last 24 hours (only non-deleted requests)
-      // Since requests are hard-deleted, we just need to count existing requests
-      const twentyFourHoursAgo = new Date();
-      twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
-      
-      // Count only requests that still exist (not deleted)
-      // Hard-deleted requests won't appear in the query, so this automatically excludes them
-      const { data: prayerRequests, error: prayerError } = await supabase
+      const { count: prayerTotal, error: prayerError } = await supabase
         .from('prayer_requests')
-        .select('id')
-        .gte('created_at', twentyFourHoursAgo.toISOString());
+        .select('id', { count: 'exact', head: true });
 
       if (prayerError) {
         console.error('Error fetching prayer requests:', prayerError);
-        setPrayerRequests24h(0);
+        setPrayerRequestsCount(0);
       } else {
-        // Count only existing (non-deleted) requests
-        setPrayerRequests24h(prayerRequests?.length || 0);
+        setPrayerRequestsCount(prayerTotal || 0);
       }
 
       // Fetch pending prayer requests (recent ones from last 7 days for "pending review")
@@ -637,8 +628,8 @@ export const AdminOverview = () => {
       subtitle: undefined,
     },
     { 
-      label: 'Prayer Requests (24hrs)', 
-      value: isLoadingStats ? '...' : prayerRequests24h.toString(), 
+      label: 'Prayer Requests', 
+      value: isLoadingStats ? '...' : prayerRequestsCount.toString(), 
       icon: <HandHeart size={20} />, 
       path: '/admin/prayer', 
       color: 'text-blue-600',
@@ -669,7 +660,7 @@ export const AdminOverview = () => {
       subtitle: isLoadingStats ? 'Loading...' : undefined
     },
     { 
-      label: 'Roster',
+      label: 'Rosters',
       value: isLoadingStats ? '...' : rosterAssignmentsCount.toString(), 
       icon: <ClipboardList size={20} />, 
       path: '/admin/roster', 
@@ -693,7 +684,7 @@ export const AdminOverview = () => {
           : undefined,
       highlight: Boolean(emailsQuota && emailQuotaNearLimit(emailsQuota)),
     },
-  ], [visibleUsers.length, visibleApprovedCount, visiblePendingCount, visibleNotLinkedCount, isLoadingUsers, prayerRequests24h, nextService, newsletterCount, devotionalsCount, isLoadingStats, teamMembersCount, rosterAssignmentsCount, emailsQuota]);
+  ], [visibleUsers.length, visibleApprovedCount, visiblePendingCount, visibleNotLinkedCount, isLoadingUsers, prayerRequestsCount, nextService, newsletterCount, devotionalsCount, isLoadingStats, teamMembersCount, rosterAssignmentsCount, emailsQuota]);
 
   console.log('AdminOverview - Rendering, user:', user, 'pendingCount:', pendingCount, 'isLoadingUsers:', isLoadingUsers);
 

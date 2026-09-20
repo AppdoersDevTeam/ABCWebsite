@@ -6,6 +6,37 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2109-024",
+      "date": "2026-09-21",
+      "time": "02:37:20",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T14:37:20.812Z",
+      "version": "1.7.39",
+      "type": "changed",
+      "area": "admin",
+      "title": "Prayer Requests shows system total; Rosters label; titles 2px larger",
+      "request": "Change the Card for Prayer Requests, remove the (24hrs) and the counter must be the total of prayer request in the system. Change the card Roster to Rosters. Increase all Cards title description on 2px. push to live",
+      "changes": [
+        "The Prayer Requests card no longer says (24hrs) and now shows the total number of prayer requests in the system.",
+        "The Roster card is now titled Rosters.",
+        "Overview card titles are 2px larger."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "73 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2109-023",
       "date": "2026-09-21",
       "time": "02:35:23",

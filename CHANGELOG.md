@@ -7,6 +7,38 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2109-024 — Prayer Requests shows system total; Rosters label; titles 2px larger
+
+**Date:** 2026-09-21
+**Time:** 02:37:20
+**Timezone:** Pacific/Auckland
+**Version:** 1.7.39
+**Type:** Changed
+
+**Request**
+
+> Change the Card for Prayer Requests, remove the (24hrs) and the counter must be the total of prayer request in the system. Change the card Roster to Rosters. Increase all Cards title description on 2px. push to live
+
+**Changes**
+
+* The Prayer Requests card no longer says (24hrs) and now shows the total number of prayer requests in the system.
+* The Roster card is now titled Rosters.
+* Overview card titles are 2px larger.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: 73 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors.
+
 ## CHG-2026-2109-023 — Overview cards share the Users card height and aligned layout
 
 **Date:** 2026-09-21
