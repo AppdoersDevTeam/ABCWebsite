@@ -6,6 +6,36 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2009-025",
+      "date": "2026-09-20",
+      "time": "23:21:21",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T11:21:21.607Z",
+      "version": "1.7.12",
+      "type": "added",
+      "area": "admin",
+      "title": "Overview People card shows directory count",
+      "request": "On the left Menu Overview, Add a card for People and Show the quantity of people in the system. Push when completed.",
+      "changes": [
+        "Admin Overview now places a People card next to Users, showing how many active people are in the directory, with a description like the Users card.",
+        "Member Overview now has a matching People card with the same directory count, linking to People."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "57 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors. No browser MCP in this session; Overview cards were checked in code."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2009-024",
       "date": "2026-09-20",
       "time": "23:04:43",

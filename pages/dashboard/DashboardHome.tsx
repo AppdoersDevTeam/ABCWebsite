@@ -1,12 +1,12 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { displayName, formatDisplayTitle, EVENTS_LABEL } from '../../lib/constants';
+import { displayName, formatDisplayTitle, EVENTS_LABEL, PEOPLE_LABEL } from '../../lib/constants';
 import { formatWeekDate, formatDdMmYyyy, resolveNewsletterWeekDate } from '../../lib/dateUtils';
 import { fetchLatestNewsletter } from '../../lib/newsletters';
 import { OverviewStatCard } from '../../components/UI/OverviewStatCard';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
-import { Calendar, CalendarDays, BookOpen, Youtube, Newspaper, HandHeart, Home } from 'lucide-react';
+import { Calendar, CalendarDays, BookOpen, Youtube, Newspaper, HandHeart, Home, Users } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { getVerseOfTheDay } from '../../lib/getVerseOfTheDay';
 
@@ -18,6 +18,7 @@ export const DashboardHome = () => {
   const [lastNewsletterWeek, setLastNewsletterWeek] = useState<string | null>(null);
   const [lastDevotionalLabel, setLastDevotionalLabel] = useState<string | null>(null);
   const [lastDevotionalSubtitle, setLastDevotionalSubtitle] = useState<string | null>(null);
+  const [peopleCount, setPeopleCount] = useState(0);
   const [isLoadingStats, setIsLoadingStats] = useState(true);
   const verseOfTheDay = useMemo(() => getVerseOfTheDay(), []);
 
@@ -33,7 +34,7 @@ export const DashboardHome = () => {
       twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
       
       // Parallelize all queries for faster loading
-      const [prayerResult, newsletter, devotionalResult] = await Promise.allSettled([
+      const [prayerResult, newsletter, devotionalResult, peopleResult] = await Promise.allSettled([
         // Prayer requests query
         supabase
           .from('prayer_requests')
@@ -48,6 +49,11 @@ export const DashboardHome = () => {
           .select('title, subtitle, week_date')
           .order('week_date', { ascending: false })
           .limit(1),
+
+        supabase
+          .from('team_members')
+          .select('id', { count: 'exact', head: true })
+          .or('is_archived.eq.false,is_archived.is.null'),
       ]);
 
       // Process prayer requests
@@ -105,6 +111,12 @@ export const DashboardHome = () => {
         setLastDevotionalLabel(null);
         setLastDevotionalSubtitle(null);
       }
+
+      if (peopleResult.status === 'fulfilled' && !peopleResult.value.error) {
+        setPeopleCount(peopleResult.value.count || 0);
+      } else {
+        setPeopleCount(0);
+      }
     } catch (error) {
       console.error('Error fetching stats:', error);
     } finally {
@@ -126,6 +138,21 @@ export const DashboardHome = () => {
         />
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
+            <Link to="/dashboard/team" className="block h-full">
+              <OverviewStatCard
+                icon={<Users size={20} />}
+                iconClassName="bg-teal-50 text-teal-600"
+                label={PEOPLE_LABEL}
+                value={isLoadingStats ? '...' : peopleCount}
+                description={
+                  isLoadingStats
+                    ? 'Loading...'
+                    : `${peopleCount === 1 ? 'person' : 'people'} in the system`
+                }
+                footerLabel={`View ${PEOPLE_LABEL} →`}
+              />
+            </Link>
+
             <Link to="/dashboard/calendar" className="block h-full">
               <OverviewStatCard
                 icon={<CalendarDays size={20} />}

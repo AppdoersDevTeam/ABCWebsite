@@ -7,6 +7,37 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2009-025 — Overview People card shows directory count
+
+**Date:** 2026-09-20
+**Time:** 23:21:21
+**Timezone:** Pacific/Auckland
+**Version:** 1.7.12
+**Type:** Added
+
+**Request**
+
+> On the left Menu Overview, Add a card for People and Show the quantity of people in the system. Push when completed.
+
+**Changes**
+
+* Admin Overview now places a People card next to Users, showing how many active people are in the directory, with a description like the Users card.
+* Member Overview now has a matching People card with the same directory count, linking to People.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: 57 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors. No browser MCP in this session; Overview cards were checked in code.
+
 ## CHG-2026-2009-024 — My Profile header uses the signed-in photo
 
 **Date:** 2026-09-20

@@ -280,10 +280,11 @@ export const AdminOverview = () => {
         setPendingPrayerRequestsCount(recentPrayerRequests?.length || 0);
       }
 
-      // Fetch team members count
+      // Fetch active People directory count (exclude archived)
       const { count: teamCount, error: teamError } = await supabase
         .from('team_members')
-        .select('*', { count: 'exact', head: true });
+        .select('id', { count: 'exact', head: true })
+        .or('is_archived.eq.false,is_archived.is.null');
 
       if (!teamError) {
         setTeamMembersCount(teamCount || 0);
@@ -589,6 +590,14 @@ export const AdminOverview = () => {
       subtitle: isLoadingUsers ? 'Loading...' : 'Approved users in the system',
     },
     { 
+      label: PEOPLE_LABEL, 
+      value: isLoadingStats ? '...' : teamMembersCount.toString(), 
+      icon: <Users size={20} />, 
+      path: '/admin/team', 
+      color: 'text-teal-600',
+      subtitle: isLoadingStats ? 'Loading...' : 'People in the system',
+    },
+    { 
       label: 'New Prayer Requests (24h)', 
       value: isLoadingStats ? '...' : prayerRequests24h.toString(), 
       icon: <HandHeart size={20} />, 
@@ -617,20 +626,12 @@ export const AdminOverview = () => {
       label: 'Last Devotional', 
       value: isLoadingStats ? '...' : (lastDevotionalDate || 'None'), 
       icon: <BookOpen size={20} />,
-      path: '/admin/devotional',
+      path: '/admin/devotional', 
       color: 'text-purple-600',
       subtitle: isLoadingStats ? 'Loading...' : undefined
     },
     { 
-      label: PEOPLE_LABEL, 
-      value: isLoadingStats ? '...' : teamMembersCount.toString(), 
-      icon: <Users size={20} />, 
-      path: '/admin/team', 
-      color: 'text-teal-600',
-      subtitle: isLoadingStats ? 'Loading...' : undefined
-    },
-    { 
-      label: 'Roster Assignments', 
+      label: 'Roster Assignments',
       value: isLoadingStats ? '...' : rosterAssignmentsCount.toString(), 
       icon: <ClipboardList size={20} />, 
       path: '/admin/roster', 
@@ -704,6 +705,8 @@ export const AdminOverview = () => {
                         : `Users and ${PEOPLE_LABEL}`
                     : stat.label === 'Users' && !isLoadingUsers
                     ? `${visibleApprovedCount === 1 ? 'approved user' : 'approved users'} in the system`
+                    : stat.label === PEOPLE_LABEL && !isLoadingStats
+                    ? `${teamMembersCount === 1 ? 'person' : 'people'} in the system`
                     : stat.subtitle;
 
           const card = (
