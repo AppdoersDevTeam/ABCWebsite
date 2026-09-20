@@ -6,6 +6,36 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2109-013",
+      "date": "2026-09-21",
+      "time": "01:29:09",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T13:29:09.019Z",
+      "version": "1.7.28",
+      "type": "changed",
+      "area": "admin",
+      "title": "Overview stat cards drop Manage footer and are slightly narrower",
+      "request": "For all cards in Overview, remove the Manage option from the bottom of the cards. also decrease the width of each card in 10 pts. push to live.",
+      "changes": [
+        "Admin Overview stat cards no longer show Manage at the bottom.",
+        "Each Overview stat card is 10px narrower."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "72 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2109-012",
       "date": "2026-09-21",
       "time": "01:26:13",

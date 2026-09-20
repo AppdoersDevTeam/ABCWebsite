@@ -766,7 +766,6 @@ export const AdminOverview = () => {
               label={stat.label}
               value={stat.value}
               description={description}
-              footerLabel="Manage →"
               highlight={stat.highlight}
               valueSize={stat.valueSize}
               valueClassName={stat.valueSize === 'title' ? 'line-clamp-2' : undefined}
@@ -785,7 +784,7 @@ export const AdminOverview = () => {
                     element.scrollIntoView({ behavior: 'smooth' });
                   }
                 }}
-                className="block h-full"
+                className="mx-auto block h-full w-[calc(100%-10px)]"
               >
                 {card}
               </a>
@@ -793,7 +792,7 @@ export const AdminOverview = () => {
           }
 
           return (
-            <Link key={i} to={stat.path} className="block h-full">
+            <Link key={i} to={stat.path} className="mx-auto block h-full w-[calc(100%-10px)]">
               {card}
             </Link>
           );

@@ -27,7 +27,7 @@ export const OverviewStatCard: React.FC<OverviewStatCardProps> = ({
   label,
   value,
   description,
-  footerLabel = 'View →',
+  footerLabel,
   highlight = false,
   valueSize = 'stat',
   valueClassName = '',
@@ -58,9 +58,11 @@ export const OverviewStatCard: React.FC<OverviewStatCardProps> = ({
       ) : (
         <div className="min-h-[2.75rem]" />
       )}
-      <div className="pt-4 mt-auto border-t border-gray-100">
-        <span className="text-gold font-semibold text-sm">{footerLabel}</span>
-      </div>
+      {footerLabel ? (
+        <div className="pt-4 mt-auto border-t border-gray-100">
+          <span className="text-gold font-semibold text-sm">{footerLabel}</span>
+        </div>
+      ) : null}
     </div>
   );
 };

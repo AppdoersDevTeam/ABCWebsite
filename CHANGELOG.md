@@ -7,6 +7,37 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2109-013 — Overview stat cards drop Manage footer and are slightly narrower
+
+**Date:** 2026-09-21
+**Time:** 01:29:09
+**Timezone:** Pacific/Auckland
+**Version:** 1.7.28
+**Type:** Changed
+
+**Request**
+
+> For all cards in Overview, remove the Manage option from the bottom of the cards. also decrease the width of each card in 10 pts. push to live.
+
+**Changes**
+
+* Admin Overview stat cards no longer show Manage at the bottom.
+* Each Overview stat card is 10px narrower.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: 72 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors.
+
 ## CHG-2026-2109-012 — Overview approval request rows are more compact
 
 **Date:** 2026-09-21
