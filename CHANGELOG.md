@@ -7,6 +7,37 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2109-003 — Overview stays first with a gray menu divider
+
+**Date:** 2026-09-21
+**Time:** 00:25:00
+**Timezone:** Pacific/Auckland
+**Version:** 1.7.18
+**Type:** Changed
+
+**Request**
+
+> keep only the Overview as the first menu on left and righ after that separate the rest of the menus with a gray line.
+
+**Changes**
+
+* Overview is pinned at the top of the Admin and Member left menus.
+* A gray line separates Overview from the remaining pages, which stay in A–Z order.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: 64 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors. No browser MCP in this session; Overview-first order and divider placement are covered by portal-nav unit tests.
+
 ## CHG-2026-2109-002 — Admin and Member left menus are alphabetical
 
 **Date:** 2026-09-21

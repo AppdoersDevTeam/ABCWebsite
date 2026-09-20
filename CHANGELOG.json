@@ -6,6 +6,36 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2109-003",
+      "date": "2026-09-21",
+      "time": "00:25:00",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T12:25:00.817Z",
+      "version": "1.7.18",
+      "type": "changed",
+      "area": "admin",
+      "title": "Overview stays first with a gray menu divider",
+      "request": "keep only the Overview as the first menu on left and righ after that separate the rest of the menus with a gray line.",
+      "changes": [
+        "Overview is pinned at the top of the Admin and Member left menus.",
+        "A gray line separates Overview from the remaining pages, which stay in A–Z order."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "64 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors. No browser MCP in this session; Overview-first order and divider placement are covered by portal-nav unit tests."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2109-002",
       "date": "2026-09-21",
       "time": "00:20:06",

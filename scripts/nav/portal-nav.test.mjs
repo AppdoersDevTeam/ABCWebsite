@@ -1,8 +1,12 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { comparePortalNavLabels, sortPortalNavItems } from '../../lib/dashboardNav.ts';
+import {
+  comparePortalNavLabels,
+  portalNavNeedsDivider,
+  sortPortalNavItems,
+} from '../../lib/dashboardNav.ts';
 
-test('admin left menu sorts A–Z including Changelog and Users & Roles children', () => {
+test('admin left menu keeps Overview first then A–Z including Changelog and Users & Roles children', () => {
   const sorted = sortPortalNavItems([
     { label: 'Overview' },
     { label: 'Annual Calendar' },
@@ -28,6 +32,7 @@ test('admin left menu sorts A–Z including Changelog and Users & Roles children
   assert.deepEqual(
     sorted.map((item) => item.label),
     [
+      'Overview',
       'Annual Calendar',
       'Changelog',
       'Devotionals',
@@ -35,7 +40,6 @@ test('admin left menu sorts A–Z including Changelog and Users & Roles children
       'Help',
       'Logs',
       'Newsletters',
-      'Overview',
       'People',
       'Prayers',
       'Rosters (Beta)',
@@ -51,7 +55,7 @@ test('admin left menu sorts A–Z including Changelog and Users & Roles children
   );
 });
 
-test('member left menu sorts A–Z', () => {
+test('member left menu keeps Overview first then A–Z', () => {
   const sorted = sortPortalNavItems([
     { label: 'Overview' },
     { label: 'Annual Calendar' },
@@ -68,12 +72,12 @@ test('member left menu sorts A–Z', () => {
   assert.deepEqual(
     sorted.map((item) => item.label),
     [
+      'Overview',
       'Annual Calendar',
       'Devotionals',
       'Events',
       'Help',
       'Newsletters',
-      'Overview',
       'People',
       'Prayers',
       'Rosters (Beta)',
@@ -85,4 +89,12 @@ test('member left menu sorts A–Z', () => {
 test('nav labels compare case-insensitively', () => {
   assert.ok(comparePortalNavLabels('events', 'Help') < 0);
   assert.equal(comparePortalNavLabels('People', 'people'), 0);
+});
+
+test('a divider is shown after Overview when it is first', () => {
+  const items = [{ label: 'Overview' }, { label: 'Annual Calendar' }, { label: 'Events' }];
+  assert.equal(portalNavNeedsDivider(0, items), false);
+  assert.equal(portalNavNeedsDivider(1, items), true);
+  assert.equal(portalNavNeedsDivider(2, items), false);
+  assert.equal(portalNavNeedsDivider(1, [{ label: 'Events' }, { label: 'Help' }]), false);
 });

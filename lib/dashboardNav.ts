@@ -19,19 +19,31 @@ export const DASHBOARD_NAV_ICON = {
 
 type PortalNavChild = { label: string };
 
+export const OVERVIEW_NAV_LABEL = 'Overview';
+
 export function comparePortalNavLabels(a: string, b: string): number {
   return a.localeCompare(b, 'en', { sensitivity: 'base' });
 }
 
-/** A–Z by visible label, including nested Users & Roles children. */
+export function portalNavNeedsDivider(
+  index: number,
+  items: { label: string }[],
+): boolean {
+  return index === 1 && items[0]?.label === OVERVIEW_NAV_LABEL;
+}
+
+/** Overview first, then A–Z by visible label, including nested Users & Roles children. */
 export function sortPortalNavItems<T extends { label: string; children?: PortalNavChild[] }>(
   items: T[],
 ): T[] {
-  return items
-    .map((item) =>
-      item.children
-        ? { ...item, children: [...item.children].sort((a, b) => comparePortalNavLabels(a.label, b.label)) }
-        : item,
-    )
+  const prepared = items.map((item) =>
+    item.children
+      ? { ...item, children: [...item.children].sort((a, b) => comparePortalNavLabels(a.label, b.label)) }
+      : item,
+  );
+  const overview = prepared.filter((item) => item.label === OVERVIEW_NAV_LABEL);
+  const rest = prepared
+    .filter((item) => item.label !== OVERVIEW_NAV_LABEL)
     .sort((a, b) => comparePortalNavLabels(a.label, b.label));
+  return [...overview, ...rest];
 }

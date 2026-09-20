@@ -18,7 +18,7 @@ import { useAuth } from '../../context/AuthContext';
 import { isAdminUser, EVENTS_LABEL, PEOPLE_LABEL } from '../../lib/constants';
 import { ScrollToTop } from '../ScrollToTop';
 import { useAutoSectionReveal } from '../UI/useAutoSectionReveal';
-import { DASHBOARD_NAV_ICON, sortPortalNavItems } from '../../lib/dashboardNav';
+import { DASHBOARD_NAV_ICON, portalNavNeedsDivider, sortPortalNavItems } from '../../lib/dashboardNav';
 import { flattenPortalSearchItems, portalPageTitle, PortalTopBar, usePortalSidebarCollapsed } from './PortalTopBar';
 
 export const DashboardLayout = () => {
@@ -95,11 +95,14 @@ export const DashboardLayout = () => {
             </div>
 
           <nav className={`flex-1 space-y-1 overflow-y-auto py-2 ${sidebarCollapsed ? 'px-2 lg:px-2' : 'px-3'}`}>
-            {navItems.map((item) => {
+            {navItems.map((item, index) => {
               const isActive = location.pathname === item.path;
               return (
+                <React.Fragment key={item.path}>
+                  {portalNavNeedsDivider(index, navItems) ? (
+                    <div className="mx-1 my-2 border-t border-gray-300" role="separator" aria-hidden="true" />
+                  ) : null}
                 <Link
-                  key={item.path}
                   to={item.path}
                   title={item.label}
                   onClick={() => setIsSidebarOpen(false)}
@@ -121,6 +124,7 @@ export const DashboardLayout = () => {
                   </span>
                   <span className={`tracking-wide ${sidebarCollapsed ? 'lg:hidden' : ''}`}>{item.label}</span>
                 </Link>
+                </React.Fragment>
               );
             })}
           </nav>
