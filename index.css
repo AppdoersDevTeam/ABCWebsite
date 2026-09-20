@@ -2,16 +2,55 @@
 @tailwind components;
 @tailwind utilities;
 
-html,
-body {
+html {
   color-scheme: light;
+  font-size: 16px;
+  overflow-x: clip;
 }
 body {
   font-family: 'Inter', sans-serif;
   background: #ffffff;
   color: #222222;
+  font-size: 16px;
   -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-wrap: break-word;
+}
+
+/* Viewport-height fallback: 100vh first, then 100dvh for mobile browser chrome. */
+.min-h-screen {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+.h-screen {
+  height: 100vh;
+  height: 100dvh;
+}
+
+.page-container {
+  width: 100%;
+  max-width: 80rem;
+  margin-inline: auto;
+  min-width: 0;
+  padding-inline: max(1rem, env(safe-area-inset-left)) max(1rem, env(safe-area-inset-right));
+}
+@media (min-width: 768px) {
+  .page-container {
+    padding-inline: max(1.5rem, env(safe-area-inset-left)) max(1.5rem, env(safe-area-inset-right));
+  }
+}
+@media (min-width: 1024px) {
+  .page-container {
+    padding-inline: max(2rem, env(safe-area-inset-left)) max(2rem, env(safe-area-inset-right));
+  }
+}
+
+.hero-title {
+  font-family: 'Kaushan Script', cursive;
+  font-size: clamp(2rem, 1.15rem + 5.2vw, 4.25rem);
+  line-height: 1.2;
+  overflow-wrap: anywhere;
 }
 
 /* Headings default to Inter, use font-serif class for Kaushan Script */

@@ -22,6 +22,16 @@ export default {
   ],
   theme: {
     extend: {
+      fontSize: {
+        // Fluid headings, 320px–1536px. Body stays 16px via index.css.
+        '3xl': ['clamp(1.5rem, 1.2rem + 1.5vw, 1.875rem)', { lineHeight: '1.2' }],
+        '4xl': ['clamp(1.625rem, 1.2rem + 2vw, 2.25rem)', { lineHeight: '1.15' }],
+        '5xl': ['clamp(1.75rem, 1.1rem + 3vw, 3rem)', { lineHeight: '1.1' }],
+        '6xl': ['clamp(1.875rem, 1rem + 4vw, 3.75rem)', { lineHeight: '1.1' }],
+        '7xl': ['clamp(2rem, 0.8rem + 5vw, 4.5rem)', { lineHeight: '1.05' }],
+        '8xl': ['clamp(2.25rem, 0.5rem + 6vw, 6rem)', { lineHeight: '1' }],
+        hero: ['clamp(2rem, 1.15rem + 5.2vw, 4.25rem)', { lineHeight: '1.2' }],
+      },
       colors: {
         gold: '#fbcb05',
         charcoal: '#222222',

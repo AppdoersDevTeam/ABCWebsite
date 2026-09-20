@@ -7,6 +7,36 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2109-037 — Next Service card uses a dark gray church icon
+
+**Date:** 2026-09-21
+**Time:** 03:17:31
+**Timezone:** Pacific/Auckland
+**Version:** 1.8.5
+**Type:** Changed
+
+**Request**
+
+> Change the Icon for the next Service card for a church Icon but  use a dark gray color for the icon. push ot
+
+**Changes**
+
+* The Admin Overview Next Service card now uses a church icon in dark gray.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: Unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors.
+
 ## CHG-2026-2109-036 — Overview cards narrowed another 25%
 
 **Date:** 2026-09-21

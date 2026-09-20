@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { OverviewStatCard } from '../../components/UI/OverviewStatCard';
 import { OverviewUserBreakdown } from '../../components/UI/OverviewUserBreakdown';
-import { Calendar, BookOpen, Users, ClipboardList, UserCheck, UserCog, X, Plus, Shield, Mail, Newspaper, HandHeart } from 'lucide-react';
+import { Calendar, Church, BookOpen, Users, ClipboardList, UserCheck, UserCog, X, Plus, Shield, Mail, Newspaper, HandHeart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { appConfirm } from '../../lib/appDialog';
@@ -650,9 +650,9 @@ export const AdminOverview = () => {
     { 
       label: 'Next Service', 
       value: isLoadingStats ? '...' : (nextService || 'Sunday 10AM'), 
-      icon: <Calendar size={20} />, 
+      icon: <Church size={20} />, 
       path: '/admin/events', 
-      color: 'text-green-600',
+      color: 'text-gray-700',
       subtitle: isLoadingStats ? 'Loading...' : undefined
     },
     {

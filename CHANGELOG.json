@@ -6,6 +6,35 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2109-037",
+      "date": "2026-09-21",
+      "time": "03:17:31",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T15:17:31.321Z",
+      "version": "1.8.5",
+      "type": "changed",
+      "area": "admin",
+      "title": "Next Service card uses a dark gray church icon",
+      "request": "Change the Icon for the next Service card for a church Icon but  use a dark gray color for the icon. push ot",
+      "changes": [
+        "The Admin Overview Next Service card now uses a church icon in dark gray."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "Unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2109-036",
       "date": "2026-09-21",
       "time": "03:15:40",
