@@ -6,6 +6,36 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2109-004",
+      "date": "2026-09-21",
+      "time": "00:37:29",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T12:37:29.494Z",
+      "version": "1.7.19",
+      "type": "added",
+      "area": "leadership",
+      "title": "People 3-dots menu can unlink a linked account",
+      "request": "On People Menu when one account show lilnked add a option to unlik that account on the 3 dots on the righ side option if the account has not been linked do not add this option. Push when completed.",
+      "changes": [
+        "When a People row shows Linked, the 3-dots menu now includes Unlink account.",
+        "Unlink is not shown for people with no linked website login."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "64 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors. No browser MCP in this session; unlink is only rendered when member.user_id is set."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2109-003",
       "date": "2026-09-21",
       "time": "00:25:00",

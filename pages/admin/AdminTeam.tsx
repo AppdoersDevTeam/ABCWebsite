@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { Modal } from '../../components/UI/Modal';
-import { CalendarDays, Trash2, User, Upload, X, Download, Search, Archive, ArchiveRestore, Plus, MoreVertical, Pencil, Building2, UsersRound } from 'lucide-react';
+import { CalendarDays, Trash2, User, Upload, X, Download, Search, Archive, ArchiveRestore, Plus, MoreVertical, Pencil, Building2, UsersRound, Unlink } from 'lucide-react';
 import type { Group, JobRole, TeamMember, User } from '../../types';
 import { supabase } from '../../lib/supabase';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
@@ -861,6 +861,33 @@ export const AdminTeam = () => {
     }
   };
 
+  const handleUnlinkWebsiteAccount = async (member: TeamMember) => {
+    if (!member.user_id) return;
+    if (
+      !window.confirm(
+        `Unlink the website account from ${member.name}? They will lose roster access until linked again. This does not delete the login or the People record.`
+      )
+    ) {
+      return;
+    }
+    try {
+      const { error } = await supabase.from('team_members').update({ user_id: null }).eq('id', member.id);
+      if (error) throw error;
+      logAuditEventSafe({
+        action: 'unlink',
+        category: 'team',
+        entityType: 'team_members',
+        entityId: member.id,
+        summary: `Unlinked website account from person "${member.name}"`,
+        details: { user_id: member.user_id },
+      });
+      await fetchMembers();
+    } catch (e: unknown) {
+      console.error(e);
+      alert(e instanceof Error ? e.message : 'Failed to unlink the website account');
+    }
+  };
+
   const handleDelete = (member: TeamMember) => {
     setDeleteTarget(member);
     setDeleteConfirmText('');
@@ -1395,6 +1422,19 @@ export const AdminTeam = () => {
                                     <ArchiveRestore size={16} />
                                     Unarchive
                                   </button>
+                                  {member.user_id ? (
+                                    <button
+                                      type="button"
+                                      className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-red-600 hover:bg-red-50"
+                                      onClick={() => {
+                                        setActionsMenuId(null);
+                                        void handleUnlinkWebsiteAccount(member);
+                                      }}
+                                    >
+                                      <Unlink size={16} />
+                                      Unlink account
+                                    </button>
+                                  ) : null}
                                   <div className="my-1 border-t border-gray-100" />
                                   <button
                                     type="button"
@@ -1432,6 +1472,19 @@ export const AdminTeam = () => {
                                     <Archive size={16} />
                                     Archive
                                   </button>
+                                  {member.user_id ? (
+                                    <button
+                                      type="button"
+                                      className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-red-600 hover:bg-red-50"
+                                      onClick={() => {
+                                        setActionsMenuId(null);
+                                        void handleUnlinkWebsiteAccount(member);
+                                      }}
+                                    >
+                                      <Unlink size={16} />
+                                      Unlink account
+                                    </button>
+                                  ) : null}
                                   <div className="my-1 border-t border-gray-100" />
                                   <button
                                     type="button"

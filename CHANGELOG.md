@@ -7,6 +7,37 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2109-004 — People 3-dots menu can unlink a linked account
+
+**Date:** 2026-09-21
+**Time:** 00:37:29
+**Timezone:** Pacific/Auckland
+**Version:** 1.7.19
+**Type:** Added
+
+**Request**
+
+> On People Menu when one account show lilnked add a option to unlik that account on the 3 dots on the righ side option if the account has not been linked do not add this option. Push when completed.
+
+**Changes**
+
+* When a People row shows Linked, the 3-dots menu now includes Unlink account.
+* Unlink is not shown for people with no linked website login.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: 64 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors. No browser MCP in this session; unlink is only rendered when member.user_id is set.
+
 ## CHG-2026-2109-003 — Overview stays first with a gray menu divider
 
 **Date:** 2026-09-21
