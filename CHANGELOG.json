@@ -6,35 +6,6 @@
   "versionSource": "package.json",
   "entries": [
     {
-      "id": "CHG-2026-2109-018",
-      "date": "2026-09-21",
-      "time": "01:57:39",
-      "timezone": "Pacific/Auckland",
-      "changedAt": "2026-09-20T13:57:39.004Z",
-      "version": "1.7.33",
-      "type": "changed",
-      "area": "admin",
-      "title": "Overview card titles and numbers are centred",
-      "request": "On the Overview cards Align the Title and Number in the Centre of the cards. push live",
-      "changes": [
-        "Overview card titles and numbers are centred on each card."
-      ],
-      "changedBy": "Appdoers Dev Team",
-      "database": {
-        "migrations": []
-      },
-      "validation": {
-        "unitTests": true,
-        "integrationTests": false,
-        "e2eTests": false,
-        "typeCheck": false,
-        "lint": false,
-        "build": true,
-        "notes": "73 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors."
-      },
-      "breakingChange": false
-    },
-    {
       "id": "CHG-2026-2109-017",
       "date": "2026-09-21",
       "time": "01:52:52",
