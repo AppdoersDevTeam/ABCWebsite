@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { Modal } from '../../components/UI/Modal';
 import { CalendarDays, Trash2, User, Upload, X, Download, Search, Archive, ArchiveRestore, Plus, MoreVertical, Pencil, Building2, UsersRound } from 'lucide-react';
-import type { Group, JobRole, TeamMember } from '../../types';
+import type { Group, JobRole, TeamMember, User } from '../../types';
 import { supabase } from '../../lib/supabase';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { buildStoredRole, getDisplayRole, inferProfileType } from '../../lib/teamMemberUtils';
@@ -10,7 +10,9 @@ import { downloadDirectoryCsv, downloadDirectoryPdf } from '../../lib/exportDire
 import { logAuditEventSafe } from '../../lib/auditLog';
 import { formatDdMmYyyy } from '../../lib/dateUtils';
 import { useAuth } from '../../context/AuthContext';
-import { CHURCH_NAME, displayInitials, PEOPLE_LABEL } from '../../lib/constants';
+import { CHURCH_NAME, displayInitials, displayName, isAccessHeld, isAdminUser, isOwnUserAccount, isServiceAccountEmail, PEOPLE_LABEL } from '../../lib/constants';
+import { deleteUserAccount } from '../../lib/deleteUserAccount';
+import { accessHoldEmailNote, notifyUserAccessHold } from '../../lib/notifyUserAccessHold';
 import metadata from '../../metadata.json';
 
 type ProfileType = 'staff' | 'attendee' | 'member';
@@ -36,6 +38,33 @@ function lastFirstFromFullName(name: string): string {
   const last = parts.slice(lastStart).join(' ');
   const first = parts.slice(0, lastStart).join(' ');
   return first ? `${last}, ${first}` : last;
+}
+
+type LinkedWebsiteUser = Pick<
+  User,
+  'id' | 'email' | 'first_name' | 'last_name' | 'name' | 'is_super_admin' | 'is_access_held' | 'is_approved' | 'role'
+>;
+
+function linkedAccountBlockReason(
+  viewer: { id?: string; role?: string | null; is_approved?: boolean | null } | null | undefined,
+  target: LinkedWebsiteUser
+): string | null {
+  if (!isAdminUser(viewer)) return 'Only an admin can archive or delete a website login.';
+  if (isOwnUserAccount(viewer, target)) {
+    return 'You cannot archive or delete your own website login while you are signed in.';
+  }
+  if (target.is_super_admin || isServiceAccountEmail(target.email)) {
+    return 'This linked website account cannot be archived or deleted.';
+  }
+  return null;
+}
+
+function linkedAccountLabel(linkedUser: LinkedWebsiteUser | null, fallbackEmail?: string): string {
+  if (linkedUser) {
+    const name = displayName(linkedUser);
+    return linkedUser.email ? `${name} (${linkedUser.email})` : name;
+  }
+  return fallbackEmail || 'the linked website account';
 }
 
 function ministryGroupLabel(member: TeamMember): string {
@@ -172,6 +201,72 @@ function formatArchivedDate(iso: string | null | undefined): string {
   return formatDdMmYyyy(d) || '—';
 }
 
+function LinkedAccountPrompt({
+  personName,
+  linkedUser,
+  linkedUserLoading,
+  hasLink,
+  fallbackEmail,
+  action,
+  alsoAffect,
+  onAlsoAffectChange,
+  blockReason,
+  canAffect,
+}: {
+  personName: string;
+  linkedUser: LinkedWebsiteUser | null;
+  linkedUserLoading: boolean;
+  hasLink: boolean;
+  fallbackEmail?: string;
+  action: 'archive' | 'delete';
+  alsoAffect: boolean;
+  onAlsoAffectChange: (value: boolean) => void;
+  blockReason: string | null;
+  canAffect: boolean;
+}) {
+  if (!hasLink) return null;
+  const accountLabel = linkedAccountLabel(linkedUser, fallbackEmail);
+  const verb = action === 'archive' ? 'archived' : 'deleted';
+  const alsoVerb = action === 'archive' ? 'archive' : 'delete';
+  return (
+    <div className="rounded-[8px] border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
+      {linkedUserLoading ? (
+        <p>Checking for a linked website account…</p>
+      ) : (
+        <>
+          <p className="font-bold">This person has a linked website account.</p>
+          <p className="mt-2">
+            {accountLabel} will be unlinked from this People record.
+          </p>
+          {blockReason ? (
+            <p className="mt-2">{blockReason}</p>
+          ) : canAffect ? (
+            <>
+              <label className="mt-3 flex items-start gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="mt-1 h-4 w-4 rounded border-gray-300 text-gold focus:ring-gold"
+                  checked={alsoAffect}
+                  onChange={(event) => onAlsoAffectChange(event.target.checked)}
+                />
+                <span>Also {alsoVerb} the linked website account</span>
+              </label>
+              {alsoAffect && (
+                <p className="mt-2 font-bold">
+                  Those accounts will be {verb}: {personName} in People, and {accountLabel}.
+                  {action === 'archive'
+                    ? ' The website login will not be able to use member or admin areas until access is restored.'
+                    : ' This cannot be undone.'}
+                </p>
+              )}
+            </>
+          ) : null}
+        </>
+      )}
+    </div>
+  );
+}
+
 export const AdminTeam = () => {
   const { user } = useAuth();
   const [members, setMembers] = useState<TeamMember[]>([]);
@@ -196,6 +291,9 @@ export const AdminTeam = () => {
   const [archiveTarget, setArchiveTarget] = useState<TeamMember | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isArchiving, setIsArchiving] = useState(false);
+  const [alsoAffectLinkedAccount, setAlsoAffectLinkedAccount] = useState(false);
+  const [linkedUser, setLinkedUser] = useState<LinkedWebsiteUser | null>(null);
+  const [linkedUserLoading, setLinkedUserLoading] = useState(false);
 
   const activeMembersList = useMemo(() => members.filter((m) => !m.is_archived), [members]);
   const archivedMembersList = useMemo(() => members.filter((m) => m.is_archived), [members]);
@@ -248,6 +346,44 @@ export const AdminTeam = () => {
   const deleteNameMatches =
     deleteTarget != null &&
     deleteConfirmText.trim().toLowerCase() === deleteTarget.name.trim().toLowerCase();
+
+  const promptMember = deleteTarget || archiveTarget;
+  const linkedBlockReason = linkedUser
+    ? linkedAccountBlockReason(user, linkedUser)
+    : promptMember?.user_id && !linkedUserLoading
+      ? 'The linked website account could not be loaded, so only this People record can be changed. The login will still be unlinked.'
+      : null;
+  const canAffectLinkedAccount = Boolean(promptMember?.user_id && linkedUser && !linkedBlockReason);
+
+  const loadLinkedUser = async (userId?: string | null) => {
+    setAlsoAffectLinkedAccount(false);
+    setLinkedUser(null);
+    if (!userId) {
+      setLinkedUserLoading(false);
+      return;
+    }
+    setLinkedUserLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('id, email, first_name, last_name, name, is_super_admin, is_access_held, is_approved, role')
+        .eq('id', userId)
+        .maybeSingle();
+      if (error) throw error;
+      setLinkedUser((data as LinkedWebsiteUser | null) || null);
+    } catch (error) {
+      console.warn('AdminTeam - linked user lookup failed:', error);
+      setLinkedUser(null);
+    } finally {
+      setLinkedUserLoading(false);
+    }
+  };
+
+  const resetLinkedPrompt = () => {
+    setAlsoAffectLinkedAccount(false);
+    setLinkedUser(null);
+    setLinkedUserLoading(false);
+  };
 
   const filenameBase = useMemo(() => {
     const d = new Date();
@@ -713,6 +849,7 @@ export const AdminTeam = () => {
   const handleDelete = (member: TeamMember) => {
     setDeleteTarget(member);
     setDeleteConfirmText('');
+    void loadLinkedUser(member.user_id);
   };
 
   const handleDeleteConfirm = async () => {
@@ -720,8 +857,35 @@ export const AdminTeam = () => {
     const expected = deleteTarget.name.trim().toLowerCase();
     if (deleteConfirmText.trim().toLowerCase() !== expected) return;
 
+    const linkedUserId = deleteTarget.user_id || null;
+    const deleteLinked = Boolean(alsoAffectLinkedAccount && canAffectLinkedAccount && linkedUserId);
+    let deleteNote = '';
+
     setIsDeleting(true);
     try {
+      if (deleteLinked && linkedUserId) {
+        const result = await deleteUserAccount(linkedUserId);
+        if (!result.ok) {
+          alert(result.error || 'Failed to delete the linked website account. The People record was not deleted.');
+          return;
+        }
+        if (result.emailed) {
+          deleteNote = ` A confirmation email was sent to ${result.emailed}.`;
+        } else if (result.emailSkipped) {
+          deleteNote = result.emailSkipReason
+            ? ` The website account was removed, but the confirmation email was not sent (${result.emailSkipReason}).`
+            : ' The website account was removed, but the confirmation email could not be sent.';
+        }
+        logAuditEventSafe({
+          action: 'delete',
+          category: 'users',
+          entityType: 'users',
+          entityId: linkedUserId,
+          summary: `Deleted linked website account for person "${deleteTarget.name}"`,
+          details: { emailed: result.emailed, emailSkipped: result.emailSkipped },
+        });
+      }
+
       const { error } = await supabase.from('team_members').delete().eq('id', deleteTarget.id);
       if (error) throw error;
       logAuditEventSafe({
@@ -730,10 +894,17 @@ export const AdminTeam = () => {
         entityType: 'team_members',
         entityId: deleteTarget.id,
         summary: `Permanently deleted person "${deleteTarget.name}"`,
+        details: { unlinked: Boolean(linkedUserId), deletedLinkedAccount: deleteLinked },
       });
       setDeleteTarget(null);
       setDeleteConfirmText('');
+      resetLinkedPrompt();
       await fetchMembers();
+      if (deleteLinked) {
+        alert(
+          `Those accounts have been deleted: the People record for ${deleteTarget.name} and the linked website account.${deleteNote}`
+        );
+      }
     } catch (error: unknown) {
       console.error('Error deleting team member:', error);
       alert(getSupabaseErrorMessage(error) || `Failed to delete ${PEOPLE_LABEL} person`);
@@ -744,18 +915,49 @@ export const AdminTeam = () => {
 
   const handleArchive = (member: TeamMember) => {
     setArchiveTarget(member);
+    void loadLinkedUser(member.user_id);
   };
 
   const handleArchiveConfirm = async () => {
     if (!archiveTarget) return;
+    const linkedUserId = archiveTarget.user_id || null;
+    const archiveLinked = Boolean(alsoAffectLinkedAccount && canAffectLinkedAccount && linkedUserId);
+    let holdNote = '';
+
     setIsArchiving(true);
     try {
+      if (archiveLinked && linkedUserId) {
+        if (linkedUser && isAccessHeld(linkedUser)) {
+          holdNote = ' The linked website account was already on hold.';
+        } else {
+          const notifyResult = await notifyUserAccessHold(linkedUserId);
+          if (!notifyResult.ok || !notifyResult.emailed) {
+            alert(
+              `The linked website account was not archived because the confirmation email could not be sent${
+                notifyResult.error ? `: ${notifyResult.error}` : ''
+              }. The People record was not archived.`
+            );
+            return;
+          }
+          holdNote = accessHoldEmailNote(notifyResult);
+          logAuditEventSafe({
+            action: 'update',
+            category: 'users',
+            entityType: 'users',
+            entityId: linkedUserId,
+            summary: `Archived (held access for) linked website account for person "${archiveTarget.name}"`,
+            details: { field: 'is_access_held', value: true, emailed: notifyResult.emailed },
+          });
+        }
+      }
+
       const { error } = await supabase
         .from('team_members')
         .update({
           is_archived: true,
           archived_at: new Date().toISOString(),
           archived_by: user?.id || null,
+          user_id: null,
         })
         .eq('id', archiveTarget.id);
       if (error) throw error;
@@ -765,9 +967,16 @@ export const AdminTeam = () => {
         entityType: 'team_members',
         entityId: archiveTarget.id,
         summary: `Archived person "${archiveTarget.name}"`,
+        details: { unlinked: Boolean(linkedUserId), archivedLinkedAccount: archiveLinked },
       });
       setArchiveTarget(null);
+      resetLinkedPrompt();
       await fetchMembers();
+      if (archiveLinked) {
+        alert(
+          `Those accounts have been archived: the People record for ${archiveTarget.name} and the linked website account.${holdNote}`
+        );
+      }
     } catch (error: unknown) {
       console.error('Error archiving team member:', error);
       alert(getSupabaseErrorMessage(error) || `Failed to archive ${PEOPLE_LABEL} person`);
@@ -1571,6 +1780,7 @@ export const AdminTeam = () => {
           if (isDeleting) return;
           setDeleteTarget(null);
           setDeleteConfirmText('');
+          resetLinkedPrompt();
         }}
         title="Delete person permanently?"
       >
@@ -1583,6 +1793,18 @@ export const AdminTeam = () => {
                 database, including groups, job roles, and any linked profile information.
               </p>
             </div>
+            <LinkedAccountPrompt
+              personName={deleteTarget.name}
+              linkedUser={linkedUser}
+              linkedUserLoading={linkedUserLoading}
+              hasLink={Boolean(deleteTarget.user_id)}
+              fallbackEmail={deleteTarget.email}
+              action="delete"
+              alsoAffect={alsoAffectLinkedAccount}
+              onAlsoAffectChange={setAlsoAffectLinkedAccount}
+              blockReason={linkedBlockReason}
+              canAffect={canAffectLinkedAccount}
+            />
             <p className="text-sm text-neutral">
               To confirm, type the person&apos;s name exactly: <span className="font-bold text-charcoal">{deleteTarget.name}</span>
             </p>
@@ -1601,6 +1823,7 @@ export const AdminTeam = () => {
                 onClick={() => {
                   setDeleteTarget(null);
                   setDeleteConfirmText('');
+                  resetLinkedPrompt();
                 }}
                 className="px-6 py-2 border border-gray-200 rounded-[4px] text-charcoal hover:bg-gray-50 transition-colors disabled:opacity-50"
               >
@@ -1608,11 +1831,15 @@ export const AdminTeam = () => {
               </button>
               <button
                 type="button"
-                disabled={!deleteNameMatches || isDeleting}
+                disabled={!deleteNameMatches || isDeleting || (Boolean(deleteTarget.user_id) && linkedUserLoading)}
                 onClick={handleDeleteConfirm}
                 className="px-6 py-2 rounded-[4px] font-bold text-white bg-red-600 hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isDeleting ? 'Deleting…' : 'Delete permanently'}
+                {isDeleting
+                  ? 'Deleting…'
+                  : alsoAffectLinkedAccount && canAffectLinkedAccount
+                    ? 'Delete both'
+                    : 'Delete permanently'}
               </button>
             </div>
           </div>
@@ -1624,6 +1851,7 @@ export const AdminTeam = () => {
         onClose={() => {
           if (isArchiving) return;
           setArchiveTarget(null);
+          resetLinkedPrompt();
         }}
         title="Archive person?"
       >
@@ -1633,17 +1861,39 @@ export const AdminTeam = () => {
               <span className="font-bold text-charcoal">{archiveTarget.name}</span> will be hidden from the public site,
               {PEOPLE_LABEL}, and rosters. Only admins can view archived people and restore them later.
             </p>
+            <LinkedAccountPrompt
+              personName={archiveTarget.name}
+              linkedUser={linkedUser}
+              linkedUserLoading={linkedUserLoading}
+              hasLink={Boolean(archiveTarget.user_id)}
+              fallbackEmail={archiveTarget.email}
+              action="archive"
+              alsoAffect={alsoAffectLinkedAccount}
+              onAlsoAffectChange={setAlsoAffectLinkedAccount}
+              blockReason={linkedBlockReason}
+              canAffect={canAffectLinkedAccount}
+            />
             <div className="flex flex-col-reverse sm:flex-row gap-3 justify-end pt-2">
               <button
                 type="button"
                 disabled={isArchiving}
-                onClick={() => setArchiveTarget(null)}
+                onClick={() => {
+                  setArchiveTarget(null);
+                  resetLinkedPrompt();
+                }}
                 className="px-6 py-2 border border-gray-200 rounded-[4px] text-charcoal hover:bg-gray-50 transition-colors disabled:opacity-50"
               >
                 Cancel
               </button>
-              <GlowingButton onClick={handleArchiveConfirm} disabled={isArchiving}>
-                {isArchiving ? 'Archiving…' : 'Archive'}
+              <GlowingButton
+                onClick={handleArchiveConfirm}
+                disabled={isArchiving || (Boolean(archiveTarget.user_id) && linkedUserLoading)}
+              >
+                {isArchiving
+                  ? 'Archiving…'
+                  : alsoAffectLinkedAccount && canAffectLinkedAccount
+                    ? 'Archive both'
+                    : 'Archive'}
               </GlowingButton>
             </div>
           </div>

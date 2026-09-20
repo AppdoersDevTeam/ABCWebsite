@@ -6,6 +6,36 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2009-027",
+      "date": "2026-09-20",
+      "time": "23:54:32",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T11:54:32.195Z",
+      "version": "1.7.14",
+      "type": "changed",
+      "area": "leadership",
+      "title": "People archive and delete warn about linked logins",
+      "request": "On People Menu, when the register is about to be archived or deleted check if the people is with a linked account if yes show a message about the account will be unlinked and asking if it is supposed to delete or archive also the linked account if yes do it for both showing the message that those accounts will be archive or delete. Push to Live.",
+      "changes": [
+        "Archiving or deleting a person who has a linked website account now warns that the login will be unlinked, and asks whether to also archive (hold access) or delete that login.",
+        "Choosing both shows that those accounts will be archived or deleted, then applies the People change and the matching Users action."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "57 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors. No browser MCP in this session; archive and delete prompts were checked in code."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2009-026",
       "date": "2026-09-20",
       "time": "23:46:49",

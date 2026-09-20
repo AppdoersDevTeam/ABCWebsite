@@ -7,6 +7,37 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2009-027 — People archive and delete warn about linked logins
+
+**Date:** 2026-09-20
+**Time:** 23:54:32
+**Timezone:** Pacific/Auckland
+**Version:** 1.7.14
+**Type:** Changed
+
+**Request**
+
+> On People Menu, when the register is about to be archived or deleted check if the people is with a linked account if yes show a message about the account will be unlinked and asking if it is supposed to delete or archive also the linked account if yes do it for both showing the message that those accounts will be archive or delete. Push to Live.
+
+**Changes**
+
+* Archiving or deleting a person who has a linked website account now warns that the login will be unlinked, and asks whether to also archive (hold access) or delete that login.
+* Choosing both shows that those accounts will be archived or deleted, then applies the People change and the matching Users action.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: 57 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors. No browser MCP in this session; archive and delete prompts were checked in code.
+
 ## CHG-2026-2009-026 — Overview approval avatars use the user photo
 
 **Date:** 2026-09-20
