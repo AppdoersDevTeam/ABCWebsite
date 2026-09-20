@@ -49,6 +49,7 @@ import { Team } from './pages/dashboard/Team';
 import { EventsPrivate } from './pages/dashboard/EventsPrivate';
 import { DashboardHelp } from './pages/dashboard/Help';
 import { UserSecurity } from './pages/dashboard/UserSecurity';
+import { MyProfile } from './pages/dashboard/MyProfile';
 import { AnnualCalendarPage } from './pages/shared/AnnualCalendarPage';
 
 // Admin Pages
@@ -220,6 +221,7 @@ const AppRoutes = () => {
                 <Route path="events" element={<EventsPrivate />} />
                 <Route path="roster" element={<Roster />} />
                 <Route path="security" element={<UserSecurity />} />
+                <Route path="profile" element={<MyProfile />} />
                 <Route path="help" element={<DashboardHelp />} />
               </Route>
             </Route>
@@ -244,6 +246,7 @@ const AppRoutes = () => {
                 <Route path="roster" element={<AdminRoster />} />
                 <Route path="settings" element={<AdminSettings />} />
                 <Route path="security" element={<UserSecurity />} />
+                <Route path="profile" element={<MyProfile />} />
                 <Route path="help" element={<AdminHelp />} />
               </Route>
             </Route>

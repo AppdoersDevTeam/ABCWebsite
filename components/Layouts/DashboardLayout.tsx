@@ -21,13 +21,14 @@ import { isAdminUser, EVENTS_LABEL } from '../../lib/constants';
 import { ScrollToTop } from '../ScrollToTop';
 import { useAutoSectionReveal } from '../UI/useAutoSectionReveal';
 import { DASHBOARD_NAV_ICON } from '../../lib/dashboardNav';
-import { flattenPortalSearchItems, portalPageTitle, PortalTopBar } from './PortalTopBar';
+import { flattenPortalSearchItems, portalPageTitle, PortalTopBar, usePortalSidebarCollapsed } from './PortalTopBar';
 
 export const DashboardLayout = () => {
   const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = usePortalSidebarCollapsed();
   useAutoSectionReveal();
 
   const handleLogout = () => {
@@ -58,7 +59,14 @@ export const DashboardLayout = () => {
         pageTitle={portalPageTitle(location.pathname, navItems)}
         searchItems={flattenPortalSearchItems(navItems)}
         helpPath="/dashboard/help"
-        onOpenSidebar={() => setIsSidebarOpen(true)}
+        sidebarCollapsed={sidebarCollapsed}
+        onToggleSidebar={() => {
+          if (typeof window !== 'undefined' && window.matchMedia('(min-width: 1024px)').matches) {
+            setSidebarCollapsed((collapsed) => !collapsed);
+            return;
+          }
+          setIsSidebarOpen((open) => !open);
+        }}
         showSwitchRole={isAdminUser(user)}
         onSwitchRole={() => {
           sessionStorage.removeItem('testRoleOverride');
@@ -76,24 +84,27 @@ export const DashboardLayout = () => {
         )}
 
         <aside className={`
-          fixed bottom-0 left-0 top-[59px] z-50 w-72 transform border-r border-gray-100 bg-white shadow-sm transition-transform duration-300 ease-in-out lg:static lg:top-auto lg:h-full lg:translate-x-0
+          fixed bottom-0 left-0 top-16 z-50 transform border-r border-gray-100 bg-white shadow-sm transition-[width,transform] duration-300 ease-in-out lg:static lg:top-auto lg:h-full lg:translate-x-0
           ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+          ${sidebarCollapsed ? 'w-72 lg:w-[72px]' : 'w-72'}
         `}>
           <div className="flex h-full flex-col">
             <div className="flex items-center justify-end border-b border-gray-100 px-3 py-2 lg:hidden">
               <button className="text-charcoal" onClick={() => setIsSidebarOpen(false)} aria-label="Close menu"><X /></button>
             </div>
 
-          <nav className="flex-1 space-y-2 overflow-y-auto px-4 py-4">
+          <nav className={`flex-1 space-y-2 overflow-y-auto py-4 ${sidebarCollapsed ? 'px-2 lg:px-2' : 'px-4'}`}>
             {navItems.map((item) => {
               const isActive = location.pathname === item.path;
               return (
                 <Link
                   key={item.path}
                   to={item.path}
+                  title={item.label}
                   onClick={() => setIsSidebarOpen(false)}
                   className={`
-                    flex items-center space-x-4 px-4 py-3 rounded-[4px] transition-all duration-300 group relative overflow-hidden
+                    flex items-center rounded-[4px] transition-all duration-300 group relative overflow-hidden
+                    ${sidebarCollapsed ? 'lg:justify-center lg:space-x-0 lg:px-2 py-3' : 'space-x-4 px-4 py-3'}
                     ${isActive 
                       ? 'bg-gold/10 text-charcoal font-bold' 
                       : 'text-neutral hover:text-charcoal hover:bg-gray-200'}
@@ -107,31 +118,37 @@ export const DashboardLayout = () => {
                   >
                     {item.icon}
                   </span>
-                  <span className="tracking-wide">{item.label}</span>
+                  <span className={`tracking-wide ${sidebarCollapsed ? 'lg:hidden' : ''}`}>{item.label}</span>
                 </Link>
               );
             })}
           </nav>
 
-          <div className="border-t border-gray-100 p-3">
+          <div className={`border-t border-gray-100 p-3 ${sidebarCollapsed ? 'lg:px-2' : ''}`}>
             {isAdminUser(user) && (
               <button 
+                title="Back to Admin"
                 onClick={() => {
                   sessionStorage.removeItem('testRoleOverride');
                   navigate('/admin');
                 }}
-                className="w-full flex items-center space-x-3 px-4 py-3 text-neutral hover:bg-blue-50 hover:text-blue-600 transition-colors rounded-[4px]"
+                className={`w-full flex items-center py-3 text-neutral hover:bg-blue-50 hover:text-blue-600 transition-colors rounded-[4px] ${
+                  sidebarCollapsed ? 'lg:justify-center lg:space-x-0 lg:px-2 space-x-3 px-4' : 'space-x-3 px-4'
+                }`}
               >
                 <ArrowRightLeft size={18} />
-                <span className="text-sm font-bold">Back to Admin</span>
+                <span className={`text-sm font-bold ${sidebarCollapsed ? 'lg:hidden' : ''}`}>Back to Admin</span>
               </button>
             )}
             <button 
+              title="Sign out"
               onClick={handleLogout}
-              className="w-full flex items-center space-x-3 px-4 py-3 text-neutral hover:bg-red-50 hover:text-red-500 transition-colors rounded-[4px]"
+              className={`w-full flex items-center py-3 text-neutral hover:bg-red-50 hover:text-red-500 transition-colors rounded-[4px] ${
+                sidebarCollapsed ? 'lg:justify-center lg:space-x-0 lg:px-2 space-x-3 px-4' : 'space-x-3 px-4'
+              }`}
             >
               <LogOut size={18} />
-              <span className="text-sm font-bold">Sign Out</span>
+              <span className={`text-sm font-bold ${sidebarCollapsed ? 'lg:hidden' : ''}`}>Sign Out</span>
             </button>
           </div>
         </div>

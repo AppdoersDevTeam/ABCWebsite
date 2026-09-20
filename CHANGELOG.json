@@ -6,6 +6,38 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2009-013",
+      "date": "2026-09-20",
+      "time": "20:41:41",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T08:41:41.492Z",
+      "version": "1.7.0",
+      "type": "changed",
+      "area": "admin",
+      "title": "Taller user menu, collapsible icon sidebar, and search button",
+      "request": "Increase the height of the Button User on top left, when click the arrow, show My profile and option to sign out. Make the button Background a bit more dark gray as well as the hover. The 3 horizontal lines in front of the search bar when clicked close all menu bar leaving only the icons visible and when click again open all the left menu again. yet in the seach bar the search button on the right side make it as a retangle with the round corners with 3 points. when conclude push it to live.",
+      "changes": [
+        "The top-left identity button is taller (56px) with a darker gray background and darker hover, matching the attached user-menu sample.",
+        "Clicking the chevron opens My Profile (gold, with the directory photo), the selected church with a check, Add Ministry, and Log Out.",
+        "The hamburger beside Search collapses the left menu to icons only and expands it again.",
+        "Search now has a rectangular submit button on the right with 3px rounded corners."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "Unit tests, validate, and vite build run after implementation, then npm run push:live."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2009-012",
       "date": "2026-09-20",
       "time": "20:23:30",

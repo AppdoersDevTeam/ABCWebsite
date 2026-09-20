@@ -7,6 +7,39 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2009-013 — Taller user menu, collapsible icon sidebar, and search button
+
+**Date:** 2026-09-20
+**Time:** 20:41:41
+**Timezone:** Pacific/Auckland
+**Version:** 1.7.0
+**Type:** Changed
+
+**Request**
+
+> Increase the height of the Button User on top left, when click the arrow, show My profile and option to sign out. Make the button Background a bit more dark gray as well as the hover. The 3 horizontal lines in front of the search bar when clicked close all menu bar leaving only the icons visible and when click again open all the left menu again. yet in the seach bar the search button on the right side make it as a retangle with the round corners with 3 points. when conclude push it to live.
+
+**Changes**
+
+* The top-left identity button is taller (56px) with a darker gray background and darker hover, matching the attached user-menu sample.
+* Clicking the chevron opens My Profile (gold, with the directory photo), the selected church with a check, Add Ministry, and Log Out.
+* The hamburger beside Search collapses the left menu to icons only and expands it again.
+* Search now has a rectangular submit button on the right with 3px rounded corners.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: Unit tests, validate, and vite build run after implementation, then npm run push:live.
+
 ## CHG-2026-2009-012 — Separate identity card from yellow search bar and darken menu hover
 
 **Date:** 2026-09-20
