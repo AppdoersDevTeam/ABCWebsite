@@ -6,6 +6,36 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2109-032",
+      "date": "2026-09-21",
+      "time": "03:03:50",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T15:03:50.014Z",
+      "version": "1.8.0",
+      "type": "added",
+      "area": "admin",
+      "title": "Overview Events card with total count",
+      "request": "On overview Create a new card for Events use the same Icons from left menu events and count the total of events in the system has been placed. Adjujst all card proportioanlly to the screen but do not change its size in any aspect. pudh to live.",
+      "changes": [
+        "Admin Overview has an Events card using the same Calendar icon as the left menu, showing the total number of events in the system.",
+        "The Overview stat cards sit in a 3-column layout on wide screens so nine cards fill the row evenly. Card height, padding, type size, and the existing width inset are unchanged."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "Unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors. Browser tools were not available in this session."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2109-031",
       "date": "2026-09-21",
       "time": "02:55:09",

@@ -7,6 +7,37 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2109-032 — Overview Events card with total count
+
+**Date:** 2026-09-21
+**Time:** 03:03:50
+**Timezone:** Pacific/Auckland
+**Version:** 1.8.0
+**Type:** Added
+
+**Request**
+
+> On overview Create a new card for Events use the same Icons from left menu events and count the total of events in the system has been placed. Adjujst all card proportioanlly to the screen but do not change its size in any aspect. pudh to live.
+
+**Changes**
+
+* Admin Overview has an Events card using the same Calendar icon as the left menu, showing the total number of events in the system.
+* The Overview stat cards sit in a 3-column layout on wide screens so nine cards fill the row evenly. Card height, padding, type size, and the existing width inset are unchanged.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: Unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors. Browser tools were not available in this session.
+
 ## CHG-2026-2109-031 — Users status icons centred under the count, 4px smaller
 
 **Date:** 2026-09-21

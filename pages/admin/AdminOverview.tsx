@@ -42,6 +42,7 @@ export const AdminOverview = () => {
   const [isLoadingStats, setIsLoadingStats] = useState(true);
   const [teamMembersCount, setTeamMembersCount] = useState(0);
   const [rosterAssignmentsCount, setRosterAssignmentsCount] = useState(0);
+  const [eventsCount, setEventsCount] = useState(0);
   const [pendingPrayerRequestsCount, setPendingPrayerRequestsCount] = useState(0);
   const [emailsQuota, setEmailsQuota] = useState<EmailQuotaStatus | null>(null);
   const [recentActivities, setRecentActivities] = useState<Array<{
@@ -328,6 +329,17 @@ export const AdminOverview = () => {
 
       if (!rosterError) {
         setRosterAssignmentsCount(rosterCount || 0);
+      }
+
+      const { count: eventsTotal, error: eventsCountError } = await supabase
+        .from('events')
+        .select('id', { count: 'exact', head: true });
+
+      if (eventsCountError) {
+        console.error('Error counting events:', eventsCountError);
+        setEventsCount(0);
+      } else {
+        setEventsCount(eventsTotal || 0);
       }
 
       // Calculate next Sunday service (Sunday at 10AM)
@@ -643,6 +655,14 @@ export const AdminOverview = () => {
       color: 'text-green-600',
       subtitle: isLoadingStats ? 'Loading...' : undefined
     },
+    {
+      label: EVENTS_LABEL,
+      value: isLoadingStats ? '...' : eventsCount.toString(),
+      icon: <Calendar size={20} />,
+      path: '/admin/events',
+      color: 'text-green-600',
+      subtitle: isLoadingStats ? 'Loading...' : undefined,
+    },
     { 
       label: 'Newsletters', 
       value: isLoadingStats ? '...' : newsletterCount.toString(), 
@@ -684,7 +704,7 @@ export const AdminOverview = () => {
           : undefined,
       highlight: Boolean(emailsQuota && emailQuotaNearLimit(emailsQuota)),
     },
-  ], [visibleUsers.length, visibleApprovedCount, visiblePendingCount, visibleNotLinkedCount, isLoadingUsers, prayerRequestsCount, nextService, newsletterCount, devotionalsCount, isLoadingStats, teamMembersCount, rosterAssignmentsCount, emailsQuota]);
+  ], [visibleUsers.length, visibleApprovedCount, visiblePendingCount, visibleNotLinkedCount, isLoadingUsers, prayerRequestsCount, nextService, eventsCount, newsletterCount, devotionalsCount, isLoadingStats, teamMembersCount, rosterAssignmentsCount, emailsQuota]);
 
   console.log('AdminOverview - Rendering, user:', user, 'pendingCount:', pendingCount, 'isLoadingUsers:', isLoadingUsers);
 
@@ -693,8 +713,8 @@ export const AdminOverview = () => {
     return (
       <div className="space-y-8">
         <SkeletonPageHeader />
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Array.from({ length: 8 }).map((_, i) => (
+        <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {Array.from({ length: 9 }).map((_, i) => (
             <SkeletonCard key={i} />
           ))}
         </div>
@@ -717,7 +737,7 @@ export const AdminOverview = () => {
       />
 
       {/* Stats Grid */}
-      <div className="grid md:grid-cols-2 xl:grid-cols-4 auto-rows-fr items-stretch gap-5 md:gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 auto-rows-fr items-stretch justify-items-center gap-5 md:gap-6">
         {stats.map((stat, i) => {
           const description =
             stat.label === 'E-mails Sent' && !isLoadingStats && emailsQuota?.blocked
