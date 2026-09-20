@@ -7,6 +7,36 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2009-024 — My Profile header uses the signed-in photo
+
+**Date:** 2026-09-20
+**Time:** 23:04:43
+**Timezone:** Pacific/Auckland
+**Version:** 1.7.11
+**Type:** Changed
+
+**Request**
+
+> On User Profile tre User icon Profile must match tre user photo as per the left button top user Profile Icon.  push when completed.
+
+**Changes**
+
+* The My Profile page header icon now uses the same round user photo as the top-left My Profile menu (directory photo, then Google photo, then initials).
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: 57 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors. No browser MCP in this session; My Profile header now shares the same photo source as the top user menu.
+
 ## CHG-2026-2009-023 — Rename Leadership menu to People
 
 **Date:** 2026-09-20

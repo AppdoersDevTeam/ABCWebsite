@@ -6,6 +6,35 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2009-024",
+      "date": "2026-09-20",
+      "time": "23:04:43",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T11:04:43.601Z",
+      "version": "1.7.11",
+      "type": "changed",
+      "area": "users",
+      "title": "My Profile header uses the signed-in photo",
+      "request": "On User Profile tre User icon Profile must match tre user photo as per the left button top user Profile Icon.  push when completed.",
+      "changes": [
+        "The My Profile page header icon now uses the same round user photo as the top-left My Profile menu (directory photo, then Google photo, then initials)."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "57 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors. No browser MCP in this session; My Profile header now shares the same photo source as the top user menu."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2009-023",
       "date": "2026-09-20",
       "time": "22:40:44",

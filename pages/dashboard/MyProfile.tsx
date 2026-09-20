@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Shield, UserCircle } from 'lucide-react';
+import { Shield } from 'lucide-react';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { useAuth } from '../../context/AuthContext';
 import { displayInitials, displayName } from '../../lib/constants';
@@ -36,14 +36,16 @@ export const MyProfile = () => {
   const securityPath = isAdmin ? '/admin/security' : '/dashboard/security';
   const roleLabel = user?.is_super_admin ? 'Super admin' : user?.role === 'admin' ? 'Admin' : 'Member';
   const [directory, setDirectory] = useState<DirectoryFile | null>(null);
+  const [authPhoto, setAuthPhoto] = useState('');
 
   useEffect(() => {
     if (!user?.id) return;
     let cancelled = false;
-    void supabase
-      .from('team_members')
-      .select(
-        `
+    void Promise.all([
+      supabase
+        .from('team_members')
+        .select(
+          `
         img,
         staff_role,
         role,
@@ -55,11 +57,14 @@ export const MyProfile = () => {
         team_member_groups:team_member_groups(groups:groups(name)),
         team_member_job_roles:team_member_job_roles(job_roles:job_roles(name))
       `
-      )
-      .eq('user_id', user.id)
-      .maybeSingle()
-      .then(({ data }) => {
+        )
+        .eq('user_id', user.id)
+        .maybeSingle(),
+      supabase.auth.getUser(),
+    ]).then(([{ data }, auth]) => {
         if (cancelled) return;
+        const meta = auth.data.user?.user_metadata || {};
+        setAuthPhoto(String(meta.avatar_url || meta.picture || ''));
         if (!data) {
           setDirectory(null);
           return;
@@ -105,21 +110,30 @@ export const MyProfile = () => {
           ? 'Attendee'
           : '';
 
+  const avatarUrl = directory?.img || authPhoto || '';
+  const initials = displayInitials(user);
+
   return (
     <div className="space-y-6">
       <AdminPageHeader
         title="My Profile"
         subtitle="Your user file."
-        icon={<UserCircle size={28} />}
+        icon={
+          avatarUrl ? (
+            <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
+          ) : (
+            <span className="text-lg font-semibold">{initials}</span>
+          )
+        }
       />
 
       <div className="rounded-[16px] border border-white/60 bg-white/80 p-6 shadow-sm">
         <div className="mb-6 flex items-center gap-4">
-          {directory?.img ? (
-            <img src={directory.img} alt="" className="h-20 w-20 rounded-full object-cover" />
+          {avatarUrl ? (
+            <img src={avatarUrl} alt="" className="h-20 w-20 rounded-full object-cover" />
           ) : (
             <span className="flex h-20 w-20 items-center justify-center rounded-full bg-gold/15 text-xl font-semibold text-gold">
-              {displayInitials(user)}
+              {initials}
             </span>
           )}
           <div>
