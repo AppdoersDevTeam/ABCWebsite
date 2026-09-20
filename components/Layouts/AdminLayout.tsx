@@ -8,7 +8,6 @@ import {
   ClipboardList, 
   LogOut, 
   X,
-  Shield,
   UserCog,
   ArrowRightLeft,
   Settings,
@@ -72,7 +71,6 @@ export const AdminLayout = () => {
     { label: EVENTS_LABEL, path: '/admin/events', icon: <Calendar size={20} />, iconClass: DASHBOARD_NAV_ICON.events },
     { label: 'Rosters (Beta)', path: '/admin/roster', icon: <ClipboardList size={20} />, iconClass: DASHBOARD_NAV_ICON.rosters },
     { label: 'System Setup', path: '/admin/settings', icon: <Settings size={20} />, iconClass: DASHBOARD_NAV_ICON.settings },
-    { label: 'User Security', path: '/admin/security', icon: <Shield size={20} />, iconClass: DASHBOARD_NAV_ICON.settings },
     { label: 'Help', path: '/admin/help', icon: <HelpCircle size={20} />, iconClass: DASHBOARD_NAV_ICON.help },
     { label: 'Logs', path: '/admin/logs', icon: <ScrollText size={20} />, iconClass: DASHBOARD_NAV_ICON.logs },
     ...(isSuperAdminUser(user)
@@ -93,7 +91,11 @@ export const AdminLayout = () => {
       <PortalTopBar
         variant="admin"
         pageTitle={portalPageTitle(location.pathname, navItems)}
-        searchItems={flattenPortalSearchItems(navItems)}
+        searchItems={[
+          ...flattenPortalSearchItems(navItems),
+          { label: 'My Profile', path: '/admin/profile' },
+          { label: 'User Security', path: '/admin/security' },
+        ]}
         helpPath="/admin/help"
         sidebarCollapsed={sidebarCollapsed}
         onToggleSidebar={() => {

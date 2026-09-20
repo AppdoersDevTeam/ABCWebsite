@@ -7,6 +7,39 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2009-015 — User menu Profile, Security, and Log Out; white bold top bar
+
+**Date:** 2026-09-20
+**Time:** 21:01:29
+**Timezone:** Pacific/Auckland
+**Version:** 1.7.2
+**Type:** Changed
+
+**Request**
+
+> Make the Arrow up and down for the user like this option just add My Profile and Log Out options from the picture. Copy the Sign Out from the left bottom Menu to into it with the same funcionalities, Move the User Security Left Menu into this User menu as well with the same funcionalities. In the searh top bar change the 3 horizontal line on the left side bar and the description intead of Black to White collor e make it bold, increase the Itens on the right side bar into 5 pts.
+
+**Changes**
+
+* The user chevron shows down when closed and up when open. The menu is My Profile, User Security, and Log Out (same logout as the left-bottom Sign Out).
+* User Security is removed from the left menu and opened from the user dropdown instead.
+* The hamburger and page title on the gold bar are white and bold.
+* Search, notifications, and Help on the right of the gold bar are 5px larger.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: Unit tests, validate, and vite build run after implementation. Push to live was not requested.
+
 ## CHG-2026-2009-014 — White search field, notification bell, and thinner user-button border
 
 **Date:** 2026-09-20

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRightLeft, Bell, Check, ChevronDown, HelpCircle, LogOut, Menu, MoreHorizontal, Search } from 'lucide-react';
+import { Bell, ChevronDown, ChevronUp, HelpCircle, LogOut, Menu, Search, Shield } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { CHURCH_NAME, displayInitials, displayName } from '../../lib/constants';
 import { supabase } from '../../lib/supabase';
@@ -62,6 +62,7 @@ export function portalPageTitle(
   items: Array<{ label: string; path?: string; children?: { label: string; path: string }[] }>
 ): string {
   if (pathname.endsWith('/profile')) return 'My Profile';
+  if (pathname.endsWith('/security')) return 'User Security';
   for (const item of items) {
     if (item.path === pathname) return item.label;
     const child = item.children?.find((entry) => entry.path === pathname);
@@ -77,8 +78,6 @@ export const PortalTopBar = ({
   helpPath,
   sidebarCollapsed,
   onToggleSidebar,
-  showSwitchRole,
-  onSwitchRole,
   onSignOut,
 }: PortalTopBarProps) => {
   const { user } = useAuth();
@@ -91,7 +90,7 @@ export const PortalTopBar = ({
   const searchRef = useRef<HTMLDivElement>(null);
   const notifyRef = useRef<HTMLDivElement>(null);
   const profilePath = variant === 'admin' ? '/admin/profile' : '/dashboard/profile';
-  const homePath = variant === 'admin' ? '/admin' : '/dashboard';
+  const securityPath = variant === 'admin' ? '/admin/security' : '/dashboard/security';
   const [directory, setDirectory] = useState<{ img: string | null; staff_role: string | null; role: string | null } | null>(null);
 
   const matches = useMemo(() => {
@@ -193,9 +192,11 @@ export const PortalTopBar = ({
           )}
           <ChevronDown
             size={18}
-            className={`shrink-0 text-neutral transition-transform ${menuOpen ? 'rotate-180' : ''} ${
-              sidebarCollapsed ? 'hidden' : ''
-            }`}
+            className={`shrink-0 text-neutral ${sidebarCollapsed ? 'hidden' : ''} ${menuOpen ? 'hidden' : ''}`}
+          />
+          <ChevronUp
+            size={18}
+            className={`shrink-0 text-neutral ${sidebarCollapsed || !menuOpen ? 'hidden' : ''}`}
           />
         </button>
         {menuOpen && (
@@ -221,46 +222,17 @@ export const PortalTopBar = ({
               My Profile
             </Link>
             <div className="mx-3 border-t border-gray-200" />
-            <button
-              type="button"
-              role="menuitem"
-              className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-gray-50"
-              onClick={() => {
-                setMenuOpen(false);
-                navigate(homePath);
-              }}
-            >
-              <img src="/ABC Logo.png" alt="" className="h-9 w-9 rounded-full bg-white object-contain" />
-              <span className="min-w-0 flex-1 text-[15px] font-medium leading-snug text-charcoal">
-                Ashburton Baptist
-                <br />
-                Church
-              </span>
-              <Check size={18} className="shrink-0 text-gold" />
-            </button>
             <Link
-              to="/ministries"
+              to={securityPath}
               role="menuitem"
-              className="flex w-full items-center gap-3 px-4 py-3 text-[15px] font-medium text-gold hover:bg-gray-50"
+              className="flex w-full items-center gap-3 px-4 py-3 text-[15px] font-medium text-charcoal hover:bg-gray-50"
               onClick={() => setMenuOpen(false)}
             >
-              <MoreHorizontal size={18} className="ml-2.5 shrink-0" />
-              Add Ministry
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-50 text-slate-600">
+                <Shield size={18} />
+              </span>
+              User Security
             </Link>
-            {showSwitchRole && (
-              <button
-                type="button"
-                role="menuitem"
-                className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm text-charcoal hover:bg-gray-50"
-                onClick={() => {
-                  setMenuOpen(false);
-                  onSwitchRole();
-                }}
-              >
-                <ArrowRightLeft size={16} className="ml-1.5 text-neutral" />
-                {variant === 'admin' ? 'View as Member' : 'Back to Admin'}
-              </button>
-            )}
             <div className="mx-3 border-t border-gray-200" />
             <button
               type="button"
@@ -283,14 +255,14 @@ export const PortalTopBar = ({
       <button
         type="button"
         onClick={onToggleSidebar}
-        className="rounded-md p-2 text-charcoal hover:bg-black/5"
+        className="rounded-md p-2 text-white hover:bg-black/10"
         aria-label={sidebarCollapsed ? 'Expand menu' : 'Collapse menu'}
         aria-pressed={sidebarCollapsed}
       >
-        <Menu size={22} />
+        <Menu size={22} strokeWidth={2.75} />
       </button>
 
-      <h1 className="hidden min-w-0 truncate text-base font-semibold text-charcoal sm:block">
+      <h1 className="hidden min-w-0 truncate text-base font-bold text-white sm:block">
         {pageTitle}
       </h1>
 
@@ -302,7 +274,7 @@ export const PortalTopBar = ({
               goToSearchMatch();
             }}
           >
-            <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-white" />
+            <Search size={21} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-white" />
             <input
               type="search"
               value={searchText}
@@ -312,7 +284,7 @@ export const PortalTopBar = ({
               }}
               onFocus={() => setSearchOpen(true)}
               placeholder="Search"
-              className="h-10 w-32 rounded-md border border-white/80 bg-transparent pl-9 pr-3 text-sm text-white placeholder:text-white focus:outline-none focus:ring-1 focus:ring-white/70 sm:w-44 md:w-52"
+              className="h-[45px] w-[138px] rounded-md border border-white/80 bg-transparent pl-10 pr-3 text-sm font-bold text-white placeholder:text-white focus:outline-none focus:ring-1 focus:ring-white/70 sm:w-[181px] md:w-[213px]"
               aria-label="Search dashboard pages"
             />
           </form>
@@ -340,7 +312,7 @@ export const PortalTopBar = ({
             aria-expanded={notifyOpen}
             title="Notifications"
           >
-            <Bell size={20} />
+            <Bell size={25} />
           </button>
           {notifyOpen && (
             <div className="absolute right-0 top-full z-40 mt-1 w-64 rounded-[11px] border border-gray-200 bg-white px-4 py-3 text-sm text-neutral shadow-lg">
@@ -354,7 +326,7 @@ export const PortalTopBar = ({
           aria-label="Help"
           title="Help"
         >
-          <HelpCircle size={20} />
+          <HelpCircle size={25} />
         </Link>
       </div>
       </header>

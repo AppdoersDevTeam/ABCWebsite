@@ -6,6 +6,38 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2009-015",
+      "date": "2026-09-20",
+      "time": "21:01:29",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T09:01:29.777Z",
+      "version": "1.7.2",
+      "type": "changed",
+      "area": "admin",
+      "title": "User menu Profile, Security, and Log Out; white bold top bar",
+      "request": "Make the Arrow up and down for the user like this option just add My Profile and Log Out options from the picture. Copy the Sign Out from the left bottom Menu to into it with the same funcionalities, Move the User Security Left Menu into this User menu as well with the same funcionalities. In the searh top bar change the 3 horizontal line on the left side bar and the description intead of Black to White collor e make it bold, increase the Itens on the right side bar into 5 pts.",
+      "changes": [
+        "The user chevron shows down when closed and up when open. The menu is My Profile, User Security, and Log Out (same logout as the left-bottom Sign Out).",
+        "User Security is removed from the left menu and opened from the user dropdown instead.",
+        "The hamburger and page title on the gold bar are white and bold.",
+        "Search, notifications, and Help on the right of the gold bar are 5px larger."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "Unit tests, validate, and vite build run after implementation. Push to live was not requested."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2009-014",
       "date": "2026-09-20",
       "time": "20:51:55",
