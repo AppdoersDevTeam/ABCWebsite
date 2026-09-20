@@ -7,6 +7,36 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2109-041 — Overview card counters 3px smaller
+
+**Date:** 2026-09-21
+**Time:** 03:28:59
+**Timezone:** Pacific/Auckland
+**Version:** 1.9.2
+**Type:** Changed
+
+**Request**
+
+> Decrease the font of each cards counter number in 3px. push live
+
+**Changes**
+
+* Each Admin Overview stat card counter is 3px smaller.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: Unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors.
+
 ## CHG-2026-2109-040 — Overview cards 15% wider
 
 **Date:** 2026-09-21
