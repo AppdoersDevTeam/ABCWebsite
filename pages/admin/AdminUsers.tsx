@@ -910,7 +910,7 @@ export const AdminUsers = () => {
               setAddUserMenuOpen(false);
               setShowCreateUser(true);
             }}
-            className="inline-flex items-center gap-2 rounded-l-lg border-2 border-gold px-4 py-2.5 font-semibold text-gold hover:bg-gold/10 transition-colors"
+            className="inline-flex items-center gap-2 rounded-l-lg border-2 border-gold px-4 py-2.5 font-semibold text-gold transition-colors hover:bg-gold hover:text-charcoal"
           >
             <span className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-gold">
               <Plus size={14} />
@@ -919,7 +919,7 @@ export const AdminUsers = () => {
           </button>
           <button
             type="button"
-            className="rounded-r-lg border-2 border-l-0 border-gold px-2 py-2.5 text-gold hover:bg-gold/10"
+            className="rounded-r-lg border-2 border-l-0 border-gold px-2 py-2.5 text-gold transition-colors hover:bg-gold hover:text-charcoal"
             aria-label="More add-user actions"
             onClick={() => setAddUserMenuOpen((open) => !open)}
           >

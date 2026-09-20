@@ -6,6 +6,35 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2009-021",
+      "date": "2026-09-20",
+      "time": "22:09:43",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T10:09:43.561Z",
+      "version": "1.7.8",
+      "type": "changed",
+      "area": "users",
+      "title": "Gold hover on Add User and Add Role",
+      "request": "On Users abd Role, there is a button Add Users and Add role when the hover user this collor background. push to live",
+      "changes": [
+        "Add User (Users) and Add Role (Roles) now fill with the gold top-bar color on hover, with charcoal text so the label stays readable."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "Unit tests, validate, and vite build run after implementation, then npm run push:live."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2009-020",
       "date": "2026-09-20",
       "time": "21:41:14",

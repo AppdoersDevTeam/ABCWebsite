@@ -237,7 +237,7 @@ export const AdminRoles = () => {
         <button
           type="button"
           onClick={openCreate}
-          className="inline-flex items-center gap-2 rounded-lg border-2 border-gold px-4 py-2.5 font-semibold text-gold hover:bg-gold/10 transition-colors"
+          className="inline-flex items-center gap-2 rounded-lg border-2 border-gold px-4 py-2.5 font-semibold text-gold transition-colors hover:bg-gold hover:text-charcoal"
         >
           <span className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-gold">
             <Plus size={14} />

@@ -7,6 +7,36 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2009-021 — Gold hover on Add User and Add Role
+
+**Date:** 2026-09-20
+**Time:** 22:09:43
+**Timezone:** Pacific/Auckland
+**Version:** 1.7.8
+**Type:** Changed
+
+**Request**
+
+> On Users abd Role, there is a button Add Users and Add role when the hover user this collor background. push to live
+
+**Changes**
+
+* Add User (Users) and Add Role (Roles) now fill with the gold top-bar color on hover, with charcoal text so the label stays readable.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: Unit tests, validate, and vite build run after implementation, then npm run push:live.
+
 ## CHG-2026-2009-020 — Larger, bolder arrows on user menu and left nav
 
 **Date:** 2026-09-20
