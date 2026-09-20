@@ -170,7 +170,7 @@ export const LinkDirectoryUserModal: React.FC<LinkDirectoryUserModalProps> = ({
             rows.map((r) => (
               <label
                 key={r.id}
-                className={`flex items-start gap-3 p-3 cursor-pointer hover:bg-gold/5 ${
+                className={`flex items-start gap-3 p-3 cursor-pointer hover:bg-gray-200 ${
                   selectedId === r.id ? 'bg-gold/10' : ''
                 }`}
               >

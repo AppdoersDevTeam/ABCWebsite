@@ -484,7 +484,7 @@ export const AdminRoster = () => {
           {rosterImages.map((rosterImage) => (
             <div
               key={rosterImage.id}
-              className="glass-card bg-white/80 border border-white/60 rounded-[12px] p-6 hover:border-gold hover:shadow-md transition-all group relative overflow-hidden"
+              className="glass-card hover-surface bg-white/80 border border-white/60 rounded-[12px] p-6 hover:bg-gray-200 hover:shadow-md transition-all group relative overflow-hidden"
             >
               <div className="absolute top-4 right-4 flex gap-2 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity z-10">
                 <button

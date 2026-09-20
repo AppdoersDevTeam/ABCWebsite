@@ -423,7 +423,7 @@ export const AdminSettings = () => {
                 {groups.map((g, idx) => (
                   <tr
                     key={g.id}
-                    className={`border-b border-gray-100 hover:bg-gold/5 transition-colors ${
+                    className={`border-b border-gray-100 hover:bg-gray-200 transition-colors ${
                       idx % 2 === 0 ? 'bg-white/40' : 'bg-white/20'
                     }`}
                   >
@@ -524,7 +524,7 @@ export const AdminSettings = () => {
                 {jobRoles.map((r, idx) => (
                   <tr
                     key={r.id}
-                    className={`border-b border-gray-100 hover:bg-gold/5 transition-colors ${
+                    className={`border-b border-gray-100 hover:bg-gray-200 transition-colors ${
                       idx % 2 === 0 ? 'bg-white/40' : 'bg-white/20'
                     }`}
                   >
@@ -625,7 +625,7 @@ export const AdminSettings = () => {
                 {eventCategories.map((c, idx) => (
                   <tr
                     key={c.id}
-                    className={`border-b border-gray-100 hover:bg-gold/5 transition-colors ${
+                    className={`border-b border-gray-100 hover:bg-gray-200 transition-colors ${
                       idx % 2 === 0 ? 'bg-white/40' : 'bg-white/20'
                     }`}
                   >

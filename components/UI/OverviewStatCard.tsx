@@ -1,5 +1,6 @@
 import React from 'react';
 import { ArrowUpRight } from 'lucide-react';
+import { SURFACE_HOVER_CLASS } from '../../lib/uiHover';
 
 type OverviewValueSize = 'stat' | 'title';
 
@@ -35,7 +36,7 @@ export const OverviewStatCard: React.FC<OverviewStatCardProps> = ({
 }) => {
   return (
     <div
-      className={`h-full glass-card rounded-[12px] p-5 md:p-6 relative flex flex-col transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-lg group bg-white border border-gray-100 hover:border-gold ${highlight ? 'border-2 border-gold shadow-sm' : ''} ${className}`}
+      className={`h-full glass-card hover-surface rounded-[12px] p-5 md:p-6 relative flex flex-col transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-lg ${SURFACE_HOVER_CLASS} group bg-white border border-gray-100 ${highlight ? 'border-2 border-gold shadow-sm' : ''} ${className}`}
     >
       <div className="absolute top-5 right-5 text-gray-300 group-hover:text-gold transition-colors">
         <ArrowUpRight size={18} />

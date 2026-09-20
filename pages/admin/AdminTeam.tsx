@@ -1280,7 +1280,7 @@ export const AdminTeam = () => {
               <div className="absolute right-0 top-full z-20 mt-1 w-36 rounded-lg border border-gray-200 bg-white py-1 shadow-lg">
                 <button
                   type="button"
-                  className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-50"
+                  className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-200"
                   onClick={() => {
                     setExportMenuOpen(false);
                     downloadDirectoryCsv(exportList, filenameBase, { churchName, exportedAt: new Date() });
@@ -1290,7 +1290,7 @@ export const AdminTeam = () => {
                 </button>
                 <button
                   type="button"
-                  className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-50"
+                  className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-200"
                   onClick={() => {
                     setExportMenuOpen(false);
                     downloadDirectoryPdf(exportList, filenameBase, { churchName, exportedAt: new Date() });
@@ -1365,7 +1365,7 @@ export const AdminTeam = () => {
                   const emailKey = (member.email || '').trim().toLowerCase();
                   const dupEmail = activeTab === 'active' && !!emailKey && duplicateEmails.has(emailKey);
                   return (
-                    <tr key={member.id} className="border-t border-gray-100">
+                    <tr key={member.id} className="border-t border-gray-100 hover:bg-gray-200">
                       <td className="px-4 py-3">
                         <input
                           type="checkbox"
@@ -1430,7 +1430,7 @@ export const AdminTeam = () => {
                                 <>
                                   <button
                                     type="button"
-                                    className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-gold hover:bg-gray-50"
+                                    className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-gold hover:bg-gray-200"
                                     onClick={() => {
                                       setActionsMenuId(null);
                                       void handleUnarchive(member.id);
@@ -1469,7 +1469,7 @@ export const AdminTeam = () => {
                                 <>
                                   <button
                                     type="button"
-                                    className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-gold hover:bg-gray-50"
+                                    className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-gold hover:bg-gray-200"
                                     onClick={() => {
                                       setActionsMenuId(null);
                                       handleEdit(member);
@@ -1480,7 +1480,7 @@ export const AdminTeam = () => {
                                   </button>
                                   <button
                                     type="button"
-                                    className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-charcoal hover:bg-gray-50"
+                                    className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-charcoal hover:bg-gray-200"
                                     onClick={() => {
                                       setActionsMenuId(null);
                                       handleArchive(member);
@@ -1807,7 +1807,7 @@ export const AdminTeam = () => {
               <div className="flex-1">
                 <label
                   htmlFor="team-image-upload"
-                  className="flex items-center justify-center gap-2 px-4 py-2 border-2 border-gray-300 rounded-[4px] cursor-pointer bg-white hover:bg-gray-50 hover:border-gold transition-colors"
+                  className="flex items-center justify-center gap-2 px-4 py-2 border-2 border-gray-300 rounded-[4px] cursor-pointer bg-white hover:bg-gray-200 transition-colors"
                 >
                   <Upload size={18} className="text-charcoal" />
                   <span className="text-sm font-bold text-charcoal">
@@ -1880,7 +1880,7 @@ export const AdminTeam = () => {
                 setEditingMember(null);
                 resetModal();
               }}
-              className="px-6 py-2 border border-gray-200 rounded-[4px] text-charcoal hover:bg-gray-50 transition-colors"
+              className="px-6 py-2 border border-gray-200 rounded-[4px] text-charcoal hover:bg-gray-200 transition-colors"
             >
               Cancel
             </button>
@@ -1942,7 +1942,7 @@ export const AdminTeam = () => {
                   setDeleteConfirmText('');
                   resetLinkedPrompt();
                 }}
-                className="px-6 py-2 border border-gray-200 rounded-[4px] text-charcoal hover:bg-gray-50 transition-colors disabled:opacity-50"
+                className="px-6 py-2 border border-gray-200 rounded-[4px] text-charcoal hover:bg-gray-200 transition-colors disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -1998,7 +1998,7 @@ export const AdminTeam = () => {
                   setArchiveTarget(null);
                   resetLinkedPrompt();
                 }}
-                className="px-6 py-2 border border-gray-200 rounded-[4px] text-charcoal hover:bg-gray-50 transition-colors disabled:opacity-50"
+                className="px-6 py-2 border border-gray-200 rounded-[4px] text-charcoal hover:bg-gray-200 transition-colors disabled:opacity-50"
               >
                 Cancel
               </button>

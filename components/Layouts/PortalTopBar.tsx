@@ -229,7 +229,7 @@ export const PortalTopBar = ({
             <Link
               to={profilePath}
               role="menuitem"
-              className="flex w-full items-center gap-3 px-4 py-3 text-[15px] font-medium text-gold hover:bg-gray-50"
+              className="flex w-full items-center gap-3 px-4 py-3 text-[15px] font-medium text-gold hover:bg-gray-200"
               onClick={() => setMenuOpen(false)}
             >
               <span className="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-gray-100 ring-1 ring-black/10">
@@ -247,7 +247,7 @@ export const PortalTopBar = ({
             <Link
               to={securityPath}
               role="menuitem"
-              className="flex w-full items-center gap-3 px-4 py-3 text-[15px] font-medium text-charcoal hover:bg-gray-50"
+              className="flex w-full items-center gap-3 px-4 py-3 text-[15px] font-medium text-charcoal hover:bg-gray-200"
               onClick={() => setMenuOpen(false)}
             >
               <span className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-50 text-slate-600">

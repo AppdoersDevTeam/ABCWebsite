@@ -372,7 +372,7 @@ export const AdminLogs = () => {
                     return (
                       <React.Fragment key={log.id}>
                         <tr
-                          className={`border-b border-gray-100 transition-colors cursor-pointer hover:bg-gold/5 ${
+                          className={`border-b border-gray-100 transition-colors cursor-pointer hover:bg-gray-200 ${
                             isExpanded ? 'bg-gold/10' : idx % 2 === 0 ? 'bg-white/40' : 'bg-white/20'
                           }`}
                           onClick={() => toggleExpand(log.id)}

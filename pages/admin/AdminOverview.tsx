@@ -18,6 +18,7 @@ import { notifyUserApproved } from '../../lib/notifyUserApproved';
 import { notifyUserReview } from '../../lib/notifyUserReview';
 import { notifyUserAdminRole, adminRoleEmailNote } from '../../lib/notifyUserAdminRole';
 import { IntroInquiryEmailModal } from './IntroInquiryEmailModal';
+import { SURFACE_HOVER_CLASS } from '../../lib/uiHover';
 import {
   emailQuotaNearLimit,
   fetchEmailQuotaStatus,
@@ -800,7 +801,7 @@ export const AdminOverview = () => {
       </div>
 
       {/* Pending User Approvals Section */}
-      <div id="pending-users" className="glass-card bg-white border border-gray-200 p-6 md:p-8 rounded-[8px] shadow-sm">
+      <div id="pending-users" className="glass-card hover-surface bg-white border border-gray-200 p-6 md:p-8 rounded-[8px] shadow-sm transition-colors">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div className="flex items-center gap-3">
             <div className="p-3 bg-gold/10 rounded-full">
@@ -859,7 +860,7 @@ export const AdminOverview = () => {
             {visiblePendingUsers.map((pendingUser) => (
               <div
                 key={pendingUser.id}
-                className="bg-white border border-gray-200 px-4 py-2.5 rounded-[8px] hover:border-gold transition-all shadow-sm"
+                className={`bg-white border border-gray-200 px-4 py-2.5 rounded-[8px] ${SURFACE_HOVER_CLASS} transition-all shadow-sm`}
               >
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2.5">
                   <div className="flex-1 min-w-0">
@@ -981,33 +982,33 @@ export const AdminOverview = () => {
                   e.preventDefault();
                   document.getElementById('pending-users')?.scrollIntoView({ behavior: 'smooth' });
                 }}
-                className="block p-4 bg-white border-2 border-gold rounded-[4px] hover:border-gold hover:shadow-md transition-all"
+                className={`block p-4 bg-white border-2 border-gold rounded-[4px] ${SURFACE_HOVER_CLASS} hover:shadow-md transition-all`}
               >
                 <span className="font-semibold text-base text-charcoal">Review Pending Users</span>
                 <p className="text-sm text-neutral mt-1">{visiblePendingCount} {visiblePendingCount === 1 ? 'user' : 'users'} awaiting approval</p>
               </a>
             )}
-            <Link to="/admin/users" className="block p-4 bg-white border border-gray-100 rounded-[4px] hover:border-blue-300 hover:shadow-md transition-all">
+            <Link to="/admin/users" className={`block p-4 bg-white border border-gray-100 rounded-[4px] ${SURFACE_HOVER_CLASS} hover:shadow-md transition-all`}>
               <span className="font-semibold text-base text-charcoal">Manage All Users</span>
               <p className="text-sm text-neutral mt-1">View and manage user roles and permissions</p>
             </Link>
-            <Link to="/admin/prayer" className="block p-4 bg-white border border-gray-100 rounded-[4px] hover:border-gold hover:shadow-md transition-all">
+            <Link to="/admin/prayer" className={`block p-4 bg-white border border-gray-100 rounded-[4px] ${SURFACE_HOVER_CLASS} hover:shadow-md transition-all`}>
               <span className="font-semibold text-base text-charcoal">Review New Prayer Requests</span>
               <p className="text-sm text-neutral mt-1">{pendingPrayerRequestsCount > 0 ? `${pendingPrayerRequestsCount} recent request${pendingPrayerRequestsCount === 1 ? '' : 's'}` : 'No recent requests'}</p>
             </Link>
-            <Link to="/admin/calendar" className="block p-4 bg-white border border-gray-100 rounded-[4px] hover:border-gold hover:shadow-md transition-all">
+            <Link to="/admin/calendar" className={`block p-4 bg-white border border-gray-100 rounded-[4px] ${SURFACE_HOVER_CLASS} hover:shadow-md transition-all`}>
               <span className="font-semibold text-base text-charcoal">Annual Calendar</span>
               <p className="text-sm text-neutral mt-1">See this year’s events, sermons, devotionals, and newsletters</p>
             </Link>
-            <Link to="/admin/events" className="block p-4 bg-white border border-gray-100 rounded-[4px] hover:border-gold hover:shadow-md transition-all">
+            <Link to="/admin/events" className={`block p-4 bg-white border border-gray-100 rounded-[4px] ${SURFACE_HOVER_CLASS} hover:shadow-md transition-all`}>
               <span className="font-semibold text-base text-charcoal">Add to {EVENTS_LABEL}</span>
               <p className="text-sm text-neutral mt-1">Create an upcoming listing</p>
             </Link>
-            <Link to="/admin/newsletter" className="block p-4 bg-white border border-gray-100 rounded-[4px] hover:border-gold hover:shadow-md transition-all">
+            <Link to="/admin/newsletter" className={`block p-4 bg-white border border-gray-100 rounded-[4px] ${SURFACE_HOVER_CLASS} hover:shadow-md transition-all`}>
               <span className="font-semibold text-base text-charcoal">Upload Newsletter</span>
               <p className="text-sm text-neutral mt-1">Publish with title, week date, and PDF</p>
             </Link>
-            <Link to="/admin/devotional" className="block p-4 bg-white border border-gray-100 rounded-[4px] hover:border-gold hover:shadow-md transition-all">
+            <Link to="/admin/devotional" className={`block p-4 bg-white border border-gray-100 rounded-[4px] ${SURFACE_HOVER_CLASS} hover:shadow-md transition-all`}>
               <span className="font-semibold text-base text-charcoal">Upload Devotional</span>
               <p className="text-sm text-neutral mt-1">Publish this week&apos;s weekly PDF</p>
             </Link>

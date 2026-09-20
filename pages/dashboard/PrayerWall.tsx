@@ -372,7 +372,7 @@ export const PrayerWall = () => {
             return (
               <div
                 key={req.id}
-                className="bg-white border border-gray-100 shadow-sm p-6 rounded-[8px] hover:shadow-md hover:border-gold transition-all duration-300"
+                className="bg-white border border-gray-100 shadow-sm p-6 rounded-[8px] hover:shadow-md hover:bg-gray-200 transition-all duration-300"
               >
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex items-center gap-3">

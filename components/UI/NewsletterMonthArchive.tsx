@@ -75,7 +75,7 @@ export const NewsletterMonthArchive: React.FC<NewsletterMonthArchiveProps> = ({
                 onClick={() => toggleMonth(group.key)}
                 aria-expanded={isOpen}
                 aria-controls={panelId}
-                className="w-full flex items-center gap-2 text-left min-h-[44px] px-1 rounded-[4px] hover:bg-gray-50 transition-colors"
+                className="w-full flex items-center gap-2 text-left min-h-[44px] px-1 rounded-[4px] hover:bg-gray-200 transition-colors"
               >
                 <span
                   className="w-5 shrink-0 text-center text-base font-bold text-charcoal leading-none"

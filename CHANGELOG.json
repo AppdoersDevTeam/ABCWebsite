@@ -6,6 +6,35 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2109-014",
+      "date": "2026-09-21",
+      "time": "01:34:35",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T13:34:35.692Z",
+      "version": "1.7.29",
+      "type": "changed",
+      "area": "admin",
+      "title": "Interactive hover uses the left-menu grey fill",
+      "request": "On Overview The card for user Approval Requests, when hover make it the same hover color from Menu Left side. Actually Make it a pattern of hover from the entire system. push to live.",
+      "changes": [
+        "User Approval Requests and other cards, rows, and menus now use the same grey hover as the left menu, instead of gold or pale grey."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "73 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2109-013",
       "date": "2026-09-21",
       "time": "01:29:09",

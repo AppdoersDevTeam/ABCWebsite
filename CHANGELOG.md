@@ -7,6 +7,36 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2109-014 — Interactive hover uses the left-menu grey fill
+
+**Date:** 2026-09-21
+**Time:** 01:34:35
+**Timezone:** Pacific/Auckland
+**Version:** 1.7.29
+**Type:** Changed
+
+**Request**
+
+> On Overview The card for user Approval Requests, when hover make it the same hover color from Menu Left side. Actually Make it a pattern of hover from the entire system. push to live.
+
+**Changes**
+
+* User Approval Requests and other cards, rows, and menus now use the same grey hover as the left menu, instead of gold or pale grey.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: 73 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors.
+
 ## CHG-2026-2109-013 — Overview stat cards drop Manage footer and are slightly narrower
 
 **Date:** 2026-09-21

@@ -930,7 +930,7 @@ export const AdminUsers = () => {
             <div className="absolute left-0 top-full z-20 mt-1 w-56 rounded-lg border border-gray-200 bg-white py-1 shadow-lg">
               <button
                 type="button"
-                className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-charcoal hover:bg-gray-50"
+                className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-charcoal hover:bg-gray-200"
                 onClick={() => {
                   setAddUserMenuOpen(false);
                   void recheckDirectoryLinks();
@@ -1000,7 +1000,7 @@ export const AdminUsers = () => {
               <div className="absolute right-0 top-full z-20 mt-1 w-36 rounded-lg border border-gray-200 bg-white py-1 shadow-lg">
                 <button
                   type="button"
-                  className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-50"
+                  className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-200"
                   onClick={() => {
                     setExportMenuOpen(false);
                     downloadAdminUsersCsv(exportUsers(), filenameBase, exportMeta(), exportContext());
@@ -1010,7 +1010,7 @@ export const AdminUsers = () => {
                 </button>
                 <button
                   type="button"
-                  className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-50"
+                  className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-200"
                   onClick={() => {
                     setExportMenuOpen(false);
                     downloadAdminUsersPdf(exportUsers(), filenameBase, exportMeta(), exportContext());
@@ -1069,7 +1069,7 @@ export const AdminUsers = () => {
                   const assigned = roleForUser(u, accountRoles);
                   const lastAccess = formatLastAccessParts(lastAccessByUserId[u.id], u.user_timezone);
                   return (
-                    <tr key={u.id} className="border-t border-gray-100">
+                    <tr key={u.id} className="border-t border-gray-100 hover:bg-gray-200">
                       <td className="px-4 py-3">
                         <input
                           type="checkbox"
@@ -1140,7 +1140,7 @@ export const AdminUsers = () => {
                         >
                               <button
                                 type="button"
-                                className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-gold hover:bg-gray-50"
+                                className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-gold hover:bg-gray-200"
                                 onClick={() => {
                                   setActionsMenuUserId(null);
                                   setEmailModalUser(u);
@@ -1151,7 +1151,7 @@ export const AdminUsers = () => {
                               </button>
                               <button
                                 type="button"
-                                className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-gold hover:bg-gray-50"
+                                className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-gold hover:bg-gray-200"
                                 onClick={() => openRoleAssign(u)}
                               >
                                 <Users size={16} />
@@ -1159,7 +1159,7 @@ export const AdminUsers = () => {
                               </button>
                               <button
                                 type="button"
-                                className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-gold hover:bg-gray-50"
+                                className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-gold hover:bg-gray-200"
                                 onClick={() => openEditUser(u)}
                               >
                                 <Pencil size={16} />
@@ -1168,7 +1168,7 @@ export const AdminUsers = () => {
                               <div className="my-1 border-t border-gray-100" />
                               <button
                                 type="button"
-                                className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-charcoal hover:bg-gray-50"
+                                className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-charcoal hover:bg-gray-200"
                                 onClick={() => {
                                   setActionsMenuUserId(null);
                                   setLinkModalUser(u);
@@ -1192,7 +1192,7 @@ export const AdminUsers = () => {
                               )}
                               <button
                                 type="button"
-                                className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-charcoal hover:bg-gray-50"
+                                className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-charcoal hover:bg-gray-200"
                                 onClick={() => {
                                   setActionsMenuUserId(null);
                                   openPasswordReset(u.email);
@@ -1204,7 +1204,7 @@ export const AdminUsers = () => {
                               {!u.is_approved && (
                                 <button
                                   type="button"
-                                  className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-charcoal hover:bg-gray-50"
+                                  className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-charcoal hover:bg-gray-200"
                                   onClick={() => {
                                     setActionsMenuUserId(null);
                                     void handleApproveUser(u.id);

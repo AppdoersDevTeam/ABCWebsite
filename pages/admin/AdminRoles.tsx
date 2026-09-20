@@ -328,7 +328,7 @@ export const AdminRoles = () => {
                             >
                               <button
                                 type="button"
-                                className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-charcoal hover:bg-gray-50"
+                                className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-charcoal hover:bg-gray-200"
                                 onClick={() => openEdit(role)}
                               >
                                 <Pencil size={16} className="text-gold" />
