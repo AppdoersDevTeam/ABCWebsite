@@ -7,6 +7,37 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2009-019 — Round user photo on My Profile and tighter left menu
+
+**Date:** 2026-09-20
+**Time:** 21:39:46
+**Timezone:** Pacific/Auckland
+**Version:** 1.7.6
+**Type:** Changed
+
+**Request**
+
+> For the My Profile icon use the User photo and make it a rounded photo Icon, for all the menus on the left decrease proportinally the hight size and the distance between all of them, push when completed.
+
+**Changes**
+
+* My Profile in the user-arrow menu uses the signed-in person's photo (directory or Google) as a round cropped icon.
+* Left-menu items are shorter and closer together: smaller icons, less padding, and less gap between rows.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: Unit tests, validate, and vite build run after implementation, then npm run push:live.
+
 ## CHG-2026-2009-018 — User-arrow menu visible above the left sidebar
 
 **Date:** 2026-09-20

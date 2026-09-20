@@ -6,6 +6,36 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2009-019",
+      "date": "2026-09-20",
+      "time": "21:39:46",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T09:39:46.310Z",
+      "version": "1.7.6",
+      "type": "changed",
+      "area": "admin",
+      "title": "Round user photo on My Profile and tighter left menu",
+      "request": "For the My Profile icon use the User photo and make it a rounded photo Icon, for all the menus on the left decrease proportinally the hight size and the distance between all of them, push when completed.",
+      "changes": [
+        "My Profile in the user-arrow menu uses the signed-in person's photo (directory or Google) as a round cropped icon.",
+        "Left-menu items are shorter and closer together: smaller icons, less padding, and less gap between rows."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "Unit tests, validate, and vite build run after implementation, then npm run push:live."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2009-018",
       "date": "2026-09-20",
       "time": "21:30:48",

@@ -93,6 +93,7 @@ export const PortalTopBar = ({
   const profilePath = variant === 'admin' ? '/admin/profile' : '/dashboard/profile';
   const securityPath = variant === 'admin' ? '/admin/security' : '/dashboard/security';
   const [directory, setDirectory] = useState<{ img: string | null; staff_role: string | null; role: string | null } | null>(null);
+  const [authPhoto, setAuthPhoto] = useState('');
 
   const matches = useMemo(() => {
     const q = searchText.trim().toLowerCase();
@@ -103,17 +104,19 @@ export const PortalTopBar = ({
   useEffect(() => {
     if (!user?.id) {
       setDirectory(null);
+      setAuthPhoto('');
       return;
     }
     let cancelled = false;
-    void supabase
-      .from('team_members')
-      .select('img, staff_role, role')
-      .eq('user_id', user.id)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (!cancelled) setDirectory(data || null);
-      });
+    void Promise.all([
+      supabase.from('team_members').select('img, staff_role, role').eq('user_id', user.id).limit(1).maybeSingle(),
+      supabase.auth.getUser(),
+    ]).then(([{ data }, auth]) => {
+      if (cancelled) return;
+      setDirectory(data || null);
+      const meta = auth.data.user?.user_metadata || {};
+      setAuthPhoto(String(meta.avatar_url || meta.picture || ''));
+    });
     return () => {
       cancelled = true;
     };
@@ -122,7 +125,7 @@ export const PortalTopBar = ({
   const firstName = (user?.first_name || displayName(user).split(' ')[0] || 'User').trim();
   const title = (directory?.staff_role || directory?.role || '').trim();
   const identitySubtitle = title ? `${title} ${firstName}` : displayName(user);
-  const avatarUrl = directory?.img || '';
+  const avatarUrl = directory?.img || authPhoto || '';
   const initials = displayInitials(user);
 
   useEffect(() => {
@@ -227,13 +230,15 @@ export const PortalTopBar = ({
               className="flex w-full items-center gap-3 px-4 py-3 text-[15px] font-medium text-gold hover:bg-gray-50"
               onClick={() => setMenuOpen(false)}
             >
-              {avatarUrl ? (
-                <img src={avatarUrl} alt="" className="h-9 w-9 rounded-full object-cover" />
-              ) : (
-                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gold/15 text-sm font-semibold text-gold">
-                  {initials}
-                </span>
-              )}
+              <span className="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-gray-100 ring-1 ring-black/10">
+                {avatarUrl ? (
+                  <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  <span className="flex h-full w-full items-center justify-center text-sm font-semibold text-gold">
+                    {initials}
+                  </span>
+                )}
+              </span>
               My Profile
             </Link>
             <div className="mx-3 border-t border-gray-200" />

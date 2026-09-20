@@ -52,32 +52,32 @@ export const AdminLayout = () => {
     | { label: string; icon: React.ReactNode; iconClass: string; children: { label: string; path: string }[] };
 
   const navItems: AdminNavItem[] = [
-    { label: 'Overview', path: '/admin', icon: <Home size={20} />, iconClass: DASHBOARD_NAV_ICON.overview },
-    { label: 'Annual Calendar', path: '/admin/calendar', icon: <CalendarDays size={20} />, iconClass: DASHBOARD_NAV_ICON.calendar },
+    { label: 'Overview', path: '/admin', icon: <Home size={16} />, iconClass: DASHBOARD_NAV_ICON.overview },
+    { label: 'Annual Calendar', path: '/admin/calendar', icon: <CalendarDays size={16} />, iconClass: DASHBOARD_NAV_ICON.calendar },
     {
       label: 'Users & Roles',
-      icon: <UserCog size={20} />,
+      icon: <UserCog size={16} />,
       iconClass: DASHBOARD_NAV_ICON.users,
       children: [
         { label: 'Users', path: '/admin/users' },
         { label: 'Roles & Permissions', path: '/admin/roles' },
       ],
     },
-    { label: 'Prayers', path: '/admin/prayer', icon: <HandHeart size={20} />, iconClass: DASHBOARD_NAV_ICON.prayers },
-    { label: 'Newsletters', path: '/admin/newsletter', icon: <Newspaper size={20} />, iconClass: DASHBOARD_NAV_ICON.newsletters },
-    { label: 'Devotionals', path: '/admin/devotional', icon: <BookOpen size={20} />, iconClass: DASHBOARD_NAV_ICON.devotionals },
-    { label: 'Leadership', path: '/admin/team', icon: <Users size={20} />, iconClass: DASHBOARD_NAV_ICON.team },
-    { label: EVENTS_LABEL, path: '/admin/events', icon: <Calendar size={20} />, iconClass: DASHBOARD_NAV_ICON.events },
-    { label: 'Rosters (Beta)', path: '/admin/roster', icon: <ClipboardList size={20} />, iconClass: DASHBOARD_NAV_ICON.rosters },
-    { label: 'System Setup', path: '/admin/settings', icon: <Settings size={20} />, iconClass: DASHBOARD_NAV_ICON.settings },
-    { label: 'Help', path: '/admin/help', icon: <HelpCircle size={20} />, iconClass: DASHBOARD_NAV_ICON.help },
-    { label: 'Logs', path: '/admin/logs', icon: <ScrollText size={20} />, iconClass: DASHBOARD_NAV_ICON.logs },
+    { label: 'Prayers', path: '/admin/prayer', icon: <HandHeart size={16} />, iconClass: DASHBOARD_NAV_ICON.prayers },
+    { label: 'Newsletters', path: '/admin/newsletter', icon: <Newspaper size={16} />, iconClass: DASHBOARD_NAV_ICON.newsletters },
+    { label: 'Devotionals', path: '/admin/devotional', icon: <BookOpen size={16} />, iconClass: DASHBOARD_NAV_ICON.devotionals },
+    { label: 'Leadership', path: '/admin/team', icon: <Users size={16} />, iconClass: DASHBOARD_NAV_ICON.team },
+    { label: EVENTS_LABEL, path: '/admin/events', icon: <Calendar size={16} />, iconClass: DASHBOARD_NAV_ICON.events },
+    { label: 'Rosters (Beta)', path: '/admin/roster', icon: <ClipboardList size={16} />, iconClass: DASHBOARD_NAV_ICON.rosters },
+    { label: 'System Setup', path: '/admin/settings', icon: <Settings size={16} />, iconClass: DASHBOARD_NAV_ICON.settings },
+    { label: 'Help', path: '/admin/help', icon: <HelpCircle size={16} />, iconClass: DASHBOARD_NAV_ICON.help },
+    { label: 'Logs', path: '/admin/logs', icon: <ScrollText size={16} />, iconClass: DASHBOARD_NAV_ICON.logs },
     ...(isSuperAdminUser(user)
       ? [
           {
             label: 'Changelog',
             path: '/admin/changelog',
-            icon: <History size={20} />,
+            icon: <History size={16} />,
             iconClass: DASHBOARD_NAV_ICON.changelog,
           },
         ]
@@ -130,7 +130,7 @@ export const AdminLayout = () => {
               <button className="text-charcoal" onClick={() => setIsSidebarOpen(false)} aria-label="Close menu"><X /></button>
             </div>
 
-          <nav className={`flex-1 space-y-2 overflow-y-auto py-4 ${sidebarCollapsed ? 'px-2 lg:px-2' : 'px-4'}`}>
+          <nav className={`flex-1 space-y-1 overflow-y-auto py-2 ${sidebarCollapsed ? 'px-2 lg:px-2' : 'px-3'}`}>
             {navItems.map((item) => {
               if ('children' in item && item.children) {
                 const childActive = item.children.some((child) => location.pathname === child.path);
@@ -150,7 +150,7 @@ export const AdminLayout = () => {
                       }}
                       className={`
                         w-full flex items-center rounded-[4px] transition-all duration-300 group relative overflow-hidden
-                        ${sidebarCollapsed ? 'lg:justify-center lg:space-x-0 lg:px-2 py-3' : 'space-x-4 px-4 py-3'}
+                        ${sidebarCollapsed ? 'lg:justify-center lg:space-x-0 lg:px-2 py-1.5' : 'space-x-2.5 px-3 py-1.5'}
                         ${childActive
                           ? 'bg-gold/10 text-charcoal font-bold'
                           : 'text-neutral hover:text-charcoal hover:bg-gray-200'}
@@ -159,7 +159,7 @@ export const AdminLayout = () => {
                     >
                       {childActive && <div className="absolute left-0 top-0 bottom-0 w-1 bg-gold"></div>}
                       <span
-                        className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-transform duration-300 ${item.iconClass} ${
+                        className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-transform duration-300 ${item.iconClass} ${
                           childActive ? 'scale-110' : 'group-hover:scale-110'
                         }`}
                       >
@@ -173,7 +173,7 @@ export const AdminLayout = () => {
                       )}
                     </button>
                     {isOpen && (
-                      <div className="mt-1 ml-4 space-y-1">
+                      <div className="mt-0.5 ml-3 space-y-0.5">
                         {item.children.map((child) => {
                           const isChildActive = location.pathname === child.path;
                           return (
@@ -182,7 +182,7 @@ export const AdminLayout = () => {
                               to={child.path}
                               onClick={() => setIsSidebarOpen(false)}
                               className={`
-                                relative flex items-center pl-5 pr-3 py-2.5 rounded-[8px] text-sm transition-colors
+                                relative flex items-center pl-5 pr-3 py-1.5 rounded-[8px] text-sm transition-colors
                                 ${isChildActive
                                   ? 'bg-gold/15 text-gold font-semibold'
                                   : 'text-charcoal hover:bg-gray-200'}
@@ -210,7 +210,7 @@ export const AdminLayout = () => {
                   onClick={() => setIsSidebarOpen(false)}
                   className={`
                     flex items-center rounded-[4px] transition-all duration-300 group relative overflow-hidden
-                    ${sidebarCollapsed ? 'lg:justify-center lg:space-x-0 lg:px-2 py-3' : 'space-x-4 px-4 py-3'}
+                    ${sidebarCollapsed ? 'lg:justify-center lg:space-x-0 lg:px-2 py-1.5' : 'space-x-2.5 px-3 py-1.5'}
                     ${isActive 
                       ? 'bg-gold/10 text-charcoal font-bold' 
                       : 'text-neutral hover:text-charcoal hover:bg-gray-200'}
@@ -218,7 +218,7 @@ export const AdminLayout = () => {
                 >
                   {isActive && <div className="absolute left-0 top-0 bottom-0 w-1 bg-gold"></div>}
                   <span
-                    className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-transform duration-300 ${item.iconClass} ${
+                    className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-transform duration-300 ${item.iconClass} ${
                       isActive ? 'scale-110' : 'group-hover:scale-110'
                     }`}
                   >
@@ -237,7 +237,7 @@ export const AdminLayout = () => {
                 sessionStorage.setItem('testRoleOverride', 'member');
                 navigate('/dashboard');
               }}
-              className={`w-full flex items-center py-3 text-neutral hover:bg-blue-50 hover:text-blue-600 transition-colors rounded-[4px] ${
+              className={`w-full flex items-center py-2 text-neutral hover:bg-blue-50 hover:text-blue-600 transition-colors rounded-[4px] ${
                 sidebarCollapsed ? 'lg:justify-center lg:space-x-0 lg:px-2 space-x-3 px-4' : 'space-x-3 px-4'
               }`}
             >

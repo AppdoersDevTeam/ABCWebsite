@@ -36,16 +36,16 @@ export const DashboardLayout = () => {
   };
 
   const navItems = [
-    { label: 'Overview', path: '/dashboard', icon: <Home size={20} />, iconClass: DASHBOARD_NAV_ICON.overview },
-    { label: 'Annual Calendar', path: '/dashboard/calendar', icon: <CalendarDays size={20} />, iconClass: DASHBOARD_NAV_ICON.calendar },
-    { label: 'Prayers', path: '/dashboard/prayer', icon: <HandHeart size={20} />, iconClass: DASHBOARD_NAV_ICON.prayers },
-    { label: 'Newsletters', path: '/dashboard/newsletter', icon: <Newspaper size={20} />, iconClass: DASHBOARD_NAV_ICON.newsletters },
-    { label: 'Devotionals', path: '/dashboard/devotional', icon: <BookOpen size={20} />, iconClass: DASHBOARD_NAV_ICON.devotionals },
-    { label: 'Sermons', path: '/dashboard/sermons', icon: <Youtube size={20} />, iconClass: DASHBOARD_NAV_ICON.sermons },
-    { label: 'Leadership', path: '/dashboard/team', icon: <Users size={20} />, iconClass: DASHBOARD_NAV_ICON.team },
-    { label: EVENTS_LABEL, path: '/dashboard/events', icon: <Calendar size={20} />, iconClass: DASHBOARD_NAV_ICON.events },
-    { label: 'Rosters (Beta)', path: '/dashboard/roster', icon: <ClipboardList size={20} />, iconClass: DASHBOARD_NAV_ICON.rosters },
-    { label: 'Help', path: '/dashboard/help', icon: <HelpCircle size={20} />, iconClass: DASHBOARD_NAV_ICON.help },
+    { label: 'Overview', path: '/dashboard', icon: <Home size={16} />, iconClass: DASHBOARD_NAV_ICON.overview },
+    { label: 'Annual Calendar', path: '/dashboard/calendar', icon: <CalendarDays size={16} />, iconClass: DASHBOARD_NAV_ICON.calendar },
+    { label: 'Prayers', path: '/dashboard/prayer', icon: <HandHeart size={16} />, iconClass: DASHBOARD_NAV_ICON.prayers },
+    { label: 'Newsletters', path: '/dashboard/newsletter', icon: <Newspaper size={16} />, iconClass: DASHBOARD_NAV_ICON.newsletters },
+    { label: 'Devotionals', path: '/dashboard/devotional', icon: <BookOpen size={16} />, iconClass: DASHBOARD_NAV_ICON.devotionals },
+    { label: 'Sermons', path: '/dashboard/sermons', icon: <Youtube size={16} />, iconClass: DASHBOARD_NAV_ICON.sermons },
+    { label: 'Leadership', path: '/dashboard/team', icon: <Users size={16} />, iconClass: DASHBOARD_NAV_ICON.team },
+    { label: EVENTS_LABEL, path: '/dashboard/events', icon: <Calendar size={16} />, iconClass: DASHBOARD_NAV_ICON.events },
+    { label: 'Rosters (Beta)', path: '/dashboard/roster', icon: <ClipboardList size={16} />, iconClass: DASHBOARD_NAV_ICON.rosters },
+    { label: 'Help', path: '/dashboard/help', icon: <HelpCircle size={16} />, iconClass: DASHBOARD_NAV_ICON.help },
   ];
 
   return (
@@ -94,7 +94,7 @@ export const DashboardLayout = () => {
               <button className="text-charcoal" onClick={() => setIsSidebarOpen(false)} aria-label="Close menu"><X /></button>
             </div>
 
-          <nav className={`flex-1 space-y-2 overflow-y-auto py-4 ${sidebarCollapsed ? 'px-2 lg:px-2' : 'px-4'}`}>
+          <nav className={`flex-1 space-y-1 overflow-y-auto py-2 ${sidebarCollapsed ? 'px-2 lg:px-2' : 'px-3'}`}>
             {navItems.map((item) => {
               const isActive = location.pathname === item.path;
               return (
@@ -105,7 +105,7 @@ export const DashboardLayout = () => {
                   onClick={() => setIsSidebarOpen(false)}
                   className={`
                     flex items-center rounded-[4px] transition-all duration-300 group relative overflow-hidden
-                    ${sidebarCollapsed ? 'lg:justify-center lg:space-x-0 lg:px-2 py-3' : 'space-x-4 px-4 py-3'}
+                    ${sidebarCollapsed ? 'lg:justify-center lg:space-x-0 lg:px-2 py-1.5' : 'space-x-2.5 px-3 py-1.5'}
                     ${isActive 
                       ? 'bg-gold/10 text-charcoal font-bold' 
                       : 'text-neutral hover:text-charcoal hover:bg-gray-200'}
@@ -113,7 +113,7 @@ export const DashboardLayout = () => {
                 >
                   {isActive && <div className="absolute left-0 top-0 bottom-0 w-1 bg-gold"></div>}
                   <span
-                    className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-transform duration-300 ${item.iconClass} ${
+                    className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-transform duration-300 ${item.iconClass} ${
                       isActive ? 'scale-110' : 'group-hover:scale-110'
                     }`}
                   >
@@ -133,7 +133,7 @@ export const DashboardLayout = () => {
                   sessionStorage.removeItem('testRoleOverride');
                   navigate('/admin');
                 }}
-                className={`w-full flex items-center py-3 text-neutral hover:bg-blue-50 hover:text-blue-600 transition-colors rounded-[4px] ${
+                className={`w-full flex items-center py-2 text-neutral hover:bg-blue-50 hover:text-blue-600 transition-colors rounded-[4px] ${
                   sidebarCollapsed ? 'lg:justify-center lg:space-x-0 lg:px-2 space-x-3 px-4' : 'space-x-3 px-4'
                 }`}
               >
