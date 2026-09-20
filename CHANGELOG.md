@@ -7,6 +7,36 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2009-026 — Overview approval avatars use the user photo
+
+**Date:** 2026-09-20
+**Time:** 23:46:49
+**Timezone:** Pacific/Auckland
+**Version:** 1.7.13
+**Type:** Changed
+
+**Request**
+
+> On The Overview the User Approval Request Icon must match with the Icon of User Photo. when completed Push live.
+
+**Changes**
+
+* User Approval Requests on Admin Overview now use the same round user photo as Users (directory photo, or initials if there is no photo), with the same Users heading icon as the Users card.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: 57 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors. No browser MCP in this session; Overview approval avatars were checked in code.
+
 ## CHG-2026-2009-025 — Overview People card shows directory count
 
 **Date:** 2026-09-20

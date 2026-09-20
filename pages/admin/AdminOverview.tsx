@@ -4,7 +4,7 @@ import { OverviewStatCard } from '../../components/UI/OverviewStatCard';
 import { Calendar, BookOpen, Users, ClipboardList, UserCheck, X, Plus, Shield, Mail, Newspaper, HandHeart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
-import { displayName, EVENTS_LABEL, PEOPLE_LABEL, filterUsersForAdminView, isPendingApproval } from '../../lib/constants';
+import { displayName, displayNameLastFirst, displayInitials, EVENTS_LABEL, PEOPLE_LABEL, filterUsersForAdminView, isPendingApproval } from '../../lib/constants';
 import { User } from '../../types';
 import { SkeletonPageHeader, SkeletonCard, SkeletonUserCard, SkeletonStatsCard } from '../../components/UI/Skeleton';
 import { formatRelativeDateInTimezone, formatFullDateTimeInTimezone, formatWeekDate, formatDdMmYyyy, resolveNewsletterWeekDate } from '../../lib/dateUtils';
@@ -26,6 +26,7 @@ export const AdminOverview = () => {
   const { user } = useAuth();
   const [pendingUsers, setPendingUsers] = useState<User[]>([]);
   const [pendingCount, setPendingCount] = useState(0);
+  const [photoByUserId, setPhotoByUserId] = useState<Record<string, string>>({});
   const [isLoadingUsers, setIsLoadingUsers] = useState(true);
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [showAllUsers, setShowAllUsers] = useState(false);
@@ -123,10 +124,31 @@ export const AdminOverview = () => {
       setPendingUsers(data || []);
       setPendingCount(data?.length || 0);
       console.log('AdminOverview - Set pending users:', data?.length || 0);
+
+      const photoIds = [...new Set((allUsers || data || []).map((u) => u.id).filter(Boolean))];
+      if (photoIds.length) {
+        const { data: dirRows, error: dirErr } = await supabase
+          .from('team_members')
+          .select('user_id, img')
+          .in('user_id', photoIds);
+        if (dirErr) {
+          console.warn('AdminOverview - directory photo lookup failed:', dirErr);
+          setPhotoByUserId({});
+        } else {
+          const map: Record<string, string> = {};
+          (dirRows || []).forEach((row: { user_id?: string | null; img?: string | null }) => {
+            if (row.user_id && row.img) map[row.user_id] = row.img;
+          });
+          setPhotoByUserId(map);
+        }
+      } else {
+        setPhotoByUserId({});
+      }
     } catch (error) {
       console.error('AdminOverview - Error fetching pending users:', error);
       setPendingUsers([]);
       setPendingCount(0);
+      setPhotoByUserId({});
     } finally {
       setIsLoadingUsers(false);
       console.log('AdminOverview - fetchPendingUsers completed');
@@ -755,7 +777,7 @@ export const AdminOverview = () => {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div className="flex items-center gap-3">
             <div className="p-3 bg-gold/10 rounded-full">
-              <UserCheck size={24} className="text-gold" />
+              <Users size={24} className="text-gold" />
             </div>
             <div>
               <h2 className="font-serif text-3xl text-charcoal font-normal">User Approval Requests</h2>
@@ -777,7 +799,7 @@ export const AdminOverview = () => {
           </div>
         ) : visiblePendingCount === 0 ? (
           <div className="text-center py-12 bg-gray-50 rounded-[8px] border border-gray-100">
-            <UserCheck size={48} className="text-gray-300 mx-auto mb-4" />
+            <Users size={48} className="text-gray-300 mx-auto mb-4" />
             <p className="text-neutral text-lg font-medium">No pending users</p>
             <p className="text-neutral text-sm mt-2">All users have been reviewed</p>
             <div className="mt-6 space-y-3">
@@ -815,12 +837,16 @@ export const AdminOverview = () => {
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-start gap-4">
-                      <div className="w-12 h-12 rounded-full bg-gold/10 text-white flex items-center justify-center font-bold text-lg flex-shrink-0">
-                        {pendingUser.name.charAt(0).toUpperCase()}
+                      <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-gray-100 text-sm font-bold text-neutral flex items-center justify-center">
+                        {photoByUserId[pendingUser.id] ? (
+                          <img src={photoByUserId[pendingUser.id]} alt="" className="h-full w-full object-cover" />
+                        ) : (
+                          displayInitials(pendingUser)
+                        )}
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
-                          <h3 className="font-bold text-xl text-charcoal">{pendingUser.name}</h3>
+                          <h3 className="font-medium text-xl text-gold">{displayNameLastFirst(pendingUser)}</h3>
                           {pendingUser.role === 'admin' && (
                             <span className="bg-red-100 text-red-700 text-xs px-2 py-1 rounded uppercase font-bold">
                               Admin

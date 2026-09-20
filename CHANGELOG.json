@@ -6,6 +6,35 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2009-026",
+      "date": "2026-09-20",
+      "time": "23:46:49",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T11:46:49.599Z",
+      "version": "1.7.13",
+      "type": "changed",
+      "area": "admin",
+      "title": "Overview approval avatars use the user photo",
+      "request": "On The Overview the User Approval Request Icon must match with the Icon of User Photo. when completed Push live.",
+      "changes": [
+        "User Approval Requests on Admin Overview now use the same round user photo as Users (directory photo, or initials if there is no photo), with the same Users heading icon as the Users card."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "57 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors. No browser MCP in this session; Overview approval avatars were checked in code."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2009-025",
       "date": "2026-09-20",
       "time": "23:21:21",
