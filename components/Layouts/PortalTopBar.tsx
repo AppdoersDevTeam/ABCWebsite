@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRightLeft, Check, ChevronDown, HelpCircle, LogOut, Menu, MoreHorizontal, Search } from 'lucide-react';
+import { ArrowRightLeft, Bell, Check, ChevronDown, HelpCircle, LogOut, Menu, MoreHorizontal, Search } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { CHURCH_NAME, displayInitials, displayName } from '../../lib/constants';
 import { supabase } from '../../lib/supabase';
@@ -86,8 +86,10 @@ export const PortalTopBar = ({
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
+  const [notifyOpen, setNotifyOpen] = useState(false);
   const identityRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
+  const notifyRef = useRef<HTMLDivElement>(null);
   const profilePath = variant === 'admin' ? '/admin/profile' : '/dashboard/profile';
   const homePath = variant === 'admin' ? '/admin' : '/dashboard';
   const [directory, setDirectory] = useState<{ img: string | null; staff_role: string | null; role: string | null } | null>(null);
@@ -128,11 +130,13 @@ export const PortalTopBar = ({
       const target = event.target as Node;
       if (identityRef.current && !identityRef.current.contains(target)) setMenuOpen(false);
       if (searchRef.current && !searchRef.current.contains(target)) setSearchOpen(false);
+      if (notifyRef.current && !notifyRef.current.contains(target)) setNotifyOpen(false);
     };
     const onKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         setMenuOpen(false);
         setSearchOpen(false);
+        setNotifyOpen(false);
       }
     };
     document.addEventListener('mousedown', onPointer);
@@ -157,7 +161,7 @@ export const PortalTopBar = ({
   return (
     <div className="relative z-30 flex h-16 shrink-0">
       <div
-        className={`flex shrink-0 items-center border-r border-gray-200 bg-white py-1 ${
+        className={`flex shrink-0 items-center border-r border-gray-100 bg-white py-1 ${
           sidebarCollapsed ? 'w-[72px] px-1' : 'w-44 px-2 sm:w-72'
         }`}
       >
@@ -165,7 +169,7 @@ export const PortalTopBar = ({
         <button
           type="button"
           onClick={() => setMenuOpen((open) => !open)}
-          className={`flex h-14 w-full items-center gap-2.5 rounded-2xl border border-black/5 bg-gray-200 px-2.5 shadow-sm transition-colors hover:bg-gray-300 ${
+          className={`flex h-14 w-full items-center gap-2.5 rounded-[11px] border-[0.5px] border-gray-300 bg-gray-200 px-2.5 transition-colors hover:bg-gray-300 ${
             sidebarCollapsed ? 'justify-center px-1' : ''
           }`}
           aria-expanded={menuOpen}
@@ -197,7 +201,7 @@ export const PortalTopBar = ({
         {menuOpen && (
           <div
             role="menu"
-            className={`absolute left-0 top-full z-40 mt-1 overflow-hidden rounded-2xl border border-gray-200 bg-white py-1 shadow-lg ${
+            className={`absolute left-0 top-full z-40 mt-1 overflow-hidden rounded-[11px] border border-gray-200 bg-white py-1 shadow-lg ${
               sidebarCollapsed ? 'w-72' : 'w-full min-w-[260px]'
             }`}
           >
@@ -293,12 +297,12 @@ export const PortalTopBar = ({
       <div className="ml-auto flex min-w-0 items-center gap-2">
         <div className="relative" ref={searchRef}>
           <form
-            className="flex items-center gap-1"
             onSubmit={(event) => {
               event.preventDefault();
               goToSearchMatch();
             }}
           >
+            <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-white" />
             <input
               type="search"
               value={searchText}
@@ -308,16 +312,9 @@ export const PortalTopBar = ({
               }}
               onFocus={() => setSearchOpen(true)}
               placeholder="Search"
-              className="h-10 w-28 rounded-full border-0 bg-white/90 px-4 text-sm text-charcoal placeholder:text-neutral focus:outline-none focus:ring-2 focus:ring-charcoal/10 sm:w-44 md:w-52"
+              className="h-10 w-32 rounded-md border border-white/80 bg-transparent pl-9 pr-3 text-sm text-white placeholder:text-white focus:outline-none focus:ring-1 focus:ring-white/70 sm:w-44 md:w-52"
               aria-label="Search dashboard pages"
             />
-            <button
-              type="submit"
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[3px] bg-white/90 text-charcoal hover:bg-white"
-              aria-label="Search"
-            >
-              <Search size={16} />
-            </button>
           </form>
           {searchOpen && matches.length > 0 && (
             <div className="absolute right-0 top-full z-40 mt-1 w-56 overflow-hidden rounded-xl border border-gray-200 bg-white py-1 shadow-lg">
@@ -334,9 +331,26 @@ export const PortalTopBar = ({
             </div>
           )}
         </div>
+        <div className="relative" ref={notifyRef}>
+          <button
+            type="button"
+            onClick={() => setNotifyOpen((open) => !open)}
+            className="rounded-full p-2 text-white hover:bg-black/10"
+            aria-label="Notifications"
+            aria-expanded={notifyOpen}
+            title="Notifications"
+          >
+            <Bell size={20} />
+          </button>
+          {notifyOpen && (
+            <div className="absolute right-0 top-full z-40 mt-1 w-64 rounded-[11px] border border-gray-200 bg-white px-4 py-3 text-sm text-neutral shadow-lg">
+              No new notifications
+            </div>
+          )}
+        </div>
         <Link
           to={helpPath}
-          className="rounded-full p-2 text-charcoal hover:bg-black/5"
+          className="rounded-full p-2 text-white hover:bg-black/10"
           aria-label="Help"
           title="Help"
         >

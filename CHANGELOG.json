@@ -6,6 +6,37 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2009-014",
+      "date": "2026-09-20",
+      "time": "20:51:55",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T08:51:55.721Z",
+      "version": "1.7.1",
+      "type": "changed",
+      "area": "admin",
+      "title": "White search field, notification bell, and thinner user-button border",
+      "request": "For the Search Bar, change the font to White like the one attached and the search button like the picture attached, remove it and add a Notification icon, For the User button on the left top remove the black line and make it a light gray thinner. Also decrease the round corner in 5pts. Push live when finished.",
+      "changes": [
+        "Search is a transparent rounded field with a white magnifying-glass icon inside and white Search text, matching the attached gold bar.",
+        "The separate search button on the right is removed and replaced with a notification bell (empty state: No new notifications).",
+        "The top-left user button no longer has a dark/black outline: it uses a thinner light gray border, and the corner radius is 5px smaller (11px)."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "Unit tests, validate, and vite build run after implementation, then npm run push:live."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2009-013",
       "date": "2026-09-20",
       "time": "20:41:41",

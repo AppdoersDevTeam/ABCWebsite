@@ -7,6 +7,38 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2009-014 — White search field, notification bell, and thinner user-button border
+
+**Date:** 2026-09-20
+**Time:** 20:51:55
+**Timezone:** Pacific/Auckland
+**Version:** 1.7.1
+**Type:** Changed
+
+**Request**
+
+> For the Search Bar, change the font to White like the one attached and the search button like the picture attached, remove it and add a Notification icon, For the User button on the left top remove the black line and make it a light gray thinner. Also decrease the round corner in 5pts. Push live when finished.
+
+**Changes**
+
+* Search is a transparent rounded field with a white magnifying-glass icon inside and white Search text, matching the attached gold bar.
+* The separate search button on the right is removed and replaced with a notification bell (empty state: No new notifications).
+* The top-left user button no longer has a dark/black outline: it uses a thinner light gray border, and the corner radius is 5px smaller (11px).
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: Unit tests, validate, and vite build run after implementation, then npm run push:live.
+
 ## CHG-2026-2009-013 — Taller user menu, collapsible icon sidebar, and search button
 
 **Date:** 2026-09-20
