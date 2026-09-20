@@ -88,12 +88,13 @@ export const PortalTopBar = ({
   }, []);
 
   return (
-    <header className="relative z-30 flex h-14 shrink-0 items-center gap-2 bg-gold px-2 sm:gap-3 sm:px-3">
-      <div className="relative shrink-0" ref={identityRef}>
+    <div className="relative z-30 flex h-[59px] shrink-0">
+      <div className="flex w-44 shrink-0 items-center border-r border-gray-200 bg-white px-2 sm:w-72">
+        <div className="relative w-full" ref={identityRef}>
         <button
           type="button"
           onClick={() => setMenuOpen((open) => !open)}
-          className="flex h-11 w-[168px] items-center gap-2 rounded-xl border border-black/5 bg-white px-2 shadow-sm sm:w-[236px]"
+          className="flex h-[47px] w-full items-center gap-2 rounded-xl border border-black/5 bg-white px-2 shadow-sm"
           aria-expanded={menuOpen}
           aria-haspopup="menu"
         >
@@ -153,12 +154,14 @@ export const PortalTopBar = ({
             </button>
           </div>
         )}
+        </div>
       </div>
 
+      <header className="flex min-w-0 flex-1 items-center gap-2 bg-gold px-3 sm:gap-3">
       <button
         type="button"
         onClick={onOpenSidebar}
-        className="rounded-md p-2 text-charcoal hover:bg-black/5 lg:hidden"
+        className="rounded-md p-2 text-charcoal hover:bg-black/5"
         aria-label="Open menu"
       >
         <Menu size={22} />
@@ -180,7 +183,7 @@ export const PortalTopBar = ({
             }}
             onFocus={() => setSearchOpen(true)}
             placeholder="Search"
-            className="h-9 w-28 rounded-lg border-0 bg-white/95 pl-9 pr-3 text-sm text-charcoal placeholder:text-neutral focus:outline-none focus:ring-2 focus:ring-charcoal/10 sm:w-48 md:w-56"
+            className="h-10 w-32 rounded-full border-0 bg-white/90 pl-9 pr-4 text-sm text-charcoal placeholder:text-neutral focus:outline-none focus:ring-2 focus:ring-charcoal/10 sm:w-48 md:w-56"
             aria-label="Search dashboard pages"
           />
           {searchOpen && matches.length > 0 && (
@@ -189,7 +192,7 @@ export const PortalTopBar = ({
                 <button
                   key={item.path}
                   type="button"
-                  className="block w-full px-3 py-2 text-left text-sm text-charcoal hover:bg-gray-50"
+                  className="block w-full px-3 py-2 text-left text-sm text-charcoal hover:bg-gray-200"
                   onClick={() => {
                     navigate(item.path);
                     setSearchText('');
@@ -211,6 +214,7 @@ export const PortalTopBar = ({
           <HelpCircle size={20} />
         </Link>
       </div>
-    </header>
+      </header>
+    </div>
   );
 };

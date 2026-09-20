@@ -6,6 +6,37 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2009-012",
+      "date": "2026-09-20",
+      "time": "20:23:30",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T08:23:30.737Z",
+      "version": "1.6.1",
+      "type": "changed",
+      "area": "admin",
+      "title": "Separate identity card from yellow search bar and darken menu hover",
+      "request": "Separate the button and the search bar as per image, increase the height of the bar as well as the user button in 3pts and the hover of the left menu make it a bit more dark gray than what is at the moment, when finish pus it live.",
+      "changes": [
+        "The church/user identity card now sits in its own white column beside the yellow top bar, with Search on the right of the yellow bar.",
+        "The top bar is 3px taller (59px) and the identity button is 3px taller (47px).",
+        "Left-menu hover is a darker gray (gray-200 instead of gray-50)."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "Unit tests, validate, and vite build run after implementation, then npm run push:live."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2009-011",
       "date": "2026-09-20",
       "time": "20:13:26",
