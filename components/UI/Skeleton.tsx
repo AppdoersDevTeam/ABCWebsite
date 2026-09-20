@@ -190,21 +190,19 @@ export const SkeletonPrayerCard: React.FC = () => {
 // Skeleton User Card Component
 export const SkeletonUserCard: React.FC = () => {
   return (
-    <div className="bg-white border-2 border-gray-200 rounded-[8px] p-6">
-      <div className="flex items-start gap-4">
-        <div className={`${shimmerClass} w-12 h-12 rounded-full flex-shrink-0`} />
-        <div className="flex-1 space-y-2">
+    <div className="bg-white border border-gray-200 rounded-[8px] px-4 py-2.5">
+      <div className="flex items-center gap-3">
+        <div className={`${shimmerClass} w-9 h-9 rounded-full flex-shrink-0`} />
+        <div className="flex-1 space-y-1.5">
           <div className="flex items-center gap-2">
-            <div className={`${shimmerClass} h-6 w-32`} />
-            <div className={`${shimmerClass} h-5 w-16 rounded`} />
+            <div className={`${shimmerClass} h-4 w-32`} />
+            <div className={`${shimmerClass} h-4 w-12 rounded`} />
           </div>
-          <div className={`${shimmerClass} h-4 w-48`} />
-          <div className={`${shimmerClass} h-4 w-40`} />
-          <div className={`${shimmerClass} h-3 w-32`} />
+          <div className={`${shimmerClass} h-3 w-56`} />
         </div>
         <div className="flex gap-2 flex-shrink-0">
-          <div className={`${shimmerClass} w-24 h-10 rounded-[4px]`} />
-          <div className={`${shimmerClass} w-24 h-10 rounded-[4px]`} />
+          <div className={`${shimmerClass} w-20 h-8 rounded-[4px]`} />
+          <div className={`${shimmerClass} w-16 h-8 rounded-[4px]`} />
         </div>
       </div>
     </div>

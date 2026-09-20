@@ -7,6 +7,36 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2109-012 — Overview approval request rows are more compact
+
+**Date:** 2026-09-21
+**Time:** 01:26:13
+**Timezone:** Pacific/Auckland
+**Version:** 1.7.27
+**Type:** Changed
+
+**Request**
+
+> On Overview The card for user Approval Requests, decrease the hight of users line as well as the buttons on the right side proportionally to feet better in the page, also decrease the space btween the users registers.
+
+**Changes**
+
+* User Approval Requests rows are shorter, with smaller right-side buttons and less space between each person.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: 72 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors.
+
 ## CHG-2026-2109-011 — Overview Users totals use status colours and icons
 
 **Date:** 2026-09-21

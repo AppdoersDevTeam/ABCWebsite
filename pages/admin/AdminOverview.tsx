@@ -820,7 +820,7 @@ export const AdminOverview = () => {
         </div>
 
         {isLoadingUsers ? (
-          <div className="space-y-4">
+          <div className="space-y-2">
             {Array.from({ length: 3 }).map((_, i) => (
               <SkeletonUserCard key={i} />
             ))}
@@ -856,82 +856,76 @@ export const AdminOverview = () => {
             </div>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-2">
             {visiblePendingUsers.map((pendingUser) => (
               <div
                 key={pendingUser.id}
-                className="bg-white border-2 border-gray-200 p-6 rounded-[8px] hover:border-gold transition-all shadow-sm"
+                className="bg-white border border-gray-200 px-4 py-2.5 rounded-[8px] hover:border-gold transition-all shadow-sm"
               >
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-start gap-4">
-                      <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-gray-100 text-sm font-bold text-neutral flex items-center justify-center">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2.5">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-3">
+                      <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-gray-100 text-xs font-bold text-neutral flex items-center justify-center">
                         {photoByUserId[pendingUser.id] ? (
                           <img src={photoByUserId[pendingUser.id]} alt="" className="h-full w-full object-cover" />
                         ) : (
                           displayInitials(pendingUser)
                         )}
                       </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <h3 className="font-medium text-xl text-gold">{displayNameLastFirst(pendingUser)}</h3>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <h3 className="truncate font-medium text-base text-gold">{displayNameLastFirst(pendingUser)}</h3>
                           {pendingUser.role === 'admin' && (
-                            <span className="bg-red-100 text-red-700 text-xs px-2 py-1 rounded uppercase font-bold">
+                            <span className="bg-red-100 text-red-700 text-[10px] px-1.5 py-0.5 rounded uppercase font-bold">
                               Admin
                             </span>
                           )}
                         </div>
-                        <div className="space-y-1">
-                          {pendingUser.email && (
-                            <p className="text-sm text-neutral flex items-center gap-2">
-                              <span className="font-bold">Email:</span> {pendingUser.email}
-                            </p>
-                          )}
-                          {pendingUser.phone && (
-                            <p className="text-sm text-neutral flex items-center gap-2">
-                              <span className="font-bold">Phone:</span> {pendingUser.phone}
-                            </p>
-                          )}
-                          {pendingUser.created_at && (
-                              <p className="text-xs text-neutral flex items-center gap-2 mt-2">
-                              <span className="font-bold">Signed up:</span> {formatDate(pendingUser.created_at, pendingUser.user_timezone)}
-                            </p>
-                          )}
-                        </div>
+                        <p className="mt-0.5 truncate text-xs text-neutral">
+                          {[
+                            pendingUser.email,
+                            pendingUser.phone,
+                            pendingUser.created_at
+                              ? `Signed up ${formatDate(pendingUser.created_at, pendingUser.user_timezone)}`
+                              : null,
+                          ]
+                            .filter(Boolean)
+                            .join(' · ')}
+                        </p>
                       </div>
                     </div>
                   </div>
-                  <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto flex-shrink-0">
+                  <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto flex-shrink-0">
                     <button
                       onClick={() => handleApproveUser(pendingUser.id)}
-                      className="bg-gold text-charcoal px-6 py-3 rounded-[4px] font-bold hover:bg-gold/80 transition-colors shadow-sm flex items-center gap-2"
+                      className="bg-gold text-charcoal px-3 py-1.5 rounded-[4px] text-sm font-bold hover:bg-gold/80 transition-colors shadow-sm flex items-center gap-1.5"
                     >
-                      <UserCheck size={18} />
+                      <UserCheck size={14} />
                       Approve
                     </button>
                     {pendingUser.role !== 'admin' && (
                       <button
                         onClick={() => handleApproveUser(pendingUser.id, true)}
-                        className="bg-white border-2 border-purple-200 text-purple-700 px-6 py-3 rounded-[4px] font-bold hover:bg-purple-50 transition-colors shadow-sm flex items-center gap-2"
+                        className="bg-white border border-purple-200 text-purple-700 px-3 py-1.5 rounded-[4px] text-sm font-bold hover:bg-purple-50 transition-colors shadow-sm flex items-center gap-1.5"
                       >
-                        <Shield size={18} />
+                        <Shield size={14} />
                         Approve as Admin
                       </button>
                     )}
                     <button
                       type="button"
                       onClick={() => setEmailModalUser(pendingUser)}
-                      className="bg-white border-2 border-gray-200 text-charcoal px-6 py-3 rounded-[4px] font-bold hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-2"
+                      className="bg-white border border-gray-200 text-charcoal px-3 py-1.5 rounded-[4px] text-sm font-bold hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-1.5"
                       title="Email this person"
                     >
-                      <Mail size={18} />
+                      <Mail size={14} />
                       Email
                     </button>
                     <button
                       onClick={() => handleRejectUser(pendingUser.id)}
-                      className="bg-white border-2 border-red-200 text-red-600 px-6 py-3 rounded-[4px] font-bold hover:bg-red-50 transition-colors shadow-sm flex items-center gap-2"
+                      className="bg-white border border-red-200 text-red-600 px-3 py-1.5 rounded-[4px] text-sm font-bold hover:bg-red-50 transition-colors shadow-sm flex items-center gap-1.5"
                     >
-                      <X size={18} />
+                      <X size={14} />
                       Reject
                     </button>
                   </div>

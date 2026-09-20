@@ -6,6 +6,35 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2109-012",
+      "date": "2026-09-21",
+      "time": "01:26:13",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T13:26:13.664Z",
+      "version": "1.7.27",
+      "type": "changed",
+      "area": "admin",
+      "title": "Overview approval request rows are more compact",
+      "request": "On Overview The card for user Approval Requests, decrease the hight of users line as well as the buttons on the right side proportionally to feet better in the page, also decrease the space btween the users registers.",
+      "changes": [
+        "User Approval Requests rows are shorter, with smaller right-side buttons and less space between each person."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "72 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2109-011",
       "date": "2026-09-21",
       "time": "01:23:33",
