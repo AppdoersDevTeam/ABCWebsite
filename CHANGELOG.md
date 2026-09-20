@@ -7,6 +7,36 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2109-018 — Overview card titles and numbers are centred
+
+**Date:** 2026-09-21
+**Time:** 01:57:39
+**Timezone:** Pacific/Auckland
+**Version:** 1.7.33
+**Type:** Changed
+
+**Request**
+
+> On the Overview cards Align the Title and Number in the Centre of the cards. push live
+
+**Changes**
+
+* Overview card titles and numbers are centred on each card.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: 73 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors.
+
 ## CHG-2026-2109-017 — Grey hover is for menus and rows only; Overview cards are narrower
 
 **Date:** 2026-09-21
