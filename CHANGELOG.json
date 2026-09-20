@@ -6,6 +6,36 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2109-027",
+      "date": "2026-09-21",
+      "time": "02:45:56",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T14:45:56.708Z",
+      "version": "1.7.42",
+      "type": "changed",
+      "area": "admin",
+      "title": "Users status icons sit under the card icon; counts 4px larger",
+      "request": "make a correction on the Users cards, Bring all icons righ under the Card Icon push all UP. push alive. All the Count numbers increase 4px. push live",
+      "changes": [
+        "On the Users card, Approved, Pending, and Not linked now sit directly under the card icon and are pushed up.",
+        "All Overview count numbers are 4px larger."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "73 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2109-026",
       "date": "2026-09-21",
       "time": "02:40:55",

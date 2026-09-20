@@ -610,6 +610,7 @@ export const AdminOverview = () => {
       color: 'text-gold', 
       highlight: false,
       descriptionClassName: 'justify-start items-start',
+      descriptionUnderIcon: true,
       subtitle: isLoadingUsers
         ? undefined
         : (
@@ -736,6 +737,7 @@ export const AdminOverview = () => {
               valueSize={stat.valueSize}
               valueClassName={stat.valueSize === 'title' ? 'line-clamp-2' : undefined}
               descriptionClassName={stat.descriptionClassName}
+              descriptionUnderIcon={stat.descriptionUnderIcon}
             />
           );
 

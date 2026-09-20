@@ -7,6 +7,37 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2109-027 — Users status icons sit under the card icon; counts 4px larger
+
+**Date:** 2026-09-21
+**Time:** 02:45:56
+**Timezone:** Pacific/Auckland
+**Version:** 1.7.42
+**Type:** Changed
+
+**Request**
+
+> make a correction on the Users cards, Bring all icons righ under the Card Icon push all UP. push alive. All the Count numbers increase 4px. push live
+
+**Changes**
+
+* On the Users card, Approved, Pending, and Not linked now sit directly under the card icon and are pushed up.
+* All Overview count numbers are 4px larger.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: 73 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors.
+
 ## CHG-2026-2109-026 — Users card uses Users & Roles icon; status counts stack on the left
 
 **Date:** 2026-09-21

@@ -11,7 +11,7 @@ export const OverviewUserBreakdown: React.FC<{
 }> = ({ approved, pending, notLinked }) => {
   return (
     <span
-      className="flex w-full flex-col items-start gap-1 text-[18px]"
+      className="flex flex-col items-start gap-1 text-[22px]"
       aria-label={formatOverviewUserBreakdown({ approved, pending, notLinked })}
     >
       <span className="inline-flex items-center gap-1 font-bold text-green-600" title="Approved">
