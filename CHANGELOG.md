@@ -7,6 +7,37 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2009-005 — Change public website menu from Events to What's On
+
+**Date:** 2026-09-20
+**Time:** 15:25:04
+**Timezone:** Pacific/Auckland
+**Version:** 1.3.5
+**Type:** Changed
+
+**Request**
+
+> Change the Website frontend the menu Events to What's On. when completed push to github.
+
+**Changes**
+
+* The public website header menu and footer Explore link now say What's On instead of Events.
+* Member and admin dashboard menus still say Events. Website addresses still use /events so existing links keep working.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: 57 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors. No browser MCP was available; verified PublicLayout header and footer use What's On, and dashboards still use Events.
+
 ## CHG-2026-2009-004 — Rename What's On back to Events across the site
 
 **Date:** 2026-09-20
