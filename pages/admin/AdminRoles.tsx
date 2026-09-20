@@ -5,6 +5,7 @@ import { Modal } from '../../components/UI/Modal';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { supabase } from '../../lib/supabase';
 import { appConfirm } from '../../lib/appDialog';
+import { cannotDelete, errorDetail } from '../../lib/systemMessage';
 import { logAuditEventSafe } from '../../lib/auditLog';
 import {
   ACCOUNT_ROLE_TYPE_LABELS,
@@ -196,10 +197,10 @@ export const AdminRoles = () => {
   const handleDelete = async (role: AccountRole) => {
     setMenuRoleId(null);
     if (role.is_system) {
-      alert('System roles cannot be deleted.');
+      alert('System roles are protected and cannot be deleted.');
       return;
     }
-    if (!await appConfirm(`Delete the ${role.name} role? People on this role will be moved to Member.`)) {
+    if (!await appConfirm(`Please confirm you want to delete the ${role.name} role. People on this role will be moved to Member.`, { confirmLabel: 'Delete role' })) {
       return;
     }
     const member = roles.find((item) => item.slug === 'member');
@@ -222,7 +223,7 @@ export const AdminRoles = () => {
       });
       await load();
     } catch (error: unknown) {
-      alert(error instanceof Error ? error.message : 'Could not delete role.');
+      alert(cannotDelete('this role', errorDetail(error)));
     }
   };
 

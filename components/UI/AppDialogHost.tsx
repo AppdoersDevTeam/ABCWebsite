@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { registerAppDialogHost, type AppDialogRequest } from '../../lib/appDialog';
+import { inferDialogTitle } from '../../lib/systemMessage';
+import { CHURCH_NAME } from '../../lib/constants';
 
 export const AppDialogHost: React.FC = () => {
   const [queue, setQueue] = useState<AppDialogRequest[]>([]);
@@ -38,6 +40,10 @@ export const AppDialogHost: React.FC = () => {
 
   if (!current || typeof document === 'undefined') return null;
 
+  const title = inferDialogTitle(current.kind, current.message, current.title);
+  const confirmLabel = current.confirmLabel || (current.kind === 'confirm' ? 'Confirm' : 'OK');
+  const cancelLabel = current.cancelLabel || 'Cancel';
+
   return createPortal(
     <div
       role="presentation"
@@ -54,39 +60,44 @@ export const AppDialogHost: React.FC = () => {
       <div
         role="alertdialog"
         aria-modal="true"
+        aria-labelledby="abc-app-dialog-title"
         aria-describedby="abc-app-dialog-message"
-        className="relative w-full max-w-lg rounded-[16px] bg-white p-6 shadow-2xl"
+        className="relative w-full max-w-lg rounded-[16px] bg-white px-6 py-8 text-center shadow-2xl"
         onClick={(event) => event.stopPropagation()}
         onPointerDown={(event) => event.stopPropagation()}
       >
-        <p id="abc-app-dialog-message" className="whitespace-pre-wrap text-base leading-relaxed text-charcoal">
+        <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-gold">{CHURCH_NAME}</p>
+        <h2 id="abc-app-dialog-title" className="mt-2 font-serif text-2xl font-normal text-charcoal">
+          {title}
+        </h2>
+        <p id="abc-app-dialog-message" className="mt-4 whitespace-pre-wrap text-center text-base leading-relaxed text-charcoal">
           {current.message}
         </p>
-        <div className="mt-6 flex justify-end gap-3">
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
           {current.kind === 'confirm' ? (
             <>
               <button
                 type="button"
-                className="rounded-[8px] border border-gray-200 bg-white px-4 py-2 text-sm font-bold text-neutral hover:bg-gray-50"
+                className="rounded-[8px] border border-gray-200 bg-white px-5 py-2 text-sm font-bold text-neutral hover:bg-gray-50"
                 onClick={() => finishConfirm(false)}
               >
-                Cancel
+                {cancelLabel}
               </button>
               <button
                 type="button"
-                className="rounded-[8px] bg-gold px-4 py-2 text-sm font-bold text-charcoal hover:bg-gold/90"
+                className="rounded-[8px] bg-gold px-5 py-2 text-sm font-bold text-charcoal hover:bg-gold/90"
                 onClick={() => finishConfirm(true)}
               >
-                OK
+                {confirmLabel}
               </button>
             </>
           ) : (
             <button
               type="button"
-              className="rounded-[8px] bg-gold px-4 py-2 text-sm font-bold text-charcoal hover:bg-gold/90"
+              className="rounded-[8px] bg-gold px-5 py-2 text-sm font-bold text-charcoal hover:bg-gold/90"
               onClick={finishAlert}
             >
-              OK
+              {confirmLabel}
             </button>
           )}
         </div>

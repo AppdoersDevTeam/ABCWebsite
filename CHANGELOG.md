@@ -7,6 +7,37 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2109-009 — System message boxes are centred with professional, role-aware wording
+
+**Date:** 2026-09-21
+**Time:** 01:13:05
+**Timezone:** Pacific/Auckland
+**Version:** 1.7.24
+**Type:** Changed
+
+**Request**
+
+> Change All the message boxes from the system to Text Centre as per message box align and buttons also centre of the box. Make all the Messages as a professional Message from the System as per its Role and Behavior. Make it professional, Dynamic and relevant. Push when complete.
+
+**Changes**
+
+* System notices now show the church name, a heading that matches the kind of message, centred wording, and centred buttons.
+* Alerts and confirmations across Admin, Member, and Login now use professional, named wording for the action instead of generic Are you sure or Failed to phrases.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: 71 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors. No browser MCP in this session; dialog titles and copy helpers are covered by unit tests.
+
 ## CHG-2026-2109-008 — Linked labels show the other person’s name
 
 **Date:** 2026-09-21

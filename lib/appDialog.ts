@@ -1,8 +1,17 @@
 export type AppDialogKind = 'alert' | 'confirm';
 
+export type AppDialogOptions = {
+  title?: string;
+  confirmLabel?: string;
+  cancelLabel?: string;
+};
+
 export type AppDialogRequest = {
   kind: AppDialogKind;
   message: string;
+  title?: string;
+  confirmLabel?: string;
+  cancelLabel?: string;
   resolveAlert?: () => void;
   resolveConfirm?: (value: boolean) => void;
 };
@@ -25,7 +34,7 @@ function fallbackConfirm(message: string): boolean {
   return window.confirm(message);
 }
 
-export function appAlert(message: string): Promise<void> {
+export function appAlert(message: string, options: AppDialogOptions = {}): Promise<void> {
   if (!host) {
     fallbackAlert(message);
     return Promise.resolve();
@@ -34,12 +43,14 @@ export function appAlert(message: string): Promise<void> {
     host?.enqueue({
       kind: 'alert',
       message,
+      title: options.title,
+      confirmLabel: options.confirmLabel,
       resolveAlert: resolve,
     });
   });
 }
 
-export function appConfirm(message: string): Promise<boolean> {
+export function appConfirm(message: string, options: AppDialogOptions = {}): Promise<boolean> {
   if (!host) {
     return Promise.resolve(fallbackConfirm(message));
   }
@@ -47,6 +58,9 @@ export function appConfirm(message: string): Promise<boolean> {
     host?.enqueue({
       kind: 'confirm',
       message,
+      title: options.title,
+      confirmLabel: options.confirmLabel,
+      cancelLabel: options.cancelLabel,
       resolveConfirm: resolve,
     });
   });

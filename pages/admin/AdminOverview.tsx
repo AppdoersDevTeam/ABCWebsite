@@ -5,6 +5,7 @@ import { Calendar, BookOpen, Users, ClipboardList, UserCheck, X, Plus, Shield, M
 import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { appConfirm } from '../../lib/appDialog';
+import { cannotComplete, namedPerson, withSystemDetail } from '../../lib/systemMessage';
 import { displayName, displayNameLastFirst, displayInitials, EVENTS_LABEL, PEOPLE_LABEL, filterUsersForAdminView, isPendingApproval } from '../../lib/constants';
 import { User } from '../../types';
 import { SkeletonPageHeader, SkeletonCard, SkeletonUserCard, SkeletonStatsCard } from '../../components/UI/Skeleton';
@@ -157,28 +158,28 @@ export const AdminOverview = () => {
   };
 
   const handleApproveUser = async (userId: string, asAdmin = false) => {
+    const target =
+      pendingUsers.find((u) => u.id === userId) || allUsers.find((u) => u.id === userId);
+    const person = namedPerson(displayName(target), 'this person');
     if (
       !await appConfirm(
         asAdmin
-          ? 'Approve this user as an admin? They will get the full admin portal, including Users & Roles.'
-          : 'Are you sure you want to approve this user?'
+          ? `Please confirm you want to approve ${person} as an administrator. They will receive the full admin portal, including Users & Roles.`
+          : `Please confirm you want to approve website access for ${person}.`,
+        { confirmLabel: 'Approve' },
       )
     ) {
       return;
     }
 
     try {
-      const target =
-        pendingUsers.find((u) => u.id === userId) || allUsers.find((u) => u.id === userId);
       const wasUnapproved = target ? !target.is_approved : true;
 
       if (asAdmin) {
         const notifyResult = await notifyUserAdminRole(userId, 'granted');
         if (!notifyResult.ok) {
           alert(
-            `Failed to approve this user as an admin${
-              notifyResult.error ? `: ${notifyResult.error}` : ''
-            }`
+            withSystemDetail(`We could not approve ${person} as an administrator.`, notifyResult.error),
           );
           return;
         }
@@ -190,7 +191,7 @@ export const AdminOverview = () => {
           summary: `Approved signup for ${target?.email || userId} as admin`,
           details: { email: target?.email, role: 'admin', emailed: notifyResult.emailed },
         });
-        alert(`User approved as an admin.${adminRoleEmailNote(notifyResult)}`);
+        alert(`${person} has been approved as an administrator.${adminRoleEmailNote(notifyResult)}`);
         fetchPendingUsers();
         return;
       }
@@ -220,21 +221,28 @@ export const AdminOverview = () => {
         }
       }
 
-      alert(`User approved successfully.${emailNote}`);
+      alert(`${person} has been approved.${emailNote}`);
       fetchPendingUsers();
     } catch (error) {
       console.error('Error approving user:', error);
-      alert('Failed to approve user');
+      alert(cannotComplete('approve this person'));
     }
   };
 
   const handleRejectUser = async (userId: string) => {
-    if (!await appConfirm('Are you sure you want to reject this user? They will need to sign up again.')) {
+    const target =
+      pendingUsers.find((u) => u.id === userId) || allUsers.find((u) => u.id === userId);
+    const person = namedPerson(displayName(target), 'this person');
+    if (
+      !await appConfirm(
+        `Please confirm you want to decline ${person}'s access request. They will need to sign up again if they still need access.`,
+        { confirmLabel: 'Decline request' },
+      )
+    ) {
       return;
     }
 
     try {
-      const target = pendingUsers.find((u) => u.id === userId) || allUsers.find((u) => u.id === userId);
       const notifyResult = await notifyUserReview(userId, 'denied');
       let emailNote = '';
       if (!notifyResult.ok) {
@@ -259,11 +267,11 @@ export const AdminOverview = () => {
         details: { email: target?.email, denialEmailSent: notifyResult.ok },
       });
 
-      alert(`User rejected and removed.${emailNote}`);
+      alert(`${person}'s access request has been declined and their signup has been removed.${emailNote}`);
       fetchPendingUsers();
     } catch (error) {
       console.error('Error rejecting user:', error);
-      alert('Failed to reject user. Note: User record deleted from database, but auth account may still exist.');
+      alert(cannotComplete("decline this access request"));
     }
   };
 

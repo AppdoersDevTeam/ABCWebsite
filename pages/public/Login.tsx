@@ -18,6 +18,7 @@ import {
 import { normalizePhoneForAuth, sanitizePhoneInput } from '../../lib/validatePhone';
 import { getAuthEmailErrorMessage } from '../../lib/authEmailErrors';
 import { clearPendingPublicBrowse } from '../../lib/pendingAccess';
+import { appConfirm } from '../../lib/appDialog';
 
 function fieldInputClass(hasError: boolean): string {
   const base =
@@ -183,7 +184,11 @@ export const Login = () => {
           return;
         }
 
-        if (!window.confirm(`Send password reset link to ${normalizedEmail}?`)) {
+        const sendReset = await appConfirm(
+          `A password reset link will be sent to ${normalizedEmail}. Continue only if this is the correct email address.`,
+          { confirmLabel: 'Send link', cancelLabel: 'Cancel' },
+        );
+        if (!sendReset) {
           return;
         }
 

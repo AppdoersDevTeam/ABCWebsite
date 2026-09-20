@@ -5,6 +5,7 @@ import { Calendar as CalIcon, Edit, Trash2, Plus, Users, Image, Upload } from 'l
 import type { Event, EventCategory } from '../../types';
 import { supabase } from '../../lib/supabase';
 import { appConfirm } from '../../lib/appDialog';
+import { cannotComplete, cannotDelete, cannotLoad } from '../../lib/systemMessage';
 import { SkeletonPageHeader } from '../../components/UI/Skeleton';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { EventsCalendarGrid, EventsCalendarGridSkeleton } from '../../components/dashboard/EventsCalendarGrid';
@@ -81,7 +82,7 @@ export const AdminEvents = () => {
       setEvents(data || []);
     } catch (error) {
       console.error('Error fetching events:', error);
-      alert('Failed to load events');
+      alert(cannotLoad('events'));
     } finally {
       setIsLoading(false);
     }
@@ -176,8 +177,10 @@ export const AdminEvents = () => {
     } catch (error: any) {
       console.error('Error creating event:', error);
       alert(
-        (error.message || 'Failed to create event') +
-          '\n\nIf the database is missing new columns, run ADD_EVENT_IMAGE_URL.sql in Supabase.'
+        cannotComplete(
+          'save this event',
+          error.message || 'The event library may need a database update before images can be stored.',
+        ),
       );
     } finally {
       setIsUploading(false);
@@ -245,8 +248,10 @@ export const AdminEvents = () => {
     } catch (error: any) {
       console.error('Error updating event:', error);
       alert(
-        (error.message || 'Failed to update event') +
-          '\n\nIf the database is missing new columns, run ADD_EVENT_IMAGE_URL.sql in Supabase.'
+        cannotComplete(
+          'update this event',
+          error.message || 'The event library may need a database update before images can be stored.',
+        ),
       );
     } finally {
       setIsUploading(false);
@@ -254,7 +259,7 @@ export const AdminEvents = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!await appConfirm('Are you sure you want to delete this event?')) {
+    if (!await appConfirm('Please confirm you want to delete this event. This cannot be undone.', { confirmLabel: 'Delete event' })) {
       return;
     }
 
@@ -276,7 +281,7 @@ export const AdminEvents = () => {
       notifyCalendarChanged();
     } catch (error) {
       console.error('Error deleting event:', error);
-      alert('Failed to delete event');
+      alert(cannotDelete('this event'));
     }
   };
 
@@ -323,8 +328,10 @@ export const AdminEvents = () => {
     } catch (e: unknown) {
       console.error('Error fetching RSVPs:', e);
       alert(
-        (e instanceof Error ? e.message : 'Failed to load RSVPs') +
-          '\n\nIf the database table is missing, run CREATE_EVENT_RSVPS_TABLE.sql in Supabase.'
+        cannotLoad(
+          'RSVPs',
+          e instanceof Error ? e.message : 'The RSVP list may need a database update before it can be shown.',
+        ),
       );
     } finally {
       setIsLoadingRsvps(false);
@@ -357,11 +364,11 @@ export const AdminEvents = () => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       if (!file.type.startsWith('image/')) {
-        alert('Please select an image file (PNG/JPG)');
+        alert('Please choose an image file (PNG or JPG).');
         return;
       }
       if (file.size > EVENT_IMAGE.maxFileBytes) {
-        alert('Image size must be less than 5MB');
+        alert('Please choose an image smaller than 5MB.');
         return;
       }
 

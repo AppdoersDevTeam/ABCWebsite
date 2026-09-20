@@ -4,6 +4,7 @@ import { Modal } from '../../components/UI/Modal';
 import { FolderPlus, Image as ImageIcon, Upload, Edit, Trash2, X, Plus } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { appConfirm } from '../../lib/appDialog';
+import { cannotComplete, cannotDelete, cannotLoad, cannotSave, errorDetail } from '../../lib/systemMessage';
 import { PhotoFolder, Photo } from '../../types';
 import { SkeletonPageHeader, SkeletonCard } from '../../components/UI/Skeleton';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
@@ -58,7 +59,7 @@ export const AdminPhotos = () => {
       setFolders(foldersWithPhotos);
     } catch (error) {
       console.error('Error fetching folders and photos:', error);
-      alert('Failed to load folders and photos');
+      alert(cannotLoad('folders and photos'));
     } finally {
       setIsLoading(false);
     }
@@ -66,7 +67,7 @@ export const AdminPhotos = () => {
 
   const handleCreateFolder = async () => {
     if (!folderName.trim()) {
-      alert('Please enter a folder name');
+      alert('Please enter a folder name.');
       return;
     }
 
@@ -83,10 +84,10 @@ export const AdminPhotos = () => {
       setFolders([newFolder, ...folders]);
       setFolderName('');
       setIsFolderModalOpen(false);
-      alert('Folder created successfully!');
+      alert('The folder has been created.');
     } catch (error: any) {
       console.error('Error creating folder:', error);
-      alert(error.message || 'Failed to create folder');
+      alert(cannotSave('this folder', errorDetail(error)));
     }
   };
 
@@ -98,7 +99,7 @@ export const AdminPhotos = () => {
 
   const handleUpdateFolder = async () => {
     if (!editingFolder || !folderName.trim()) {
-      alert('Please enter a folder name');
+      alert('Please enter a folder name.');
       return;
     }
 
@@ -123,15 +124,15 @@ export const AdminPhotos = () => {
       setFolderName('');
       setEditingFolder(null);
       setIsFolderModalOpen(false);
-      alert('Folder updated successfully!');
+      alert('The folder has been updated.');
     } catch (error: any) {
       console.error('Error updating folder:', error);
-      alert(error.message || 'Failed to update folder');
+      alert(cannotSave('this folder', errorDetail(error)));
     }
   };
 
   const handleDeleteFolder = async (id: string) => {
-    if (!await appConfirm('Are you sure you want to delete this folder and all its photos?')) {
+    if (!await appConfirm('Please confirm you want to delete this folder and all of its photos. This cannot be undone.', { confirmLabel: 'Delete folder' })) {
       return;
     }
 
@@ -179,10 +180,10 @@ export const AdminPhotos = () => {
       if (selectedFolder?.id === id) {
         setSelectedFolder(null);
       }
-      alert('Folder deleted successfully!');
+      alert('The folder has been deleted.');
     } catch (error: any) {
       console.error('Error deleting folder:', error);
-      alert(error.message || 'Failed to delete folder');
+      alert(cannotDelete('this folder', errorDetail(error)));
     } finally {
       setIsDeleting(false);
     }
@@ -230,7 +231,7 @@ export const AdminPhotos = () => {
       }
 
       if (uploadedPhotoUrls.length === 0) {
-        alert('Failed to upload photos. Please try again.');
+        alert(cannotComplete('upload these photos'));
         return;
       }
 
@@ -264,17 +265,17 @@ export const AdminPhotos = () => {
       setPreviewUrls([]);
       setIsPhotoModalOpen(false);
       
-      alert(`Successfully uploaded ${insertedPhotos?.length || 0} photo(s)!`);
+      alert(`${insertedPhotos?.length || 0} ${(insertedPhotos?.length || 0) === 1 ? 'photo has' : 'photos have'} been uploaded.`);
     } catch (error: any) {
       console.error('Error uploading photos:', error);
-      alert(error.message || 'Failed to upload photos');
+      alert(cannotComplete('upload these photos', errorDetail(error)));
     } finally {
       setIsUploading(false);
     }
   };
 
   const handleDeletePhoto = async (photo: Photo) => {
-    if (!await appConfirm('Are you sure you want to delete this photo?')) {
+    if (!await appConfirm('Please confirm you want to delete this photo. This cannot be undone.', { confirmLabel: 'Delete photo' })) {
       return;
     }
 
@@ -324,10 +325,10 @@ export const AdminPhotos = () => {
       ));
       setSelectedFolder(updatedFolder);
 
-      alert('Photo deleted successfully!');
+      alert('The photo has been deleted.');
     } catch (error: any) {
       console.error('Error deleting photo:', error);
-      alert(error.message || 'Failed to delete photo');
+      alert(cannotDelete('this photo', errorDetail(error)));
     }
   };
 

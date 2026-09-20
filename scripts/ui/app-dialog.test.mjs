@@ -19,3 +19,25 @@ test('appAlert and appConfirm wait for the host instead of closing on outside cl
 
   registerAppDialogHost(null);
 });
+
+test('appConfirm forwards professional labels to the host', async () => {
+  /** @type {import('../../lib/appDialog.ts').AppDialogRequest | null} */
+  let seen = null;
+  registerAppDialogHost({
+    enqueue: (request) => {
+      seen = request;
+      request.resolveConfirm?.(false);
+    },
+  });
+
+  const confirmed = await appConfirm('Please confirm you want to remove this photo.', {
+    confirmLabel: 'Delete',
+    cancelLabel: 'Keep',
+  });
+  assert.equal(confirmed, false);
+  assert.equal(seen?.kind, 'confirm');
+  assert.equal(seen?.confirmLabel, 'Delete');
+  assert.equal(seen?.cancelLabel, 'Keep');
+
+  registerAppDialogHost(null);
+});

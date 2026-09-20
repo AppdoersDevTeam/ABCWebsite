@@ -111,7 +111,7 @@ export const CreateUserProfile: React.FC<CreateUserProfileProps> = ({ isOpen, on
         entityId: userId,
         summary: `Admin created user profile for ${email.toLowerCase()}`,
       });
-      alert('User profile created successfully! They can now be approved.');
+      alert('The profile has been created. It can now be approved.');
       setEmail('');
       setFirstName('');
       setLastName('');

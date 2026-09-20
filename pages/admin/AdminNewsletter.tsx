@@ -7,6 +7,7 @@ import { DocumentReaderPanel } from '../../components/UI/DocumentReaderPanel';
 import { NewsletterMonthArchive } from '../../components/UI/NewsletterMonthArchive';
 import { supabase } from '../../lib/supabase';
 import { appConfirm } from '../../lib/appDialog';
+import { cannotComplete, cannotDelete, cannotLoad, errorDetail, pleaseCompleteRequired } from '../../lib/systemMessage';
 import { Newsletter as NewsletterType } from '../../types';
 import { SkeletonPageHeader, SkeletonCard } from '../../components/UI/Skeleton';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
@@ -174,7 +175,7 @@ export const AdminNewsletter = () => {
       setNewsletters(data);
     } catch (error) {
       console.error('Error fetching newsletters:', error);
-      alert('Failed to load newsletters');
+      alert(cannotLoad('newsletters'));
     } finally {
       setIsLoading(false);
     }
@@ -194,7 +195,7 @@ export const AdminNewsletter = () => {
 
   const handleUpload = async () => {
     if (!uploadData.file || !uploadData.title.trim() || !uploadData.weekDate) {
-      alert('Please fill in all required fields and select a file');
+      alert('Please complete the required fields and choose a file.');
       return;
     }
 
@@ -244,13 +245,13 @@ export const AdminNewsletter = () => {
       setNewsletters(sortNewslettersLatestFirst([data, ...newsletters]));
       notifyCalendarChanged();
       closeUploadModal();
-      alert('Newsletter uploaded successfully!');
+      alert('The newsletter has been uploaded.');
     } catch (error: any) {
       console.error('Error uploading newsletter:', error);
       if (String(error?.message || '').includes('week_date')) {
-        alert('Please run ADD_NEWSLETTER_WEEK_DATE.sql in the Supabase SQL editor, then try uploading again.');
+        alert('This newsletter could not be saved until the week-date database update has been applied. Please try again after that update.');
       } else {
-        alert(error.message || 'Failed to upload newsletter');
+        alert(cannotComplete('upload this newsletter', errorDetail(error)));
       }
     } finally {
       setIsUploading(false);
@@ -259,7 +260,7 @@ export const AdminNewsletter = () => {
 
   const handleEdit = async () => {
     if (!editing || !editData.title.trim() || !editData.weekDate) {
-      alert('Please fill in all required fields');
+      alert(pleaseCompleteRequired());
       return;
     }
 
@@ -322,13 +323,13 @@ export const AdminNewsletter = () => {
       notifyCalendarChanged();
       if (viewing?.id === editing.id) setViewing(data);
       resetEditForm();
-      alert('Newsletter updated successfully!');
+      alert('The newsletter has been updated.');
     } catch (error: any) {
       console.error('Error updating newsletter:', error);
       if (String(error?.message || '').includes('week_date')) {
-        alert('Please run ADD_NEWSLETTER_WEEK_DATE.sql in the Supabase SQL editor, then try saving again.');
+        alert('This newsletter could not be saved until the week-date database update has been applied. Please try again after that update.');
       } else {
-        alert(error.message || 'Failed to update newsletter');
+        alert(cannotComplete('update this newsletter', errorDetail(error)));
       }
     } finally {
       setIsSaving(false);
@@ -336,7 +337,7 @@ export const AdminNewsletter = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!await appConfirm('Are you sure you want to delete this newsletter?')) {
+    if (!await appConfirm('Please confirm you want to delete this newsletter. This cannot be undone.', { confirmLabel: 'Delete' })) {
       return;
     }
 
@@ -367,7 +368,7 @@ export const AdminNewsletter = () => {
       notifyCalendarChanged();
     } catch (error) {
       console.error('Error deleting newsletter:', error);
-      alert('Failed to delete newsletter');
+      alert(cannotDelete('this newsletter'));
     }
   };
 

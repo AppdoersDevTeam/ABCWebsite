@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { Users, UserCheck, X, Shield, ShieldOff, KeyRound, AlertTriangle, ChevronDown, Link2, Unlink, Trash2, PauseCircle, Download, Search, Plus, MoreVertical, Bell, Pencil, Building2, User as UserIcon, UsersRound } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { appConfirm } from '../../lib/appDialog';
+import { cannotComplete, cannotDelete, cannotSave, errorDetail, namedPerson, withSystemDetail } from '../../lib/systemMessage';
 import { displayName, displayNameLastFirst, displayInitials, filterUsersForAdminView, canChangeUserAdminRole, isAdminUser, isOwnUserAccount, isServiceAccountEmail, isPendingApproval, isAccessHeld, CHURCH_NAME, PEOPLE_LABEL } from '../../lib/constants';
 import { User } from '../../types';
 import { CreateUserProfile } from './CreateUserProfile';
@@ -191,15 +192,17 @@ export const AdminUsers = () => {
   const handleApproveUser = async (userId: string, asAdmin = false) => {
     const target = allUsers.find((u) => u.id === userId);
     const restoringHold = isAccessHeld(target);
+    const person = namedPerson(displayName(target), 'this person');
     if (
       !await appConfirm(
         asAdmin
           ? restoringHold
-            ? `Restore website access for ${displayName(target) || 'this user'} as an admin?`
-            : 'Approve this user as an admin? They will get the full admin portal, including Users & Roles.'
+            ? `Please confirm you want to restore website access for ${person} as an administrator. They will again have the full admin portal, including Users & Roles.`
+            : `Please confirm you want to approve ${person} as an administrator. They will receive the full admin portal, including Users & Roles.`
           : restoringHold
-            ? `Restore website access for ${displayName(target) || 'this user'}? They will again have member access.`
-            : 'Are you sure you want to approve this user?'
+            ? `Please confirm you want to restore website access for ${person}. They will again have member access.`
+            : `Please confirm you want to approve website access for ${person}.`,
+        { confirmLabel: restoringHold ? 'Restore access' : 'Approve' },
       )
     ) {
       return;
@@ -212,9 +215,12 @@ export const AdminUsers = () => {
         const notifyResult = await notifyUserAdminRole(userId, 'granted');
         if (!notifyResult.ok) {
           alert(
-            `Failed to ${restoringHold ? 'restore this user as an admin' : 'approve this user as an admin'}${
-              notifyResult.error ? `: ${notifyResult.error}` : ''
-            }`
+            withSystemDetail(
+              restoringHold
+                ? `We could not restore administrator access for ${person}.`
+                : `We could not approve ${person} as an administrator.`,
+              notifyResult.error,
+            ),
           );
           return;
         }
@@ -289,16 +295,23 @@ export const AdminUsers = () => {
         }
       }
 
-      alert(`User approved successfully.${emailNote}`);
+      alert(`${namedPerson(displayName(target), 'This person')} has been approved.${emailNote}`);
       fetchUsers();
     } catch (error) {
       console.error('Error approving user:', error);
-      alert(restoringHold ? 'Failed to restore access' : 'Failed to approve user');
+      alert(restoringHold ? cannotComplete('restore website access') : cannotComplete('approve this person'));
     }
   };
 
   const handleRejectUser = async (userId: string) => {
-    if (!await appConfirm('Are you sure you want to reject this user? They will need to sign up again.')) {
+    const target = allUsers.find((u) => u.id === userId);
+    const person = namedPerson(displayName(target), 'this person');
+    if (
+      !await appConfirm(
+        `Please confirm you want to decline ${person}'s access request. They will need to sign up again if they still need access.`,
+        { confirmLabel: 'Decline request' },
+      )
+    ) {
       return;
     }
 
@@ -317,7 +330,6 @@ export const AdminUsers = () => {
         .eq('id', userId);
 
       if (deleteError) throw deleteError;
-      const target = allUsers.find((u) => u.id === userId);
       logAuditEventSafe({
         action: 'reject',
         category: 'users',
@@ -326,11 +338,11 @@ export const AdminUsers = () => {
         summary: `Rejected and removed signup for ${target?.email || userId}`,
         details: { email: target?.email, denialEmailSent: notifyResult.ok },
       });
-      alert(`User rejected and removed.${emailNote}`);
+      alert(`${person}'s access request has been declined and their signup has been removed.${emailNote}`);
       fetchUsers();
     } catch (error) {
       console.error('Error rejecting user:', error);
-      alert('Failed to reject user');
+      alert(cannotComplete("decline this access request"));
     }
   };
 
@@ -338,23 +350,24 @@ export const AdminUsers = () => {
     setActionsMenuUserId(null);
 
     if (!isAdminUser(user)) {
-      alert('Only an admin can delete users.');
+      alert('Only an administrator can delete website accounts.');
       return;
     }
 
     if (isOwnUserAccount(user, target)) {
-      alert('You cannot delete your own account while you are logged in.');
+      alert('You cannot delete your own account while you are signed in.');
       return;
     }
 
     if (target.is_super_admin || isServiceAccountEmail(target.email)) {
-      alert('This account cannot be deleted.');
+      alert('This account is protected and cannot be deleted.');
       return;
     }
 
     const label = `${displayName(target)}${target.email ? ` (${target.email})` : ''}`;
     const confirmed = await appConfirm(
-      `Delete ${label} from the Ashburton Baptist Church system?\n\nThis cannot be undone. Their login and related records will be removed, and they will receive a confirmation email.`
+      `Please confirm you want to permanently delete ${label} from the ${CHURCH_NAME} website.\n\nTheir login and related records will be removed, and they will receive a confirmation email.`,
+      { confirmLabel: 'Delete account' },
     );
     if (!confirmed) return;
 
@@ -362,7 +375,7 @@ export const AdminUsers = () => {
     try {
       const result = await deleteUserAccount(target.id);
       if (!result.ok) {
-        alert(result.error || 'Failed to delete user');
+        alert(withSystemDetail(cannotDelete('this website account'), result.error));
         return;
       }
 
@@ -375,7 +388,7 @@ export const AdminUsers = () => {
         details: { email: target.email, emailed: result.emailed, emailSkipped: result.emailSkipped },
       });
 
-      let message = `${displayName(target)} has been deleted from the Ashburton Baptist Church system.`;
+      let message = `${displayName(target)} has been removed from the ${CHURCH_NAME} website.`;
       if (result.emailed) {
         message += ` A confirmation email was sent to ${result.emailed}.`;
       } else if (result.emailSkipped) {
@@ -387,7 +400,7 @@ export const AdminUsers = () => {
       fetchUsers();
     } catch (error) {
       console.error('Error deleting user:', error);
-      alert('Failed to delete user');
+      alert(cannotDelete('this website account'));
     } finally {
       setDeletingUserId(null);
     }
@@ -396,7 +409,8 @@ export const AdminUsers = () => {
   const handleHoldAccess = async (userId: string, userName: string) => {
     if (
       !await appConfirm(
-        `Place ${userName}'s website access on hold? They will not be able to use member or admin areas until access is restored.`
+        `Please confirm you want to place ${userName}'s website access on hold. They will not be able to use member or admin areas until access is restored.`,
+        { confirmLabel: 'Place on hold' },
       )
     ) {
       return;
@@ -427,12 +441,17 @@ export const AdminUsers = () => {
       fetchUsers();
     } catch (error) {
       console.error('Error placing access on hold:', error);
-      alert('Failed to place access on hold');
+      alert(cannotComplete('place this access on hold'));
     }
   };
 
   const handleMakeAdmin = async (userId: string, userName: string) => {
-    if (!await appConfirm(`Make ${userName} an admin? They will be able to access the admin dashboard.`)) {
+    if (
+      !await appConfirm(
+        `Please confirm you want to grant ${userName} administrator access. They will be able to use the admin dashboard.`,
+        { confirmLabel: 'Grant admin' },
+      )
+    ) {
       return;
     }
 
@@ -440,9 +459,7 @@ export const AdminUsers = () => {
       const notifyResult = await notifyUserAdminRole(userId, 'granted');
       if (!notifyResult.ok) {
         alert(
-          `Failed to make ${userName} an admin${
-            notifyResult.error ? `: ${notifyResult.error}` : ''
-          }`
+          withSystemDetail(`We could not grant administrator access to ${userName}.`, notifyResult.error),
         );
         return;
       }
@@ -456,7 +473,7 @@ export const AdminUsers = () => {
         details: { field: 'role', value: 'admin', emailed: notifyResult.emailed },
       });
 
-      alert(`${userName} is now an admin.${adminRoleEmailNote(notifyResult)}`);
+      alert(`${userName} now has administrator access.${adminRoleEmailNote(notifyResult)}`);
       const adminRole = accountRoles.find((role) => role.slug === 'admin');
       if (adminRole) {
         await supabase.from('users').update({ account_role_id: adminRole.id }).eq('id', userId);
@@ -464,14 +481,15 @@ export const AdminUsers = () => {
       fetchUsers();
     } catch (error) {
       console.error('Error making user admin:', error);
-      alert('Failed to make user an admin');
+      alert(cannotComplete('grant administrator access'));
     }
   };
 
   const handleRevokeAdmin = async (userId: string, userName: string) => {
     if (
       !await appConfirm(
-        `Revoke the Administrative role from ${userName}? They will be returned to member access only.`
+        `Please confirm you want to remove the Administrative role from ${userName}. They will be returned to member access only.`,
+        { confirmLabel: 'Remove admin' },
       )
     ) {
       return;
@@ -506,14 +524,14 @@ export const AdminUsers = () => {
       fetchUsers();
     } catch (error) {
       console.error('Error revoking admin:', error);
-      alert('Failed to revoke admin rights');
+      alert(cannotComplete('remove administrator access'));
     }
   };
 
   const openPasswordReset = (email: string | null | undefined) => {
     const normalizedEmail = (email || '').trim();
     if (!normalizedEmail) {
-      alert('This user does not have an email address on file.');
+      alert('This person does not have an email address on file.');
       return;
     }
     setPasswordResetCaptcha(null);
@@ -529,20 +547,20 @@ export const AdminUsers = () => {
   const handleSendPasswordReset = async () => {
     if (!passwordResetEmail) return;
     if (!passwordResetCaptcha) {
-      alert('Please complete the CAPTCHA before sending the reset email.');
+      alert('Please complete the security check before sending the reset email.');
       return;
     }
 
     setIsSendingPasswordReset(true);
     try {
       await sendPasswordReset(passwordResetEmail, passwordResetCaptcha);
-      alert('Password reset email sent. Ask the user to check their inbox.');
+      alert('A password reset email has been sent. Please ask them to check their inbox.');
       closePasswordReset();
     } catch (error) {
       console.error('Error sending password reset email:', error);
       setPasswordResetCaptcha(null);
       passwordResetTurnstileRef.current?.reset();
-      alert('Failed to send password reset email');
+      alert(cannotComplete('send the password reset email'));
     } finally {
       setIsSendingPasswordReset(false);
     }
@@ -639,7 +657,7 @@ export const AdminUsers = () => {
     try {
       const candidates = allUsers.filter((u) => !directoryByUserId[u.id] && !!(u.email || '').trim());
       if (candidates.length === 0) {
-        alert('All users with emails are already linked (or require manual review).');
+        alert('Everyone with an email address is already linked, or needs a manual review.');
         return;
       }
 
@@ -651,10 +669,14 @@ export const AdminUsers = () => {
         if (ok) linked += 1;
       }
       await fetchUsers();
-      alert(linked > 0 ? `Linked ${linked} user(s) to ${PEOPLE_LABEL}.` : 'No safe matches found. Manual linking required.');
+      alert(
+        linked > 0
+          ? `${linked} ${linked === 1 ? 'login has' : 'logins have'} been linked to ${PEOPLE_LABEL}.`
+          : 'No safe automatic matches were found. Please link remaining people manually.',
+      );
     } catch (e) {
       console.error(e);
-      alert('Failed to recheck directory links.');
+      alert(cannotComplete('recheck People links'));
     } finally {
       setIsRelinking(false);
     }
@@ -663,7 +685,8 @@ export const AdminUsers = () => {
   const handleUnlinkLeadership = async (target: User) => {
     if (
       !await appConfirm(
-        `Unlink ${displayName(target) || 'this user'} from ${PEOPLE_LABEL}? They will lose roster access until linked again.`
+        `Please confirm you want to unlink ${displayName(target) || 'this person'} from ${PEOPLE_LABEL}. Roster access for this login will pause until it is linked again.`,
+        { confirmLabel: 'Unlink', cancelLabel: 'Keep linked' },
       )
     ) {
       return;
@@ -681,7 +704,7 @@ export const AdminUsers = () => {
       await fetchUsers();
     } catch (e: unknown) {
       console.error(e);
-      alert(e instanceof Error ? e.message : 'Failed to unlink');
+      alert(cannotComplete('unlink this People record', errorDetail(e)));
     }
   };
 
@@ -807,7 +830,7 @@ export const AdminUsers = () => {
       setEditUser(null);
       await fetchUsers();
     } catch (error: unknown) {
-      alert(error instanceof Error ? error.message : 'Could not save user.');
+      alert(cannotSave('this profile', errorDetail(error)));
     } finally {
       setIsSavingEdit(false);
     }
@@ -825,7 +848,7 @@ export const AdminUsers = () => {
     const nextRole = accountRoles.find((role) => role.id === roleAssignId);
     if (!nextRole) return;
     if (nextRole.slug === 'owner' && !roleAssignUser.is_super_admin) {
-      alert('Owner is reserved for the site owner account and cannot be assigned here.');
+      alert('The Owner role is reserved for the site owner and cannot be assigned here.');
       return;
     }
     setIsSavingRole(true);
@@ -848,7 +871,7 @@ export const AdminUsers = () => {
       setRoleAssignUser(null);
       await fetchUsers();
     } catch (error: unknown) {
-      alert(error instanceof Error ? error.message : 'Could not update role.');
+      alert(cannotComplete('update this role', errorDetail(error)));
     } finally {
       setIsSavingRole(false);
     }

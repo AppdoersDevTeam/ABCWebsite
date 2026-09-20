@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { appConfirm } from '../../lib/appDialog';
+import { cannotComplete, cannotLoad, errorDetail } from '../../lib/systemMessage';
 import type { User } from '../../types';
 import { Modal } from '../../components/UI/Modal';
 import { GlowingButton } from '../../components/UI/GlowingButton';
@@ -86,7 +87,7 @@ export const LinkDirectoryUserModal: React.FC<LinkDirectoryUserModalProps> = ({
       setSelectedId(null);
     } catch (e) {
       console.error('Directory search failed', e);
-      alert(`Could not search ${PEOPLE_LABEL}. Check Supabase connection and RLS.`);
+      alert(cannotLoad(PEOPLE_LABEL, 'Please check your connection and try again.'));
       setRows([]);
     } finally {
       setLoading(false);
@@ -100,7 +101,8 @@ export const LinkDirectoryUserModal: React.FC<LinkDirectoryUserModalProps> = ({
     if (row.user_id && row.user_id !== targetUser.id) {
       if (
         !await appConfirm(
-          `This ${PEOPLE_LABEL} record is already linked to another website user. Replace the link with this user?`
+          `This ${PEOPLE_LABEL} record is already linked to another website login. Please confirm you want to replace that link with this person.`,
+          { confirmLabel: 'Replace link' },
         )
       ) {
         return;
@@ -121,12 +123,12 @@ export const LinkDirectoryUserModal: React.FC<LinkDirectoryUserModalProps> = ({
         summary: `Linked ${PEOPLE_LABEL} record "${row.name}" to login ${targetUser.email}`,
         details: { user_id: targetUser.id, directory_id: selectedId },
       });
-      alert(`${PEOPLE_LABEL} link saved.`);
+      alert(`This login has been linked to ${PEOPLE_LABEL}.`);
       onSuccess();
       onClose();
     } catch (e: unknown) {
       console.error(e);
-      alert(e instanceof Error ? e.message : 'Failed to link');
+      alert(cannotComplete('link this People record', errorDetail(e)));
     } finally {
       setSaving(false);
     }

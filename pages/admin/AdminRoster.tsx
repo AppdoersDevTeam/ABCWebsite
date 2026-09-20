@@ -5,6 +5,7 @@ import { Modal } from '../../components/UI/Modal';
 import type { Group, JobRole, RosterImage, TeamMember } from '../../types';
 import { supabase } from '../../lib/supabase';
 import { appConfirm } from '../../lib/appDialog';
+import { cannotComplete, cannotDelete, cannotLoad, errorDetail, pleaseChooseFile } from '../../lib/systemMessage';
 import { SkeletonPageHeader } from '../../components/UI/Skeleton';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { logAuditEventSafe } from '../../lib/auditLog';
@@ -135,7 +136,7 @@ export const AdminRoster = () => {
       }
     } catch (error) {
       console.error('Error loading roster admin data:', error);
-      alert('Failed to load roster data');
+      alert(cannotLoad('rosters'));
     } finally {
       setIsLoading(false);
     }
@@ -153,7 +154,7 @@ export const AdminRoster = () => {
       setRosterImages((data || []) as RosterRow[]);
     } catch (error) {
       console.error('Error fetching roster images:', error);
-      alert('Failed to load roster images');
+      alert(cannotLoad('roster images'));
     }
   };
 
@@ -161,7 +162,7 @@ export const AdminRoster = () => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       if (file.type !== 'application/pdf') {
-        alert('Please select a PDF file');
+        alert(pleaseChooseFile('PDF'));
         return;
       }
       setSelectedFile(file);
@@ -179,7 +180,7 @@ export const AdminRoster = () => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       if (file.type !== 'application/pdf') {
-        alert('Please select a PDF file');
+        alert(pleaseChooseFile('PDF'));
         return;
       }
       setEditFile(file);
@@ -205,7 +206,7 @@ export const AdminRoster = () => {
   const handleSaveEdit = async () => {
     if (!editingRoster) return;
     if (!editGroupId || !editDateFrom || !editDateTo) {
-      alert('Please select a ministry and date range.');
+      alert('Please choose a ministry and date range.');
       return;
     }
 
@@ -213,7 +214,7 @@ export const AdminRoster = () => {
     try {
       const group = groups.find((g) => g.id === editGroupId) || null;
       if (!group) {
-        alert('Please select a valid ministry.');
+        alert('Please choose a valid ministry.');
         return;
       }
 
@@ -279,13 +280,13 @@ export const AdminRoster = () => {
       setEditingRoster(null);
       setEditFile(null);
       setEditPreviewUrl(null);
-      alert('Roster updated successfully!');
+      alert('The roster has been updated.');
     } catch (e: any) {
       console.error('Error updating roster:', e);
-      const msg = e?.message || 'Failed to update roster';
+      const msg = e?.message || cannotComplete('update this roster');
       alert(
         msg.includes('roster_images_group_date_range_key')
-          ? 'A roster already exists for that ministry and date range. Choose a different range or edit the existing one.'
+          ? 'A roster already exists for that ministry and date range. Please choose a different range, or edit the existing roster.'
           : msg
       );
     } finally {
@@ -295,7 +296,7 @@ export const AdminRoster = () => {
 
   const handleUpload = async () => {
     if (!selectedFile || !selectedGroupId || !dateFrom || !dateTo) {
-      alert('Please select a ministry, date range, and a PDF file');
+      alert('Please choose a ministry, date range, and PDF.');
       return;
     }
 
@@ -304,7 +305,7 @@ export const AdminRoster = () => {
     try {
       const group = groups.find((g) => g.id === selectedGroupId) || null;
       if (!group) {
-        alert('Please select a valid ministry.');
+        alert('Please choose a valid ministry.');
         return;
       }
 
@@ -392,19 +393,19 @@ export const AdminRoster = () => {
       setDateFrom('');
       setDateTo('');
       setIsUploadModalOpen(false);
-      alert('Roster PDF uploaded successfully!');
+      alert('The roster PDF has been uploaded.');
     } catch (error: any) {
       console.error('Error uploading roster PDF:', error);
-      let errorMessage = 'Failed to upload roster PDF';
+      let errorMessage = cannotComplete('upload this roster PDF');
       
       if (error.message) {
         errorMessage = error.message;
       } else if (error.code === 'PGRST116') {
-        errorMessage = 'Table "roster_images" does not exist. Please run the SQL migration script first.';
+        errorMessage = 'The roster library is not ready yet. Please apply the roster database update, then try again.';
       } else if (error.code === '42703') {
-        errorMessage = 'Column "pdf_url" does not exist. Please run the SQL migration script to update the table schema.';
+        errorMessage = 'The roster library needs a database update before PDFs can be stored. Please try again after that update.';
       } else if (error.status === 400) {
-        errorMessage = 'Database error: The roster_images table may not exist or has the wrong schema. Please run the SQL migration script.';
+        errorMessage = 'We could not save this roster. The roster library may need a database update.';
       }
       
       alert(errorMessage);
@@ -414,7 +415,7 @@ export const AdminRoster = () => {
   };
 
   const handleDelete = async (id: string, pdfUrl: string) => {
-    if (!await appConfirm('Are you sure you want to delete this roster PDF?')) {
+    if (!await appConfirm('Please confirm you want to delete this roster PDF. This cannot be undone.', { confirmLabel: 'Delete roster' })) {
       return;
     }
 
@@ -441,7 +442,7 @@ export const AdminRoster = () => {
       setRosterImages(rosterImages.filter(img => img.id !== id));
     } catch (error: any) {
       console.error('Error deleting roster PDF:', error);
-      alert(error.message || 'Failed to delete roster PDF');
+      alert(cannotDelete('this roster PDF', errorDetail(error)));
     }
   };
 

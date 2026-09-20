@@ -5,6 +5,7 @@ import { Modal } from '../../components/UI/Modal';
 import { Heart, Edit, Trash2, HandHeart } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { appConfirm } from '../../lib/appDialog';
+import { cannotComplete, cannotDelete } from '../../lib/systemMessage';
 import { useAuth } from '../../context/AuthContext';
 import { PrayerRequest } from '../../types';
 import { SkeletonPageHeader, SkeletonPrayerCard } from '../../components/UI/Skeleton';
@@ -105,7 +106,7 @@ export const PrayerWall = () => {
       setIsModalOpen(false);
     } catch (error) {
       console.error('Error submitting prayer request:', error);
-      alert('Failed to submit prayer request');
+      alert(cannotComplete('submit this prayer request'));
     }
   };
 
@@ -149,12 +150,12 @@ export const PrayerWall = () => {
       setIsEditModalOpen(false);
     } catch (error) {
       console.error('Error updating prayer request:', error);
-      alert('Failed to update prayer request');
+      alert(cannotComplete('update this prayer request'));
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!await appConfirm('Are you sure you want to delete this prayer request? This action cannot be undone.')) {
+    if (!await appConfirm('Please confirm you want to delete this prayer request. This cannot be undone.', { confirmLabel: 'Delete request' })) {
       return;
     }
 
@@ -189,7 +190,7 @@ export const PrayerWall = () => {
       await fetchPrayerRequests();
     } catch (error) {
       console.error('Error deleting prayer request:', error);
-      alert('Failed to delete prayer request');
+      alert(cannotDelete('this prayer request'));
     }
   };
 
@@ -214,7 +215,7 @@ export const PrayerWall = () => {
 
   const handlePrayingClick = async (requestId: string, event: React.MouseEvent<HTMLButtonElement>) => {
     if (!user) {
-      alert('Please log in to pray for requests');
+      alert('Please sign in to pray for these requests.');
       return;
     }
 
@@ -311,7 +312,7 @@ export const PrayerWall = () => {
       }
     } catch (error: any) {
       console.error('Error updating prayer count:', error);
-      alert(`Failed to update prayer count: ${error.message || 'Please make sure you are logged in and have permission.'}`);
+      alert(cannotComplete('update this prayer count', error.message || 'Please sign in and check you have permission.'));
     }
   };
 

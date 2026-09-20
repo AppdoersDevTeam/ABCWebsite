@@ -3,6 +3,7 @@ import { Settings, Tag, Briefcase, Plus, Save, Trash2 } from 'lucide-react';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { supabase } from '../../lib/supabase';
 import { appConfirm } from '../../lib/appDialog';
+import { cannotComplete, cannotSave } from '../../lib/systemMessage';
 import type { EventCategory, Group, JobRole } from '../../types';
 import { logAuditEvent } from '../../lib/auditLog';
 import { EVENTS_LABEL, PEOPLE_LABEL } from '../../lib/constants';
@@ -66,7 +67,7 @@ export const AdminSettings = () => {
     } catch (e) {
       console.error('Failed to load settings lists', e);
       alert(
-        'Failed to load settings lists. Make sure ADD_GROUPS_AND_JOB_ROLES.sql and ADD_EVENT_CATEGORIES.sql have been run in Supabase.'
+        'We could not load System Setup. Please refresh the page and try again.',
       );
     } finally {
       setIsLoading(false);
@@ -93,7 +94,7 @@ export const AdminSettings = () => {
       setNewGroupName('');
     } catch (e) {
       console.error('Create group failed', e);
-      alert('Failed to create group. If a group with the same name/slug exists, choose a different name.');
+      alert(cannotSave('this group. If a group with the same name already exists, please choose a different name'));
     }
   };
 
@@ -110,7 +111,7 @@ export const AdminSettings = () => {
       setNewJobRoleName('');
     } catch (e) {
       console.error('Create job role failed', e);
-      alert('Failed to create job role. If one with the same name/slug exists, choose a different name.');
+      alert(cannotSave('this job role. If a role with the same name already exists, please choose a different name'));
     }
   };
 
@@ -140,7 +141,7 @@ export const AdminSettings = () => {
       setNewCategoryName('');
     } catch (e) {
       console.error('Create event category failed', e);
-      alert('Failed to create category. If a category with the same name/slug exists, choose a different name.');
+      alert(cannotSave('this category. If a category with the same name already exists, please choose a different name'));
     }
   };
 
@@ -156,7 +157,7 @@ export const AdminSettings = () => {
       setSavedGroups((prev) => prev.map((x) => (x.id === id ? { ...x, ...payload } : x)));
     } catch (e) {
       console.error('Save group failed', e);
-      alert('Failed to update group.');
+      alert(cannotSave('this group'));
     }
   };
 
@@ -172,7 +173,7 @@ export const AdminSettings = () => {
       setSavedJobRoles((prev) => prev.map((x) => (x.id === id ? { ...x, ...payload } : x)));
     } catch (e) {
       console.error('Save job role failed', e);
-      alert('Failed to update job role.');
+      alert(cannotSave('this job role'));
     }
   };
 
@@ -192,12 +193,12 @@ export const AdminSettings = () => {
       setSavedEventCategories((prev) => prev.map((x) => (x.id === id ? { ...x, ...payload } : x)));
     } catch (e) {
       console.error('Save event category failed', e);
-      alert('Failed to update category.');
+      alert(cannotSave('this category'));
     }
   };
 
   const deleteGroup = async (id: string) => {
-    if (!await appConfirm('Delete this group? If it is assigned to people, deletion may fail.')) return;
+    if (!await appConfirm('Please confirm you want to delete this group. If it is assigned to people, deletion may not be possible.', { confirmLabel: 'Delete group' })) return;
     const g = groups.find((x) => x.id === id);
     try {
       const { error } = await supabase.from('groups').delete().eq('id', id);
@@ -207,12 +208,12 @@ export const AdminSettings = () => {
       setSavedGroups((prev) => prev.filter((g) => g.id !== id));
     } catch (e) {
       console.error('Delete group failed', e);
-      alert('Delete failed (it may be in use). Try disabling it instead.');
+      alert('This item could not be deleted because it is still in use. Please disable it instead.');
     }
   };
 
   const deleteJobRole = async (id: string) => {
-    if (!await appConfirm('Delete this job role? If it is assigned to people, deletion may fail.')) return;
+    if (!await appConfirm('Please confirm you want to delete this job role. If it is assigned to people, deletion may not be possible.', { confirmLabel: 'Delete role' })) return;
     const r = jobRoles.find((x) => x.id === id);
     try {
       const { error } = await supabase.from('job_roles').delete().eq('id', id);
@@ -222,12 +223,12 @@ export const AdminSettings = () => {
       setSavedJobRoles((prev) => prev.filter((r) => r.id !== id));
     } catch (e) {
       console.error('Delete job role failed', e);
-      alert('Delete failed (it may be in use). Try disabling it instead.');
+      alert('This item could not be deleted because it is still in use. Please disable it instead.');
     }
   };
 
   const deleteEventCategory = async (id: string) => {
-    if (!await appConfirm('Delete this category? Existing events may still reference it by name.')) return;
+    if (!await appConfirm('Please confirm you want to delete this category. Existing events may still keep this name.', { confirmLabel: 'Delete category' })) return;
     const c = eventCategories.find((x) => x.id === id);
     try {
       const { error } = await supabase.from('event_categories').delete().eq('id', id);
@@ -237,7 +238,7 @@ export const AdminSettings = () => {
       setSavedEventCategories((prev) => prev.filter((c) => c.id !== id));
     } catch (e) {
       console.error('Delete event category failed', e);
-      alert('Delete failed (it may be in use). Try disabling it instead.');
+      alert('This item could not be deleted because it is still in use. Please disable it instead.');
     }
   };
 
@@ -297,7 +298,7 @@ export const AdminSettings = () => {
         return;
       }
 
-      const leave = await appConfirm('You have unsaved changes. Leave without saving? Your changes will be discarded.');
+      const leave = await appConfirm('You have unsaved changes. Please confirm you want to leave without saving. Your changes will be discarded.', { confirmLabel: 'Leave', cancelLabel: 'Stay' });
       if (leave) {
         discardChanges();
         lastHashRef.current = nextHash;
@@ -326,7 +327,7 @@ export const AdminSettings = () => {
             if (tab === 'groups') return;
             if (hasUnsavedChanges) {
               const leave = await appConfirm(
-                'You have unsaved changes. Switch tabs without saving? Your changes will be discarded.'
+                'You have unsaved changes. Please confirm you want to switch tabs without saving. Your changes will be discarded.',
               );
               if (!leave) return;
               discardChanges();
@@ -346,7 +347,7 @@ export const AdminSettings = () => {
             if (tab === 'job_roles') return;
             if (hasUnsavedChanges) {
               const leave = await appConfirm(
-                'You have unsaved changes. Switch tabs without saving? Your changes will be discarded.'
+                'You have unsaved changes. Please confirm you want to switch tabs without saving. Your changes will be discarded.',
               );
               if (!leave) return;
               discardChanges();
@@ -366,7 +367,7 @@ export const AdminSettings = () => {
             if (tab === 'event_categories') return;
             if (hasUnsavedChanges) {
               const leave = await appConfirm(
-                'You have unsaved changes. Switch tabs without saving? Your changes will be discarded.'
+                'You have unsaved changes. Please confirm you want to switch tabs without saving. Your changes will be discarded.',
               );
               if (!leave) return;
               discardChanges();

@@ -5,6 +5,7 @@ import { Modal } from '../../components/UI/Modal';
 import { Heart, Edit, Trash2, Plus, HandHeart } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { appConfirm } from '../../lib/appDialog';
+import { cannotComplete, cannotDelete, cannotLoad } from '../../lib/systemMessage';
 import { PrayerRequest } from '../../types';
 import { SkeletonPageHeader, SkeletonPrayerCard } from '../../components/UI/Skeleton';
 import { getUserTimezone, formatRelativeDateInTimezone } from '../../lib/dateUtils';
@@ -34,7 +35,7 @@ export const AdminPrayerWall = () => {
       setRequests(data || []);
     } catch (error) {
       console.error('Error fetching prayer requests:', error);
-      alert('Failed to load prayer requests');
+      alert(cannotLoad('prayer requests'));
     } finally {
       setIsLoading(false);
     }
@@ -77,7 +78,7 @@ export const AdminPrayerWall = () => {
       setIsCreateModalOpen(false);
     } catch (error) {
       console.error('Error creating prayer request:', error);
-      alert('Failed to create prayer request');
+      alert(cannotComplete('create this prayer request'));
     }
   };
 
@@ -123,12 +124,12 @@ export const AdminPrayerWall = () => {
       setIsEditModalOpen(false);
     } catch (error) {
       console.error('Error updating prayer request:', error);
-      alert('Failed to update prayer request');
+      alert(cannotComplete('update this prayer request'));
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!await appConfirm('Are you sure you want to delete this prayer request? This action cannot be undone.')) {
+    if (!await appConfirm('Please confirm you want to delete this prayer request. This cannot be undone.', { confirmLabel: 'Delete request' })) {
       return;
     }
 
@@ -166,7 +167,7 @@ export const AdminPrayerWall = () => {
       await fetchPrayerRequests();
     } catch (error) {
       console.error('Error deleting prayer request:', error);
-      alert('Failed to delete prayer request. Please make sure you have admin permissions.');
+      alert(cannotDelete('this prayer request. Please check you have administrator permission'));
     }
   };
 

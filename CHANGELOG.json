@@ -6,6 +6,36 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2109-009",
+      "date": "2026-09-21",
+      "time": "01:13:05",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T13:13:05.182Z",
+      "version": "1.7.24",
+      "type": "changed",
+      "area": "admin",
+      "title": "System message boxes are centred with professional, role-aware wording",
+      "request": "Change All the message boxes from the system to Text Centre as per message box align and buttons also centre of the box. Make all the Messages as a professional Message from the System as per its Role and Behavior. Make it professional, Dynamic and relevant. Push when complete.",
+      "changes": [
+        "System notices now show the church name, a heading that matches the kind of message, centred wording, and centred buttons.",
+        "Alerts and confirmations across Admin, Member, and Login now use professional, named wording for the action instead of generic Are you sure or Failed to phrases."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "71 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors. No browser MCP in this session; dialog titles and copy helpers are covered by unit tests."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2109-008",
       "date": "2026-09-21",
       "time": "00:58:56",

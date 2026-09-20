@@ -6,6 +6,7 @@ import { Modal } from '../../components/UI/Modal';
 import { DocumentReaderPanel } from '../../components/UI/DocumentReaderPanel';
 import { supabase } from '../../lib/supabase';
 import { appConfirm } from '../../lib/appDialog';
+import { cannotComplete, cannotDelete, cannotLoad, errorDetail, pleaseCompleteRequired } from '../../lib/systemMessage';
 import { Devotional as DevotionalType } from '../../types';
 import { SkeletonPageHeader, SkeletonCard } from '../../components/UI/Skeleton';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
@@ -185,7 +186,7 @@ export const AdminDevotional = () => {
       setDevotionals(data || []);
     } catch (error) {
       console.error('Error fetching devotionals:', error);
-      alert('Failed to load devotionals');
+      alert(cannotLoad('devotionals'));
     } finally {
       setIsLoading(false);
     }
@@ -205,7 +206,7 @@ export const AdminDevotional = () => {
 
   const handleUpload = async () => {
     if (!uploadData.file || !uploadData.title.trim() || !uploadData.subtitle.trim() || !uploadData.weekDate) {
-      alert('Please fill in all required fields and select a file');
+      alert('Please complete the required fields and choose a file.');
       return;
     }
 
@@ -253,10 +254,10 @@ export const AdminDevotional = () => {
       setDevotionals([data, ...devotionals].sort((a, b) => b.week_date.localeCompare(a.week_date)));
       notifyCalendarChanged();
       closeUploadModal();
-      alert('Devotional uploaded successfully!');
+      alert('The devotional has been uploaded.');
     } catch (error: any) {
       console.error('Error uploading devotional:', error);
-      alert(error.message || 'Failed to upload devotional');
+      alert(cannotComplete('upload this devotional', errorDetail(error)));
     } finally {
       setIsUploading(false);
     }
@@ -264,7 +265,7 @@ export const AdminDevotional = () => {
 
   const handleEdit = async () => {
     if (!editing || !editData.title.trim() || !editData.subtitle.trim() || !editData.weekDate) {
-      alert('Please fill in all required fields');
+      alert(pleaseCompleteRequired());
       return;
     }
 
@@ -326,17 +327,17 @@ export const AdminDevotional = () => {
       notifyCalendarChanged();
       if (viewing?.id === editing.id) setViewing(data);
       resetEditForm();
-      alert('Devotional updated successfully!');
+      alert('The devotional has been updated.');
     } catch (error: any) {
       console.error('Error updating devotional:', error);
-      alert(error.message || 'Failed to update devotional');
+      alert(cannotComplete('update this devotional', errorDetail(error)));
     } finally {
       setIsSaving(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!await appConfirm('Are you sure you want to delete this devotional?')) {
+    if (!await appConfirm('Please confirm you want to delete this devotional. This cannot be undone.', { confirmLabel: 'Delete' })) {
       return;
     }
 
@@ -367,7 +368,7 @@ export const AdminDevotional = () => {
       notifyCalendarChanged();
     } catch (error) {
       console.error('Error deleting devotional:', error);
-      alert('Failed to delete devotional');
+      alert(cannotDelete('this devotional'));
     }
   };
 

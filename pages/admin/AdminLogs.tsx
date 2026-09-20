@@ -8,6 +8,7 @@ import { formatFullDateTimeInTimezone } from '../../lib/dateUtils';
 import { downloadAuditLogsCsv } from '../../lib/exportAuditLogs';
 import { SkeletonPageHeader } from '../../components/UI/Skeleton';
 import { EVENTS_LABEL, PEOPLE_LABEL } from '../../lib/constants';
+import { cannotComplete, errorDetail } from '../../lib/systemMessage';
 
 const PAGE_SIZE = 50;
 
@@ -212,7 +213,7 @@ export const AdminLogs = () => {
       const stamp = new Date().toISOString().slice(0, 10);
       downloadAuditLogsCsv((data || []) as AuditLog[], `abc-audit-logs-${stamp}`);
     } catch (e: unknown) {
-      alert(e instanceof Error ? e.message : 'Export failed');
+      alert(cannotComplete('export these logs', errorDetail(e)));
     }
   };
 

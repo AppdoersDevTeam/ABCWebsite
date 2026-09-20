@@ -17,6 +17,7 @@ import { CHURCH_NAME, displayInitials, displayName, isAccessHeld, isAdminUser, i
 import { deleteUserAccount } from '../../lib/deleteUserAccount';
 import { directoryPersonEmailNote, notifyDirectoryPerson } from '../../lib/notifyDirectoryPerson';
 import { accessHoldEmailNote, notifyUserAccessHold } from '../../lib/notifyUserAccessHold';
+import { cannotComplete, cannotDelete, cannotLoad, cannotSave, errorDetail, withSystemDetail } from '../../lib/systemMessage';
 import metadata from '../../metadata.json';
 
 type ProfileType = 'staff' | 'attendee' | 'member';
@@ -233,7 +234,7 @@ function LinkedAccountPrompt({
   const verb = action === 'archive' ? 'archived' : 'deleted';
   const alsoVerb = action === 'archive' ? 'archive' : 'delete';
   return (
-    <div className="rounded-[8px] border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
+    <div className="rounded-[8px] border border-amber-200 bg-amber-50 p-4 text-center text-sm text-amber-950">
       {linkedUserLoading ? (
         <p>Checking for a linked website account…</p>
       ) : (
@@ -246,7 +247,7 @@ function LinkedAccountPrompt({
             <p className="mt-2">{blockReason}</p>
           ) : canAffect ? (
             <>
-              <label className="mt-3 flex items-start gap-2 cursor-pointer">
+              <label className="mt-3 inline-flex items-start justify-center gap-2 cursor-pointer text-left">
                 <input
                   type="checkbox"
                   className="mt-1 h-4 w-4 rounded border-gray-300 text-gold focus:ring-gold"
@@ -502,7 +503,7 @@ export const AdminTeam = () => {
     } catch (error) {
       console.error('Error fetching team members:', error);
       setLinkedUserNameById({});
-      alert(`Failed to load ${PEOPLE_LABEL}`);
+      alert(cannotLoad(PEOPLE_LABEL));
     } finally {
       setIsLoading(false);
     }
@@ -514,13 +515,13 @@ export const AdminTeam = () => {
 
       const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'application/pdf'];
       if (!validTypes.includes(file.type)) {
-        alert('Please select a PNG, JPEG, or PDF file');
+        alert('Please choose a PNG, JPEG, or PDF file.');
         return;
       }
 
       const maxSize = 300 * 1024;
       if (file.size > maxSize) {
-        alert('File size must be less than 300KB');
+        alert('Please choose a file smaller than 300KB.');
         return;
       }
 
@@ -726,7 +727,7 @@ export const AdminTeam = () => {
     }
 
     if (photoRequired && !selectedFile && !formData.img) {
-      alert('Photo is required for staff. Please upload a photo.');
+      alert('Please upload a photo for staff records.');
       return;
     }
 
@@ -781,7 +782,7 @@ export const AdminTeam = () => {
       setIsModalOpen(false);
     } catch (error: unknown) {
       console.error('Error creating team member:', error);
-      const msg = getSupabaseErrorMessage(error) || `Failed to add person to ${PEOPLE_LABEL}`;
+      const msg = getSupabaseErrorMessage(error) || cannotSave(`this ${PEOPLE_LABEL} record`);
       alert(msg + teamMemberSaveErrorHint(msg));
     } finally {
       setIsUploading(false);
@@ -807,7 +808,7 @@ export const AdminTeam = () => {
     }
 
     if (photoRequired && !selectedFile && !formData.img && !editingMember.img) {
-      alert('Photo is required for staff. Please upload a photo.');
+      alert('Please upload a photo for staff records.');
       return;
     }
 
@@ -863,7 +864,7 @@ export const AdminTeam = () => {
       setIsModalOpen(false);
     } catch (error: unknown) {
       console.error('Error updating team member:', error);
-      const msg = getSupabaseErrorMessage(error) || `Failed to update ${PEOPLE_LABEL} person`;
+      const msg = getSupabaseErrorMessage(error) || cannotSave(`this ${PEOPLE_LABEL} record`);
       alert(msg + teamMemberSaveErrorHint(msg));
     } finally {
       setIsUploading(false);
@@ -874,7 +875,8 @@ export const AdminTeam = () => {
     if (!member.user_id) return;
     if (
       !await appConfirm(
-        `Unlink the website account from ${member.name}? They will lose roster access until linked again. This does not delete the login or the People record.`
+        `Please confirm you want to unlink the website login from ${member.name}. Roster access for that login will pause until it is linked again. The login and the People record will both stay in the system.`,
+        { confirmLabel: 'Unlink', cancelLabel: 'Keep linked' },
       )
     ) {
       return;
@@ -893,7 +895,7 @@ export const AdminTeam = () => {
       await fetchMembers();
     } catch (e: unknown) {
       console.error(e);
-      alert(e instanceof Error ? e.message : 'Failed to unlink the website account');
+      alert(cannotComplete('unlink this website account', errorDetail(e)));
     }
   };
 
@@ -923,9 +925,10 @@ export const AdminTeam = () => {
       });
       if (!mail.ok) {
         alert(
-          `${PEOPLE_LABEL} was not deleted because the confirmation email could not be sent${
-            mail.error ? `: ${mail.error}` : ''
-          }.`
+          withSystemDetail(
+            `${PEOPLE_LABEL} was not deleted because the confirmation email could not be sent.`,
+            mail.error,
+          ),
         );
         return;
       }
@@ -934,7 +937,12 @@ export const AdminTeam = () => {
       if (deleteLinked && linkedUserId) {
         const result = await deleteUserAccount(linkedUserId);
         if (!result.ok) {
-          alert(result.error || 'Failed to delete the linked website account. The People record was not deleted.');
+          alert(
+            withSystemDetail(
+              'The linked website account was not deleted, so the People record was left unchanged.',
+              result.error,
+            ),
+          );
           return;
         }
         if (result.emailed) {
@@ -975,7 +983,7 @@ export const AdminTeam = () => {
       );
     } catch (error: unknown) {
       console.error('Error deleting team member:', error);
-      alert(getSupabaseErrorMessage(error) || `Failed to delete ${PEOPLE_LABEL} person`);
+      alert(cannotDelete(`this ${PEOPLE_LABEL} record`, getSupabaseErrorMessage(error)));
     } finally {
       setIsDeleting(false);
     }
@@ -1003,9 +1011,10 @@ export const AdminTeam = () => {
       });
       if (!mail.ok) {
         alert(
-          `${PEOPLE_LABEL} was not archived because the confirmation email could not be sent${
-            mail.error ? `: ${mail.error}` : ''
-          }.`
+          withSystemDetail(
+            `${PEOPLE_LABEL} was not archived because the confirmation email could not be sent.`,
+            mail.error,
+          ),
         );
         return;
       }
@@ -1018,9 +1027,10 @@ export const AdminTeam = () => {
           const notifyResult = await notifyUserAccessHold(linkedUserId);
           if (!notifyResult.ok || !notifyResult.emailed) {
             alert(
-              `The linked website account was not archived because the confirmation email could not be sent${
-                notifyResult.error ? `: ${notifyResult.error}` : ''
-              }. The People record was not archived.`
+              withSystemDetail(
+                'The linked website account was not archived, so the People record was left unchanged.',
+                notifyResult.error,
+              ),
             );
             return;
           }
@@ -1064,7 +1074,7 @@ export const AdminTeam = () => {
       );
     } catch (error: unknown) {
       console.error('Error archiving team member:', error);
-      alert(getSupabaseErrorMessage(error) || `Failed to archive ${PEOPLE_LABEL} person`);
+      alert(cannotComplete(`archive this ${PEOPLE_LABEL} record`, getSupabaseErrorMessage(error)));
     } finally {
       setIsArchiving(false);
     }
@@ -1088,7 +1098,7 @@ export const AdminTeam = () => {
       await fetchMembers();
     } catch (error: unknown) {
       console.error('Error unarchiving team member:', error);
-      alert(getSupabaseErrorMessage(error) || `Failed to restore ${PEOPLE_LABEL} person`);
+      alert(cannotComplete(`restore this ${PEOPLE_LABEL} record`, getSupabaseErrorMessage(error)));
     }
   };
 
@@ -1892,7 +1902,7 @@ export const AdminTeam = () => {
         title="Delete person permanently?"
       >
         {deleteTarget && (
-          <div className="space-y-4">
+          <div className="space-y-4 text-center">
             <div className="rounded-[8px] border border-red-200 bg-red-50 p-4 text-sm text-red-900">
               <p className="font-bold">This action is permanent and cannot be undone.</p>
               <p className="mt-2">
@@ -1923,7 +1933,7 @@ export const AdminTeam = () => {
               placeholder={deleteTarget.name}
               autoComplete="off"
             />
-            <div className="flex flex-col-reverse sm:flex-row gap-3 justify-end pt-2">
+            <div className="flex flex-col-reverse sm:flex-row gap-3 justify-center pt-2">
               <button
                 type="button"
                 disabled={isDeleting}
@@ -1963,7 +1973,7 @@ export const AdminTeam = () => {
         title="Archive person?"
       >
         {archiveTarget && (
-          <div className="space-y-4">
+          <div className="space-y-4 text-center">
             <p className="text-sm text-neutral">
               <span className="font-bold text-charcoal">{archiveTarget.name}</span> will be hidden from the public site,
               {PEOPLE_LABEL}, and rosters. Only admins can view archived people and restore them later.
@@ -1980,7 +1990,7 @@ export const AdminTeam = () => {
               blockReason={linkedBlockReason}
               canAffect={canAffectLinkedAccount}
             />
-            <div className="flex flex-col-reverse sm:flex-row gap-3 justify-end pt-2">
+            <div className="flex flex-col-reverse sm:flex-row gap-3 justify-center pt-2">
               <button
                 type="button"
                 disabled={isArchiving}

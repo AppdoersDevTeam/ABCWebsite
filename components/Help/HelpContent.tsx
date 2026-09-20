@@ -49,6 +49,7 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode, isSuperAdmin = f
               <li>The Users card shows how many approved users are in the system. Click it to open Users under Users & Roles.</li>
               <li>The {PEOPLE_LABEL} card shows how many people are in the directory. Click it to open {PEOPLE_LABEL}.</li>
               <li>Use it to orient new admins before they open Users, Roles, or {PEOPLE_LABEL}.</li>
+              <li>System messages appear in a centred box. The heading matches the kind of notice, the wording is centred, and the buttons sit in the centre. Use OK, Confirm, or Cancel — clicking outside does not close them.</li>
             </Section>
 
             <Section title="Annual Calendar">
@@ -159,6 +160,7 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode, isSuperAdmin = f
               <li>Your home inside the member area: welcome content and pointers to the rest of the portal.</li>
               <li>The yellow bar at the top shows the church name, the person signed in, a search box for member pages, and Help.</li>
               <li>Open this when you first log in to see what is new or highlighted for members.</li>
+              <li>System messages appear in a centred box with centred wording and buttons. Use OK, Confirm, or Cancel — clicking outside does not close them.</li>
               <li>The {PEOPLE_LABEL} card shows how many people are in the directory. Click it to open {PEOPLE_LABEL}.</li>
             </Section>
 

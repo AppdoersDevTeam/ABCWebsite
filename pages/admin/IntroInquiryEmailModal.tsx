@@ -75,7 +75,7 @@ export const IntroInquiryEmailModal: React.FC<IntroInquiryEmailModalProps> = ({
     });
 
     setIsSending(false);
-    alert(`Email sent to ${result.emailed || targetUser.email}.`);
+    alert(`The email has been sent to ${result.emailed || targetUser.email}.`);
     onClose();
   };
 

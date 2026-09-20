@@ -9,6 +9,7 @@ import { usePageMeta } from '../../lib/usePageMeta';
 import { getRouteMeta, ROUTE_META } from '../../lib/seoConfig';
 import { EVENTS_LABEL } from '../../lib/constants';
 import { MINISTRIES, MINISTRIES_LABEL, MINISTRY_MENU_ITEMS } from '../../lib/ministries';
+import { AppDialogHost } from '../UI/AppDialogHost';
 
 export const PublicLayout = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -632,6 +633,7 @@ export const PublicLayout = () => {
           </div>
         </div>
       </footer>
+      <AppDialogHost />
     </div>
   );
 };
