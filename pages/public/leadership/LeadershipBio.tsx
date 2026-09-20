@@ -83,7 +83,7 @@ export const LeadershipBio = () => {
             <div className="absolute inset-0 bg-black/10"></div>
             <div className="absolute inset-0 bg-gray-700/45"></div>
           </div>
-          <div className="container relative z-10 px-4 mx-auto text-center">
+          <div className="page-container relative z-10 text-center">
             <div className="animate-pulse text-white text-xl">Loading...</div>
           </div>
         </section>
@@ -115,7 +115,7 @@ export const LeadershipBio = () => {
         </div>
 
         {/* Hero Content */}
-        <div className="container relative z-10 px-4 mx-auto pt-[224px] md:pt-[256px]">
+        <div className="page-container relative z-10 pt-[224px] md:pt-[256px]">
           <div className="max-w-4xl mx-auto text-center">
             <ScrollReveal direction="up" delay={150}>
               <h1 className="hero-title text-white text-center max-w-5xl mx-auto mb-4 transition-all duration-1000 delay-250">

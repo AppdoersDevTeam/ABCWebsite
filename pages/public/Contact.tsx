@@ -368,7 +368,7 @@ export const Contact = () => {
           <div className="absolute inset-0 bg-gray-700/45" />
         </div>
 
-        <div className="container relative z-10 px-4 mx-auto pt-[224px] md:pt-[256px] pb-24 md:pb-28">
+        <div className="page-container relative z-10 pt-[224px] md:pt-[256px] pb-24 md:pb-28">
           <div className="max-w-4xl mx-auto text-center">
             <ScrollReveal direction="up" delay={150}>
               <h1

@@ -6,6 +6,67 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2109-039",
+      "date": "2026-09-21",
+      "time": "03:25:02",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T15:25:02.246Z",
+      "version": "1.9.0",
+      "type": "changed",
+      "area": "admin",
+      "title": "Overview cards 12% wider in two rows of five",
+      "request": "Every Admin Overview stat card  increase the width size in  12% more. Height and inner layout are unchanged. Make it 2 rows Put 5 in one and another 5 in the next row. push it.",
+      "changes": [
+        "Admin Overview stat cards are 12% wider than the previous live width. Height and inner layout are unchanged.",
+        "The cards sit in two rows of five on wide screens, with an Annual Calendar card completing the second row."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "Unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "CHG-2026-2109-038",
+      "date": "2026-09-21",
+      "time": "03:23:21",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T15:23:21.007Z",
+      "version": "1.8.6",
+      "type": "changed",
+      "area": "public",
+      "title": "Mobile foundations: fluid type, safe areas, shared page gutters",
+      "request": "Make the decision to best fit the app into the mobile because I do not know what means each one of that requests.",
+      "changes": [
+        "Phone and tablet decisions: hamburger stays below 1024px so the desktop nav is not cramped on tablets; the menu is shown on leadership bios; Photos pages that are not in the site menu are ignored; unused colour tokens were left alone.",
+        "The page now uses a phone-safe viewport, fluid heading sizes, shared 16/24/32px gutters, notch/home-indicator padding on chrome and dialogs, and 100dvh with a 100vh fallback.",
+        "Horizontal overflow is no longer hidden on the body; long text can wrap, and html uses overflow-x clip only as a last-resort guard."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "vite build, unit tests, and npm run validate recorded after this entry. Typecheck still fails on pre-existing app errors."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2109-037",
       "date": "2026-09-21",
       "time": "03:17:31",

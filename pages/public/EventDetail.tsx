@@ -267,7 +267,7 @@ export const EventDetail = () => {
         </div>
 
         {/* Hero Content */}
-        <div className="container relative z-10 px-4 mx-auto pt-[224px] md:pt-[256px] pb-24 md:pb-28">
+        <div className="page-container relative z-10 pt-[224px] md:pt-[256px] pb-24 md:pb-28">
           <div className="max-w-4xl mx-auto text-center">
             <div className="flex flex-wrap items-center justify-center gap-2 mb-6">
               {event.category && (

@@ -28,7 +28,7 @@ export const KidsProgram = () => {
         </div>
 
         {/* Hero Content */}
-        <div className="container relative z-10 px-4 mx-auto pt-[224px] md:pt-[256px]">
+        <div className="page-container relative z-10 pt-[224px] md:pt-[256px]">
           <div className="max-w-4xl mx-auto text-center">
             <ScrollReveal direction="up" delay={150}>
               <h1 className="hero-title text-white text-center max-w-5xl mx-auto mb-4 transition-all duration-1000 delay-250">

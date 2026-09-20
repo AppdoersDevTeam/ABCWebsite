@@ -222,7 +222,7 @@ export const StatementOfFaith = () => {
           <div className="absolute inset-0 bg-gray-700/45" />
         </div>
 
-        <div className="container relative z-10 px-4 sm:px-6 mx-auto pt-28 sm:pt-32 md:pt-36 pb-10 sm:pb-12">
+        <div className="page-container relative z-10 pt-28 sm:pt-32 md:pt-36 pb-10 sm:pb-12">
           <div className="max-w-3xl mx-auto text-center">
             <ScrollReveal direction="up" delay={100}>
               <h1

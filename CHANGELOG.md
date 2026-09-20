@@ -7,22 +7,22 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
-## CHG-2026-2109-038 — Overview cards 12% narrower in two rows of five
+## CHG-2026-2109-039 — Overview cards 12% wider in two rows of five
 
 **Date:** 2026-09-21
-**Time:** 03:21:23
+**Time:** 03:25:02
 **Timezone:** Pacific/Auckland
 **Version:** 1.9.0
 **Type:** Changed
 
 **Request**
 
-> Every Admin Overview stat card  increase the narrow it in  12% more. Height and inner layout are unchanged. Make it 2 rows Put 5 in one and another 5 in the next row. push it.
+> Every Admin Overview stat card  increase the width size in  12% more. Height and inner layout are unchanged. Make it 2 rows Put 5 in one and another 5 in the next row. push it.
 
 **Changes**
 
-* Admin Overview stat cards are 12% narrower than the previous live width. Height and inner layout are unchanged.
-* The cards sit in two rows of five on wide screens, including an Annual Calendar card so the second row is complete.
+* Admin Overview stat cards are 12% wider than the previous live width. Height and inner layout are unchanged.
+* The cards sit in two rows of five on wide screens, with an Annual Calendar card completing the second row.
 
 **Database**
 
@@ -37,6 +37,38 @@ Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.
 * Lint: not run or failed
 * Build: passed
 * Notes: Unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors.
+
+## CHG-2026-2109-038 — Mobile foundations: fluid type, safe areas, shared page gutters
+
+**Date:** 2026-09-21
+**Time:** 03:23:21
+**Timezone:** Pacific/Auckland
+**Version:** 1.8.6
+**Type:** Changed
+
+**Request**
+
+> Make the decision to best fit the app into the mobile because I do not know what means each one of that requests.
+
+**Changes**
+
+* Phone and tablet decisions: hamburger stays below 1024px so the desktop nav is not cramped on tablets; the menu is shown on leadership bios; Photos pages that are not in the site menu are ignored; unused colour tokens were left alone.
+* The page now uses a phone-safe viewport, fluid heading sizes, shared 16/24/32px gutters, notch/home-indicator padding on chrome and dialogs, and 100dvh with a 100vh fallback.
+* Horizontal overflow is no longer hidden on the body; long text can wrap, and html uses overflow-x clip only as a last-resort guard.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: vite build, unit tests, and npm run validate recorded after this entry. Typecheck still fails on pre-existing app errors.
 
 ## CHG-2026-2109-037 — Next Service card uses a dark gray church icon
 
