@@ -6,6 +6,36 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2009-008",
+      "date": "2026-09-20",
+      "time": "18:55:15",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T06:55:15.768Z",
+      "version": "1.4.2",
+      "type": "changed",
+      "area": "admin",
+      "title": "Show approved Users count on Admin Overview",
+      "request": "On Admin dashboard, Left menu Overview, there is a card called Pending Users, Change that card to Users only and show the number of Approved Users from the System. Update all system, Front End, Admin Dashboard and or Members Dashboard. Do a push to live when completed.",
+      "changes": [
+        "The Admin Overview stat card is now labelled Users and shows the count of approved users in the system. Clicking it opens User Management.",
+        "The pending-approvals list and Review Pending Users shortcut on Overview are unchanged so new signups can still be approved. The member dashboard had no matching Pending Users card, so it was left as-is. Admin Help Overview now describes the Users card."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "57 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors. No browser MCP; verified Admin Overview stats card uses Users + approved count."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2009-007",
       "date": "2026-09-20",
       "time": "16:48:28",

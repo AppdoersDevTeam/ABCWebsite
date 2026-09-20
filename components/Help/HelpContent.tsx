@@ -45,6 +45,7 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode, isSuperAdmin = f
           <>
             <Section title="Overview">
               <li>Your landing page after signing in as an admin: quick snapshot and shortcuts into the main tools.</li>
+              <li>The Users card shows how many approved users are in the system. Click it to open User Management.</li>
               <li>Use it to orient new admins before they open User Management or Leadership.</li>
             </Section>
 

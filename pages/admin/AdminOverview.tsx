@@ -568,6 +568,11 @@ export const AdminOverview = () => {
 
   const visiblePendingCount = visiblePendingUsers.length;
 
+  const visibleApprovedCount = useMemo(
+    () => visibleUsers.filter((u) => u.is_approved === true).length,
+    [visibleUsers]
+  );
+
   const formatDate = (dateString: string | undefined, userTimezone?: string) => {
     // For admin views, display dates in the admin's current timezone
     return formatRelativeDateInTimezone(dateString, userTimezone);
@@ -575,12 +580,13 @@ export const AdminOverview = () => {
 
   const stats = useMemo(() => [
     { 
-      label: 'Pending Users', 
-      value: visiblePendingCount.toString(), 
-      icon: <UserCheck size={20} />, 
-      path: '#pending-users', 
+      label: 'Users', 
+      value: isLoadingUsers ? '...' : visibleApprovedCount.toString(), 
+      icon: <Users size={20} />, 
+      path: '/admin/users', 
       color: 'text-gold', 
-      highlight: visiblePendingCount > 0 
+      highlight: false,
+      subtitle: isLoadingUsers ? 'Loading...' : 'Approved users in the system',
     },
     { 
       label: 'New Prayer Requests (24h)', 
@@ -648,7 +654,7 @@ export const AdminOverview = () => {
           : 'To users and Leadership',
       highlight: Boolean(emailsQuota && emailQuotaNearLimit(emailsQuota)),
     },
-  ], [visiblePendingCount, prayerRequests24h, nextService, lastNewsletterDate, lastNewsletterTitle, lastDevotionalDate, isLoadingStats, teamMembersCount, rosterAssignmentsCount, emailsQuota]);
+  ], [visibleApprovedCount, isLoadingUsers, prayerRequests24h, nextService, lastNewsletterDate, lastNewsletterTitle, lastDevotionalDate, isLoadingStats, teamMembersCount, rosterAssignmentsCount, emailsQuota]);
 
   console.log('AdminOverview - Rendering, user:', user, 'pendingCount:', pendingCount, 'isLoadingUsers:', isLoadingUsers);
 
@@ -696,6 +702,8 @@ export const AdminOverview = () => {
                       : emailsQuota
                         ? 'Users and Leadership, New Zealand time'
                         : 'Users and Leadership'
+                    : stat.label === 'Users' && !isLoadingUsers
+                    ? `${visibleApprovedCount === 1 ? 'approved user' : 'approved users'} in the system`
                     : stat.subtitle;
 
           const card = (

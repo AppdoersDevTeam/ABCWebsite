@@ -7,6 +7,37 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2009-008 — Show approved Users count on Admin Overview
+
+**Date:** 2026-09-20
+**Time:** 18:55:15
+**Timezone:** Pacific/Auckland
+**Version:** 1.4.2
+**Type:** Changed
+
+**Request**
+
+> On Admin dashboard, Left menu Overview, there is a card called Pending Users, Change that card to Users only and show the number of Approved Users from the System. Update all system, Front End, Admin Dashboard and or Members Dashboard. Do a push to live when completed.
+
+**Changes**
+
+* The Admin Overview stat card is now labelled Users and shows the count of approved users in the system. Clicking it opens User Management.
+* The pending-approvals list and Review Pending Users shortcut on Overview are unchanged so new signups can still be approved. The member dashboard had no matching Pending Users card, so it was left as-is. Admin Help Overview now describes the Users card.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: 57 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors. No browser MCP; verified Admin Overview stats card uses Users + approved count.
+
 ## CHG-2026-2009-007 — Add Events item to the public website menu
 
 **Date:** 2026-09-20
