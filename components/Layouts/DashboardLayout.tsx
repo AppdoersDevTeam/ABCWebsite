@@ -7,7 +7,6 @@ import {
   BookOpen, 
   ClipboardList, 
   LogOut, 
-  Menu,
   X,
   ArrowRightLeft,
   HelpCircle,
@@ -18,10 +17,11 @@ import {
   CalendarDays
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { displayName, displayInitial, isAdminUser, EVENTS_LABEL } from '../../lib/constants';
+import { isAdminUser, EVENTS_LABEL } from '../../lib/constants';
 import { ScrollToTop } from '../ScrollToTop';
 import { useAutoSectionReveal } from '../UI/useAutoSectionReveal';
 import { DASHBOARD_NAV_ICON } from '../../lib/dashboardNav';
+import { flattenPortalSearchItems, portalPageTitle, PortalTopBar } from './PortalTopBar';
 
 export const DashboardLayout = () => {
   const { user, logout } = useAuth();
@@ -51,37 +51,40 @@ export const DashboardLayout = () => {
   ];
 
   return (
-    <div className="page-shell page-shell-image h-dvh lg:h-screen">
-      <div className="page-shell-content flex h-dvh lg:h-screen font-sans text-charcoal relative overflow-hidden selection:bg-gold selection:text-charcoal">
-        <ScrollToTop />
-        
-        {/* Mobile Sidebar Overlay */}
+    <div className="flex h-dvh flex-col bg-dash font-sans text-charcoal lg:h-screen">
+      <ScrollToTop />
+      <PortalTopBar
+        variant="member"
+        pageTitle={portalPageTitle(location.pathname, navItems)}
+        searchItems={flattenPortalSearchItems(navItems)}
+        helpPath="/dashboard/help"
+        onOpenSidebar={() => setIsSidebarOpen(true)}
+        showSwitchRole={isAdminUser(user)}
+        onSwitchRole={() => {
+          sessionStorage.removeItem('testRoleOverride');
+          navigate('/admin');
+        }}
+        onSignOut={handleLogout}
+      />
+
+      <div className="relative flex min-h-0 flex-1 overflow-hidden">
         {isSidebarOpen && (
-          <div 
-            className="fixed inset-0 bg-charcoal/20 backdrop-blur-sm z-40 lg:hidden"
+          <div
+            className="fixed inset-0 z-40 bg-charcoal/20 backdrop-blur-sm lg:hidden"
             onClick={() => setIsSidebarOpen(false)}
           />
         )}
 
-        {/* Sidebar */}
         <aside className={`
-          fixed lg:static inset-y-0 left-0 z-50 w-72 bg-white/80 backdrop-blur-md border-r border-gray-100 transform transition-transform duration-300 ease-in-out shadow-sm h-dvh lg:h-screen
+          fixed bottom-0 left-0 top-14 z-50 w-72 transform border-r border-gray-100 bg-white shadow-sm transition-transform duration-300 ease-in-out lg:static lg:top-auto lg:h-full lg:translate-x-0
           ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}>
-          <div className="flex flex-col h-full relative">
-            <div className="p-8 border-b border-gray-100 flex justify-between items-center">
-              <Link to="/" className="block">
-                  <img 
-                    src="/ABC Logo.png" 
-                    alt="Ashburton Baptist Church" 
-                    className="h-16 transition-opacity duration-300 hover:opacity-80"
-                  />
-                  <span className="block text-[10px] uppercase tracking-[0.2em] text-gold mt-1">Member Portal</span>
-              </Link>
-              <button className="lg:hidden text-charcoal" onClick={() => setIsSidebarOpen(false)}><X /></button>
+          <div className="flex h-full flex-col">
+            <div className="flex items-center justify-end border-b border-gray-100 px-3 py-2 lg:hidden">
+              <button className="text-charcoal" onClick={() => setIsSidebarOpen(false)} aria-label="Close menu"><X /></button>
             </div>
 
-          <nav className="flex-1 overflow-y-auto py-6 px-4 space-y-2">
+          <nav className="flex-1 space-y-2 overflow-y-auto px-4 py-4">
             {navItems.map((item) => {
               const isActive = location.pathname === item.path;
               return (
@@ -110,19 +113,7 @@ export const DashboardLayout = () => {
             })}
           </nav>
 
-          <div className="p-4 border-t border-gray-100">
-            <div className="flex items-center space-x-3 px-4 py-4 mb-2 rounded-[4px] bg-gray-50 border border-gray-100">
-              <div className="w-10 h-10 rounded-full bg-gold flex items-center justify-center text-charcoal font-bold text-lg">
-                {displayInitial(user)}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold text-charcoal truncate">{displayName(user)}</p>
-                <p className="text-xs text-neutral truncate">{user?.email}</p>
-                <span className="text-[10px] text-gold font-bold uppercase tracking-wider">
-                  {isAdminUser(user) ? 'Admin' : 'Member'}
-                </span>
-              </div>
-            </div>
+          <div className="border-t border-gray-100 p-3">
             {isAdminUser(user) && (
               <button 
                 onClick={() => {
@@ -146,18 +137,8 @@ export const DashboardLayout = () => {
         </div>
         </aside>
 
-        {/* Main Content Area */}
-        <div className="flex-1 flex flex-col min-w-0 h-dvh lg:h-screen overflow-hidden relative z-10">
-          {/* Mobile Header */}
-          <header className="lg:hidden bg-white/80 backdrop-blur-md border-b border-gray-100 flex items-center justify-between px-4 h-16 relative z-20 flex-shrink-0">
-            <button onClick={() => setIsSidebarOpen(true)} className="text-charcoal p-2">
-              <Menu size={24} />
-            </button>
-            <span className="font-serif font-normal text-lg text-charcoal">Dashboard</span>
-            <div className="w-8" />
-          </header>
-
-          <main className="flex-1 overflow-y-auto overflow-x-auto p-4 sm:p-8 min-h-0">
+        <div className="flex min-w-0 flex-1 flex-col overflow-hidden bg-dash">
+          <main className="min-h-0 flex-1 overflow-x-auto overflow-y-auto p-4 sm:p-8">
             <Outlet />
           </main>
         </div>

@@ -7,6 +7,38 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2009-011 — Gray dashboard canvas, yellow top bar, and compact portal identity
+
+**Date:** 2026-09-20
+**Time:** 20:13:26
+**Timezone:** Pacific/Auckland
+**Version:** 1.6.0
+**Type:** Changed
+
+**Request**
+
+> Use the admin and member dashboard Background color as per the square gray color attached, also use the yellow attached to make the top search bar for the dashboard background. For the Admin Portal on the top left make it as the Admin Portal file attached, copy the rectangle as well as fonts and background also add the user logged in there. decrease the height.
+
+**Changes**
+
+* Admin and member dashboards now use a flat light gray canvas instead of the photo background.
+* A compact yellow top bar holds Search (jumps to matching left-menu pages), the current page name, and Help.
+* The tall Admin/Member Portal logo block is replaced by a short white rounded identity card: church logo, church name, the signed-in person’s name, and a chevron menu (public site, switch role, sign out).
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: Unit tests, validate, and vite build run after implementation. Typecheck still fails on pre-existing app errors. No browser MCP; verify Admin and Member dashboards after refresh.
+
 ## CHG-2026-2009-010 — Admin Users & Roles menu with Users and Roles cards
 
 **Date:** 2026-09-20
