@@ -1,7 +1,7 @@
 {
   "name": "ashburton-baptist-church",
   "private": true,
-  "version": "1.7.37",
+  "version": "1.7.38",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -34,6 +34,9 @@
     "@types/node": "^22.14.0",
     "@types/qrcode": "^1.5.6",
     "@vitejs/plugin-react": "^5.0.0",
+    "autoprefixer": "^10.6.1",
+    "postcss": "^8.5.28",
+    "tailwindcss": "^3.4.19",
     "typescript": "~5.8.2",
     "vite": "^6.2.0"
   }

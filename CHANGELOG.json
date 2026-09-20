@@ -6,6 +6,36 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2109-023",
+      "date": "2026-09-21",
+      "time": "02:35:23",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T14:35:23.660Z",
+      "version": "1.7.38",
+      "type": "changed",
+      "area": "admin",
+      "title": "Overview cards share the Users card height and aligned layout",
+      "request": "make all overview cards the same hight size as per Users cards and ajust and align it proportionaly. push live",
+      "changes": [
+        "All Overview stat cards now share the same height as the Users card, including the second row.",
+        "Title, number, and bottom row (Users status icons or empty space) stay aligned across cards."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "73 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2109-022",
       "date": "2026-09-21",
       "time": "02:29:33",

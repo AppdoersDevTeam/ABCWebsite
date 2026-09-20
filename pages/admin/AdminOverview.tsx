@@ -726,7 +726,7 @@ export const AdminOverview = () => {
       />
 
       {/* Stats Grid */}
-      <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-5 md:gap-6">
+      <div className="grid md:grid-cols-2 xl:grid-cols-4 auto-rows-fr items-stretch gap-5 md:gap-6">
         {stats.map((stat, i) => {
           const description =
             stat.label === 'E-mails Sent' && !isLoadingStats && emailsQuota?.blocked
@@ -758,7 +758,7 @@ export const AdminOverview = () => {
                     element.scrollIntoView({ behavior: 'smooth' });
                   }
                 }}
-                className="mx-auto block h-full w-[calc(100%-190px)]"
+                className="mx-auto flex h-full w-[calc(100%-190px)] flex-col"
               >
                 {card}
               </a>
@@ -766,7 +766,7 @@ export const AdminOverview = () => {
           }
 
           return (
-            <Link key={i} to={stat.path} className="mx-auto block h-full w-[calc(100%-190px)]">
+            <Link key={i} to={stat.path} className="mx-auto flex h-full w-[calc(100%-190px)] flex-col">
               {card}
             </Link>
           );

@@ -7,6 +7,37 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2109-023 — Overview cards share the Users card height and aligned layout
+
+**Date:** 2026-09-21
+**Time:** 02:35:23
+**Timezone:** Pacific/Auckland
+**Version:** 1.7.38
+**Type:** Changed
+
+**Request**
+
+> make all overview cards the same hight size as per Users cards and ajust and align it proportionaly. push live
+
+**Changes**
+
+* All Overview stat cards now share the same height as the Users card, including the second row.
+* Title, number, and bottom row (Users status icons or empty space) stay aligned across cards.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: 73 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors.
+
 ## CHG-2026-2109-022 — Overview card titles smaller; Prayer and Roster labels shortened
 
 **Date:** 2026-09-21
