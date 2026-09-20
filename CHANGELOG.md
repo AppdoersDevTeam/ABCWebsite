@@ -7,6 +7,37 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2009-007 — Add Events item to the public website menu
+
+**Date:** 2026-09-20
+**Time:** 16:48:28
+**Timezone:** Pacific/Auckland
+**Version:** 1.4.1
+**Type:** Added
+
+**Request**
+
+> Add a new Menu call Events and once clicked on there take the person to the Events page.
+
+**Changes**
+
+* The public header and mobile menus now include Events as its own item. Clicking it opens the Events calendar page at /events.
+* The Ministries menu is unchanged.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: 57 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors. No browser MCP; verified PublicLayout header and mobile nav include Events linking to /events.
+
 ## CHG-2026-2009-006 — Replace What's On with Ministries pages outside /events
 
 **Date:** 2026-09-20

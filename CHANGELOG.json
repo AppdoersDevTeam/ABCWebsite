@@ -6,6 +6,36 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2009-007",
+      "date": "2026-09-20",
+      "time": "16:48:28",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T04:48:28.055Z",
+      "version": "1.4.1",
+      "type": "added",
+      "area": "events",
+      "title": "Add Events item to the public website menu",
+      "request": "Add a new Menu call Events and once clicked on there take the person to the Events page.",
+      "changes": [
+        "The public header and mobile menus now include Events as its own item. Clicking it opens the Events calendar page at /events.",
+        "The Ministries menu is unchanged."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "57 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors. No browser MCP; verified PublicLayout header and mobile nav include Events linking to /events."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2009-006",
       "date": "2026-09-20",
       "time": "16:34:28",

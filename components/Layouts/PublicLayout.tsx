@@ -173,6 +173,11 @@ export const PublicLayout = () => {
       path: '/events/sermons',
       submenu: []
     },
+    {
+      label: EVENTS_LABEL,
+      path: '/events',
+      submenu: []
+    },
     { 
       label: MINISTRIES_LABEL, 
       path: '/ministries',
