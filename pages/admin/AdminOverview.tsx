@@ -769,7 +769,7 @@ export const AdminOverview = () => {
                     element.scrollIntoView({ behavior: 'smooth' });
                   }
                 }}
-                className="mx-auto flex h-full w-[calc((100%-190px)*0.75)] flex-col"
+                className="mx-auto flex h-full w-[calc((100%-190px)*0.5625)] flex-col"
               >
                 {card}
               </a>
@@ -777,7 +777,7 @@ export const AdminOverview = () => {
           }
 
           return (
-            <Link key={i} to={stat.path} className="mx-auto flex h-full w-[calc((100%-190px)*0.75)] flex-col">
+            <Link key={i} to={stat.path} className="mx-auto flex h-full w-[calc((100%-190px)*0.5625)] flex-col">
               {card}
             </Link>
           );

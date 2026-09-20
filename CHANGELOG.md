@@ -7,6 +7,36 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2109-036 — Overview cards narrowed another 25%
+
+**Date:** 2026-09-21
+**Time:** 03:15:40
+**Timezone:** Pacific/Auckland
+**Version:** 1.8.4
+**Type:** Changed
+
+**Request**
+
+> Every Admin Overview stat card  narrow it in  25% less. Height and inner layout are unchanged. push it
+
+**Changes**
+
+* Every Admin Overview stat card is 25% narrower than the previous live width. Height and inner layout are unchanged.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: Unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors.
+
 ## CHG-2026-2109-035 — Overview cards 25% narrower
 
 **Date:** 2026-09-21

@@ -6,6 +6,35 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2109-036",
+      "date": "2026-09-21",
+      "time": "03:15:40",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T15:15:40.061Z",
+      "version": "1.8.4",
+      "type": "changed",
+      "area": "admin",
+      "title": "Overview cards narrowed another 25%",
+      "request": "Every Admin Overview stat card  narrow it in  25% less. Height and inner layout are unchanged. push it",
+      "changes": [
+        "Every Admin Overview stat card is 25% narrower than the previous live width. Height and inner layout are unchanged."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "Unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2109-035",
       "date": "2026-09-21",
       "time": "03:11:35",
