@@ -2,7 +2,7 @@ import React from 'react';
 import { Clock, Unlink, UserCheck } from 'lucide-react';
 import { formatOverviewUserBreakdown } from '../../lib/overviewUserCounts';
 
-const COUNT_ICON_SIZE = 16 + 3;
+const COUNT_ICON_SIZE = 16;
 
 export const OverviewUserBreakdown: React.FC<{
   approved: number;
@@ -11,7 +11,7 @@ export const OverviewUserBreakdown: React.FC<{
 }> = ({ approved, pending, notLinked }) => {
   return (
     <span
-      className="flex flex-col items-start gap-1 text-[22px]"
+      className="flex flex-col items-start gap-1 text-[24px]"
       aria-label={formatOverviewUserBreakdown({ approved, pending, notLinked })}
     >
       <span className="inline-flex items-center gap-1 font-bold text-green-600" title="Approved">

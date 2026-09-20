@@ -6,6 +6,36 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2109-029",
+      "date": "2026-09-21",
+      "time": "02:49:42",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T14:49:42.658Z",
+      "version": "1.7.44",
+      "type": "changed",
+      "area": "admin",
+      "title": "Users status icons smaller; Overview counts 2px larger",
+      "request": "on the Users cards, decrease all icons righ under the Card Icon in 3px. push alive. All the Count numbers increase 2px. push live.",
+      "changes": [
+        "The Approved, Pending, and Not linked icons under the Users card icon are 3px smaller.",
+        "All Overview count numbers are 2px larger."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "73 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2109-028",
       "date": "2026-09-21",
       "time": "02:48:23",

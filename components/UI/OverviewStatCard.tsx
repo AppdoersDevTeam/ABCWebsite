@@ -19,7 +19,7 @@ interface OverviewStatCardProps {
 }
 
 const valueSizeClasses: Record<OverviewValueSize, string> = {
-  stat: 'text-[30px] md:text-[34px] font-serif font-normal leading-tight tracking-tight',
+  stat: 'text-[32px] md:text-[36px] font-serif font-normal leading-tight tracking-tight',
   title: 'text-lg md:text-xl font-serif font-normal leading-snug',
 };
 
