@@ -6,6 +6,36 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2109-001",
+      "date": "2026-09-21",
+      "time": "00:05:47",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T12:05:47.089Z",
+      "version": "1.7.16",
+      "type": "added",
+      "area": "leadership",
+      "title": "People add, archive, and delete send confirmation emails",
+      "request": "When People has been added, archived ort delete, send an e-mail inofmring the person about that Action. Make a professional Email. when completed push.",
+      "changes": [
+        "Adding, archiving, or deleting a person in People now emails them a branded confirmation of that action.",
+        "Archive and delete wait for the email to send before changing the record. Add still saves the person if the email cannot be sent, and shows a warning."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "60 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors. Live notify-directory-person v2 is deployed on the ABC Website Supabase project with index, recordEmailSend, emailQuota, and directoryPersonEmail. No live add/archive/delete was run in browser, to avoid emailing real people."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2009-028",
       "date": "2026-09-20",
       "time": "23:57:48",

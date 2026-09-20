@@ -7,6 +7,37 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2109-001 — People add, archive, and delete send confirmation emails
+
+**Date:** 2026-09-21
+**Time:** 00:05:47
+**Timezone:** Pacific/Auckland
+**Version:** 1.7.16
+**Type:** Added
+
+**Request**
+
+> When People has been added, archived ort delete, send an e-mail inofmring the person about that Action. Make a professional Email. when completed push.
+
+**Changes**
+
+* Adding, archiving, or deleting a person in People now emails them a branded confirmation of that action.
+* Archive and delete wait for the email to send before changing the record. Add still saves the person if the email cannot be sent, and shows a warning.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: 60 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors. Live notify-directory-person v2 is deployed on the ABC Website Supabase project with index, recordEmailSend, emailQuota, and directoryPersonEmail. No live add/archive/delete was run in browser, to avoid emailing real people.
+
 ## CHG-2026-2009-028 — Users list shows Linked and red Pending
 
 **Date:** 2026-09-20

@@ -118,6 +118,7 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode, isSuperAdmin = f
               <li>Assign groups (ministries) and job roles; photos and names feed leader lines on rosters and listings.</li>
               <li>Watch for duplicate emails and “linked account” vs “no account link” so logins and {PEOPLE_LABEL} rows stay aligned.</li>
               <li>If you archive or delete a person who has a linked website login, you are told the login will be unlinked. You can also choose to archive or delete that login at the same time.</li>
+              <li>Adding, archiving, or deleting a person sends them a confirmation email about that action.</li>
             </Section>
 
             <Section title={EVENTS_LABEL}>

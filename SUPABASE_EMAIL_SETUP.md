@@ -342,6 +342,20 @@ The function is already deployed once for project **ABC Website** (`zwxlccqhafdn
 
 ---
 
+## People directory emails (add, archive, delete)
+
+When an admin adds, archives, or deletes a person on **People**, the app calls `notify-directory-person` and sends a branded confirmation to that person's directory email.
+
+Source: `supabase/functions/notify-directory-person/index.ts`
+
+```powershell
+npx supabase functions deploy notify-directory-person --project-ref zwxlccqhafdnvdohzxkg
+```
+
+Archive and delete wait for the email to send. Add still saves the person if the email cannot be sent, and shows a warning.
+
+---
+
 ## Intro inquiry email (pending signups)
 
 Admins can email unknown pending signups from **Admin Overview** or **Admin Users** (Email next to Approve / Reject). A compose modal opens with an editable template; send uses Resend from the church office with `Reply-To: office@ashburtonbaptist.co.nz`.

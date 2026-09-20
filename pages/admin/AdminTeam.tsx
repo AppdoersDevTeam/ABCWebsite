@@ -12,6 +12,7 @@ import { formatDdMmYyyy } from '../../lib/dateUtils';
 import { useAuth } from '../../context/AuthContext';
 import { CHURCH_NAME, displayInitials, displayName, isAccessHeld, isAdminUser, isOwnUserAccount, isServiceAccountEmail, PEOPLE_LABEL } from '../../lib/constants';
 import { deleteUserAccount } from '../../lib/deleteUserAccount';
+import { directoryPersonEmailNote, notifyDirectoryPerson } from '../../lib/notifyDirectoryPerson';
 import { accessHoldEmailNote, notifyUserAccessHold } from '../../lib/notifyUserAccessHold';
 import metadata from '../../metadata.json';
 
@@ -752,6 +753,20 @@ export const AdminTeam = () => {
         details: { profile_type: trimmed.profile_type },
       });
 
+      const mail = await notifyDirectoryPerson({
+        kind: 'added',
+        email: trimmed.email,
+        name: trimmed.name,
+        teamMemberId: created.id,
+      });
+      if (!mail.ok) {
+        alert(
+          `${trimmed.name} was added to ${PEOPLE_LABEL}, but the confirmation email could not be sent${
+            mail.error ? `: ${mail.error}` : ''
+          }.`
+        );
+      }
+
       await fetchMembers();
       resetModal();
       setIsModalOpen(false);
@@ -863,6 +878,23 @@ export const AdminTeam = () => {
 
     setIsDeleting(true);
     try {
+      const mail = await notifyDirectoryPerson({
+        kind: 'deleted',
+        email: deleteTarget.email,
+        name: deleteTarget.name,
+        teamMemberId: deleteTarget.id,
+        userId: linkedUserId,
+      });
+      if (!mail.ok) {
+        alert(
+          `${PEOPLE_LABEL} was not deleted because the confirmation email could not be sent${
+            mail.error ? `: ${mail.error}` : ''
+          }.`
+        );
+        return;
+      }
+      deleteNote = directoryPersonEmailNote(mail);
+
       if (deleteLinked && linkedUserId) {
         const result = await deleteUserAccount(linkedUserId);
         if (!result.ok) {
@@ -870,11 +902,11 @@ export const AdminTeam = () => {
           return;
         }
         if (result.emailed) {
-          deleteNote = ` A confirmation email was sent to ${result.emailed}.`;
+          deleteNote += ` A website-account confirmation email was sent to ${result.emailed}.`;
         } else if (result.emailSkipped) {
-          deleteNote = result.emailSkipReason
-            ? ` The website account was removed, but the confirmation email was not sent (${result.emailSkipReason}).`
-            : ' The website account was removed, but the confirmation email could not be sent.';
+          deleteNote += result.emailSkipReason
+            ? ` The website account was removed, but that confirmation email was not sent (${result.emailSkipReason}).`
+            : ' The website account was removed, but that confirmation email could not be sent.';
         }
         logAuditEventSafe({
           action: 'delete',
@@ -900,11 +932,11 @@ export const AdminTeam = () => {
       setDeleteConfirmText('');
       resetLinkedPrompt();
       await fetchMembers();
-      if (deleteLinked) {
-        alert(
-          `Those accounts have been deleted: the People record for ${deleteTarget.name} and the linked website account.${deleteNote}`
-        );
-      }
+      alert(
+        deleteLinked
+          ? `Those accounts have been deleted: the People record for ${deleteTarget.name} and the linked website account.${deleteNote}`
+          : `${deleteTarget.name} has been deleted from ${PEOPLE_LABEL}.${deleteNote}`
+      );
     } catch (error: unknown) {
       console.error('Error deleting team member:', error);
       alert(getSupabaseErrorMessage(error) || `Failed to delete ${PEOPLE_LABEL} person`);
@@ -926,6 +958,23 @@ export const AdminTeam = () => {
 
     setIsArchiving(true);
     try {
+      const mail = await notifyDirectoryPerson({
+        kind: 'archived',
+        email: archiveTarget.email,
+        name: archiveTarget.name,
+        teamMemberId: archiveTarget.id,
+        userId: linkedUserId,
+      });
+      if (!mail.ok) {
+        alert(
+          `${PEOPLE_LABEL} was not archived because the confirmation email could not be sent${
+            mail.error ? `: ${mail.error}` : ''
+          }.`
+        );
+        return;
+      }
+      const directoryNote = directoryPersonEmailNote(mail);
+
       if (archiveLinked && linkedUserId) {
         if (linkedUser && isAccessHeld(linkedUser)) {
           holdNote = ' The linked website account was already on hold.';
@@ -972,11 +1021,11 @@ export const AdminTeam = () => {
       setArchiveTarget(null);
       resetLinkedPrompt();
       await fetchMembers();
-      if (archiveLinked) {
-        alert(
-          `Those accounts have been archived: the People record for ${archiveTarget.name} and the linked website account.${holdNote}`
-        );
-      }
+      alert(
+        archiveLinked
+          ? `Those accounts have been archived: the People record for ${archiveTarget.name} and the linked website account.${directoryNote}${holdNote}`
+          : `${archiveTarget.name} has been archived.${directoryNote}`
+      );
     } catch (error: unknown) {
       console.error('Error archiving team member:', error);
       alert(getSupabaseErrorMessage(error) || `Failed to archive ${PEOPLE_LABEL} person`);
