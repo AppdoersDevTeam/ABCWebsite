@@ -127,6 +127,7 @@ export const Modal: React.FC<ModalProps> = ({
             type="button"
             onClick={requestClose}
             disabled={preventClose}
+            aria-label="Close"
             className="absolute right-4 top-4 z-10 inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full p-2 text-neutral transition-colors hover:bg-gray-100 hover:text-charcoal disabled:cursor-not-allowed disabled:opacity-40"
           >
             <X size={24} />

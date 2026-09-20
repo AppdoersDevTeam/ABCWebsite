@@ -226,8 +226,7 @@ export const StatementOfFaith = () => {
           <div className="max-w-3xl mx-auto text-center">
             <ScrollReveal direction="up" delay={100}>
               <h1
-                className="text-white mb-3 px-2"
-                style={{ fontFamily: 'Kaushan Script', fontSize: 'clamp(2.25rem, 7vw, 4.25rem)', lineHeight: 1.15 }}
+                className="hero-title text-white mb-3 px-2"
               >
                 What We Believe
               </h1>

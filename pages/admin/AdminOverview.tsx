@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { OverviewStatCard } from '../../components/UI/OverviewStatCard';
 import { OverviewUserBreakdown } from '../../components/UI/OverviewUserBreakdown';
-import { Calendar, CalendarDays, Church, BookOpen, Users, ClipboardList, UserCheck, UserCog, X, Plus, Shield, Mail, Newspaper, HandHeart } from 'lucide-react';
+import { Calendar, Church, BookOpen, Users, ClipboardList, UserCheck, UserCog, X, Plus, Shield, Mail, Newspaper, HandHeart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { appConfirm } from '../../lib/appDialog';
@@ -704,14 +704,6 @@ export const AdminOverview = () => {
           : undefined,
       highlight: Boolean(emailsQuota && emailQuotaNearLimit(emailsQuota)),
     },
-    {
-      label: 'Annual Calendar',
-      value: new Date().getFullYear().toString(),
-      icon: <CalendarDays size={20} />,
-      path: '/admin/calendar',
-      color: 'text-emerald-600',
-      subtitle: isLoadingStats ? 'Loading...' : undefined,
-    },
   ], [visibleUsers.length, visibleApprovedCount, visiblePendingCount, visibleNotLinkedCount, isLoadingUsers, prayerRequestsCount, nextService, eventsCount, newsletterCount, devotionalsCount, isLoadingStats, teamMembersCount, rosterAssignmentsCount, emailsQuota]);
 
   console.log('AdminOverview - Rendering, user:', user, 'pendingCount:', pendingCount, 'isLoadingUsers:', isLoadingUsers);
@@ -721,8 +713,8 @@ export const AdminOverview = () => {
     return (
       <div className="space-y-8">
         <SkeletonPageHeader />
-        <div className="grid md:grid-cols-2 xl:grid-cols-5 gap-6">
-          {Array.from({ length: 10 }).map((_, i) => (
+        <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {Array.from({ length: 9 }).map((_, i) => (
             <SkeletonCard key={i} />
           ))}
         </div>
@@ -745,7 +737,7 @@ export const AdminOverview = () => {
       />
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 auto-rows-fr items-stretch justify-items-center gap-5 md:gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 auto-rows-fr items-stretch justify-items-center gap-5 md:gap-6">
         {stats.map((stat, i) => {
           const description =
             stat.label === 'E-mails Sent' && !isLoadingStats && emailsQuota?.blocked
@@ -777,7 +769,7 @@ export const AdminOverview = () => {
                     element.scrollIntoView({ behavior: 'smooth' });
                   }
                 }}
-                className="mx-auto flex h-full w-[48%] flex-col"
+                className="mx-auto flex h-full w-[calc((100%-190px)*0.5625)] flex-col"
               >
                 {card}
               </a>
@@ -785,7 +777,7 @@ export const AdminOverview = () => {
           }
 
           return (
-            <Link key={i} to={stat.path} className="mx-auto flex h-full w-[48%] flex-col">
+            <Link key={i} to={stat.path} className="mx-auto flex h-full w-[calc((100%-190px)*0.5625)] flex-col">
               {card}
             </Link>
           );

@@ -28,8 +28,7 @@ export const MinistriesIndex = () => {
           <div className="max-w-4xl mx-auto text-center">
             <ScrollReveal direction="up" delay={150}>
               <h1
-                className="text-white text-center max-w-5xl mx-auto mb-4 transition-all duration-1000 delay-250"
-                style={{ fontFamily: 'Kaushan Script', fontSize: '4.25rem', lineHeight: '1.2' }}
+                className="hero-title text-white text-center max-w-5xl mx-auto mb-4 transition-all duration-1000 delay-250"
               >
                 {MINISTRIES_LABEL}
               </h1>

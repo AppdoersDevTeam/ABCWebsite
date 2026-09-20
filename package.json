@@ -1,7 +1,7 @@
 {
   "name": "ashburton-baptist-church",
   "private": true,
-  "version": "1.9.0",
+  "version": "1.8.5",
   "type": "module",
   "scripts": {
     "dev": "vite",

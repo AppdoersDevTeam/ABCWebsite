@@ -286,8 +286,7 @@ export const EventDetail = () => {
             </div>
             <ScrollReveal direction="up" delay={150}>
               <h1
-                className="text-white text-center max-w-5xl mx-auto mb-4 transition-all duration-1000 delay-250"
-                style={{ fontFamily: 'Kaushan Script', fontSize: 'clamp(2rem, 5vw, 4.25rem)', lineHeight: '1.2' }}
+                className="hero-title text-white text-center max-w-5xl mx-auto mb-4 transition-all duration-1000 delay-250"
               >
                 {event.title}
               </h1>
