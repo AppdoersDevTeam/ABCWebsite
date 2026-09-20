@@ -67,6 +67,7 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode, isSuperAdmin = f
                 account while logged in.
               </li>
               <li>Link a login to a {PEOPLE_LABEL} record so group memberships and rosters apply to that account. Use Check {PEOPLE_LABEL} Links to retry safe automatic matches.</li>
+              <li>When a login is linked, Users shows Linked under the name in the same purple as {PEOPLE_LABEL}. Pending shows in red.</li>
               <li>Not every login needs a {PEOPLE_LABEL} row—only link when they should appear in ministry lists or see group rosters.</li>
             </Section>
 

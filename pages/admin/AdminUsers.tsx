@@ -1089,8 +1089,11 @@ export const AdminUsers = () => {
                           </div>
                           <div className="min-w-0">
                             <p className="truncate font-medium text-gold">{displayNameLastFirst(u)}</p>
+                            {link ? (
+                              <p className="text-[11px] font-bold uppercase text-purple-700">Linked</p>
+                            ) : null}
                             {isPendingApproval(u) && (
-                              <p className="text-[11px] font-bold uppercase text-yellow-700">Pending</p>
+                              <p className="text-[11px] font-bold uppercase text-red-600">Pending</p>
                             )}
                             {isAccessHeld(u) && (
                               <p className="text-[11px] font-bold uppercase text-orange-700">Hold Access</p>

@@ -7,6 +7,37 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2009-028 — Users list shows Linked and red Pending
+
+**Date:** 2026-09-20
+**Time:** 23:57:48
+**Timezone:** Pacific/Auckland
+**Version:** 1.7.15
+**Type:** Changed
+
+**Request**
+
+> On Users when a user has a linked account, show linked underneth the name as it is in People, same color also change the color of PENDING to red font color.  Push when completed.
+
+**Changes**
+
+* Users now shows Linked under the name in the same purple as People when the login is linked to a People record.
+* Pending under the name is now red.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: 57 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors. No browser MCP in this session; Users name labels were checked in code.
+
 ## CHG-2026-2009-027 — People archive and delete warn about linked logins
 
 **Date:** 2026-09-20

@@ -6,6 +6,36 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2009-028",
+      "date": "2026-09-20",
+      "time": "23:57:48",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T11:57:48.273Z",
+      "version": "1.7.15",
+      "type": "changed",
+      "area": "users",
+      "title": "Users list shows Linked and red Pending",
+      "request": "On Users when a user has a linked account, show linked underneth the name as it is in People, same color also change the color of PENDING to red font color.  Push when completed.",
+      "changes": [
+        "Users now shows Linked under the name in the same purple as People when the login is linked to a People record.",
+        "Pending under the name is now red."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "57 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors. No browser MCP in this session; Users name labels were checked in code."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2009-027",
       "date": "2026-09-20",
       "time": "23:54:32",
