@@ -7,6 +7,36 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2009-018 — User-arrow menu visible above the left sidebar
+
+**Date:** 2026-09-20
+**Time:** 21:30:48
+**Timezone:** Pacific/Auckland
+**Version:** 1.7.5
+**Type:** Fixed
+
+**Request**
+
+> I cannot see the Sign out and User Profiles inside the tole left buttom when click on the arrow. oush when completed.
+
+**Changes**
+
+* Clicking the top-left user arrow now opens My Profile, User Security, and Sign Out in a fixed overlay so the menu is no longer hidden under the left sidebar or the 64px top bar.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: Unit tests, validate, and vite build run after implementation, then npm run push:live.
+
 ## CHG-2026-2009-017 — Sign Out in user menu; My Profile opens own user file
 
 **Date:** 2026-09-20

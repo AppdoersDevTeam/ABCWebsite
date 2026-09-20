@@ -121,7 +121,7 @@ export const AdminLayout = () => {
         )}
 
         <aside className={`
-          fixed bottom-0 left-0 top-16 z-50 transform border-r border-gray-100 bg-white shadow-sm transition-[width,transform] duration-300 ease-in-out lg:static lg:top-auto lg:h-full lg:translate-x-0
+          fixed bottom-0 left-0 top-16 z-50 transform border-r border-gray-100 bg-white shadow-sm transition-[width,transform] duration-300 ease-in-out lg:static lg:top-auto lg:z-auto lg:h-full lg:translate-x-0
           ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
           ${sidebarCollapsed ? 'w-72 lg:w-[72px]' : 'w-72'}
         `}>

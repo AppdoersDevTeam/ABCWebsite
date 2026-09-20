@@ -83,6 +83,7 @@ export const PortalTopBar = ({
   const { user } = useAuth();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [menuPos, setMenuPos] = useState({ top: 0, left: 0, width: 280 });
   const [searchText, setSearchText] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
   const [notifyOpen, setNotifyOpen] = useState(false);
@@ -146,6 +147,18 @@ export const PortalTopBar = ({
     };
   }, []);
 
+  const openUserMenu = () => {
+    const box = identityRef.current?.getBoundingClientRect();
+    if (box) {
+      setMenuPos({
+        top: box.bottom + 4,
+        left: box.left,
+        width: Math.max(box.width, 280),
+      });
+    }
+    setMenuOpen(true);
+  };
+
   const goToSearchMatch = (path?: string) => {
     const target = path || matches[0]?.path;
     if (!target) {
@@ -158,16 +171,19 @@ export const PortalTopBar = ({
   };
 
   return (
-    <div className="relative z-30 flex h-16 shrink-0">
+    <div className="relative z-[80] flex h-16 shrink-0 overflow-visible">
       <div
-        className={`flex shrink-0 items-center border-r border-gray-100 bg-white py-1 ${
+        className={`flex shrink-0 items-center overflow-visible border-r border-gray-100 bg-white py-1 ${
           sidebarCollapsed ? 'w-[72px] px-1' : 'w-44 px-2 sm:w-72'
         }`}
       >
         <div className="relative w-full" ref={identityRef}>
         <button
           type="button"
-          onClick={() => setMenuOpen((open) => !open)}
+          onClick={() => {
+            if (menuOpen) setMenuOpen(false);
+            else openUserMenu();
+          }}
           className={`flex h-14 w-full items-center gap-2.5 rounded-[11px] border-[0.5px] border-gray-300 bg-gray-200 px-2.5 transition-colors hover:bg-gray-300 ${
             sidebarCollapsed ? 'justify-center px-1' : ''
           }`}
@@ -202,9 +218,8 @@ export const PortalTopBar = ({
         {menuOpen && (
           <div
             role="menu"
-            className={`absolute left-0 top-full z-40 mt-1 overflow-hidden rounded-[11px] border border-gray-200 bg-white py-1 shadow-lg ${
-              sidebarCollapsed ? 'w-72' : 'w-full min-w-[260px]'
-            }`}
+            style={{ top: menuPos.top, left: menuPos.left, width: menuPos.width }}
+            className="fixed z-[90] overflow-hidden rounded-[11px] border border-gray-200 bg-white py-1 shadow-lg"
           >
             <Link
               to={profilePath}

@@ -6,6 +6,35 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2009-018",
+      "date": "2026-09-20",
+      "time": "21:30:48",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T09:30:48.617Z",
+      "version": "1.7.5",
+      "type": "fixed",
+      "area": "admin",
+      "title": "User-arrow menu visible above the left sidebar",
+      "request": "I cannot see the Sign out and User Profiles inside the tole left buttom when click on the arrow. oush when completed.",
+      "changes": [
+        "Clicking the top-left user arrow now opens My Profile, User Security, and Sign Out in a fixed overlay so the menu is no longer hidden under the left sidebar or the 64px top bar."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "Unit tests, validate, and vite build run after implementation, then npm run push:live."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2009-017",
       "date": "2026-09-20",
       "time": "21:26:09",
