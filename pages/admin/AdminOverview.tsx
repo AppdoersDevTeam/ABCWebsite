@@ -10,8 +10,7 @@ import { cannotComplete, namedPerson, withSystemDetail } from '../../lib/systemM
 import { displayName, displayNameLastFirst, displayInitials, EVENTS_LABEL, PEOPLE_LABEL, filterUsersForAdminView, isPendingApproval } from '../../lib/constants';
 import { User } from '../../types';
 import { SkeletonPageHeader, SkeletonCard, SkeletonUserCard, SkeletonStatsCard } from '../../components/UI/Skeleton';
-import { formatRelativeDateInTimezone, formatFullDateTimeInTimezone, formatWeekDate, formatDdMmYyyy, resolveNewsletterWeekDate } from '../../lib/dateUtils';
-import { fetchLatestNewsletter } from '../../lib/newsletters';
+import { formatRelativeDateInTimezone, formatFullDateTimeInTimezone, formatDdMmYyyy } from '../../lib/dateUtils';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { logAuditEventSafe } from '../../lib/auditLog';
 import { notifyUserApproved } from '../../lib/notifyUserApproved';
@@ -38,9 +37,8 @@ export const AdminOverview = () => {
   const [emailModalUser, setEmailModalUser] = useState<User | null>(null);
   const [prayerRequests24h, setPrayerRequests24h] = useState(0);
   const [nextService, setNextService] = useState<string | null>(null);
-  const [lastNewsletterDate, setLastNewsletterDate] = useState<string | null>(null);
-  const [lastNewsletterTitle, setLastNewsletterTitle] = useState<string | null>(null);
-  const [lastDevotionalDate, setLastDevotionalDate] = useState<string | null>(null);
+  const [newsletterCount, setNewsletterCount] = useState(0);
+  const [devotionalsCount, setDevotionalsCount] = useState(0);
   const [isLoadingStats, setIsLoadingStats] = useState(true);
   const [teamMembersCount, setTeamMembersCount] = useState(0);
   const [rosterAssignmentsCount, setRosterAssignmentsCount] = useState(0);
@@ -369,38 +367,24 @@ export const AdminOverview = () => {
       // Always use calculated next Sunday - format as "dd month"
       setNextService(formatDdMmYyyy(nextSunday));
 
-      // Fetch last newsletter date
-      const latestNewsletter = await fetchLatestNewsletter();
-      if (latestNewsletter) {
-        setLastNewsletterTitle(latestNewsletter.title || null);
-        const weekDate = resolveNewsletterWeekDate(latestNewsletter);
-        setLastNewsletterDate(
-          weekDate
-            ? formatWeekDate(weekDate)
-            : formatDdMmYyyy(latestNewsletter.created_at)
-        );
+      const { count: newsletterTotal, error: newsletterCountError } = await supabase
+        .from('newsletters')
+        .select('id', { count: 'exact', head: true });
+      if (newsletterCountError) {
+        console.error('Error counting newsletters:', newsletterCountError);
+        setNewsletterCount(0);
       } else {
-        setLastNewsletterTitle(null);
-        setLastNewsletterDate(null);
+        setNewsletterCount(newsletterTotal || 0);
       }
 
-      const { data: devotionals, error: devotionalsError } = await supabase
+      const { count: devotionalsTotal, error: devotionalsCountError } = await supabase
         .from('devotionals')
-        .select('week_date, created_at')
-        .order('week_date', { ascending: false })
-        .limit(1);
-
-      if (devotionalsError) {
-        console.error('Error fetching devotionals:', devotionalsError);
-      } else if (devotionals && devotionals.length > 0) {
-        const week = new Date(`${devotionals[0].week_date}T00:00:00`);
-        setLastDevotionalDate(
-          Number.isNaN(week.getTime())
-            ? devotionals[0].week_date
-            : formatDdMmYyyy(week)
-        );
+        .select('id', { count: 'exact', head: true });
+      if (devotionalsCountError) {
+        console.error('Error counting devotionals:', devotionalsCountError);
+        setDevotionalsCount(0);
       } else {
-        setLastDevotionalDate(null);
+        setDevotionalsCount(devotionalsTotal || 0);
       }
 
       const quota = await fetchEmailQuotaStatus();
@@ -669,17 +653,16 @@ export const AdminOverview = () => {
       subtitle: isLoadingStats ? 'Loading...' : undefined
     },
     { 
-      label: 'Last Newsletter', 
-      value: isLoadingStats ? '...' : (lastNewsletterTitle || lastNewsletterDate || 'None'), 
+      label: 'Newsletters', 
+      value: isLoadingStats ? '...' : newsletterCount.toString(), 
       icon: <Newspaper size={20} />,
       path: '/admin/newsletter',
       color: 'text-orange-600',
       subtitle: isLoadingStats ? 'Loading...' : undefined,
-      valueSize: 'title' as const,
     },
     { 
-      label: 'Last Devotional', 
-      value: isLoadingStats ? '...' : (lastDevotionalDate || 'None'), 
+      label: 'Devotionals', 
+      value: isLoadingStats ? '...' : devotionalsCount.toString(), 
       icon: <BookOpen size={20} />,
       path: '/admin/devotional', 
       color: 'text-purple-600',
@@ -710,7 +693,7 @@ export const AdminOverview = () => {
           : undefined,
       highlight: Boolean(emailsQuota && emailQuotaNearLimit(emailsQuota)),
     },
-  ], [visibleUsers.length, visibleApprovedCount, visiblePendingCount, visibleNotLinkedCount, isLoadingUsers, prayerRequests24h, nextService, lastNewsletterDate, lastNewsletterTitle, lastDevotionalDate, isLoadingStats, teamMembersCount, rosterAssignmentsCount, emailsQuota]);
+  ], [visibleUsers.length, visibleApprovedCount, visiblePendingCount, visibleNotLinkedCount, isLoadingUsers, prayerRequests24h, nextService, newsletterCount, devotionalsCount, isLoadingStats, teamMembersCount, rosterAssignmentsCount, emailsQuota]);
 
   console.log('AdminOverview - Rendering, user:', user, 'pendingCount:', pendingCount, 'isLoadingUsers:', isLoadingUsers);
 
@@ -775,7 +758,7 @@ export const AdminOverview = () => {
                     element.scrollIntoView({ behavior: 'smooth' });
                   }
                 }}
-                className="mx-auto block h-full w-[calc(100%-120px)]"
+                className="mx-auto block h-full w-[calc(100%-190px)]"
               >
                 {card}
               </a>
@@ -783,7 +766,7 @@ export const AdminOverview = () => {
           }
 
           return (
-            <Link key={i} to={stat.path} className="mx-auto block h-full w-[calc(100%-120px)]">
+            <Link key={i} to={stat.path} className="mx-auto block h-full w-[calc(100%-190px)]">
               {card}
             </Link>
           );

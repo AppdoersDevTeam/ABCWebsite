@@ -7,6 +7,38 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2109-021 — Overview cards show newsletter and devotional counts, with smaller gold numbers
+
+**Date:** 2026-09-21
+**Time:** 02:21:36
+**Timezone:** Pacific/Auckland
+**Version:** 1.7.36
+**Type:** Changed
+
+**Request**
+
+> Change the Descriptio Text of Last Newsletter to Newsletters and Last Devotional to Devotionals, instead of bringing the dates for those 2 cards bring the quantity added into the system as per Newslettter and Devotionals. for all the cards the numbers increase in 2px and change the font color to color attached. For all cards decrease the width of each card in 70px. and decrease the hight in 50px, push to live.
+
+**Changes**
+
+* The Last Newsletter and Last Devotional cards are now titled Newsletters and Devotionals and show how many items are in the system instead of dates.
+* Overview card numbers are 2px larger and use the attached gold colour.
+* Each Overview stat card is 70px narrower and 50px shorter.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: 73 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors.
+
 ## CHG-2026-2109-020 — Overview cards drop extra description lines; Emails retitled
 
 **Date:** 2026-09-21

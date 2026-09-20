@@ -17,7 +17,7 @@ interface OverviewStatCardProps {
 }
 
 const valueSizeClasses: Record<OverviewValueSize, string> = {
-  stat: 'text-2xl md:text-[1.75rem] font-serif font-normal leading-tight tracking-tight',
+  stat: 'text-[26px] md:text-[30px] font-serif font-normal leading-tight tracking-tight',
   title: 'text-lg md:text-xl font-serif font-normal leading-snug',
 };
 
@@ -38,12 +38,12 @@ export const OverviewStatCard: React.FC<OverviewStatCardProps> = ({
 }) => {
   return (
     <div
-      className={`h-full glass-card rounded-[12px] p-5 md:p-6 relative flex flex-col transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-lg group bg-white border border-gray-100 ${highlight ? 'border-2 border-gold shadow-sm' : ''} ${className}`}
+      className={`h-full glass-card rounded-[12px] px-5 py-3 md:px-6 md:py-3 relative flex flex-col transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-lg group bg-white border border-gray-100 ${highlight ? 'border-2 border-gold shadow-sm' : ''} ${className}`}
     >
-      <div className="absolute top-5 right-5 text-gold">
+      <div className="absolute top-3 right-5 text-gold">
         <ArrowUpRight size={CARD_ARROW_SIZE} strokeWidth={3} />
       </div>
-      <div className="grid grid-cols-[2.75rem_minmax(0,1fr)_2.75rem] items-center gap-x-3 mb-2">
+      <div className="grid grid-cols-[2.75rem_minmax(0,1fr)_2.75rem] items-center gap-x-3 mb-1">
         <div
           className={`p-2.5 rounded-full w-11 h-11 flex items-center justify-center transition-colors shrink-0 ${iconClassName} group-hover:bg-gold group-hover:text-white ${highlight ? 'bg-gold/15' : ''}`}
         >
@@ -55,16 +55,16 @@ export const OverviewStatCard: React.FC<OverviewStatCardProps> = ({
         <div aria-hidden="true" />
       </div>
       <div
-        className={`${valueSizeClasses[valueSize]} mb-2 text-center normal-case ${highlight ? 'text-gold' : 'text-charcoal'} ${valueClassName}`}
+        className={`${valueSizeClasses[valueSize]} mb-1 text-center normal-case text-gold ${valueClassName}`}
       >
         {value}
       </div>
       {description ? (
-        <div className="flex min-h-[2.75rem] items-center justify-center text-[15px] text-neutral leading-relaxed">
+        <div className="flex min-h-[1.375rem] items-center justify-center text-[15px] text-neutral leading-relaxed">
           {description}
         </div>
       ) : (
-        <div className="min-h-[2.75rem]" />
+        <div className="min-h-[1.375rem]" />
       )}
       {footerLabel ? (
         <div className="pt-4 mt-auto border-t border-gray-100">
