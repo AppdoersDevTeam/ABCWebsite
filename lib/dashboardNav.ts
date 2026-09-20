@@ -16,3 +16,22 @@ export const DASHBOARD_NAV_ICON = {
   logs: 'bg-rose-50 text-rose-600',
   changelog: 'bg-violet-50 text-violet-600',
 } as const;
+
+type PortalNavChild = { label: string };
+
+export function comparePortalNavLabels(a: string, b: string): number {
+  return a.localeCompare(b, 'en', { sensitivity: 'base' });
+}
+
+/** A–Z by visible label, including nested Users & Roles children. */
+export function sortPortalNavItems<T extends { label: string; children?: PortalNavChild[] }>(
+  items: T[],
+): T[] {
+  return items
+    .map((item) =>
+      item.children
+        ? { ...item, children: [...item.children].sort((a, b) => comparePortalNavLabels(a.label, b.label)) }
+        : item,
+    )
+    .sort((a, b) => comparePortalNavLabels(a.label, b.label));
+}

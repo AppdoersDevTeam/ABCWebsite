@@ -84,7 +84,7 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode, isSuperAdmin = f
             {isSuperAdmin && (
               <Section title="Changelog">
                 <li>
-                  Super Admins only: a left-menu tab (next to Logs) with the product history of everything that has been
+                  Super Admins only: a left-menu tab with the product history of everything that has been
                   changed on the website.
                 </li>
                 <li>

@@ -23,7 +23,7 @@ import { useAuth } from '../../context/AuthContext';
 import { isSuperAdminUser, EVENTS_LABEL, PEOPLE_LABEL } from '../../lib/constants';
 import { ScrollToTop } from '../ScrollToTop';
 import { useAutoSectionReveal } from '../UI/useAutoSectionReveal';
-import { DASHBOARD_NAV_ICON } from '../../lib/dashboardNav';
+import { DASHBOARD_NAV_ICON, sortPortalNavItems } from '../../lib/dashboardNav';
 import { flattenPortalSearchItems, portalPageTitle, PortalTopBar, usePortalSidebarCollapsed } from './PortalTopBar';
 
 export const AdminLayout = () => {
@@ -51,7 +51,7 @@ export const AdminLayout = () => {
     | { label: string; path: string; icon: React.ReactNode; iconClass: string; children?: undefined }
     | { label: string; icon: React.ReactNode; iconClass: string; children: { label: string; path: string }[] };
 
-  const navItems: AdminNavItem[] = [
+  const navItems: AdminNavItem[] = sortPortalNavItems([
     { label: 'Overview', path: '/admin', icon: <Home size={16} />, iconClass: DASHBOARD_NAV_ICON.overview },
     { label: 'Annual Calendar', path: '/admin/calendar', icon: <CalendarDays size={16} />, iconClass: DASHBOARD_NAV_ICON.calendar },
     {
@@ -82,7 +82,7 @@ export const AdminLayout = () => {
           },
         ]
       : []),
-  ];
+  ]);
 
   return (
     <div className="flex h-dvh flex-col bg-dash font-sans text-charcoal lg:h-screen">

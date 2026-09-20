@@ -18,7 +18,7 @@ import { useAuth } from '../../context/AuthContext';
 import { isAdminUser, EVENTS_LABEL, PEOPLE_LABEL } from '../../lib/constants';
 import { ScrollToTop } from '../ScrollToTop';
 import { useAutoSectionReveal } from '../UI/useAutoSectionReveal';
-import { DASHBOARD_NAV_ICON } from '../../lib/dashboardNav';
+import { DASHBOARD_NAV_ICON, sortPortalNavItems } from '../../lib/dashboardNav';
 import { flattenPortalSearchItems, portalPageTitle, PortalTopBar, usePortalSidebarCollapsed } from './PortalTopBar';
 
 export const DashboardLayout = () => {
@@ -35,7 +35,7 @@ export const DashboardLayout = () => {
     navigate('/login');
   };
 
-  const navItems = [
+  const navItems = sortPortalNavItems([
     { label: 'Overview', path: '/dashboard', icon: <Home size={16} />, iconClass: DASHBOARD_NAV_ICON.overview },
     { label: 'Annual Calendar', path: '/dashboard/calendar', icon: <CalendarDays size={16} />, iconClass: DASHBOARD_NAV_ICON.calendar },
     { label: 'Prayers', path: '/dashboard/prayer', icon: <HandHeart size={16} />, iconClass: DASHBOARD_NAV_ICON.prayers },
@@ -46,7 +46,7 @@ export const DashboardLayout = () => {
     { label: EVENTS_LABEL, path: '/dashboard/events', icon: <Calendar size={16} />, iconClass: DASHBOARD_NAV_ICON.events },
     { label: 'Rosters (Beta)', path: '/dashboard/roster', icon: <ClipboardList size={16} />, iconClass: DASHBOARD_NAV_ICON.rosters },
     { label: 'Help', path: '/dashboard/help', icon: <HelpCircle size={16} />, iconClass: DASHBOARD_NAV_ICON.help },
-  ];
+  ]);
 
   return (
     <div className="flex h-dvh flex-col bg-dash font-sans text-charcoal lg:h-screen">

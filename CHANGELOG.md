@@ -7,6 +7,37 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2109-002 — Admin and Member left menus are alphabetical
+
+**Date:** 2026-09-21
+**Time:** 00:20:06
+**Timezone:** Pacific/Auckland
+**Version:** 1.7.17
+**Type:** Changed
+
+**Request**
+
+> Organize by alphabethic order the left menu for Admin and Members push wehn completed.
+
+**Changes**
+
+* The Admin and Member portal left menus now list pages A–Z by name.
+* Under Users & Roles, Roles & Permissions now appears before Users.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: 63 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors. No browser MCP in this session; menu order is covered by portal-nav unit tests.
+
 ## CHG-2026-2109-001 — People add, archive, and delete send confirmation emails
 
 **Date:** 2026-09-21

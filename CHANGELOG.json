@@ -6,6 +6,36 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2109-002",
+      "date": "2026-09-21",
+      "time": "00:20:06",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T12:20:06.433Z",
+      "version": "1.7.17",
+      "type": "changed",
+      "area": "admin",
+      "title": "Admin and Member left menus are alphabetical",
+      "request": "Organize by alphabethic order the left menu for Admin and Members push wehn completed.",
+      "changes": [
+        "The Admin and Member portal left menus now list pages A–Z by name.",
+        "Under Users & Roles, Roles & Permissions now appears before Users."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "63 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors. No browser MCP in this session; menu order is covered by portal-nav unit tests."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2109-001",
       "date": "2026-09-21",
       "time": "00:05:47",
