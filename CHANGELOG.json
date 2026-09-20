@@ -6,6 +6,36 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2009-020",
+      "date": "2026-09-20",
+      "time": "21:41:14",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T09:41:14.804Z",
+      "version": "1.7.7",
+      "type": "changed",
+      "area": "admin",
+      "title": "Larger, bolder arrows on user menu and left nav",
+      "request": "For all the left menus and top lef menu where there is a arrow, increase the arrows size in 3 ponts and make it bold. push when completed.",
+      "changes": [
+        "The top-left user chevron is 3px larger (21px) and drawn with a heavier stroke.",
+        "The Users & Roles left-menu chevron is 3px larger (19px) and drawn with a heavier stroke."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "Unit tests, validate, and vite build run after implementation, then npm run push:live."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2009-019",
       "date": "2026-09-20",
       "time": "21:39:46",

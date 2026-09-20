@@ -167,9 +167,9 @@ export const AdminLayout = () => {
                       </span>
                       <span className={`tracking-wide flex-1 text-left ${sidebarCollapsed ? 'lg:hidden' : ''}`}>{item.label}</span>
                       {sidebarCollapsed ? null : isOpen ? (
-                        <ChevronUp size={16} className="shrink-0 text-neutral" />
+                        <ChevronUp size={19} strokeWidth={2.75} className="shrink-0 text-charcoal" />
                       ) : (
-                        <ChevronDown size={16} className="shrink-0 text-neutral" />
+                        <ChevronDown size={19} strokeWidth={2.75} className="shrink-0 text-charcoal" />
                       )}
                     </button>
                     {isOpen && (

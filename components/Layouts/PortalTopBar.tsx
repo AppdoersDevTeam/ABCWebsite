@@ -210,12 +210,14 @@ export const PortalTopBar = ({
             </span>
           )}
           <ChevronDown
-            size={18}
-            className={`shrink-0 text-neutral ${sidebarCollapsed ? 'hidden' : ''} ${menuOpen ? 'hidden' : ''}`}
+            size={21}
+            strokeWidth={2.75}
+            className={`shrink-0 text-charcoal ${sidebarCollapsed ? 'hidden' : ''} ${menuOpen ? 'hidden' : ''}`}
           />
           <ChevronUp
-            size={18}
-            className={`shrink-0 text-neutral ${sidebarCollapsed || !menuOpen ? 'hidden' : ''}`}
+            size={21}
+            strokeWidth={2.75}
+            className={`shrink-0 text-charcoal ${sidebarCollapsed || !menuOpen ? 'hidden' : ''}`}
           />
         </button>
         {menuOpen && (
