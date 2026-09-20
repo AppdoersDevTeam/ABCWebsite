@@ -1,16 +1,16 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { Modal } from '../../components/UI/Modal';
-import { CalendarDays, Edit, Trash2, User, Upload, X, UserPlus, Download, Search, ChevronDown, Archive, ArchiveRestore } from 'lucide-react';
+import { CalendarDays, Trash2, User, Upload, X, Download, Search, Archive, ArchiveRestore, Plus, MoreVertical, Pencil, Building2, UsersRound } from 'lucide-react';
 import type { Group, JobRole, TeamMember } from '../../types';
 import { supabase } from '../../lib/supabase';
-import { SkeletonPageHeader } from '../../components/UI/Skeleton';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { buildStoredRole, getDisplayRole, inferProfileType } from '../../lib/teamMemberUtils';
 import { downloadDirectoryCsv, downloadDirectoryPdf } from '../../lib/exportDirectoryPeople';
 import { logAuditEventSafe } from '../../lib/auditLog';
 import { formatDdMmYyyy } from '../../lib/dateUtils';
 import { useAuth } from '../../context/AuthContext';
+import { CHURCH_NAME, displayInitials } from '../../lib/constants';
 import metadata from '../../metadata.json';
 
 type ProfileType = 'staff' | 'attendee' | 'member';
@@ -20,6 +20,37 @@ const PROFILE_LABEL: Record<ProfileType, string> = {
   attendee: 'Attendee',
   member: 'Member',
 };
+
+const NAME_PARTICLES = new Set(['da', 'de', 'do', 'dos', 'das', 'van', 'von', 'del', 'della', 'di', 'le', 'la', 'du', 'st', 'saint']);
+
+function lastFirstFromFullName(name: string): string {
+  const trimmed = name.trim();
+  if (!trimmed) return '';
+  if (trimmed.includes(',')) return trimmed;
+  const parts = trimmed.split(/\s+/);
+  if (parts.length === 1) return trimmed;
+  let lastStart = parts.length - 1;
+  while (lastStart > 0 && NAME_PARTICLES.has(parts[lastStart - 1].toLowerCase())) {
+    lastStart -= 1;
+  }
+  const last = parts.slice(lastStart).join(' ');
+  const first = parts.slice(0, lastStart).join(' ');
+  return first ? `${last}, ${first}` : last;
+}
+
+function ministryGroupLabel(member: TeamMember): string {
+  const groups = (member.groups || []).map((g) => g.name).filter(Boolean);
+  if (inferProfileType(member) === 'staff') {
+    return groups.length ? `${CHURCH_NAME} ${groups.join(', ')}` : `${CHURCH_NAME} Staff`;
+  }
+  return groups.length ? groups.join(', ') : CHURCH_NAME;
+}
+
+function StatusGlyph({ profileType }: { profileType: ProfileType }) {
+  if (profileType === 'member') return <User size={14} className="text-gold" />;
+  if (profileType === 'attendee') return <UsersRound size={14} className="text-gold" />;
+  return <Building2 size={14} className="text-gold" />;
+}
 
 const MAX_DIRECTORY_PHONE_DIGITS = 17;
 
@@ -151,19 +182,15 @@ export const AdminTeam = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
   const [formData, setFormData] = useState<FormState>(emptyForm);
-  const [selectedProfileTypes, setSelectedProfileTypes] = useState<Record<ProfileType, boolean>>({
-    staff: true,
-    member: true,
-    attendee: true,
-  });
-  const [selectedGroupIds, setSelectedGroupIds] = useState<Record<string, boolean>>({});
-  const [selectedJobRoleIds, setSelectedJobRoleIds] = useState<Record<string, boolean>>({});
+  const [statusFilter, setStatusFilter] = useState<'all' | ProfileType>('all');
+  const [groupFilter, setGroupFilter] = useState('all');
   const [searchText, setSearchText] = useState('');
-  const [sortKey, setSortKey] = useState<
-    'name' | 'email' | 'phone' | 'role' | 'baptism_date' | 'membership_start_date' | 'status' | 'groups' | 'job_roles'
-  >('name');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
   const [activeTab, setActiveTab] = useState<'active' | 'archived'>('active');
+  const [selectedIds, setSelectedIds] = useState<Record<string, boolean>>({});
+  const [exportMenuOpen, setExportMenuOpen] = useState(false);
+  const [actionsMenuId, setActionsMenuId] = useState<string | null>(null);
+  const actionsMenuRef = useRef<HTMLDivElement | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<TeamMember | null>(null);
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [archiveTarget, setArchiveTarget] = useState<TeamMember | null>(null);
@@ -175,35 +202,17 @@ export const AdminTeam = () => {
 
   const tabMembers = activeTab === 'active' ? activeMembersList : archivedMembersList;
 
-  const anyGroupSelectedUI = useMemo(() => Object.values(selectedGroupIds).some(Boolean), [selectedGroupIds]);
-  const anyJobRoleSelectedUI = useMemo(() => Object.values(selectedJobRoleIds).some(Boolean), [selectedJobRoleIds]);
-  const allProfileTypesSelectedUI = useMemo(
-    () => (Object.keys(PROFILE_LABEL) as ProfileType[]).every((pt) => selectedProfileTypes[pt]),
-    [selectedProfileTypes]
-  );
-
   const filteredMembers = useMemo(() => {
     return tabMembers.filter((m) => {
       const pt = inferProfileType(m);
-      if (!selectedProfileTypes[pt]) return false;
-
-      const anyGroupSelected = Object.values(selectedGroupIds).some(Boolean);
-      if (anyGroupSelected) {
+      if (statusFilter !== 'all' && pt !== statusFilter) return false;
+      if (activeTab === 'active' && groupFilter !== 'all') {
         const memberGroupIds = new Set((m.groups || []).map((g) => g.id));
-        const ok = Object.entries(selectedGroupIds).some(([id, on]) => on && memberGroupIds.has(id));
-        if (!ok) return false;
+        if (!memberGroupIds.has(groupFilter)) return false;
       }
-
-      const anyRoleSelected = Object.values(selectedJobRoleIds).some(Boolean);
-      if (anyRoleSelected) {
-        const memberRoleIds = new Set((m.job_roles || []).map((r) => r.id));
-        const ok = Object.entries(selectedJobRoleIds).some(([id, on]) => on && memberRoleIds.has(id));
-        if (!ok) return false;
-      }
-
       return true;
     });
-  }, [tabMembers, selectedProfileTypes, selectedGroupIds, selectedJobRoleIds]);
+  }, [tabMembers, statusFilter, groupFilter, activeTab]);
 
   const visibleMembers = useMemo(() => {
     const q = searchText.trim().toLowerCase();
@@ -228,100 +237,13 @@ export const AdminTeam = () => {
 
   const sortedVisibleMembers = useMemo(() => {
     const dir = sortDir === 'asc' ? 1 : -1;
-
-    const toStr = (v: unknown) => String(v ?? '').trim().toLowerCase();
-
-    const toDateValue = (v: unknown): number | null => {
-      const s = String(v ?? '').trim();
-      if (!s) return null;
-      // Expect YYYY-MM-DD; Date.parse is fine for ISO-ish strings.
-      const t = Date.parse(s);
-      return Number.isFinite(t) ? t : null;
-    };
-
-    const getGroupsStr = (m: TeamMember) => (m.groups || []).map((g) => g.name).filter(Boolean).join(' ');
-    const getJobRolesStr = (m: TeamMember) => (m.job_roles || []).map((r) => r.name).filter(Boolean).join(' ');
-    const getStatusStr = (m: TeamMember) => PROFILE_LABEL[inferProfileType(m)];
-
     const cmpStr = (a: string, b: string) => a.localeCompare(b, undefined, { sensitivity: 'base' });
-    const cmpDate = (a: number | null, b: number | null) => {
-      if (a === null && b === null) return 0;
-      if (a === null) return sortDir === 'asc' ? 1 : -1;
-      if (b === null) return sortDir === 'asc' ? -1 : 1;
-      return a - b;
-    };
-
-    const out = [...visibleMembers].sort((a, b) => {
-      let c = 0;
-      switch (sortKey) {
-        case 'name':
-          c = cmpStr(toStr(a.name), toStr(b.name));
-          break;
-        case 'email':
-          c = cmpStr(toStr(a.email), toStr(b.email));
-          break;
-        case 'phone':
-          c = cmpStr(toStr(a.phone), toStr(b.phone));
-          break;
-        case 'role':
-          c = cmpStr(toStr(getDisplayRole(a)), toStr(getDisplayRole(b)));
-          break;
-        case 'status':
-          c = cmpStr(toStr(getStatusStr(a)), toStr(getStatusStr(b)));
-          break;
-        case 'groups':
-          c = cmpStr(toStr(getGroupsStr(a)), toStr(getGroupsStr(b)));
-          break;
-        case 'job_roles':
-          c = cmpStr(toStr(getJobRolesStr(a)), toStr(getJobRolesStr(b)));
-          break;
-        case 'baptism_date':
-          c = cmpDate(toDateValue(a.baptism_date), toDateValue(b.baptism_date));
-          break;
-        case 'membership_start_date':
-          c = cmpDate(toDateValue(a.membership_start_date), toDateValue(b.membership_start_date));
-          break;
-        default:
-          c = 0;
-      }
-
+    return [...visibleMembers].sort((a, b) => {
+      const c = cmpStr(lastFirstFromFullName(a.name || ''), lastFirstFromFullName(b.name || ''));
       if (c !== 0) return c * dir;
-      // Tie-breaker: name
-      return cmpStr(toStr(a.name), toStr(b.name));
+      return cmpStr(a.name || '', b.name || '');
     });
-
-    return out;
-  }, [sortDir, sortKey, visibleMembers]);
-
-  const clearFilters = () => {
-    setSearchText('');
-    setSelectedProfileTypes({ staff: true, member: true, attendee: true });
-    setSelectedGroupIds({});
-    setSelectedJobRoleIds({});
-    setSortKey('name');
-    setSortDir('asc');
-  };
-
-  const selectAllProfileTypes = () => setSelectedProfileTypes({ staff: true, member: true, attendee: true });
-  const selectAllGroups = () => setSelectedGroupIds({});
-  const selectAllJobRoles = () => setSelectedJobRoleIds({});
-
-  const sortedArchivedMembers = useMemo(() => {
-    const q = searchText.trim().toLowerCase();
-    let list = archivedMembersList;
-    if (q) {
-      list = list.filter((m) => {
-        const haystack = [m.name ?? '', m.email ?? '', getDisplayRole(m) ?? ''].join(' ').toLowerCase();
-        return haystack.includes(q);
-      });
-    }
-    return [...list].sort((a, b) => {
-      const aT = a.archived_at ? Date.parse(a.archived_at) : 0;
-      const bT = b.archived_at ? Date.parse(b.archived_at) : 0;
-      if (bT !== aT) return bT - aT;
-      return (a.name ?? '').localeCompare(b.name ?? '', undefined, { sensitivity: 'base' });
-    });
-  }, [archivedMembersList, searchText]);
+  }, [sortDir, visibleMembers]);
 
   const deleteNameMatches =
     deleteTarget != null &&
@@ -354,6 +276,24 @@ export const AdminTeam = () => {
     fetchMembers();
     fetchLookups();
   }, []);
+
+  useEffect(() => {
+    if (!actionsMenuId) return;
+    const handlePointerDown = (event: MouseEvent) => {
+      if (actionsMenuRef.current && !actionsMenuRef.current.contains(event.target as Node)) {
+        setActionsMenuId(null);
+      }
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setActionsMenuId(null);
+    };
+    document.addEventListener('mousedown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [actionsMenuId]);
 
   const fetchLookups = async () => {
     try {
@@ -875,19 +815,6 @@ export const AdminTeam = () => {
     }));
   };
 
-  if (isLoading) {
-    return (
-      <div className="space-y-8">
-        <SkeletonPageHeader />
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="h-32 bg-gray-100 rounded animate-pulse" />
-          ))}
-        </div>
-      </div>
-    );
-  }
-
   const trimmed = trimForm();
   const validationError = validate(trimmed);
   const formInvalid =
@@ -898,38 +825,36 @@ export const AdminTeam = () => {
     !trimmed.email ||
     !trimmed.phone;
 
+  const listedMembers = sortedVisibleMembers;
+  const listedIds = listedMembers.map((m) => m.id);
+  const allListedSelected = listedIds.length > 0 && listedIds.every((id) => selectedIds[id]);
+  const toggleAllListed = () => {
+    setSelectedIds((prev) => {
+      const select = !allListedSelected;
+      const next = { ...prev };
+      listedIds.forEach((id) => {
+        if (select) next[id] = true;
+        else delete next[id];
+      });
+      return next;
+    });
+  };
+  const toggleSelected = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = { ...prev };
+      if (next[id]) delete next[id];
+      else next[id] = true;
+      return next;
+    });
+  };
+  const exportList = listedMembers;
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <AdminPageHeader
         title="Leadership"
-        subtitle="Manage staff, attendees, and members."
+        subtitle="Search, filter, and manage staff, attendees, and members."
         icon={<User size={28} />}
-        rightSlot={
-          <div className="flex gap-2 flex-wrap">
-            <button
-              type="button"
-              onClick={() => downloadDirectoryCsv(sortedVisibleMembers, filenameBase, { churchName, exportedAt: new Date() })}
-              className="bg-white border-2 border-gray-200 text-charcoal px-4 py-2 rounded-[4px] font-bold hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-2 text-sm"
-              title="Download CSV (filtered)"
-            >
-              <Download size={16} />
-              CSV
-            </button>
-            <button
-              type="button"
-              onClick={() => downloadDirectoryPdf(sortedVisibleMembers, filenameBase, { churchName, exportedAt: new Date() })}
-              className="bg-white border-2 border-gray-200 text-charcoal px-4 py-2 rounded-[4px] font-bold hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-2 text-sm"
-              title="Download PDF (filtered)"
-            >
-              <Download size={16} />
-              PDF
-            </button>
-            <GlowingButton size="sm" fullWidth className="md:w-auto" onClick={openCreateModal}>
-              <UserPlus size={16} className="mr-2" />
-              Add Person
-            </GlowingButton>
-          </div>
-        }
       />
 
       {directorySetupWarning && (
@@ -963,433 +888,321 @@ export const AdminTeam = () => {
         </button>
       </div>
 
-      <div className="glass-card bg-white/80 border border-white/60 rounded-[12px] p-4 space-y-4">
-        <div className="flex flex-col lg:flex-row gap-3 lg:items-center">
-          <div className="flex-1">
-            <label className="block text-sm font-bold text-charcoal mb-2">Search</label>
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <button
+          type="button"
+          onClick={openCreateModal}
+          className="inline-flex items-center gap-2 rounded-lg border-2 border-gold px-4 py-2.5 font-semibold text-gold transition-colors hover:bg-gold hover:text-charcoal"
+        >
+          <span className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-current">
+            <Plus size={14} />
+          </span>
+          Add Person
+        </button>
+
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+          <label className="sm:w-40">
+            <span className="mb-1 block text-sm font-bold text-charcoal">Status</span>
+            <select
+              value={statusFilter}
+              onChange={(event) => setStatusFilter(event.target.value as 'all' | ProfileType)}
+              className="w-full border-0 border-b border-gray-300 bg-transparent px-0 py-2 text-sm text-charcoal focus:border-gold focus:outline-none"
+            >
+              <option value="all">All</option>
+              {(Object.keys(PROFILE_LABEL) as ProfileType[]).map((pt) => (
+                <option key={pt} value={pt}>
+                  {PROFILE_LABEL[pt]}
+                </option>
+              ))}
+            </select>
+          </label>
+          {groups.length > 0 && activeTab === 'active' && (
+            <label className="sm:w-48">
+              <span className="mb-1 block text-sm font-bold text-charcoal">Group</span>
+              <select
+                value={groupFilter}
+                onChange={(event) => setGroupFilter(event.target.value)}
+                className="w-full border-0 border-b border-gray-300 bg-transparent px-0 py-2 text-sm text-charcoal focus:border-gold focus:outline-none"
+              >
+                <option value="all">All</option>
+                {groups
+                  .filter((g) => g.is_active !== false)
+                  .map((g) => (
+                    <option key={g.id} value={g.id}>
+                      {g.name}
+                    </option>
+                  ))}
+              </select>
+            </label>
+          )}
+          <label className="sm:w-80">
+            <span className="mb-1 block text-sm font-bold text-charcoal">Search by name, email, phone or group</span>
             <div className="relative">
-              <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral" />
+              <Search size={16} className="absolute left-0 top-1/2 -translate-y-1/2 text-neutral" />
               <input
                 type="text"
                 value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-                className="w-full pl-10 pr-10 py-3 rounded-[6px] border border-gray-200 focus:border-gold focus:outline-none bg-white"
-                placeholder={activeTab === 'active' ? 'Search name, email, phone, role, groups, job roles…' : 'Search archived people…'}
+                onChange={(event) => setSearchText(event.target.value)}
+                className="w-full border-0 border-b border-gray-300 bg-transparent py-2 pl-6 pr-8 text-sm text-charcoal focus:border-gold focus:outline-none"
+                placeholder="Search"
               />
               {searchText.trim() && (
                 <button
                   type="button"
                   onClick={() => setSearchText('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral hover:text-charcoal transition-colors"
-                  title="Clear search"
+                  className="absolute right-0 top-1/2 -translate-y-1/2 text-neutral hover:text-charcoal"
                 >
-                  <X size={16} />
+                  <X size={14} />
                 </button>
               )}
             </div>
-          </div>
-
-          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
-            <div className="text-xs text-neutral pb-1">
-              {activeTab === 'active' ? (
-                <>
-                  Showing <span className="font-bold text-charcoal">{visibleMembers.length}</span> of{' '}
-                  <span className="font-bold text-charcoal">{activeMembersList.length}</span> active
-                </>
-              ) : (
-                <>
-                  Showing <span className="font-bold text-charcoal">{sortedArchivedMembers.length}</span> of{' '}
-                  <span className="font-bold text-charcoal">{archivedMembersList.length}</span> archived
-                </>
-              )}
-            </div>
-            {activeTab === 'active' && (
-            <div className="flex items-center gap-2">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-neutral mb-1">Sort by</label>
-                <select
-                  value={sortKey}
-                  onChange={(e) => setSortKey(e.target.value as any)}
-                  className="px-3 py-2 bg-white border border-gray-200 rounded-[6px] text-sm font-bold text-charcoal hover:border-gold focus:border-gold focus:outline-none transition-colors"
-                >
-                  <option value="name">Alphabetic (Name)</option>
-                  <option value="email">Email</option>
-                  <option value="phone">Phone</option>
-                  <option value="role">Role</option>
-                  <option value="status">Status</option>
-                  <option value="groups">Groups</option>
-                  <option value="job_roles">Job roles</option>
-                  <option value="baptism_date">Date of Baptism</option>
-                  <option value="membership_start_date">Date of Membership</option>
-                </select>
-              </div>
-              <button
-                type="button"
-                onClick={() => setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))}
-                className="mt-[18px] px-3 py-2 bg-white border border-gray-200 rounded-[6px] text-sm font-bold text-neutral hover:text-charcoal hover:border-gold transition-colors"
-                title={sortDir === 'asc' ? 'Ascending' : 'Descending'}
-              >
-                {sortDir === 'asc' ? 'A→Z' : 'Z→A'}
-              </button>
-            </div>
-            )}
-            {activeTab === 'active' && (
-            <button
-              type="button"
-              onClick={clearFilters}
-              className="px-4 py-2 bg-white border border-gray-200 rounded-[6px] text-sm font-bold text-neutral hover:text-charcoal hover:border-gold transition-colors"
-              title="Clear all filters"
-            >
-              Clear
-            </button>
-            )}
-          </div>
+          </label>
         </div>
-
-        {activeTab === 'active' && (
-        <>
-        <div>
-          <p className="text-sm font-bold text-charcoal mb-3">Profile type</p>
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={selectAllProfileTypes}
-              className={`inline-flex items-center px-3 py-2 rounded-[6px] border text-sm font-bold transition-colors ${
-                allProfileTypesSelectedUI
-                  ? 'border-gold bg-gold/10 text-charcoal'
-                  : 'border-gray-200 bg-white text-neutral hover:text-charcoal hover:border-gold'
-              }`}
-              title="All profile types"
-            >
-              All
-            </button>
-            {(Object.keys(PROFILE_LABEL) as ProfileType[]).map((pt) => {
-              const checked = selectedProfileTypes[pt];
-              return (
-                <label key={pt} className="cursor-pointer">
-                  <input
-                    type="checkbox"
-                    className="sr-only peer"
-                    checked={checked}
-                    onChange={() =>
-                      setSelectedProfileTypes((prev) => ({
-                        ...prev,
-                        [pt]: !prev[pt],
-                      }))
-                    }
-                  />
-                  <span className="inline-flex items-center px-3 py-2 rounded-[6px] border border-gray-200 bg-white text-sm font-bold text-neutral peer-checked:border-gold peer-checked:bg-gold/10 peer-checked:text-charcoal transition-colors">
-                    {PROFILE_LABEL[pt]}
-                  </span>
-                </label>
-              );
-            })}
-          </div>
-        </div>
-
-        {(groups.length > 0 || jobRoles.length > 0) && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-            {groups.length > 0 && (
-              <details className="rounded-[10px] border border-gray-200 bg-white/70 overflow-hidden">
-                <summary className="cursor-pointer list-none flex items-center justify-between gap-3 px-4 py-3">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-bold text-charcoal">Groups</span>
-                    <span className="text-xs text-neutral">
-                      {anyGroupSelectedUI ? `${Object.values(selectedGroupIds).filter(Boolean).length} selected` : 'All'}
-                    </span>
-                  </div>
-                  <ChevronDown size={18} className="text-neutral" />
-                </summary>
-                <div className="px-4 pb-4">
-                  <div className="pt-3 flex flex-wrap items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={selectAllGroups}
-                      className={`inline-flex items-center px-3 py-2 rounded-[6px] border text-sm font-bold transition-colors ${
-                        !anyGroupSelectedUI
-                          ? 'border-gold bg-gold/10 text-charcoal'
-                          : 'border-gray-200 bg-white text-neutral hover:text-charcoal hover:border-gold'
-                      }`}
-                      title="All groups"
-                    >
-                      All
-                    </button>
-                  </div>
-                  <div className="pt-3 flex flex-wrap gap-2">
-                  {groups
-                    .filter((g) => g.is_active !== false)
-                    .map((g) => {
-                      const checked = !!selectedGroupIds[g.id];
-                      return (
-                        <label key={g.id} className="cursor-pointer">
-                          <input
-                            type="checkbox"
-                            className="sr-only peer"
-                            checked={checked}
-                            onChange={() =>
-                              setSelectedGroupIds((prev) => ({
-                                ...prev,
-                                [g.id]: !prev[g.id],
-                              }))
-                            }
-                          />
-                          <span className="inline-flex items-center px-3 py-2 rounded-[6px] border border-gray-200 bg-white text-sm font-bold text-neutral peer-checked:border-gold peer-checked:bg-gold/10 peer-checked:text-charcoal transition-colors">
-                            {g.name}
-                          </span>
-                        </label>
-                      );
-                    })}
-                  </div>
-                </div>
-              </details>
-            )}
-
-            {jobRoles.length > 0 && (
-              <details className="rounded-[10px] border border-gray-200 bg-white/70 overflow-hidden">
-                <summary className="cursor-pointer list-none flex items-center justify-between gap-3 px-4 py-3">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-bold text-charcoal">Job roles</span>
-                    <span className="text-xs text-neutral">
-                      {anyJobRoleSelectedUI ? `${Object.values(selectedJobRoleIds).filter(Boolean).length} selected` : 'All'}
-                    </span>
-                  </div>
-                  <ChevronDown size={18} className="text-neutral" />
-                </summary>
-                <div className="px-4 pb-4">
-                  <div className="pt-3 flex flex-wrap items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={selectAllJobRoles}
-                      className={`inline-flex items-center px-3 py-2 rounded-[6px] border text-sm font-bold transition-colors ${
-                        !anyJobRoleSelectedUI
-                          ? 'border-gold bg-gold/10 text-charcoal'
-                          : 'border-gray-200 bg-white text-neutral hover:text-charcoal hover:border-gold'
-                      }`}
-                      title="All job roles"
-                    >
-                      All
-                    </button>
-                  </div>
-                  <div className="pt-3 flex flex-wrap gap-2">
-                  {jobRoles
-                    .filter((r) => r.is_active !== false)
-                    .map((r) => {
-                      const checked = !!selectedJobRoleIds[r.id];
-                      return (
-                        <label key={r.id} className="cursor-pointer">
-                          <input
-                            type="checkbox"
-                            className="sr-only peer"
-                            checked={checked}
-                            onChange={() =>
-                              setSelectedJobRoleIds((prev) => ({
-                                ...prev,
-                                [r.id]: !prev[r.id],
-                              }))
-                            }
-                          />
-                          <span className="inline-flex items-center px-3 py-2 rounded-[6px] border border-gray-200 bg-white text-sm font-bold text-neutral peer-checked:border-gold peer-checked:bg-gold/10 peer-checked:text-charcoal transition-colors">
-                            {r.name}
-                          </span>
-                        </label>
-                      );
-                    })}
-                  </div>
-                </div>
-              </details>
-            )}
-          </div>
-        )}
-        </>
-        )}
       </div>
 
-      {activeTab === 'active' && activeMembersList.length === 0 ? (
-        <div className="text-center py-12 glass-card bg-white/80 border border-white/60 rounded-[12px]">
-          <p className="text-neutral">No people in Leadership yet. Add your first person to get started.</p>
-        </div>
-      ) : activeTab === 'active' && visibleMembers.length === 0 ? (
-        <div className="text-center py-12 glass-card bg-white/80 border border-white/60 rounded-[12px]">
-          <p className="text-neutral">No results match the selected filters.</p>
-        </div>
-      ) : activeTab === 'archived' && archivedMembersList.length === 0 ? (
-        <div className="text-center py-12 glass-card bg-white/80 border border-white/60 rounded-[12px]">
-          <p className="text-neutral">No archived people.</p>
-        </div>
-      ) : activeTab === 'archived' && sortedArchivedMembers.length === 0 ? (
-        <div className="text-center py-12 glass-card bg-white/80 border border-white/60 rounded-[12px]">
-          <p className="text-neutral">No archived people match your search.</p>
-        </div>
-      ) : activeTab === 'archived' ? (
-        <div className="glass-card bg-white/80 border border-white/60 rounded-[12px] overflow-hidden">
-          <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 overscroll-x-contain">
-            <table className="min-w-[700px] w-full text-left">
-              <thead className="bg-white/60 sticky top-0">
-                <tr className="border-b border-gray-200">
-                  <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-neutral">Name</th>
-                  <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-neutral">Email</th>
-                  <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-neutral">Role</th>
-                  <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-neutral">Status</th>
-                  <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-neutral">Archived</th>
-                  <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-neutral w-[200px]">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sortedArchivedMembers.map((member, idx) => {
-                  const pt = inferProfileType(member);
-                  return (
-                    <tr
-                      key={member.id}
-                      className={`border-b border-gray-100 hover:bg-gold/5 transition-colors ${
-                        idx % 2 === 0 ? 'bg-white/40' : 'bg-white/20'
-                      }`}
-                    >
-                      <td className="px-4 py-3 font-bold text-charcoal">{member.name}</td>
-                      <td className="px-4 py-3 text-sm text-neutral">{member.email || '—'}</td>
-                      <td className="px-4 py-3 text-sm text-charcoal font-bold">{getDisplayRole(member)}</td>
-                      <td className="px-4 py-3">
-                        <span className="inline-flex items-center px-2 py-1 rounded-full bg-gold/10 text-blue-700 text-[11px] font-bold uppercase tracking-wider">
-                          {PROFILE_LABEL[pt]}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-sm text-neutral">{formatArchivedDate(member.archived_at)}</td>
-                      <td className="px-4 py-3">
-                        <div className="flex gap-2 flex-wrap">
-                          <button
-                            type="button"
-                            onClick={() => handleUnarchive(member.id)}
-                            className="px-3 py-2 bg-white border border-gray-200 rounded-[4px] text-neutral hover:text-gold hover:border-gold transition-colors text-sm font-bold inline-flex items-center gap-2"
-                            title="Unarchive"
-                          >
-                            <ArchiveRestore size={16} />
-                            Unarchive
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDelete(member)}
-                            className="px-3 py-2 bg-white border border-red-200 rounded-[4px] text-red-600 hover:bg-red-50 transition-colors text-sm font-bold inline-flex items-center gap-2"
-                            title="Delete permanently"
-                          >
-                            <Trash2 size={16} />
-                            Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+      <div className="overflow-hidden rounded-2xl border border-gray-100 bg-gray-50 shadow-sm">
+        <div className="flex justify-end px-4 py-3">
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setExportMenuOpen((open) => !open)}
+              disabled={isLoading || listedMembers.length === 0}
+              className="inline-flex items-center gap-2 rounded-lg border border-gold bg-white px-3 py-1.5 text-sm font-semibold text-gold hover:bg-gold/10 disabled:opacity-50"
+            >
+              <Download size={16} />
+              Export
+            </button>
+            {exportMenuOpen && (
+              <div className="absolute right-0 top-full z-20 mt-1 w-36 rounded-lg border border-gray-200 bg-white py-1 shadow-lg">
+                <button
+                  type="button"
+                  className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-50"
+                  onClick={() => {
+                    setExportMenuOpen(false);
+                    downloadDirectoryCsv(exportList, filenameBase, { churchName, exportedAt: new Date() });
+                  }}
+                >
+                  CSV
+                </button>
+                <button
+                  type="button"
+                  className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-50"
+                  onClick={() => {
+                    setExportMenuOpen(false);
+                    downloadDirectoryPdf(exportList, filenameBase, { churchName, exportedAt: new Date() });
+                  }}
+                >
+                  PDF
+                </button>
+              </div>
+            )}
           </div>
         </div>
-      ) : (
-        <div className="glass-card bg-white/80 border border-white/60 rounded-[12px] overflow-hidden">
-          {duplicateEmails.size > 0 && (
-            <div className="px-4 py-3 bg-amber-50 border-b border-amber-200 text-sm text-amber-900">
-              <p className="font-bold">Duplicate Leadership emails detected</p>
-              <p className="text-amber-800 mt-1">
-                Some people share the same email address. User ↔ Leadership auto-link and roster permissions use
-                email matching — resolve duplicates in Leadership so each login email maps to one person.
-              </p>
-            </div>
-          )}
-          <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 overscroll-x-contain">
-            <table className="min-w-[900px] w-full text-left">
-              <thead className="bg-white/60 sticky top-0">
-                <tr className="border-b border-gray-200">
-                  <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-neutral">Name</th>
-                  <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-neutral">Email</th>
-                  <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-neutral">Phone</th>
-                  <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-neutral">Role</th>
-                  <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-neutral">Groups</th>
-                  <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-neutral">Job Roles</th>
-                  <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-neutral">Status</th>
-                  <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-neutral w-[140px]">Actions</th>
+
+        {activeTab === 'active' && duplicateEmails.size > 0 && (
+          <div className="mx-4 mb-3 rounded-[12px] border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            <p className="font-bold">Duplicate Leadership emails detected</p>
+            <p className="mt-1 text-amber-800">
+              Some people share the same email address. User ↔ Leadership auto-link and roster permissions use
+              email matching — resolve duplicates in Leadership so each login email maps to one person.
+            </p>
+          </div>
+        )}
+
+        <div className="overflow-x-auto">
+          <table className="min-w-full text-left">
+            <thead>
+              <tr className="border-y border-gray-200 bg-white text-[11px] font-bold uppercase tracking-wider text-neutral">
+                <th className="w-10 px-4 py-3">
+                  <input
+                    type="checkbox"
+                    checked={allListedSelected}
+                    onChange={toggleAllListed}
+                    aria-label="Select all people"
+                    className="h-4 w-4 rounded border-gray-300 text-gold focus:ring-gold"
+                  />
+                </th>
+                <th className="px-3 py-3">
+                  <button type="button" onClick={() => setSortDir((dir) => (dir === 'asc' ? 'desc' : 'asc'))}>
+                    Name {sortDir === 'asc' ? '↑' : '↓'}
+                  </button>
+                </th>
+                <th className="px-3 py-3">Email</th>
+                <th className="px-3 py-3">Role</th>
+                <th className="px-3 py-3">Ministry Group</th>
+                <th className="px-3 py-3">{activeTab === 'archived' ? 'Archived' : 'Phone'}</th>
+                <th className="w-12 px-2 py-3">
+                  <span className="sr-only">Actions</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white">
+              {isLoading ? (
+                <tr>
+                  <td colSpan={7} className="px-6 py-12 text-center text-neutral">
+                    Loading people…
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {sortedVisibleMembers.map((member, idx) => {
+              ) : listedMembers.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="px-6 py-12 text-center text-neutral">
+                    {activeTab === 'archived'
+                      ? archivedMembersList.length === 0
+                        ? 'No archived people'
+                        : 'No archived people match your search'
+                      : activeMembersList.length === 0
+                        ? 'No people in Leadership yet. Add your first person to get started.'
+                        : 'No people found'}
+                  </td>
+                </tr>
+              ) : (
+                listedMembers.map((member) => {
                   const pt = inferProfileType(member);
                   const emailKey = (member.email || '').trim().toLowerCase();
-                  const dupEmail = !!emailKey && duplicateEmails.has(emailKey);
+                  const dupEmail = activeTab === 'active' && !!emailKey && duplicateEmails.has(emailKey);
                   return (
-                    <tr
-                      key={member.id}
-                      className={`border-b transition-colors ${
-                        member.user_id
-                          ? 'border-purple-400 [&>td]:bg-purple-200 hover:[&>td]:bg-purple-300 [&>td:first-child]:border-l-4 [&>td:first-child]:border-purple-600'
-                          : `border-gray-100 hover:bg-gold/5 ${idx % 2 === 0 ? 'bg-white/40' : 'bg-white/20'}`
-                      } ${dupEmail ? 'ring-1 ring-inset ring-amber-200' : ''}`}
-                    >
+                    <tr key={member.id} className="border-t border-gray-100">
                       <td className="px-4 py-3">
-                        <div className="font-bold text-charcoal">{member.name}</div>
-                        <div className="flex flex-wrap gap-1 mt-1">
-                          {member.user_id ? (
-                            <span className="text-[10px] font-bold uppercase tracking-wide text-white bg-purple-600 px-2 py-0.5 rounded">
-                              Linked account
-                            </span>
-                          ) : (
-                            <span className="text-[10px] font-bold uppercase tracking-wide text-neutral bg-gray-100 px-2 py-0.5 rounded">
-                              No account link
-                            </span>
-                          )}
-                          {dupEmail && (
-                            <span className="text-[10px] font-bold uppercase tracking-wide text-amber-900 bg-amber-100 px-2 py-0.5 rounded">
-                              Duplicate email
-                            </span>
-                          )}
+                        <input
+                          type="checkbox"
+                          checked={!!selectedIds[member.id]}
+                          onChange={() => toggleSelected(member.id)}
+                          aria-label={`Select ${lastFirstFromFullName(member.name)}`}
+                          className="h-4 w-4 rounded border-gray-300 text-gold focus:ring-gold"
+                        />
+                      </td>
+                      <td className="px-3 py-3">
+                        <div className="flex min-w-[180px] items-center gap-3">
+                          <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gray-100 text-xs font-bold text-neutral">
+                            {member.img ? (
+                              <img src={member.img} alt="" className="h-full w-full object-cover" />
+                            ) : (
+                              displayInitials({ name: member.name })
+                            )}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="truncate font-medium text-gold">{lastFirstFromFullName(member.name)}</p>
+                            {member.user_id ? (
+                              <p className="text-[11px] font-bold uppercase text-purple-700">Linked</p>
+                            ) : (
+                              <p className="text-[11px] font-bold uppercase text-neutral">No account</p>
+                            )}
+                            {dupEmail && (
+                              <p className="text-[11px] font-bold uppercase text-amber-800">Duplicate email</p>
+                            )}
+                          </div>
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-sm text-neutral">{member.email || '-'}</td>
-                      <td className="px-4 py-3 text-sm text-neutral">{member.phone || '-'}</td>
-                      <td className="px-4 py-3 text-sm text-charcoal font-bold">{getDisplayRole(member)}</td>
-                      <td className="px-4 py-3 text-sm text-neutral">
-                        {(member.groups || []).map((g) => g.name).filter(Boolean).join(', ') || '-'}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-neutral">
-                        {(member.job_roles || []).map((r) => r.name).filter(Boolean).join(', ') || '-'}
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className="inline-flex items-center px-2 py-1 rounded-full bg-gold/10 text-blue-700 text-[11px] font-bold uppercase tracking-wider">
-                          {PROFILE_LABEL[pt]}
+                      <td className="px-3 py-3 text-sm text-charcoal">{member.email || '—'}</td>
+                      <td className="px-3 py-3">
+                        <span className="inline-flex items-center gap-2 text-sm font-medium text-gold">
+                          <StatusGlyph profileType={pt} />
+                          {getDisplayRole(member)}
                         </span>
                       </td>
-                      <td className="px-4 py-3">
-                        <div className="flex gap-2 flex-wrap">
+                      <td className="px-3 py-3 text-sm text-charcoal">{ministryGroupLabel(member) || '—'}</td>
+                      <td className="px-3 py-3 whitespace-nowrap text-sm text-charcoal">
+                        {activeTab === 'archived' ? formatArchivedDate(member.archived_at) : member.phone || '—'}
+                      </td>
+                      <td className="px-2 py-3 text-right">
+                        <div
+                          className="relative inline-block"
+                          ref={actionsMenuId === member.id ? actionsMenuRef : undefined}
+                        >
                           <button
-                            onClick={() => handleEdit(member)}
-                            className="px-3 py-2 bg-white border border-gray-200 rounded-[4px] text-neutral hover:text-gold hover:border-gold transition-colors text-sm font-bold inline-flex items-center gap-2"
-                            title="Edit"
+                            type="button"
+                            className="rounded-full p-1.5 text-neutral hover:bg-gray-100 hover:text-charcoal"
+                            aria-label={`${member.name} actions`}
+                            onClick={() =>
+                              setActionsMenuId((current) => (current === member.id ? null : member.id))
+                            }
                           >
-                            <Edit size={16} />
-                            Edit
+                            <MoreVertical size={18} />
                           </button>
-                          <button
-                            onClick={() => handleArchive(member)}
-                            className="px-3 py-2 bg-white border border-gray-200 rounded-[4px] text-neutral hover:text-charcoal hover:border-gold transition-colors text-sm font-bold inline-flex items-center gap-2"
-                            title="Archive"
-                          >
-                            <Archive size={16} />
-                            Archive
-                          </button>
-                          <button
-                            onClick={() => handleDelete(member)}
-                            className="px-3 py-2 bg-white border border-red-200 rounded-[4px] text-red-600 hover:bg-red-50 transition-colors text-sm font-bold inline-flex items-center gap-2"
-                            title="Delete permanently"
-                          >
-                            <Trash2 size={16} />
-                            Delete
-                          </button>
+                          {actionsMenuId === member.id && (
+                            <div
+                              role="menu"
+                              className="absolute right-0 top-full z-30 mt-1 w-52 rounded-lg border border-gray-200 bg-white py-1 shadow-lg"
+                            >
+                              {activeTab === 'archived' ? (
+                                <>
+                                  <button
+                                    type="button"
+                                    className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-gold hover:bg-gray-50"
+                                    onClick={() => {
+                                      setActionsMenuId(null);
+                                      void handleUnarchive(member.id);
+                                    }}
+                                  >
+                                    <ArchiveRestore size={16} />
+                                    Unarchive
+                                  </button>
+                                  <div className="my-1 border-t border-gray-100" />
+                                  <button
+                                    type="button"
+                                    className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-red-600 hover:bg-red-50"
+                                    onClick={() => {
+                                      setActionsMenuId(null);
+                                      handleDelete(member);
+                                    }}
+                                  >
+                                    <Trash2 size={16} />
+                                    Delete
+                                  </button>
+                                </>
+                              ) : (
+                                <>
+                                  <button
+                                    type="button"
+                                    className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-gold hover:bg-gray-50"
+                                    onClick={() => {
+                                      setActionsMenuId(null);
+                                      handleEdit(member);
+                                    }}
+                                  >
+                                    <Pencil size={16} />
+                                    Edit
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-charcoal hover:bg-gray-50"
+                                    onClick={() => {
+                                      setActionsMenuId(null);
+                                      handleArchive(member);
+                                    }}
+                                  >
+                                    <Archive size={16} />
+                                    Archive
+                                  </button>
+                                  <div className="my-1 border-t border-gray-100" />
+                                  <button
+                                    type="button"
+                                    className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-red-600 hover:bg-red-50"
+                                    onClick={() => {
+                                      setActionsMenuId(null);
+                                      handleDelete(member);
+                                    }}
+                                  >
+                                    <Trash2 size={16} />
+                                    Delete
+                                  </button>
+                                </>
+                              )}
+                            </div>
+                          )}
                         </div>
                       </td>
                     </tr>
                   );
-                })}
-              </tbody>
-            </table>
-          </div>
+                })
+              )}
+            </tbody>
+          </table>
         </div>
-      )}
+        <div className="border-t border-gray-100 bg-white px-6 py-3 text-right text-sm text-neutral">
+          {listedMembers.length} {listedMembers.length === 1 ? 'item' : 'items'}
+        </div>
+      </div>
 
       <Modal
         isOpen={isModalOpen}

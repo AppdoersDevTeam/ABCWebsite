@@ -6,6 +6,35 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2009-022",
+      "date": "2026-09-20",
+      "time": "22:26:43",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T10:26:43.011Z",
+      "version": "1.7.9",
+      "type": "changed",
+      "area": "leadership",
+      "title": "Leadership directory card matches Users",
+      "request": "Make the card for leadership like the card for Users same.",
+      "changes": [
+        "Admin Leadership now uses the same table card as Users: gold Add Person button, underline Status/Group/Search filters, Export in the card, photo avatars, gold last-first names, ministry group, and a row action menu for Edit, Archive, and Delete."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "57 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors. No browser MCP in this session; Leadership card was verified against the Users table markup."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2009-021",
       "date": "2026-09-20",
       "time": "22:09:43",

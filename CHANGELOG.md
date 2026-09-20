@@ -7,6 +7,36 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2009-022 — Leadership directory card matches Users
+
+**Date:** 2026-09-20
+**Time:** 22:26:43
+**Timezone:** Pacific/Auckland
+**Version:** 1.7.9
+**Type:** Changed
+
+**Request**
+
+> Make the card for leadership like the card for Users same.
+
+**Changes**
+
+* Admin Leadership now uses the same table card as Users: gold Add Person button, underline Status/Group/Search filters, Export in the card, photo avatars, gold last-first names, ministry group, and a row action menu for Edit, Archive, and Delete.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: 57 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors. No browser MCP in this session; Leadership card was verified against the Users table markup.
+
 ## CHG-2026-2009-021 — Gold hover on Add User and Add Role
 
 **Date:** 2026-09-20
