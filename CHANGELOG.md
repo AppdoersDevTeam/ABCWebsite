@@ -7,6 +7,69 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2109-026 — Users card uses Users & Roles icon; status counts stack on the left
+
+**Date:** 2026-09-21
+**Time:** 02:40:55
+**Timezone:** Pacific/Auckland
+**Version:** 1.7.41
+**Type:** Changed
+
+**Request**
+
+> On Users card use the same icon for Users & Roles on the left menu, also the Icons underneth the count number for Users, put it underneth the Icon one by one align to the leff position ofd the icon. push to live
+
+**Changes**
+
+* The Users Overview card now uses the same UserCog icon as Users & Roles in the left menu.
+* Approved, Pending, and Not linked counts stack one by one under the number, left-aligned with the card icon.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: 73 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors.
+
+## CHG-2026-2109-025 — Replace Tailwind CDN with PostCSS build; publish responsive audit
+
+**Date:** 2026-09-21
+**Time:** 02:39:43
+**Timezone:** Pacific/Auckland
+**Version:** 1.7.40
+**Type:** Infrastructure
+
+**Request**
+
+> Full responsive refactor for mobile and tablet. Phase 0: replace Tailwind CDN with a proper build pipeline. Phase 1: produce RESPONSIVE_AUDIT.md and stop for approval before layout changes.
+
+**Changes**
+
+* Tailwind Play CDN was removed from index.html and replaced with Tailwind CSS 3.4.19, PostCSS, and Autoprefixer.
+* Custom colours, fonts, animations, and page-shell CSS now live in tailwind.config.js and index.css.
+* RESPONSIVE_AUDIT.md lists every route, overflow risk, table/modal/PDF, and Phase 2 questions. Layout work is not started.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: vite build passed. Arbitrary Tailwind classes including w-[calc(100%-190px)], min-[480px], and h-[65dvh] compiled. Unit tests and npm run validate recorded after this entry. Typecheck still fails on pre-existing app errors.
+
 ## CHG-2026-2109-024 — Prayer Requests shows system total; Rosters label; titles 2px larger
 
 **Date:** 2026-09-21

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { OverviewStatCard } from '../../components/UI/OverviewStatCard';
 import { OverviewUserBreakdown } from '../../components/UI/OverviewUserBreakdown';
-import { Calendar, BookOpen, Users, ClipboardList, UserCheck, X, Plus, Shield, Mail, Newspaper, HandHeart } from 'lucide-react';
+import { Calendar, BookOpen, Users, ClipboardList, UserCheck, UserCog, X, Plus, Shield, Mail, Newspaper, HandHeart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { appConfirm } from '../../lib/appDialog';
@@ -605,10 +605,11 @@ export const AdminOverview = () => {
     { 
       label: 'Users', 
       value: isLoadingUsers ? '...' : visibleUsers.length.toString(), 
-      icon: <Users size={20} />, 
+      icon: <UserCog size={20} />, 
       path: '/admin/users', 
       color: 'text-gold', 
       highlight: false,
+      descriptionClassName: 'justify-start items-start',
       subtitle: isLoadingUsers
         ? undefined
         : (
@@ -734,6 +735,7 @@ export const AdminOverview = () => {
               highlight={stat.highlight}
               valueSize={stat.valueSize}
               valueClassName={stat.valueSize === 'title' ? 'line-clamp-2' : undefined}
+              descriptionClassName={stat.descriptionClassName}
             />
           );
 

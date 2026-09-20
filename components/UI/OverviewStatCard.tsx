@@ -14,6 +14,7 @@ interface OverviewStatCardProps {
   valueSize?: OverviewValueSize;
   valueClassName?: string;
   className?: string;
+  descriptionClassName?: string;
 }
 
 const valueSizeClasses: Record<OverviewValueSize, string> = {
@@ -38,6 +39,7 @@ export const OverviewStatCard: React.FC<OverviewStatCardProps> = ({
   valueSize = 'stat',
   valueClassName = '',
   className = '',
+  descriptionClassName = '',
 }) => {
   return (
     <div
@@ -63,7 +65,7 @@ export const OverviewStatCard: React.FC<OverviewStatCardProps> = ({
         {value}
       </div>
       {description ? (
-        <div className={`flex ${DESCRIPTION_ROW_MIN_HEIGHT} shrink-0 items-center justify-center text-[15px] text-neutral leading-relaxed`}>
+        <div className={`flex ${DESCRIPTION_ROW_MIN_HEIGHT} shrink-0 text-[15px] text-neutral leading-relaxed ${descriptionClassName || 'items-center justify-center'}`}>
           {description}
         </div>
       ) : (
