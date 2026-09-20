@@ -1,12 +1,13 @@
 ---
-description: When the user asks to implement and push without asking, do not pause for Run/Allow prompts in chat.
+description: Never ask the user to click Run or Allow; auto-run allowlisted commands.
 alwaysApply: true
 ---
 
-# Auto-run requested work
+# Auto-run without asking
 
-When the user has asked to implement, complete, or push work without asking them to Run or Allow:
+The user does not want to click Run or Allow.
 
-1. Do not stop to ask the user to run a command or approve a step in chat.
-2. If Auto-review blocks a Shell command, immediately retry the exact same command with `request_smart_mode_approval` set to true and the exact block reason. Do not rewrite the command.
-3. Continue through changelog, validate, commit, and `git push` when they asked to push to GitHub.
+1. Do not stop in chat to ask the user to run a command or approve a step.
+2. Commands on the Cursor allowlist (git, npm, node, Hub CLI, changelog, validate, push) must run automatically.
+3. If Auto-review still blocks a Shell command, immediately retry the exact same command with `request_smart_mode_approval` set to true and the exact block reason. Do not rewrite the command. Do not ask in chat.
+4. When the user asks to push to live / GitHub, run `npm run push:live` or `git push` without asking.

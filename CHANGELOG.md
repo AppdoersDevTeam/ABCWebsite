@@ -7,6 +7,37 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2009-009 — Auto-run allowlisted Cursor agent commands without Run prompts
+
+**Date:** 2026-09-20
+**Time:** 19:14:06
+**Timezone:** Pacific/Auckland
+**Version:** 1.4.3
+**Type:** Infrastructure
+
+**Request**
+
+> set ut cursor for not ask me anymore run or approve anymore command, i dont want to click RUN all the time, make sure that when it i whisllist it will go auto without ask me .
+
+**Changes**
+
+* The project auto-run rule now tells the agent never to ask in chat for Run or Allow, and to auto-run allowlisted git, npm, node, Hub, and push commands.
+* Laptop Cursor permissions were set so allowlisted terminal commands (git, npm, node, Hub CLI, and similar) run without a Run click. Force-push and hard reset still ask first.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: not run or failed
+* Notes: 57 unit tests and npm run validate passed. No app UI change; browser verification not applicable. Laptop ~/.cursor/permissions.json and CLI approvalMode are local to this machine.
+
 ## CHG-2026-2009-008 — Show approved Users count on Admin Overview
 
 **Date:** 2026-09-20

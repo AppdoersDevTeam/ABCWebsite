@@ -6,6 +6,36 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2009-009",
+      "date": "2026-09-20",
+      "time": "19:14:06",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T07:14:06.513Z",
+      "version": "1.4.3",
+      "type": "infrastructure",
+      "area": "system",
+      "title": "Auto-run allowlisted Cursor agent commands without Run prompts",
+      "request": "set ut cursor for not ask me anymore run or approve anymore command, i dont want to click RUN all the time, make sure that when it i whisllist it will go auto without ask me .",
+      "changes": [
+        "The project auto-run rule now tells the agent never to ask in chat for Run or Allow, and to auto-run allowlisted git, npm, node, Hub, and push commands.",
+        "Laptop Cursor permissions were set so allowlisted terminal commands (git, npm, node, Hub CLI, and similar) run without a Run click. Force-push and hard reset still ask first."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "57 unit tests and npm run validate passed. No app UI change; browser verification not applicable. Laptop ~/.cursor/permissions.json and CLI approvalMode are local to this machine."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2009-008",
       "date": "2026-09-20",
       "time": "18:55:15",
