@@ -35,11 +35,9 @@ export const PublicLayout = () => {
   usePageMeta(managesOwnMeta ? null : getRouteMeta(location.pathname));
 
   useEffect(() => {
-    if (isLeadershipBioPage) {
-      setIsMenuOpen(false);
-      setOpenMobileSubmenu(null);
-    }
-  }, [isLeadershipBioPage]);
+    setIsMenuOpen(false);
+    setOpenMobileSubmenu(null);
+  }, [location.pathname]);
 
   // Refresh user profile when component mounts if user is logged in
   // This ensures we have the latest approval status for the header button
@@ -214,12 +212,12 @@ export const PublicLayout = () => {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-transparent text-charcoal font-sans relative overflow-x-hidden selection:bg-gold selection:text-charcoal">
+    <div className="min-h-screen flex min-w-0 flex-col bg-transparent text-charcoal font-sans relative selection:bg-gold selection:text-charcoal">
       <ScrollToTop />
       
       {/* Header */}
-      <header className={`fixed w-full z-50 transition-all duration-300 ${isLoginPage || scrolled ? 'bg-white backdrop-blur-md shadow-sm py-4' : 'bg-transparent py-6'}`}>
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <header className={`fixed w-full z-50 min-w-0 transition-all duration-300 pt-[max(1rem,env(safe-area-inset-top))] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] ${isLoginPage || scrolled ? 'bg-white backdrop-blur-md shadow-sm pb-4' : 'bg-transparent pb-6'}`}>
+        <div className="page-container">
           <div className="flex justify-between items-center">
             {/* Logo */}
             <Link to="/" className="flex items-center group">
@@ -346,26 +344,29 @@ export const PublicLayout = () => {
               </div>
             </nav>
 
-            {/* Mobile Menu Button — hidden on individual leadership bio pages */}
             <button
               type="button"
-              className={`${isLeadershipBioPage ? 'hidden' : 'lg:hidden'} p-2 transition-colors ${
+              className={`lg:hidden inline-flex min-h-[44px] min-w-[44px] items-center justify-center p-2 transition-colors ${
                 isLoginPage || scrolled
                   ? 'text-[#738242] hover:text-gold'
                   : 'text-white hover:text-gold'
               }`}
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              aria-label="Open menu"
+              aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={isMenuOpen}
+              aria-controls="public-mobile-nav"
             >
               {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
             </button>
           </div>
         </div>
 
-        {/* Mobile Menu — not used on individual leadership bio pages */}
-        {isMenuOpen && !isLeadershipBioPage && (
-          <div className="lg:hidden bg-white absolute w-full h-screen top-0 left-0 p-8 flex flex-col justify-center space-y-6 z-40 overflow-y-auto">
-             <button className="absolute top-8 right-8 text-charcoal" onClick={() => setIsMenuOpen(false)}><X size={32}/></button>
+        {isMenuOpen && (
+          <div
+            id="public-mobile-nav"
+            className="lg:hidden bg-white fixed inset-0 z-40 flex min-h-[100vh] min-h-[100dvh] flex-col justify-center space-y-6 overflow-y-auto pt-[max(5rem,env(safe-area-inset-top))] pb-[max(2rem,env(safe-area-inset-bottom))] pl-[max(2rem,env(safe-area-inset-left))] pr-[max(2rem,env(safe-area-inset-right))]"
+          >
+             <button type="button" className="absolute top-[max(2rem,env(safe-area-inset-top))] right-[max(2rem,env(safe-area-inset-right))] inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-charcoal" onClick={() => setIsMenuOpen(false)} aria-label="Close menu"><X size={32}/></button>
             {navItems.map((item) => (
               <div key={item.path} className="space-y-2">
                 {item.submenu && item.submenu.length > 0 ? (
@@ -480,17 +481,17 @@ export const PublicLayout = () => {
       </header>
 
       {/* Main Content */}
-      <main className="flex-grow relative z-10">
+      <main className="flex-grow relative z-10 min-w-0">
         <div className="page-shell">
-          <div className="page-shell-content">
+          <div className="page-shell-content min-w-0">
             <Outlet />
           </div>
         </div>
       </main>
 
       {/* Footer */}
-      <footer className="footer-gradient text-white pt-24 pb-12 border-t border-transparent relative z-10 w-full">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <footer className="footer-gradient text-white pt-24 pb-[max(3rem,calc(2rem+env(safe-area-inset-bottom)))] border-t border-transparent relative z-10 w-full min-w-0 pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]">
+        <div className="page-container">
           {/* Main Footer Content */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12 border-b border-gray-100 pb-6 mb-6">
             {/* Brand Section */}

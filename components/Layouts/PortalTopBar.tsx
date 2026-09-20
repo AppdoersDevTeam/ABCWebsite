@@ -174,7 +174,7 @@ export const PortalTopBar = ({
   };
 
   return (
-    <div className="relative z-[80] flex h-16 shrink-0 overflow-visible">
+    <div className="relative z-[80] flex h-[calc(4rem+env(safe-area-inset-top))] shrink-0 overflow-visible pt-[env(safe-area-inset-top)]">
       <div
         className={`flex shrink-0 items-center overflow-visible border-r border-gray-100 bg-white py-1 ${
           sidebarCollapsed ? 'w-[72px] px-1' : 'w-44 px-2 sm:w-72'
@@ -275,11 +275,11 @@ export const PortalTopBar = ({
         </div>
       </div>
 
-      <header className="flex min-w-0 flex-1 items-center gap-2 bg-gold px-3 sm:gap-3">
+      <header className="flex min-w-0 flex-1 items-center gap-2 bg-gold px-3 pr-[max(0.75rem,env(safe-area-inset-right))] sm:gap-3">
       <button
         type="button"
         onClick={onToggleSidebar}
-        className="rounded-md p-2 text-white hover:bg-black/10"
+        className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md p-2 text-white hover:bg-black/10"
         aria-label={sidebarCollapsed ? 'Expand menu' : 'Collapse menu'}
         aria-pressed={sidebarCollapsed}
       >
@@ -308,7 +308,7 @@ export const PortalTopBar = ({
               }}
               onFocus={() => setSearchOpen(true)}
               placeholder="Search"
-              className="h-[45px] w-[138px] rounded-md border border-white/80 bg-transparent pl-10 pr-3 text-sm font-bold text-white placeholder:text-white focus:outline-none focus:ring-1 focus:ring-white/70 sm:w-[181px] md:w-[213px]"
+              className="h-[45px] w-28 min-w-0 max-w-[213px] rounded-md border border-white/80 bg-transparent pl-10 pr-3 text-base font-bold text-white placeholder:text-white focus:outline-none focus:ring-1 focus:ring-white/70 sm:w-[181px] md:w-[213px]"
               aria-label="Search dashboard pages"
             />
           </form>

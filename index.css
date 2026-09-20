@@ -119,6 +119,27 @@ h6 {
     transform: none;
     transition: none;
   }
+  .animate-blob,
+  .animate-blob-reverse,
+  .animate-pulse-slow,
+  .animate-float,
+  .animate-glow,
+  .animate-shimmer,
+  .animate-falling-heart,
+  .animate-ping-pong,
+  .animate-fade-in-up,
+  .animate-fade-in-down,
+  .animate-fade-in-left,
+  .animate-scale-in,
+  .animate-scale-in-bounce,
+  .animate-slide-in-right,
+  .animate-slide-in-left {
+    animation: none !important;
+  }
+  .hover-lift:hover {
+    transform: none;
+    box-shadow: none;
+  }
 }
 
 /* Hover animations */

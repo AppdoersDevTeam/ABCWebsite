@@ -6,6 +6,36 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2109-038",
+      "date": "2026-09-21",
+      "time": "03:21:23",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T15:21:23.494Z",
+      "version": "1.9.0",
+      "type": "changed",
+      "area": "admin",
+      "title": "Overview cards 12% narrower in two rows of five",
+      "request": "Every Admin Overview stat card  increase the narrow it in  12% more. Height and inner layout are unchanged. Make it 2 rows Put 5 in one and another 5 in the next row. push it.",
+      "changes": [
+        "Admin Overview stat cards are 12% narrower than the previous live width. Height and inner layout are unchanged.",
+        "The cards sit in two rows of five on wide screens, including an Annual Calendar card so the second row is complete."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "Unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2109-037",
       "date": "2026-09-21",
       "time": "03:17:31",

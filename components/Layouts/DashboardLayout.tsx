@@ -50,7 +50,7 @@ export const DashboardLayout = () => {
   ]);
 
   return (
-    <div className="flex h-dvh flex-col bg-dash font-sans text-charcoal lg:h-screen">
+    <div className="flex h-[100vh] h-[100dvh] min-w-0 flex-col bg-dash font-sans text-charcoal">
       <ScrollToTop />
       <AppDialogHost />
       <PortalTopBar
@@ -87,13 +87,13 @@ export const DashboardLayout = () => {
         )}
 
         <aside className={`
-          fixed bottom-0 left-0 top-16 z-50 transform border-r border-gray-100 bg-white shadow-sm transition-[width,transform] duration-300 ease-in-out lg:static lg:top-auto lg:z-auto lg:h-full lg:translate-x-0
+          fixed bottom-0 left-0 top-[calc(4rem+env(safe-area-inset-top))] z-50 transform border-r border-gray-100 bg-white shadow-sm transition-[width,transform] duration-300 ease-in-out lg:static lg:top-auto lg:z-auto lg:h-full lg:translate-x-0 pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)]
           ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
           ${sidebarCollapsed ? 'w-72 lg:w-[72px]' : 'w-72'}
         `}>
-          <div className="flex h-full flex-col">
+          <div className="flex h-full min-w-0 flex-col">
             <div className="flex items-center justify-end border-b border-gray-100 px-3 py-2 lg:hidden">
-              <button className="text-charcoal" onClick={() => setIsSidebarOpen(false)} aria-label="Close menu"><X /></button>
+              <button type="button" className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-charcoal" onClick={() => setIsSidebarOpen(false)} aria-label="Close menu"><X /></button>
             </div>
 
           <nav className={`flex-1 space-y-1 overflow-y-auto py-2 ${sidebarCollapsed ? 'px-2 lg:px-2' : 'px-3'}`}>
@@ -109,7 +109,7 @@ export const DashboardLayout = () => {
                   title={item.label}
                   onClick={() => setIsSidebarOpen(false)}
                   className={`
-                    flex items-center rounded-[4px] transition-all duration-300 group relative overflow-hidden
+                    flex min-h-[44px] items-center rounded-[4px] transition-all duration-300 group relative overflow-hidden
                     ${sidebarCollapsed ? 'lg:justify-center lg:space-x-0 lg:px-2 py-1.5' : 'space-x-2.5 px-3 py-1.5'}
                     ${isActive 
                       ? 'bg-gold/10 text-charcoal font-bold' 
@@ -152,7 +152,7 @@ export const DashboardLayout = () => {
         </aside>
 
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden bg-dash">
-          <main className="min-h-0 flex-1 overflow-x-auto overflow-y-auto p-4 sm:p-8">
+          <main className="min-h-0 min-w-0 flex-1 overflow-x-auto overflow-y-auto p-4 md:p-6 lg:p-8">
             <Outlet />
           </main>
         </div>

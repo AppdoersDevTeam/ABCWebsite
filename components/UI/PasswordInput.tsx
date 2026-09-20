@@ -17,7 +17,7 @@ export const PasswordInput = ({ className = '', wrapperClassName = '', ...props 
       />
       <button
         type="button"
-        className="absolute right-3 top-1/2 -translate-y-1/2 z-10 text-neutral hover:text-charcoal p-1 rounded-full"
+        className="absolute right-3 top-1/2 z-10 inline-flex min-h-[44px] min-w-[44px] -translate-y-1/2 items-center justify-center rounded-full p-1 text-neutral hover:text-charcoal"
         onClick={() => setVisible((current) => !current)}
         aria-label={visible ? 'Hide password' : 'Show password'}
         aria-pressed={visible}

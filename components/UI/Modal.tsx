@@ -97,7 +97,7 @@ export const Modal: React.FC<ModalProps> = ({
   return createPortal(
     <div
       role="presentation"
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm transition-opacity duration-300"
+      className="fixed inset-0 z-[100] flex items-end justify-center bg-black/50 p-0 backdrop-blur-sm transition-opacity duration-300 md:items-center md:p-4 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]"
       style={{ opacity: isOpen ? 1 : 0 }}
       onClick={handleBackdropClick}
       onPointerDown={handleBackdropPointerDown}
@@ -105,17 +105,18 @@ export const Modal: React.FC<ModalProps> = ({
       <div
         role="dialog"
         aria-modal="true"
-        className="bg-white rounded-[16px] max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative"
+        className="relative min-w-0 w-full max-w-2xl overflow-y-auto bg-white shadow-2xl max-md:max-h-[100vh] max-md:max-h-[100dvh] max-md:rounded-t-[16px] md:max-h-[90vh] md:max-h-[90dvh] md:rounded-[16px]"
         onClick={(e) => e.stopPropagation()}
       >
         {title && (
-          <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between z-10">
-            <h2 className="text-2xl font-serif font-normal text-charcoal">{title}</h2>
+          <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-gray-100 bg-white px-4 py-4 sm:px-6">
+            <h2 className="min-w-0 break-words text-2xl font-serif font-normal text-charcoal">{title}</h2>
             <button
               type="button"
               onClick={requestClose}
               disabled={preventClose}
-              className="text-neutral hover:text-charcoal transition-colors p-2 hover:bg-gray-100 rounded-full disabled:opacity-40 disabled:cursor-not-allowed"
+              aria-label="Close"
+              className="inline-flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-full p-2 text-neutral transition-colors hover:bg-gray-100 hover:text-charcoal disabled:cursor-not-allowed disabled:opacity-40"
             >
               <X size={24} />
             </button>
@@ -126,12 +127,12 @@ export const Modal: React.FC<ModalProps> = ({
             type="button"
             onClick={requestClose}
             disabled={preventClose}
-            className="absolute top-4 right-4 text-neutral hover:text-charcoal transition-colors p-2 hover:bg-gray-100 rounded-full z-10 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="absolute right-4 top-4 z-10 inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full p-2 text-neutral transition-colors hover:bg-gray-100 hover:text-charcoal disabled:cursor-not-allowed disabled:opacity-40"
           >
             <X size={24} />
           </button>
         )}
-        <div className="p-6">{children}</div>
+        <div className="min-w-0 p-4 sm:p-6">{children}</div>
       </div>
     </div>,
     document.body

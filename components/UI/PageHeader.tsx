@@ -12,7 +12,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
 }) => {
   return (
     <div className="relative pt-40 pb-20 flex flex-col items-center justify-center text-center overflow-hidden">
-      <div className="relative z-10 container px-4">
+      <div className="page-container relative z-10">
         {subtitle && (
             <p className="text-gold font-bold tracking-[0.3em] uppercase mb-4 text-sm md:text-base animate-slide-in-right">{subtitle}</p>
         )}

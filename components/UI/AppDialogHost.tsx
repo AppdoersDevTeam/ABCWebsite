@@ -47,7 +47,7 @@ export const AppDialogHost: React.FC = () => {
   return createPortal(
     <div
       role="presentation"
-      className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+      className="fixed inset-0 z-[110] flex items-end justify-center bg-black/50 p-0 backdrop-blur-sm md:items-center md:p-4 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]"
       onPointerDown={(event) => {
         event.preventDefault();
         event.stopPropagation();
@@ -62,7 +62,7 @@ export const AppDialogHost: React.FC = () => {
         aria-modal="true"
         aria-labelledby="abc-app-dialog-title"
         aria-describedby="abc-app-dialog-message"
-        className="relative w-full max-w-lg rounded-[16px] bg-white px-6 py-8 text-center shadow-2xl"
+        className="relative min-w-0 w-full max-w-lg bg-white px-4 py-8 text-center shadow-2xl sm:px-6 max-md:rounded-t-[16px] md:rounded-[16px]"
         onClick={(event) => event.stopPropagation()}
         onPointerDown={(event) => event.stopPropagation()}
       >
@@ -70,7 +70,7 @@ export const AppDialogHost: React.FC = () => {
         <h2 id="abc-app-dialog-title" className="mt-2 font-serif text-2xl font-normal text-charcoal">
           {title}
         </h2>
-        <p id="abc-app-dialog-message" className="mt-4 whitespace-pre-wrap text-center text-base leading-relaxed text-charcoal">
+        <p id="abc-app-dialog-message" className="mt-4 min-w-0 whitespace-pre-wrap break-words text-center text-base leading-relaxed text-charcoal">
           {current.message}
         </p>
         <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
@@ -78,14 +78,14 @@ export const AppDialogHost: React.FC = () => {
             <>
               <button
                 type="button"
-                className="rounded-[8px] border border-gray-200 bg-white px-5 py-2 text-sm font-bold text-neutral hover:bg-gray-50"
+                className="min-h-[44px] rounded-[8px] border border-gray-200 bg-white px-5 py-2 text-sm font-bold text-neutral hover:bg-gray-50"
                 onClick={() => finishConfirm(false)}
               >
                 {cancelLabel}
               </button>
               <button
                 type="button"
-                className="rounded-[8px] bg-gold px-5 py-2 text-sm font-bold text-charcoal hover:bg-gold/90"
+                className="min-h-[44px] rounded-[8px] bg-gold px-5 py-2 text-sm font-bold text-charcoal hover:bg-gold/90"
                 onClick={() => finishConfirm(true)}
               >
                 {confirmLabel}
@@ -94,7 +94,7 @@ export const AppDialogHost: React.FC = () => {
           ) : (
             <button
               type="button"
-              className="rounded-[8px] bg-gold px-5 py-2 text-sm font-bold text-charcoal hover:bg-gold/90"
+              className="min-h-[44px] rounded-[8px] bg-gold px-5 py-2 text-sm font-bold text-charcoal hover:bg-gold/90"
               onClick={finishAlert}
             >
               {confirmLabel}
