@@ -1,5 +1,7 @@
 /** Per-route SEO metadata for public pages (HashRouter pathnames). */
 
+import { getMinistryByPath, MINISTRIES_LABEL } from './ministries';
+
 export interface PageMeta {
   /** Page title. The church name suffix is appended automatically unless `rawTitle` is true. */
   title: string;
@@ -50,25 +52,10 @@ export const ROUTE_META: Record<string, PageMeta> = {
     description:
       'Watch and listen to recent sermons from Ashburton Baptist Church. Be encouraged and equipped by Godʼs word.',
   },
-  '/events/sunday-service': {
-    title: 'Sunday Service',
+  '/ministries': {
+    title: MINISTRIES_LABEL,
     description:
-      'Join us every Sunday at 10am for worship, teaching, and community at Ashburton Baptist Church, 284 Havelock Street.',
-  },
-  '/events/young-adults': {
-    title: 'Young Adults',
-    description:
-      'Young adults community at Ashburton Baptist Church — connect, grow, and belong with others in your season of life.',
-  },
-  '/events/teens-youth': {
-    title: 'Teens & Youth',
-    description:
-      'Our teens and youth ministry at Ashburton Baptist Church — a place for young people to belong, have fun, and grow in faith.',
-  },
-  '/events/kids-program': {
-    title: 'Kids Program',
-    description:
-      'Fun, safe, and faith-filled childrenʼs ministry at Ashburton Baptist Church for kids of all ages.',
+      'Ministries at Ashburton Baptist Church — Sunday Service, children, youth, pastoral care, and more ways to belong and serve.',
   },
   '/im-new': {
     title: 'Iʼm New',
@@ -107,5 +94,13 @@ export const ROUTE_META: Record<string, PageMeta> = {
 /** Resolve metadata for a pathname, falling back to the site default. */
 export function getRouteMeta(pathname: string): PageMeta {
   const normalized = pathname.length > 1 ? pathname.replace(/\/+$/, '') : pathname;
-  return ROUTE_META[normalized] || DEFAULT_META;
+  if (ROUTE_META[normalized]) return ROUTE_META[normalized];
+  const ministry = getMinistryByPath(normalized);
+  if (ministry) {
+    return {
+      title: ministry.label,
+      description: `${ministry.summary} Ashburton Baptist Church, 284 Havelock Street.`,
+    };
+  }
+  return DEFAULT_META;
 }

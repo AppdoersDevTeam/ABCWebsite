@@ -20,6 +20,9 @@ import { YoungAdults } from './pages/public/events/YoungAdults';
 import { TeensYouth } from './pages/public/events/TeensYouth';
 import { KidsProgram } from './pages/public/events/KidsProgram';
 import { ImNew } from './pages/public/ImNew';
+import { MinistriesIndex } from './pages/public/ministries/MinistriesIndex';
+import { MinistryPage } from './pages/public/ministries/MinistryPage';
+import { MINISTRIES, MINISTRY_LEGACY_REDIRECTS } from './lib/ministries';
 import { Giving } from './pages/public/Giving';
 import { NeedPrayer } from './pages/public/NeedPrayer';
 import { Contact } from './pages/public/Contact';
@@ -160,11 +163,26 @@ const AppRoutes = () => {
               <Route path="about/leadership/:slug" element={<LeadershipBio />} />
               <Route path="events" element={<Events />} />
               <Route path="events/sermons" element={<Sermons />} />
-              <Route path="events/sunday-service" element={<SundayService />} />
-              <Route path="events/young-adults" element={<YoungAdults />} />
-              <Route path="events/teens-youth" element={<TeensYouth />} />
-              <Route path="events/kids-program" element={<KidsProgram />} />
+              {MINISTRY_LEGACY_REDIRECTS.map((redirect) => (
+                <Route
+                  key={redirect.from}
+                  path={redirect.from.replace(/^\//, '')}
+                  element={<Navigate to={redirect.to} replace />}
+                />
+              ))}
               <Route path="events/:id" element={<EventDetail />} />
+              <Route path="ministries" element={<MinistriesIndex />} />
+              <Route path="sunday-service" element={<SundayService />} />
+              <Route path="young-adults" element={<YoungAdults />} />
+              <Route path="teens-youth" element={<TeensYouth />} />
+              <Route path="children" element={<KidsProgram />} />
+              {MINISTRIES.filter((ministry) => !ministry.existingPage).map((ministry) => (
+                <Route
+                  key={ministry.slug}
+                  path={ministry.slug}
+                  element={<MinistryPage slug={ministry.slug} />}
+                />
+              ))}
               <Route path="im-new" element={<ImNew />} />
               <Route path="giving" element={<Giving />} />
               <Route path="need-prayer" element={<NeedPrayer />} />

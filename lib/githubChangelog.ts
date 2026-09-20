@@ -81,6 +81,7 @@ function areaFromLocation(location: string): ChangelogArea {
       return 'leadership';
     case EVENTS_LABEL:
     case "What's On":
+    case 'Ministries':
       return 'events';
     case 'Rosters (Beta)':
       return 'roster';

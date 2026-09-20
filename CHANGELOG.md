@@ -7,6 +7,38 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2009-006 — Replace What's On with Ministries pages outside /events
+
+**Date:** 2026-09-20
+**Time:** 16:34:28
+**Timezone:** Pacific/Auckland
+**Version:** 1.4.0
+**Type:** Changed
+
+**Request**
+
+> On Front end Webpage update What's On with new items: change the menu from What's On to Ministries, remove Young Adult, Kids Program and Teen & Youth from that menu, add Sunday Service first then alphabetical ministry pages at /<name> not under /events, and push to GitHub without asking to run or allow.
+
+**Changes**
+
+* The public header menu now says Ministries, with Sunday Service first, then Boys Brigade, CAP, Children, Connect Groups, Counselling, Couples, Family, Girls Brigade, Men, Missions, Pastoral Care, Plus 65+, Teens & Youth, Women, Worship, and Young Adults.
+* Each ministry uses a top-level address such as /sunday-service, /children, and /cap instead of /events/kids-program. Old Events submenu links redirect to the new addresses.
+* Sunday Service, Children, Teens & Youth, and Young Adults keep their existing page content. New ministries have public pages with church-office contact next steps. Visiting ashburtonbaptist.co.nz/children opens the matching page.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: 57 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors. No browser MCP; verified routes, menu config, and production bundle include Ministries pages.
+
 ## CHG-2026-2009-005 — Change public website menu from Events to What's On
 
 **Date:** 2026-09-20

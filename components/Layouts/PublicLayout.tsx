@@ -7,7 +7,8 @@ import { ScrollToTop } from '../ScrollToTop';
 import { useAutoSectionReveal } from '../UI/useAutoSectionReveal';
 import { usePageMeta } from '../../lib/usePageMeta';
 import { getRouteMeta, ROUTE_META } from '../../lib/seoConfig';
-import { PUBLIC_EVENTS_MENU_LABEL } from '../../lib/constants';
+import { EVENTS_LABEL } from '../../lib/constants';
+import { MINISTRIES, MINISTRIES_LABEL, MINISTRY_MENU_ITEMS } from '../../lib/ministries';
 
 export const PublicLayout = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -173,14 +174,9 @@ export const PublicLayout = () => {
       submenu: []
     },
     { 
-      label: PUBLIC_EVENTS_MENU_LABEL, 
-      path: '/events',
-      submenu: [
-        { label: 'Sunday Service', path: '/events/sunday-service', hash: '' },
-        { label: 'Young Adults', path: '/events/young-adults', hash: '' },
-        { label: 'Teens & Youth', path: '/events/teens-youth', hash: '' },
-        { label: 'Kids Program', path: '/events/kids-program', hash: '' },
-      ]
+      label: MINISTRIES_LABEL, 
+      path: '/ministries',
+      submenu: MINISTRY_MENU_ITEMS,
     },
     { 
       label: "I'm New", 
@@ -531,7 +527,8 @@ export const PublicLayout = () => {
               <ul id="footer-explore-links" className={`space-y-3 ${openFooterSection === 'explore' ? 'block' : 'hidden'} md:block`}>
                 <li><Link to="/" className="text-white hover:text-gold transition-colors text-sm">Home</Link></li>
                 <li><Link to="/about" className="text-white hover:text-gold transition-colors text-sm">About</Link></li>
-                <li><Link to="/events" className="text-white hover:text-gold transition-colors text-sm">{PUBLIC_EVENTS_MENU_LABEL}</Link></li>
+                <li><Link to="/events" className="text-white hover:text-gold transition-colors text-sm">{EVENTS_LABEL}</Link></li>
+                <li><Link to="/ministries" className="text-white hover:text-gold transition-colors text-sm">{MINISTRIES_LABEL}</Link></li>
                 <li><Link to="/im-new" className="text-white hover:text-gold transition-colors text-sm">I'm New</Link></li>
                 <li><Link to="/need-prayer" className="text-white hover:text-gold transition-colors text-sm">Prayer</Link></li>
                 <li><Link to="/giving" className="text-white hover:text-gold transition-colors text-sm">Giving</Link></li>
@@ -555,10 +552,13 @@ export const PublicLayout = () => {
                 <li><Link to="/im-new#faq" className="text-white hover:text-gold transition-colors text-sm">FAQ</Link></li>
                 <li><Link to="/giving#direct-deposit" className="text-white hover:text-gold transition-colors text-sm">Direct Deposit</Link></li>
                 <li><Link to="/giving#credit-card" className="text-white hover:text-gold transition-colors text-sm">Credit Card</Link></li>
-                <li><Link to="/events/sunday-service" className="text-white hover:text-gold transition-colors text-sm">Sunday Service</Link></li>
-                <li><Link to="/events/young-adults" className="text-white hover:text-gold transition-colors text-sm">Young Adults</Link></li>
-                <li><Link to="/events/teens-youth" className="text-white hover:text-gold transition-colors text-sm">Teens & Youth</Link></li>
-                <li><Link to="/events/kids-program" className="text-white hover:text-gold transition-colors text-sm">Kids Program</Link></li>
+                {MINISTRIES.slice(0, 6).map((ministry) => (
+                  <li key={ministry.slug}>
+                    <Link to={ministry.path} className="text-white hover:text-gold transition-colors text-sm">
+                      {ministry.label}
+                    </Link>
+                  </li>
+                ))}
               </ul>
             </div>
 

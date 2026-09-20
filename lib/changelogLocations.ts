@@ -36,6 +36,7 @@ const PATH_RULES: { test: RegExp; label: MenuLocationLabel }[] = [
   { test: /Newsletter/, label: 'Newsletters' },
   { test: /Devotional/, label: 'Devotionals' },
   { test: /[Ss]ermon|YouTubeSermon/, label: 'Sermons' },
+  { test: /pages\/public\/ministries|lib\/ministries/, label: EVENTS_LABEL },
   { test: /AdminEvents|EventsCalendarGrid|pages\/.*[Ee]vent/, label: EVENTS_LABEL },
   { test: /[Rr]oster/, label: 'Rosters (Beta)' },
   { test: /pages\/admin\/Help|pages\/dashboard\/Help|HelpContent/, label: 'Help' },

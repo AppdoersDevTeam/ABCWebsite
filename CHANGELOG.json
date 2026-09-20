@@ -6,6 +6,37 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2009-006",
+      "date": "2026-09-20",
+      "time": "16:34:28",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T04:34:28.071Z",
+      "version": "1.4.0",
+      "type": "changed",
+      "area": "events",
+      "title": "Replace What's On with Ministries pages outside /events",
+      "request": "On Front end Webpage update What's On with new items: change the menu from What's On to Ministries, remove Young Adult, Kids Program and Teen & Youth from that menu, add Sunday Service first then alphabetical ministry pages at /<name> not under /events, and push to GitHub without asking to run or allow.",
+      "changes": [
+        "The public header menu now says Ministries, with Sunday Service first, then Boys Brigade, CAP, Children, Connect Groups, Counselling, Couples, Family, Girls Brigade, Men, Missions, Pastoral Care, Plus 65+, Teens & Youth, Women, Worship, and Young Adults.",
+        "Each ministry uses a top-level address such as /sunday-service, /children, and /cap instead of /events/kids-program. Old Events submenu links redirect to the new addresses.",
+        "Sunday Service, Children, Teens & Youth, and Young Adults keep their existing page content. New ministries have public pages with church-office contact next steps. Visiting ashburtonbaptist.co.nz/children opens the matching page."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "57 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors. No browser MCP; verified routes, menu config, and production bundle include Ministries pages."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2009-005",
       "date": "2026-09-20",
       "time": "15:25:04",

@@ -66,28 +66,28 @@ export const Events = () => {
       id: 'sunday-service',
       title: 'Sunday Service',
       description: 'Worship, teaching, and community every Sunday at 10:00 AM.',
-      link: '/events/sunday-service',
+      link: '/sunday-service',
       icon: <Music size={28} />
     },
     {
       id: 'young-adults',
       title: 'Young Adults',
       description: 'Connect and grow with other young adults through faith and friendship.',
-      link: '/events/young-adults',
+      link: '/young-adults',
       icon: <Users size={28} />
     },
     {
       id: 'teens-youth',
       title: 'Teens & Youth',
       description: 'A welcoming space for teens to grow in faith and build friendships. Every Tuesday at 7:00 PM.',
-      link: '/events/teens-youth',
+      link: '/teens-youth',
       icon: <Users size={28} />
     },
     {
       id: 'kids-program',
-      title: 'Kids Programme',
+      title: 'Children',
       description: 'Engaging programs that help kids learn about Jesus in a fun way.',
-      link: '/events/kids-program',
+      link: '/children',
       icon: <Users size={28} />
     }
   ];

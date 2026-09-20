@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { GlowingButton } from '../../../components/UI/GlowingButton';
 import { ScrollReveal } from '../../../components/UI/ScrollReveal';
 import { Users, Clock, MapPin, ArrowLeft, Heart, Sparkles, ArrowDownToLine } from 'lucide-react';
-import { EVENTS_LABEL } from '../../../lib/constants';
+import { MINISTRIES_LABEL } from '../../../lib/ministries';
 
 export const KidsProgram = () => {
   const heroRef = useRef<HTMLDivElement>(null);
@@ -32,7 +32,7 @@ export const KidsProgram = () => {
           <div className="max-w-4xl mx-auto text-center">
             <ScrollReveal direction="up" delay={150}>
               <h1 className="text-white text-center max-w-5xl mx-auto mb-4 transition-all duration-1000 delay-250" style={{ fontFamily: 'Kaushan Script', fontSize: '4.25rem', lineHeight: '1.2' }}>
-                Kids Programme
+                Children
               </h1>
             </ScrollReveal>
             <ScrollReveal direction="up" delay={200}>
@@ -44,10 +44,10 @@ export const KidsProgram = () => {
 
             <ScrollReveal direction="up" delay={400}>
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-24">
-                <Link to="/events" className="group">
+                <Link to="/ministries" className="group">
                   <GlowingButton variant="outline" size="md" className="!px-6 !py-[14px] !border-gold !bg-gold/20 !text-white hover:!bg-gold hover:!text-white !rounded-full transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:scale-110 hover:!border-gold active:scale-95 hover:-translate-y-1 !normal-case">
                     <ArrowLeft size={18} className="mr-2 text-gold transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] group-hover:h-5 group-hover:w-5 group-hover:translate-x-1 group-hover:text-white" />
-                    <span className="text-white font-normal text-base leading-6 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] group-hover:font-semibold group-hover:tracking-wider">Back to {EVENTS_LABEL}</span>
+                    <span className="text-white font-normal text-base leading-6 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] group-hover:font-semibold group-hover:tracking-wider">Back to {MINISTRIES_LABEL}</span>
                   </GlowingButton>
                 </Link>
               </div>
@@ -72,7 +72,7 @@ export const KidsProgram = () => {
                   <div className="p-4 bg-[#fbcb05] rounded-full w-24 h-24 mx-auto mb-6 flex items-center justify-center text-white flex-shrink-0 shadow-lg shadow-gold/30">
                     <Users size={48} />
                   </div>
-                  <h2 className="text-4xl md:text-5xl font-serif font-normal text-charcoal mb-4 group-hover:text-gold transition-colors duration-300">Kids Programme</h2>
+                  <h2 className="text-4xl md:text-5xl font-serif font-normal text-charcoal mb-4 group-hover:text-gold transition-colors duration-300">Children</h2>
                   <p className="text-xl text-neutral leading-relaxed group-hover:text-charcoal transition-colors">
                     Fun and faith for K-6. We create engaging, age-appropriate programmes where children 
                     can learn about Jesus, build friendships, and grow in their faith in a safe and 
