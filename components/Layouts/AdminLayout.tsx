@@ -240,7 +240,8 @@ export const AdminLayout = () => {
             })}
           </nav>
 
-          <div className={`border-t border-gray-100 p-3 ${sidebarCollapsed ? 'lg:px-2' : ''}`}>
+          <div className={`p-3 ${sidebarCollapsed ? 'lg:px-2' : ''}`}>
+            <div className="mx-1 my-2 border-t border-gray-300" role="separator" aria-hidden="true" />
             <button 
               title="View as Member"
               onClick={() => {

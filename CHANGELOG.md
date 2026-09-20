@@ -7,6 +7,36 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2109-030 — Left menu divider before View as Member matches Overview
+
+**Date:** 2026-09-21
+**Time:** 02:53:18
+**Timezone:** Pacific/Auckland
+**Version:** 1.7.45
+**Type:** Changed
+
+**Request**
+
+> On the division of the Left Menu and before View as member on bottow of the menu make a line with the same color line underneth the Overview Menu. push to live .
+
+**Changes**
+
+* The left menu now has the same grey divider as under Overview, placed before View as Member.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: 73 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors.
+
 ## CHG-2026-2109-029 — Users status icons smaller; Overview counts 2px larger
 
 **Date:** 2026-09-21
