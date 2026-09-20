@@ -194,11 +194,13 @@ export const PortalTopBar = ({
           aria-haspopup="menu"
           aria-label="User menu"
         >
-          <img
-            src="/ABC Logo.png"
-            alt=""
-            className="h-10 w-10 shrink-0 rounded-full bg-white object-contain"
-          />
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gold">
+            <img
+              src="/ABC Logo.png"
+              alt=""
+              className="h-full w-full object-contain"
+            />
+          </span>
           {!sidebarCollapsed && (
             <span className="min-w-0 flex-1 text-left">
               <span className="block truncate text-[15px] font-semibold leading-tight text-charcoal">

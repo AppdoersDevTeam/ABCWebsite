@@ -6,6 +6,35 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2109-028",
+      "date": "2026-09-21",
+      "time": "02:48:23",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T14:48:23.024Z",
+      "version": "1.7.43",
+      "type": "changed",
+      "area": "admin",
+      "title": "Logged-in user icon sits in a gold rounded circle",
+      "request": "On the Top Menu User Logged in make the Iconof the system with the rounded circle color like the photo. push live.",
+      "changes": [
+        "The church logo on the logged-in user control in the top menu now sits in a gold rounded circle, matching the attached logo."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "73 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2109-027",
       "date": "2026-09-21",
       "time": "02:45:56",

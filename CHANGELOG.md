@@ -7,6 +7,36 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2109-028 — Logged-in user icon sits in a gold rounded circle
+
+**Date:** 2026-09-21
+**Time:** 02:48:23
+**Timezone:** Pacific/Auckland
+**Version:** 1.7.43
+**Type:** Changed
+
+**Request**
+
+> On the Top Menu User Logged in make the Iconof the system with the rounded circle color like the photo. push live.
+
+**Changes**
+
+* The church logo on the logged-in user control in the top menu now sits in a gold rounded circle, matching the attached logo.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: 73 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors.
+
 ## CHG-2026-2109-027 — Users status icons sit under the card icon; counts 4px larger
 
 **Date:** 2026-09-21
