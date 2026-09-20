@@ -6,6 +6,35 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2109-006",
+      "date": "2026-09-21",
+      "time": "00:48:17",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T12:48:17.804Z",
+      "version": "1.7.21",
+      "type": "fixed",
+      "area": "users",
+      "title": "Users 3-dots menu opens in front of the card",
+      "request": "do the same on Users The Users 3-dots menu if has being clipped by the table card footer. Put it to opens in front of the card. Push when completed.",
+      "changes": [
+        "The Users row actions menu now opens in a portal above the table card, so it is no longer clipped by the footer."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "66 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors. No browser MCP in this session; the same portal menu placement tests cover Users."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2109-005",
       "date": "2026-09-21",
       "time": "00:42:41",

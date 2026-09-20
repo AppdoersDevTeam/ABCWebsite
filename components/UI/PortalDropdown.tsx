@@ -37,6 +37,8 @@ export const PortalDropdown: React.FC<PortalDropdownProps> = ({
   useLayoutEffect(() => {
     if (!open) return;
     updatePosition();
+    const frame = requestAnimationFrame(updatePosition);
+    return () => cancelAnimationFrame(frame);
   }, [open]);
 
   useEffect(() => {

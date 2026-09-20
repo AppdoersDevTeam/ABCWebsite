@@ -9,6 +9,7 @@ import { LinkDirectoryUserModal } from './LinkDirectoryUserModal';
 import { IntroInquiryEmailModal } from './IntroInquiryEmailModal';
 import { formatLastAccessParts } from '../../lib/dateUtils';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
+import { PortalDropdown } from '../../components/UI/PortalDropdown';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { Modal } from '../../components/UI/Modal';
 import { TurnstileField, type TurnstileFieldHandle } from '../../components/UI/TurnstileField';
@@ -87,36 +88,11 @@ export const AdminUsers = () => {
   const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
   const [actionsMenuUserId, setActionsMenuUserId] = useState<string | null>(null);
   const passwordResetTurnstileRef = useRef<TurnstileFieldHandle>(null);
-  const actionsMenuRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     fetchUsers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  useEffect(() => {
-    if (!actionsMenuUserId) return;
-
-    const handlePointerDown = (event: MouseEvent) => {
-      if (
-        actionsMenuRef.current &&
-        !actionsMenuRef.current.contains(event.target as Node)
-      ) {
-        setActionsMenuUserId(null);
-      }
-    };
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setActionsMenuUserId(null);
-    };
-
-    document.addEventListener('mousedown', handlePointerDown);
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('mousedown', handlePointerDown);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [actionsMenuUserId]);
 
   const fetchUsers = async () => {
     console.log('AdminUsers - fetchUsers called');
@@ -1121,25 +1097,24 @@ export const AdminUsers = () => {
                         )}
                       </td>
                       <td className="px-2 py-3 text-right">
-                        <div
-                          className="relative inline-block"
-                          ref={actionsMenuUserId === u.id ? actionsMenuRef : undefined}
-                        >
-                          <button
-                            type="button"
-                            className="rounded-full p-1.5 text-neutral hover:bg-gray-100 hover:text-charcoal"
-                            aria-label={`${displayName(u)} actions`}
-                            onClick={() =>
-                              setActionsMenuUserId((current) => (current === u.id ? null : u.id))
-                            }
-                          >
-                            <MoreVertical size={18} />
-                          </button>
-                          {actionsMenuUserId === u.id && (
-                            <div
-                              role="menu"
-                              className="absolute right-0 top-full z-30 mt-1 w-60 rounded-lg border border-gray-200 bg-white py-1 shadow-lg"
+                        <PortalDropdown
+                          open={actionsMenuUserId === u.id}
+                          onClose={() => setActionsMenuUserId(null)}
+                          menuClassName="w-60"
+                          trigger={
+                            <button
+                              type="button"
+                              className="rounded-full p-1.5 text-neutral hover:bg-gray-100 hover:text-charcoal"
+                              aria-label={`${displayName(u)} actions`}
+                              aria-expanded={actionsMenuUserId === u.id}
+                              onClick={() =>
+                                setActionsMenuUserId((current) => (current === u.id ? null : u.id))
+                              }
                             >
+                              <MoreVertical size={18} />
+                            </button>
+                          }
+                        >
                               <button
                                 type="button"
                                 className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-gold hover:bg-gray-50"
@@ -1279,9 +1254,7 @@ export const AdminUsers = () => {
                                 <Trash2 size={16} />
                                 {deletingUserId === u.id ? 'Deleting…' : 'Delete'}
                               </button>
-                            </div>
-                          )}
-                        </div>
+                        </PortalDropdown>
                       </td>
                     </tr>
                   );

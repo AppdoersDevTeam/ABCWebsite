@@ -7,6 +7,36 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2109-006 — Users 3-dots menu opens in front of the card
+
+**Date:** 2026-09-21
+**Time:** 00:48:17
+**Timezone:** Pacific/Auckland
+**Version:** 1.7.21
+**Type:** Fixed
+
+**Request**
+
+> do the same on Users The Users 3-dots menu if has being clipped by the table card footer. Put it to opens in front of the card. Push when completed.
+
+**Changes**
+
+* The Users row actions menu now opens in a portal above the table card, so it is no longer clipped by the footer.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: 66 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors. No browser MCP in this session; the same portal menu placement tests cover Users.
+
 ## CHG-2026-2109-005 — People 3-dots menu opens in front of the card
 
 **Date:** 2026-09-21
