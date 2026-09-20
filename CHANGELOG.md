@@ -7,6 +7,36 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2109-033 — Left menu People renamed to People's Directory
+
+**Date:** 2026-09-21
+**Time:** 03:06:00
+**Timezone:** Pacific/Auckland
+**Version:** 1.8.1
+**Type:** Changed
+
+**Request**
+
+> On the left menu change the Menu People to People's Directory. Push live.
+
+**Changes**
+
+* Admin and member left menus now show People's Directory instead of People.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: Unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors.
+
 ## CHG-2026-2109-032 — Overview Events card with total count
 
 **Date:** 2026-09-21

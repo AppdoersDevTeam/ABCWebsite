@@ -6,6 +6,35 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2109-033",
+      "date": "2026-09-21",
+      "time": "03:06:00",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T15:06:00.943Z",
+      "version": "1.8.1",
+      "type": "changed",
+      "area": "admin",
+      "title": "Left menu People renamed to People's Directory",
+      "request": "On the left menu change the Menu People to People's Directory. Push live.",
+      "changes": [
+        "Admin and member left menus now show People's Directory instead of People."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "Unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2109-032",
       "date": "2026-09-21",
       "time": "03:03:50",
