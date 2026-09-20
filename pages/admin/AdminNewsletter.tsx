@@ -461,7 +461,7 @@ export const AdminNewsletter = () => {
                 <div
                   key={newsletter.id}
                   className={`glass-card bg-white/80 border p-3 sm:p-4 flex justify-between items-center gap-2 rounded-[10px] transition-all group min-w-0 ${
-                    viewing?.id === newsletter.id ? 'border-gold shadow-md' : 'border-white/60 hover:shadow-md hover:bg-gray-200'
+                    viewing?.id === newsletter.id ? 'border-gold shadow-md' : 'border-white/60 hover:shadow-md hover:border-gold'
                   }`}
                 >
                   <button

@@ -6,6 +6,36 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2109-017",
+      "date": "2026-09-21",
+      "time": "01:52:52",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T13:52:52.824Z",
+      "version": "1.7.32",
+      "type": "changed",
+      "area": "admin",
+      "title": "Grey hover is for menus and rows only; Overview cards are narrower",
+      "request": "User Approval Requests now use the same grey hover as the left menu, and that fill is the hover pattern for cards, rows, and menus. Undo this option above, leave just this option for Menus and rows not to cards, do this pattern for all system.  Also On Overview Menu, decrease the width of each card in 90 pts. push to live.",
+      "changes": [
+        "Grey hover now applies to menus and rows only. Cards no longer fill grey on hover.",
+        "Each Overview stat card is 90px narrower."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "73 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2109-016",
       "date": "2026-09-21",
       "time": "01:43:12",

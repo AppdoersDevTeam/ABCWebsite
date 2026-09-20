@@ -212,7 +212,7 @@ export const AdminPrayerWall = () => {
           {requests.map((req) => (
             <div
               key={req.id}
-              className="glass-card hover-surface bg-white/80 border border-white/60 shadow-sm p-6 rounded-[12px] hover:shadow-md hover:bg-gray-200 transition-all duration-300"
+              className="glass-card bg-white/80 border border-white/60 shadow-sm p-6 rounded-[12px] hover:shadow-md hover:border-gold transition-all duration-300"
             >
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4">
                 <div className="flex items-center gap-3">

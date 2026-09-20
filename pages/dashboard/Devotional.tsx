@@ -139,7 +139,7 @@ export const Devotional = () => {
                   className={`w-full bg-white border p-3 sm:p-4 flex justify-between items-center gap-3 cursor-pointer rounded-[4px] transition-all group min-w-0 text-left min-h-[44px] ${
                     viewing?.id === item.id
                       ? 'border-gold shadow-md'
-                      : 'border-gray-200 hover:shadow-md hover:bg-gray-200'
+                      : 'border-gray-200 hover:shadow-md hover:border-gold'
                   }`}
                 >
                   <span className="min-w-0">

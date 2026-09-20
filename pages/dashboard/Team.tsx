@@ -65,7 +65,7 @@ export const Team = () => {
           {members.map((member) => (
             <VibrantCard
               key={member.id}
-              className="group bg-white shadow-sm hover:shadow-md hover:bg-gray-200 text-left py-3"
+              className="group bg-white shadow-sm hover:shadow-md hover:border-gold text-left py-3"
             >
               <div className="flex items-center gap-3">
                 <div className="w-[59px] h-[59px] rounded-full overflow-hidden border-2 border-gray-100 group-hover:border-gold transition-colors flex-shrink-0">
