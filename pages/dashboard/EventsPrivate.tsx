@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase';
 import { Event } from '../../types';
 import { SkeletonPageHeader } from '../../components/UI/Skeleton';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
-import { WHATS_ON_LABEL } from '../../lib/constants';
+import { EVENTS_LABEL } from '../../lib/constants';
 import { EventsCalendarGrid, EventsCalendarGridSkeleton } from '../../components/dashboard/EventsCalendarGrid';
 import { useAuth } from '../../context/AuthContext';
 
@@ -50,7 +50,7 @@ export const EventsPrivate = () => {
   return (
     <div className="space-y-8">
       <AdminPageHeader
-        title={WHATS_ON_LABEL}
+        title={EVENTS_LABEL}
         subtitle="Meetings & Rehearsals."
         icon={<CalIcon size={28} />}
       />

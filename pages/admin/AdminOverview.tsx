@@ -4,7 +4,7 @@ import { OverviewStatCard } from '../../components/UI/OverviewStatCard';
 import { Calendar, BookOpen, Users, ClipboardList, UserCheck, X, Plus, Shield, Mail, Newspaper, HandHeart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
-import { displayName, filterUsersForAdminView, isPendingApproval } from '../../lib/constants';
+import { displayName, EVENTS_LABEL, filterUsersForAdminView, isPendingApproval } from '../../lib/constants';
 import { User } from '../../types';
 import { SkeletonPageHeader, SkeletonCard, SkeletonUserCard, SkeletonStatsCard } from '../../components/UI/Skeleton';
 import { formatRelativeDateInTimezone, formatFullDateTimeInTimezone, formatWeekDate, formatDdMmYyyy, resolveNewsletterWeekDate } from '../../lib/dateUtils';
@@ -939,10 +939,10 @@ export const AdminOverview = () => {
             </Link>
             <Link to="/admin/calendar" className="block p-4 bg-white border border-gray-100 rounded-[4px] hover:border-gold hover:shadow-md transition-all">
               <span className="font-semibold text-base text-charcoal">Annual Calendar</span>
-              <p className="text-sm text-neutral mt-1">See this year’s what’s on, sermons, devotionals, and newsletters</p>
+              <p className="text-sm text-neutral mt-1">See this year’s events, sermons, devotionals, and newsletters</p>
             </Link>
             <Link to="/admin/events" className="block p-4 bg-white border border-gray-100 rounded-[4px] hover:border-gold hover:shadow-md transition-all">
-              <span className="font-semibold text-base text-charcoal">Add to What's On</span>
+              <span className="font-semibold text-base text-charcoal">Add to {EVENTS_LABEL}</span>
               <p className="text-sm text-neutral mt-1">Create an upcoming listing</p>
             </Link>
             <Link to="/admin/newsletter" className="block p-4 bg-white border border-gray-100 rounded-[4px] hover:border-gold hover:shadow-md transition-all">

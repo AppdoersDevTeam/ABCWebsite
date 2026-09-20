@@ -18,14 +18,11 @@ export const Home = () => {
   const heroRef = useRef<HTMLDivElement>(null);
   const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
   const [isLoadingEvents, setIsLoadingEvents] = useState(true);
-  const [whatsOnEvents, setWhatsOnEvents] = useState<Event[]>([]);
-  const [isLoadingWhatsOn, setIsLoadingWhatsOn] = useState(true);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
 
   // Fetch upcoming events
   useEffect(() => {
     fetchUpcomingEvents();
-    fetchWhatsOnEvents();
   }, []);
 
   const fetchUpcomingEvents = async () => {
@@ -49,30 +46,6 @@ export const Home = () => {
       setUpcomingEvents([]);
     } finally {
       setIsLoadingEvents(false);
-    }
-  };
-
-  const fetchWhatsOnEvents = async () => {
-    setIsLoadingWhatsOn(true);
-    try {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      
-      const { data, error } = await supabase
-        .from('events')
-        .select('*')
-        .eq('is_public', true)
-        .gte('date', today.toISOString().split('T')[0])
-        .order('date', { ascending: true })
-        .limit(2);
-
-      if (error) throw error;
-      setWhatsOnEvents(data || []);
-    } catch (error) {
-      console.error('Error fetching what\'s on events:', error);
-      setWhatsOnEvents([]);
-    } finally {
-      setIsLoadingWhatsOn(false);
     }
   };
 
@@ -238,7 +211,7 @@ export const Home = () => {
           </div>
       </section>
 
-      {/* What's On */}
+      {/* Upcoming Events */}
       <section className="section-plain py-12 md:py-20 relative z-10">
           <div className="container mx-auto px-4">
                <ScrollReveal direction="down" delay={0}>
@@ -275,7 +248,7 @@ export const Home = () => {
                      <div className="col-span-3 text-center py-12">
                        <Calendar className="text-gray-300 mx-auto mb-4" size={48} />
                        <p className="text-neutral text-lg">Nothing coming up yet</p>
-                       <p className="text-neutral text-sm mt-2">Check back soon for what's on!</p>
+                       <p className="text-neutral text-sm mt-2">Check back soon for upcoming events!</p>
                      </div>
                   ) : (
                     upcomingEvents.map((evt, i) => {

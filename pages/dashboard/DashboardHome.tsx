@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { displayName, formatDisplayTitle, WHATS_ON_LABEL } from '../../lib/constants';
+import { displayName, formatDisplayTitle, EVENTS_LABEL } from '../../lib/constants';
 import { formatWeekDate, formatDdMmYyyy, resolveNewsletterWeekDate } from '../../lib/dateUtils';
 import { fetchLatestNewsletter } from '../../lib/newsletters';
 import { OverviewStatCard } from '../../components/UI/OverviewStatCard';
@@ -132,7 +132,7 @@ export const DashboardHome = () => {
                 iconClassName="bg-emerald-50 text-emerald-600"
                 label="Annual Calendar"
                 value={new Date().getFullYear()}
-                description="Year, month, or week — what's on, sermons, devotionals, and newsletters"
+                description="Year, month, or week — events, sermons, devotionals, and newsletters"
                 footerLabel="Open Calendar →"
               />
             </Link>
@@ -144,7 +144,7 @@ export const DashboardHome = () => {
                 label="Next Service"
                 value={isLoadingStats ? '...' : (nextService || 'Sunday')}
                 description={isLoadingStats ? 'Loading...' : 'Every Sunday at 10:00 AM'}
-                footerLabel={`View ${WHATS_ON_LABEL} →`}
+                footerLabel={`View ${EVENTS_LABEL} →`}
               />
             </Link>
 

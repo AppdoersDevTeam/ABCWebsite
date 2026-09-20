@@ -41,9 +41,9 @@ export const ROUTE_META: Record<string, PageMeta> = {
       'Our statement of faith — the core beliefs that shape life and ministry at Ashburton Baptist Church.',
   },
   '/events': {
-    title: "What's On",
+    title: 'Events',
     description:
-      "What's happening at Ashburton Baptist Church — upcoming gatherings, services, and ways to connect with our church family.",
+      'Events at Ashburton Baptist Church — upcoming gatherings, services, and ways to connect with our church family.',
   },
   '/events/sermons': {
     title: 'Sermons',

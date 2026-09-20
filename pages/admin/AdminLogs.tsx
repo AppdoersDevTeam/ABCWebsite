@@ -7,6 +7,7 @@ import type { AuditLog, AuditLogCategory } from '../../types';
 import { formatFullDateTimeInTimezone } from '../../lib/dateUtils';
 import { downloadAuditLogsCsv } from '../../lib/exportAuditLogs';
 import { SkeletonPageHeader } from '../../components/UI/Skeleton';
+import { EVENTS_LABEL } from '../../lib/constants';
 
 const PAGE_SIZE = 50;
 
@@ -17,7 +18,7 @@ const CATEGORY_OPTIONS: { value: string; label: string }[] = [
   { value: '', label: 'All categories' },
   { value: 'auth', label: 'Auth' },
   { value: 'users', label: 'Users' },
-  { value: 'events', label: "What's On" },
+  { value: 'events', label: EVENTS_LABEL },
   { value: 'team', label: 'Leadership' },
   { value: 'prayer', label: 'Prayer' },
   { value: 'roster', label: 'Roster' },
@@ -66,7 +67,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 const CATEGORY_LABELS: Record<string, string> = {
   auth: 'Auth',
   users: 'Users',
-  events: "What's On",
+  events: EVENTS_LABEL,
   team: 'Leadership',
   prayer: 'Prayer',
   roster: 'Roster',

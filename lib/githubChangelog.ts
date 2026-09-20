@@ -5,7 +5,7 @@ import {
   locationFromFiles,
   locationFromPath,
 } from './changelogLocations';
-import { WHATS_ON_LABEL } from './constants';
+import { EVENTS_LABEL } from './constants';
 import { formatDdMmYyyy } from './dateUtils';
 
 const DEFAULT_REPO = 'AppdoersDevTeam/ABCWebsite';
@@ -79,8 +79,8 @@ function areaFromLocation(location: string): ChangelogArea {
       return 'devotionals';
     case 'Leadership':
       return 'leadership';
-    case 'Events':
-    case WHATS_ON_LABEL:
+    case EVENTS_LABEL:
+    case "What's On":
       return 'events';
     case 'Rosters (Beta)':
       return 'roster';

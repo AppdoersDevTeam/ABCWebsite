@@ -5,6 +5,7 @@ import { ScrollReveal } from '../../components/UI/ScrollReveal';
 import { supabase } from '../../lib/supabase';
 import { Event } from '../../types';
 import { EventCard } from '../../components/UI/EventCard';
+import { EVENTS_LABEL } from '../../lib/constants';
 
 const ALL_CATEGORIES = [
   'All',
@@ -118,7 +119,7 @@ export const Events = () => {
             </ScrollReveal>
             <ScrollReveal direction="up" delay={200}>
               <p className="text-base sm:text-lg md:text-[1.375rem] lg:text-[1.5625rem] leading-relaxed text-white text-center max-w-5xl mx-auto mb-6 transition-all duration-1000 delay-300 px-2 sm:px-0">
-                <span className="block font-raleway font-normal text-center">What's On.</span>
+                <span className="block font-raleway font-normal text-center">{EVENTS_LABEL}.</span>
                 <span className="block mt-3 sm:mt-4 font-raleway font-normal text-center">Join us this week</span>
                 <span className="block mt-3 sm:mt-4 font-raleway font-normal text-center">and be part of our community.</span>
               </p>
@@ -137,7 +138,7 @@ export const Events = () => {
           <ScrollReveal direction="down" delay={0}>
             <div className="text-center mb-12 md:mb-16">
               <Calendar className="text-gold mx-auto mb-6" size={64} />
-              <h2 className="text-4xl md:text-5xl font-serif font-normal text-charcoal mb-4">What's On Highlights</h2>
+              <h2 className="text-4xl md:text-5xl font-serif font-normal text-charcoal mb-4">Event Highlights</h2>
               <p className="text-gold mt-2 text-base font-bold">Explore what is happening this season.</p>
             </div>
           </ScrollReveal>
@@ -187,7 +188,7 @@ export const Events = () => {
           <ScrollReveal direction="down" delay={0}>
             <div className="text-center mb-8">
               <Calendar className="text-gold mx-auto mb-6" size={64} />
-              <h2 className="text-4xl md:text-5xl font-serif font-normal text-white mb-4">What's On</h2>
+              <h2 className="text-4xl md:text-5xl font-serif font-normal text-white mb-4">{EVENTS_LABEL}</h2>
               <p className="text-gold mt-2 text-base font-bold">Join us this week.</p>
             </div>
           </ScrollReveal>
@@ -241,7 +242,7 @@ export const Events = () => {
                 ? 'Nothing coming up yet'
                 : `No upcoming ${activeCategory} listings`}
             </p>
-            <p className="text-white/50 text-sm mt-2">Check back soon for what's on!</p>
+            <p className="text-white/50 text-sm mt-2">Check back soon for upcoming events!</p>
             {activeCategory !== 'All' && (
               <button
                 onClick={() => setActiveCategory('All')}

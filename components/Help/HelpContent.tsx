@@ -1,6 +1,7 @@
 import React from 'react';
 import { HelpCircle } from 'lucide-react';
 import { AdminPageHeader } from '../UI/AdminPageHeader';
+import { EVENTS_LABEL } from '../../lib/constants';
 
 type Mode = 'member' | 'admin';
 
@@ -48,13 +49,13 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode, isSuperAdmin = f
             </Section>
 
             <Section title="Annual Calendar">
-              <li>See this year’s what’s on, sermons, devotionals, and newsletters on one calendar — year, month, or week view.</li>
+              <li>See this year’s events, sermons, devotionals, and newsletters on one calendar — year, month, or week view.</li>
               <li>Coloured dots mark each type of item. Tap a day, then tap an item to open it for viewing.</li>
-              <li>The calendar updates when you add or change what’s on, devotionals, or newsletters. Sermons follow the church YouTube channel.</li>
+              <li>The calendar updates when you add or change events, devotionals, or newsletters. Sermons follow the church YouTube channel.</li>
             </Section>
 
             <Section title="User Management">
-              <li>Every approved admin can use this page — including User Management, Leadership, What's On, and the rest of the admin menu.</li>
+              <li>Every approved admin can use this page — including User Management, Leadership, {EVENTS_LABEL}, and the rest of the admin menu.</li>
               <li>See everyone who has a website login: email, role (member/admin), and approval status.</li>
               <li>Approve new accounts as a member or as an admin, reset passwords, and promote or demote admin access.</li>
               <li>
@@ -122,9 +123,9 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode, isSuperAdmin = f
               <li>Watch for duplicate emails and “linked account” vs “no account link” so logins and Leadership rows stay aligned.</li>
             </Section>
 
-            <Section title="What's On">
-              <li>Create and edit what is on: times, details, and categories from System Setup.</li>
-              <li>Control what appears on public What's On pages vs member-only views, depending on how your site is set up.</li>
+            <Section title={EVENTS_LABEL}>
+              <li>Create and edit events: times, details, and categories from System Setup.</li>
+              <li>Control what appears on public Events pages vs member-only views, depending on how your site is set up.</li>
             </Section>
 
             <Section title="Roster">
@@ -144,7 +145,7 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode, isSuperAdmin = f
               </li>
               <li>
                 <span className="font-semibold text-charcoal">Event Categories</span> — dropdown options when admins create
-                or edit What's On listings; keep this list in sync with how you want them organised.
+                or edit {EVENTS_LABEL} listings; keep this list in sync with how you want them organised.
               </li>
             </Section>
 
@@ -161,7 +162,7 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode, isSuperAdmin = f
             </Section>
 
             <Section title="Annual Calendar">
-              <li>See this year’s church calendar: what’s on, sermons, devotionals, and newsletters together.</li>
+              <li>See this year’s church calendar: events, sermons, devotionals, and newsletters together.</li>
               <li>Switch between year, month, and week. Tap a day to list what is on, then tap an item to open it.</li>
               <li>New items appear on the calendar after they are published (or when you return to this page).</li>
             </Section>
@@ -187,7 +188,7 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode, isSuperAdmin = f
               <li>Use it to learn who leads which areas and how to recognise people on a Sunday.</li>
             </Section>
 
-            <Section title="What's On">
+            <Section title={EVENTS_LABEL}>
               <li>See upcoming services, groups, and special dates that are shared with members.</li>
               <li>Check times and details so you can plan to attend or share with friends.</li>
             </Section>

@@ -7,6 +7,37 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2009-004 — Rename What's On back to Events across the site
+
+**Date:** 2026-09-20
+**Time:** 15:16:14
+**Timezone:** Pacific/Auckland
+**Version:** 1.3.4
+**Type:** Changed
+
+**Request**
+
+> On the Website Menu, change the What's ON to Events, update all dashboards, frontend and backend. When finished push it to live.
+
+**Changes**
+
+* The public menu, footer, member dashboard, and admin dashboard now say Events instead of What's On.
+* Page titles, help text, calendar filters, logs, and the changelog area label match Events. Website addresses still use /events so existing links keep working.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: 57 unit tests and npm run validate. vite build. Typecheck still fails on pre-existing app errors. Browser E2E tools were not available. Change ID remapped from CHG-2026-2009-002 because remote main already used 002 and 003 for Hub setup.
+
 ## CHG-2026-2009-003 — Require each teammate laptop to use its own Hub token
 
 **Date:** 2026-09-20

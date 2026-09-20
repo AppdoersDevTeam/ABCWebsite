@@ -17,7 +17,7 @@ import {
 } from '../../lib/eventDateUtils';
 import { logAuditEvent } from '../../lib/auditLog';
 import { notifyCalendarChanged } from '../../lib/calendarItems';
-import { WHATS_ON_LABEL } from '../../lib/constants';
+import { EVENTS_LABEL } from '../../lib/constants';
 import metadata from '../../metadata.json';
 
 const DEFAULT_THUMB = '/ABC Logo.png';
@@ -430,8 +430,8 @@ export const AdminEvents = () => {
   return (
     <div className="space-y-8">
       <AdminPageHeader
-        title={WHATS_ON_LABEL}
-        subtitle="Create and manage what is on at church."
+        title={EVENTS_LABEL}
+        subtitle="Create and manage events at church."
         icon={<CalIcon size={28} />}
         rightSlot={
           <GlowingButton size="sm" fullWidth className="md:w-auto" onClick={openCreateModal}>
