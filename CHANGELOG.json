@@ -6,6 +6,36 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2109-019",
+      "date": "2026-09-21",
+      "time": "02:07:40",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T14:07:40.543Z",
+      "version": "1.7.34",
+      "type": "changed",
+      "area": "admin",
+      "title": "Overview Users status counts are centred and larger",
+      "request": "On the Overview cards on Users Align the Icons and numbers  in the centre of the line card. also increase the font of them in 3 px and push live",
+      "changes": [
+        "The Overview Users card now centres the Approved, Pending, and Not linked icons and numbers on the line.",
+        "Those icons and numbers are 3px larger."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "73 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2109-018",
       "date": "2026-09-21",
       "time": "02:03:29",

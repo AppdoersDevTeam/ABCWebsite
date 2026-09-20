@@ -60,7 +60,7 @@ export const OverviewStatCard: React.FC<OverviewStatCardProps> = ({
         {value}
       </div>
       {description ? (
-        <div className="flex min-h-[2.75rem] items-center text-[15px] text-neutral leading-relaxed">
+        <div className="flex min-h-[2.75rem] items-center justify-center text-[15px] text-neutral leading-relaxed">
           {description}
         </div>
       ) : (

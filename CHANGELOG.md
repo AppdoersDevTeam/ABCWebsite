@@ -7,6 +7,37 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2109-019 — Overview Users status counts are centred and larger
+
+**Date:** 2026-09-21
+**Time:** 02:07:40
+**Timezone:** Pacific/Auckland
+**Version:** 1.7.34
+**Type:** Changed
+
+**Request**
+
+> On the Overview cards on Users Align the Icons and numbers  in the centre of the line card. also increase the font of them in 3 px and push live
+
+**Changes**
+
+* The Overview Users card now centres the Approved, Pending, and Not linked icons and numbers on the line.
+* Those icons and numbers are 3px larger.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: 73 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors.
+
 ## CHG-2026-2109-018 — Overview card title and number sit on the centre of each line
 
 **Date:** 2026-09-21
