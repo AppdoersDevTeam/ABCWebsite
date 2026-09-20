@@ -637,7 +637,7 @@ export const AdminOverview = () => {
       subtitle: undefined,
     },
     { 
-      label: 'New Prayer Requests (24h)', 
+      label: 'Prayer Requests (24hrs)', 
       value: isLoadingStats ? '...' : prayerRequests24h.toString(), 
       icon: <HandHeart size={20} />, 
       path: '/admin/prayer', 
@@ -669,7 +669,7 @@ export const AdminOverview = () => {
       subtitle: isLoadingStats ? 'Loading...' : undefined
     },
     { 
-      label: 'Roster Assignments',
+      label: 'Roster',
       value: isLoadingStats ? '...' : rosterAssignmentsCount.toString(), 
       icon: <ClipboardList size={20} />, 
       path: '/admin/roster', 

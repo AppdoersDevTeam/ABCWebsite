@@ -7,6 +7,38 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2109-022 — Overview card titles smaller; Prayer and Roster labels shortened
+
+**Date:** 2026-09-21
+**Time:** 02:29:33
+**Timezone:** Pacific/Auckland
+**Version:** 1.7.37
+**Type:** Changed
+
+**Request**
+
+> For all cards Decrease the font title size in 2px and for the New Prayer Requests change the description to Prayer Requestes (24hrs), for Roster, remove the Assignments. push live
+
+**Changes**
+
+* Overview card titles are 2px smaller.
+* The New Prayer Requests card is now titled Prayer Requests (24hrs).
+* The Roster Assignments card is now titled Roster.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: 73 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors.
+
 ## CHG-2026-2109-021 — Overview cards show newsletter and devotional counts, with smaller gold numbers
 
 **Date:** 2026-09-21

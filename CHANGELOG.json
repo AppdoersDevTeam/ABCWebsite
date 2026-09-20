@@ -6,6 +6,37 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2109-022",
+      "date": "2026-09-21",
+      "time": "02:29:33",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T14:29:33.690Z",
+      "version": "1.7.37",
+      "type": "changed",
+      "area": "admin",
+      "title": "Overview card titles smaller; Prayer and Roster labels shortened",
+      "request": "For all cards Decrease the font title size in 2px and for the New Prayer Requests change the description to Prayer Requestes (24hrs), for Roster, remove the Assignments. push live",
+      "changes": [
+        "Overview card titles are 2px smaller.",
+        "The New Prayer Requests card is now titled Prayer Requests (24hrs).",
+        "The Roster Assignments card is now titled Roster."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "73 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2109-021",
       "date": "2026-09-21",
       "time": "02:21:36",

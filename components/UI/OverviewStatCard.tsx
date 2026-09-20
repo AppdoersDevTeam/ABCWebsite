@@ -49,7 +49,7 @@ export const OverviewStatCard: React.FC<OverviewStatCardProps> = ({
         >
           {icon}
         </div>
-        <p className="min-h-11 flex items-center justify-center text-center text-[18px] font-semibold text-charcoal leading-snug">
+        <p className="min-h-11 flex items-center justify-center text-center text-[16px] font-semibold text-charcoal leading-snug">
           {label}
         </p>
         <div aria-hidden="true" />
