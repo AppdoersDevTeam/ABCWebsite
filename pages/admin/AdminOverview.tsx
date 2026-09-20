@@ -777,7 +777,7 @@ export const AdminOverview = () => {
                     element.scrollIntoView({ behavior: 'smooth' });
                   }
                 }}
-                className="mx-auto flex h-full w-[63%] flex-col"
+                className="mx-auto flex h-full w-[72.45%] flex-col"
               >
                 {card}
               </a>
@@ -785,7 +785,7 @@ export const AdminOverview = () => {
           }
 
           return (
-            <Link key={i} to={stat.path} className="mx-auto flex h-full w-[63%] flex-col">
+            <Link key={i} to={stat.path} className="mx-auto flex h-full w-[72.45%] flex-col">
               {card}
             </Link>
           );

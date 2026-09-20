@@ -6,6 +6,35 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2109-040",
+      "date": "2026-09-21",
+      "time": "03:27:32",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T15:27:32.762Z",
+      "version": "1.9.1",
+      "type": "changed",
+      "area": "admin",
+      "title": "Overview cards 15% wider",
+      "request": "Every Admin Overview stat card  increase the width size in  15% more. Height and inner layout are unchanged.. push it.",
+      "changes": [
+        "Every Admin Overview stat card is 15% wider than the previous live width. Height and inner layout are unchanged."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "Unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2109-039",
       "date": "2026-09-21",
       "time": "03:25:02",
