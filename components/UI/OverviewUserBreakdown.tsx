@@ -8,18 +8,21 @@ export const OverviewUserBreakdown: React.FC<{
   notLinked: number;
 }> = ({ approved, pending, notLinked }) => {
   return (
-    <span className="flex flex-col gap-1.5" aria-label={formatOverviewUserBreakdown({ approved, pending, notLinked })}>
-      <span className="inline-flex items-center gap-1.5 font-bold text-green-600">
+    <span
+      className="flex flex-wrap items-center gap-x-3 gap-y-1"
+      aria-label={formatOverviewUserBreakdown({ approved, pending, notLinked })}
+    >
+      <span className="inline-flex items-center gap-1 font-bold text-green-600" title="Approved">
         <UserCheck size={16} strokeWidth={2.5} aria-hidden="true" />
-        Approved {approved}
+        {approved}
       </span>
-      <span className="inline-flex items-center gap-1.5 font-bold text-red-600">
+      <span className="inline-flex items-center gap-1 font-bold text-red-600" title="Pending">
         <Clock size={16} strokeWidth={2.5} aria-hidden="true" />
-        Pending {pending}
+        {pending}
       </span>
-      <span className="inline-flex items-center gap-1.5 font-bold text-purple-700">
+      <span className="inline-flex items-center gap-1 font-bold text-purple-700" title="Not linked">
         <Unlink size={16} strokeWidth={2.5} aria-hidden="true" />
-        Not linked {notLinked}
+        {notLinked}
       </span>
     </span>
   );

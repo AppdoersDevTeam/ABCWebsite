@@ -6,6 +6,36 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2109-015",
+      "date": "2026-09-21",
+      "time": "01:37:05",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T13:37:05.925Z",
+      "version": "1.7.30",
+      "type": "changed",
+      "area": "admin",
+      "title": "Overview Users card is icons and counts only, cards are narrower",
+      "request": "On Overview Menu, Remove the Approved, the Pending and not linked text from the Users card and keep only the Icons with its numbers. also decrease the width of each card in 20 pts. push to live.",
+      "changes": [
+        "The Overview Users card now shows only the Approved, Pending, and Not linked icons with their numbers.",
+        "Each Overview stat card is 20px narrower."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "73 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2109-014",
       "date": "2026-09-21",
       "time": "01:34:35",

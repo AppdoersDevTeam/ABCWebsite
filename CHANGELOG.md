@@ -7,6 +7,37 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2109-015 — Overview Users card is icons and counts only, cards are narrower
+
+**Date:** 2026-09-21
+**Time:** 01:37:05
+**Timezone:** Pacific/Auckland
+**Version:** 1.7.30
+**Type:** Changed
+
+**Request**
+
+> On Overview Menu, Remove the Approved, the Pending and not linked text from the Users card and keep only the Icons with its numbers. also decrease the width of each card in 20 pts. push to live.
+
+**Changes**
+
+* The Overview Users card now shows only the Approved, Pending, and Not linked icons with their numbers.
+* Each Overview stat card is 20px narrower.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: 73 unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors.
+
 ## CHG-2026-2109-014 — Interactive hover uses the left-menu grey fill
 
 **Date:** 2026-09-21

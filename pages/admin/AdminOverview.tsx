@@ -785,7 +785,7 @@ export const AdminOverview = () => {
                     element.scrollIntoView({ behavior: 'smooth' });
                   }
                 }}
-                className="mx-auto block h-full w-[calc(100%-10px)]"
+                className="mx-auto block h-full w-[calc(100%-30px)]"
               >
                 {card}
               </a>
@@ -793,7 +793,7 @@ export const AdminOverview = () => {
           }
 
           return (
-            <Link key={i} to={stat.path} className="mx-auto block h-full w-[calc(100%-10px)]">
+            <Link key={i} to={stat.path} className="mx-auto block h-full w-[calc(100%-30px)]">
               {card}
             </Link>
           );
