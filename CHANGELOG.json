@@ -6,6 +6,37 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2109-049",
+      "date": "2026-09-21",
+      "time": "18:43:05",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-21T06:43:05.274Z",
+      "version": "1.9.10",
+      "type": "changed",
+      "area": "public",
+      "title": "Header logo left; Sermons; I'm New on one line",
+      "request": "fix the logo for the website to the lef side of the header menu , also change the menu Watch Sermns to only Sermons and I'm New do not make it in 2 lines put is in the same line menu like others. push to live",
+      "changes": [
+        "The public header keeps the church logo on the left of the menu.",
+        "The header item Watch Sermons is now Sermons.",
+        "I'm New and the other desktop menu labels stay on one line."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "Unit tests and npm run validate passed. vite build passed. Chrome checked the public header at 1280px and 1440px. Typecheck still fails on pre-existing app errors."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2109-048",
       "date": "2026-09-21",
       "time": "18:00:49",

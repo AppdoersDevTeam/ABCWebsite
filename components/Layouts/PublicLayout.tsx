@@ -172,7 +172,7 @@ export const PublicLayout = () => {
       ]
     },
     { 
-      label: 'Watch Sermons', 
+      label: 'Sermons', 
       path: '/events/sermons',
       submenu: []
     },
@@ -222,9 +222,9 @@ export const PublicLayout = () => {
       {/* Header */}
       <header className={`fixed w-full z-50 min-w-0 transition-all duration-300 pt-[max(1rem,env(safe-area-inset-top))] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] ${isLoginPage || scrolled ? 'bg-white backdrop-blur-md shadow-sm pb-4' : 'bg-transparent pb-6'}`}>
         <div className="page-container">
-          <div className="flex justify-between items-center">
-            {/* Logo */}
-            <Link to="/" className="flex items-center group">
+          <div className="flex min-w-0 items-center gap-4 md:gap-6">
+            {/* Logo — left of the header menu */}
+            <Link to="/" className="flex shrink-0 items-center group">
               <img 
                 src="/ABC Logo.png" 
                 alt="Ashburton Baptist Church" 
@@ -233,11 +233,11 @@ export const PublicLayout = () => {
             </Link>
 
             {/* Desktop Nav */}
-            <nav className="hidden xl:flex items-center space-x-[42px]">
+            <nav className="hidden min-w-0 flex-1 xl:flex items-center justify-end gap-x-4 2xl:gap-x-8">
               {navItems.map((item) => (
                 <div
                   key={item.path}
-                  className="relative"
+                  className="relative shrink-0"
                   ref={(el) => (dropdownRefs.current[item.path] = el)}
                   onMouseEnter={() => {
                     if (dropdownTimeoutRef.current) {
@@ -259,7 +259,7 @@ export const PublicLayout = () => {
                       href={item.path}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={`text-base font-sans font-bold transition-all duration-300 relative group flex items-center gap-1 ${
+                      className={`whitespace-nowrap text-base font-sans font-bold transition-all duration-300 relative group flex items-center gap-1 ${
                         isLoginPage || scrolled
                           ? 'text-[#738242] hover:text-[#738242]'
                           : 'text-white hover:text-white'
@@ -272,7 +272,7 @@ export const PublicLayout = () => {
                   ) : (
                     <Link
                       to={item.path}
-                      className={`text-base font-sans font-bold transition-all duration-300 relative group flex items-center gap-1 ${
+                      className={`whitespace-nowrap text-base font-sans font-bold transition-all duration-300 relative group flex items-center gap-1 ${
                         isLoginPage || scrolled
                           ? 'text-[#738242] hover:text-[#738242]'
                           : 'text-white hover:text-white'
@@ -350,7 +350,7 @@ export const PublicLayout = () => {
 
             <button
               type="button"
-              className={`xl:hidden inline-flex min-h-[44px] min-w-[44px] items-center justify-center p-2 transition-colors ${
+              className={`ml-auto xl:hidden inline-flex min-h-[44px] min-w-[44px] items-center justify-center p-2 transition-colors ${
                 isLoginPage || scrolled
                   ? 'text-[#738242] hover:text-gold'
                   : 'text-white hover:text-gold'
