@@ -47,7 +47,7 @@ export const OverviewStatCard: React.FC<OverviewStatCardProps> = ({
 
       <div className="flex items-center gap-3 pr-8 min-w-0">
         <div
-          className={`p-2.5 rounded-full w-10 h-10 flex items-center justify-center transition-colors shrink-0 ${iconClassName} group-hover:bg-gold group-hover:text-charcoal ${highlight ? 'bg-gold/15' : ''}`}
+          className={`p-2.5 rounded-full w-10 h-10 flex items-center justify-center transition-colors shrink-0 ${iconClassName} group-hover:bg-gold group-hover:text-charcoal ${highlight ? 'ring-2 ring-gold/40' : ''}`}
         >
           {icon}
         </div>

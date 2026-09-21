@@ -1,24 +1,53 @@
-/** Shared left-menu icon style — matches public site gold/charcoal language. */
+/**
+ * Portal left-menu icon chips — restrained accents from the public site palette
+ * (gold, olive #A8B774/#738242, brand teal, charcoal). Soft tint backgrounds only.
+ */
 export const PORTAL_NAV_ICON = 'bg-gold/15 text-gold';
 
-/** @deprecated Use PORTAL_NAV_ICON; kept as keyed aliases for existing call sites. */
 export const DASHBOARD_NAV_ICON = {
-  overview: PORTAL_NAV_ICON,
-  prayers: PORTAL_NAV_ICON,
-  newsletters: PORTAL_NAV_ICON,
-  devotionals: PORTAL_NAV_ICON,
-  sermons: PORTAL_NAV_ICON,
-  events: PORTAL_NAV_ICON,
-  calendar: PORTAL_NAV_ICON,
-  team: PORTAL_NAV_ICON,
-  rosters: PORTAL_NAV_ICON,
-  help: PORTAL_NAV_ICON,
-  users: PORTAL_NAV_ICON,
-  roles: PORTAL_NAV_ICON,
-  settings: PORTAL_NAV_ICON,
-  logs: PORTAL_NAV_ICON,
-  changelog: PORTAL_NAV_ICON,
+  overview: 'bg-gold/15 text-gold',
+  events: 'bg-[#A8B774]/20 text-[#738242]',
+  calendar: 'bg-[#A8B774]/20 text-[#738242]',
+  prayers: 'bg-teal/10 text-teal',
+  newsletters: 'bg-amber-50 text-amber-700',
+  devotionals: 'bg-gold/10 text-[#738242]',
+  sermons: 'bg-charcoal/5 text-charcoal',
+  team: 'bg-teal/10 text-teal',
+  rosters: 'bg-teal/10 text-teal',
+  help: 'bg-gold/15 text-gold',
+  users: 'bg-teal/10 text-teal',
+  roles: 'bg-teal/10 text-teal',
+  settings: 'bg-charcoal/5 text-charcoal',
+  logs: 'bg-charcoal/5 text-charcoal',
+  changelog: 'bg-charcoal/5 text-charcoal',
 } as const;
+
+/** Shared portal sidebar chrome — aligns with public glass / gold / dash surfaces. */
+export const PORTAL_SIDEBAR_ASIDE =
+  'border-r border-white/70 bg-dash/90 backdrop-blur-md shadow-[inset_-1px_0_0_rgba(251,203,5,0.12)]';
+
+export const PORTAL_SIDEBAR_NAV = 'flex-1 space-y-0.5 overflow-y-auto py-3';
+
+export const PORTAL_SIDEBAR_DIVIDER =
+  'mx-2 my-2.5 border-t border-[#A8B774]/35';
+
+export const PORTAL_NAV_ITEM_BASE =
+  'flex min-h-[44px] items-center rounded-[10px] transition-all duration-300 group relative overflow-hidden';
+
+export const PORTAL_NAV_ITEM_IDLE =
+  'text-neutral hover:text-charcoal hover:bg-white/70';
+
+export const PORTAL_NAV_ITEM_ACTIVE =
+  'bg-white text-charcoal font-bold shadow-sm border border-gold/40';
+
+export const PORTAL_NAV_CHILD_IDLE =
+  'text-charcoal hover:bg-white/70';
+
+export const PORTAL_NAV_CHILD_ACTIVE =
+  'bg-gold/15 text-charcoal font-semibold';
+
+export const PORTAL_SIDEBAR_FOOTER_BTN =
+  'w-full flex items-center min-h-[44px] py-2 text-neutral hover:bg-white/70 hover:text-charcoal transition-colors rounded-[10px]';
 
 type PortalNavChild = { label: string };
 

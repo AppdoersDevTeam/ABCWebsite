@@ -6,6 +6,69 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2109-055",
+      "date": "2026-09-21",
+      "time": "22:12:17",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-21T10:12:17.720Z",
+      "version": "1.9.16",
+      "type": "fixed",
+      "area": "admin",
+      "title": "Portal top bar responsive across screen sizes",
+      "request": "The top menu bar is not responsive on different screen sizes. Rework as needed.",
+      "changes": [
+        "Phone and tablet: full-width gold bar with hamburger, truncated page title, search icon (expands to full-bar search), notifications, help, and account menu — identity rail no longer steals horizontal space.",
+        "Desktop (lg+): identity rail stays aligned with the sidebar; inline search field returns.",
+        "User account menu anchors correctly from the mobile logo button or desktop identity control."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "npm test, npm run validate, and vite build. Typecheck still fails on pre-existing app errors."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "CHG-2026-2109-054",
+      "date": "2026-09-21",
+      "time": "22:08:42",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-21T10:08:42.111Z",
+      "version": "1.9.15",
+      "type": "changed",
+      "area": "admin",
+      "title": "Portal sidebar polish and restrained colour accents",
+      "request": "Differentiate a bit with different colours without overwhelming; rework the left menu so it matches the rest of the site.",
+      "changes": [
+        "Reworked admin and member left sidebars to use dash/glass surfaces, olive-tinted dividers, rounded nav items, and gold-accent active states matching the public site.",
+        "Aligned the top-bar church identity strip and user menu with the same glass/gold treatment instead of flat grey.",
+        "Restored restrained icon accents (gold, olive, teal, amber, charcoal) shared by the left menu and overview cards.",
+        "Updated row/menu hover to soft gold tint so list surfaces match the new sidebar."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "npm test, npm run validate, and vite build. Typecheck still fails on pre-existing app errors."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2109-053",
       "date": "2026-09-21",
       "time": "22:00:56",

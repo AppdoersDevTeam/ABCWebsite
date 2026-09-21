@@ -9,6 +9,7 @@ import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { Calendar, CalendarDays, BookOpen, Youtube, Newspaper, HandHeart, Home, Users } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { getVerseOfTheDay } from '../../lib/getVerseOfTheDay';
+import { DASHBOARD_NAV_ICON } from '../../lib/dashboardNav';
 
 export const DashboardHome = () => {
   const { user } = useAuth();
@@ -141,6 +142,7 @@ export const DashboardHome = () => {
             <Link to="/dashboard/events" className="block h-full min-w-0">
               <OverviewStatCard
                 icon={<Calendar size={20} />}
+                iconClassName={DASHBOARD_NAV_ICON.events}
                 label="Next Service"
                 value={isLoadingStats ? '...' : (nextService || 'Sunday')}
                 description={isLoadingStats ? 'Loading...' : 'Every Sunday at 10:00 AM'}
@@ -151,6 +153,7 @@ export const DashboardHome = () => {
             <Link to="/dashboard/calendar" className="block h-full min-w-0">
               <OverviewStatCard
                 icon={<CalendarDays size={20} />}
+                iconClassName={DASHBOARD_NAV_ICON.calendar}
                 label="Annual Calendar"
                 value={new Date().getFullYear()}
                 description="Year, month, or week — events, sermons, devotionals, and newsletters"
@@ -161,6 +164,7 @@ export const DashboardHome = () => {
             <Link to="/dashboard/prayer" className="block h-full min-w-0">
               <OverviewStatCard
                 icon={<HandHeart size={20} />}
+                iconClassName={DASHBOARD_NAV_ICON.prayers}
                 label="Prayers"
                 value={isLoadingStats ? '...' : prayerRequests24h}
                 description={
@@ -175,6 +179,7 @@ export const DashboardHome = () => {
             <Link to="/dashboard/newsletter" className="block h-full min-w-0">
               <OverviewStatCard
                 icon={<Newspaper size={20} />}
+                iconClassName={DASHBOARD_NAV_ICON.newsletters}
                 label="Newsletter"
                 value={isLoadingStats ? '...' : (lastNewsletterTitle || 'None')}
                 valueSize="title"
@@ -195,6 +200,7 @@ export const DashboardHome = () => {
             <Link to="/dashboard/devotional" className="block h-full min-w-0">
               <OverviewStatCard
                 icon={<BookOpen size={20} />}
+                iconClassName={DASHBOARD_NAV_ICON.devotionals}
                 label="Devotional of the Week"
                 value={isLoadingStats ? '...' : (lastDevotionalLabel || 'None')}
                 valueSize="title"
@@ -215,6 +221,7 @@ export const DashboardHome = () => {
             <Link to="/dashboard/sermons" className="block h-full min-w-0">
               <OverviewStatCard
                 icon={<Youtube size={20} />}
+                iconClassName={DASHBOARD_NAV_ICON.sermons}
                 label="Watch Sermons"
                 value="YouTube"
                 description="Catch up on our latest messages"
@@ -225,6 +232,7 @@ export const DashboardHome = () => {
             <Link to="/dashboard/team" className="block h-full min-w-0">
               <OverviewStatCard
                 icon={<Users size={20} />}
+                iconClassName={DASHBOARD_NAV_ICON.team}
                 label="People's Directory"
                 value={isLoadingStats ? '...' : peopleCount}
                 footerLabel={`View ${PEOPLE_LABEL} →`}

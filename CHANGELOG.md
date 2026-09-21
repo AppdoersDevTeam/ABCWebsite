@@ -7,6 +7,71 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2109-055 — Portal top bar responsive across screen sizes
+
+**Date:** 2026-09-21
+**Time:** 22:12:17
+**Timezone:** Pacific/Auckland
+**Version:** 1.9.16
+**Type:** Fixed
+
+**Request**
+
+> The top menu bar is not responsive on different screen sizes. Rework as needed.
+
+**Changes**
+
+* Phone and tablet: full-width gold bar with hamburger, truncated page title, search icon (expands to full-bar search), notifications, help, and account menu — identity rail no longer steals horizontal space.
+* Desktop (lg+): identity rail stays aligned with the sidebar; inline search field returns.
+* User account menu anchors correctly from the mobile logo button or desktop identity control.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: npm test, npm run validate, and vite build. Typecheck still fails on pre-existing app errors.
+
+## CHG-2026-2109-054 — Portal sidebar polish and restrained colour accents
+
+**Date:** 2026-09-21
+**Time:** 22:08:42
+**Timezone:** Pacific/Auckland
+**Version:** 1.9.15
+**Type:** Changed
+
+**Request**
+
+> Differentiate a bit with different colours without overwhelming; rework the left menu so it matches the rest of the site.
+
+**Changes**
+
+* Reworked admin and member left sidebars to use dash/glass surfaces, olive-tinted dividers, rounded nav items, and gold-accent active states matching the public site.
+* Aligned the top-bar church identity strip and user menu with the same glass/gold treatment instead of flat grey.
+* Restored restrained icon accents (gold, olive, teal, amber, charcoal) shared by the left menu and overview cards.
+* Updated row/menu hover to soft gold tint so list surfaces match the new sidebar.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: npm test, npm run validate, and vite build. Typecheck still fails on pre-existing app errors.
+
 ## CHG-2026-2109-053 — Portal menu order and overview dashboard UX
 
 **Date:** 2026-09-21

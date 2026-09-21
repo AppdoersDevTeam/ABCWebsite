@@ -80,7 +80,7 @@ h6 {
 
 /* Menus and rows only — not cards */
 .hover-surface:hover {
-  background: #e5e7eb;
+  background: rgba(251, 203, 5, 0.1);
 }
 
 /* Typography Effects */

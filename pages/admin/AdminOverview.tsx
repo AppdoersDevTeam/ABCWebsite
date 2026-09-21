@@ -18,6 +18,7 @@ import { notifyUserReview } from '../../lib/notifyUserReview';
 import { notifyUserAdminRole, adminRoleEmailNote } from '../../lib/notifyUserAdminRole';
 import { IntroInquiryEmailModal } from './IntroInquiryEmailModal';
 import { SURFACE_HOVER_CLASS } from '../../lib/uiHover';
+import { DASHBOARD_NAV_ICON } from '../../lib/dashboardNav';
 import {
   emailQuotaNearLimit,
   fetchEmailQuotaStatus,
@@ -618,6 +619,7 @@ export const AdminOverview = () => {
       label: 'Users', 
       value: isLoadingUsers ? '...' : visibleUsers.length.toString(), 
       icon: <UserCog size={20} />, 
+      iconClass: DASHBOARD_NAV_ICON.users,
       path: '/admin/users', 
       highlight: false,
       subtitle: isLoadingUsers
@@ -634,6 +636,7 @@ export const AdminOverview = () => {
       label: "People's Directory", 
       value: isLoadingStats ? '...' : teamMembersCount.toString(), 
       icon: <Users size={20} />, 
+      iconClass: DASHBOARD_NAV_ICON.team,
       path: '/admin/team', 
       subtitle: undefined,
     },
@@ -641,6 +644,7 @@ export const AdminOverview = () => {
       label: EVENTS_LABEL,
       value: isLoadingStats ? '...' : eventsCount.toString(),
       icon: <Calendar size={20} />,
+      iconClass: DASHBOARD_NAV_ICON.events,
       path: '/admin/events',
       subtitle: isLoadingStats ? 'Loading...' : undefined,
     },
@@ -648,6 +652,7 @@ export const AdminOverview = () => {
       label: 'Next Service', 
       value: isLoadingStats ? '...' : (nextService || 'Sunday 10AM'), 
       icon: <Church size={20} />, 
+      iconClass: DASHBOARD_NAV_ICON.events,
       path: '/admin/events', 
       subtitle: isLoadingStats ? 'Loading...' : undefined
     },
@@ -655,6 +660,7 @@ export const AdminOverview = () => {
       label: 'Annual Calendar',
       value: new Date().getFullYear().toString(),
       icon: <CalendarDays size={20} />,
+      iconClass: DASHBOARD_NAV_ICON.calendar,
       path: '/admin/calendar',
       subtitle: isLoadingStats ? 'Loading...' : undefined,
     },
@@ -662,6 +668,7 @@ export const AdminOverview = () => {
       label: 'Prayer Requests', 
       value: isLoadingStats ? '...' : prayerRequestsCount.toString(), 
       icon: <HandHeart size={20} />, 
+      iconClass: DASHBOARD_NAV_ICON.prayers,
       path: '/admin/prayer', 
       subtitle: isLoadingStats ? 'Loading...' : undefined
     },
@@ -669,6 +676,7 @@ export const AdminOverview = () => {
       label: 'Newsletters', 
       value: isLoadingStats ? '...' : newsletterCount.toString(), 
       icon: <Newspaper size={20} />,
+      iconClass: DASHBOARD_NAV_ICON.newsletters,
       path: '/admin/newsletter', 
       subtitle: isLoadingStats ? 'Loading...' : undefined,
     },
@@ -676,6 +684,7 @@ export const AdminOverview = () => {
       label: 'Devotionals', 
       value: isLoadingStats ? '...' : devotionalsCount.toString(), 
       icon: <BookOpen size={20} />,
+      iconClass: DASHBOARD_NAV_ICON.devotionals,
       path: '/admin/devotional', 
       subtitle: isLoadingStats ? 'Loading...' : undefined
     },
@@ -683,6 +692,7 @@ export const AdminOverview = () => {
       label: 'Rosters',
       value: isLoadingStats ? '...' : rosterAssignmentsCount.toString(), 
       icon: <ClipboardList size={20} />, 
+      iconClass: DASHBOARD_NAV_ICON.rosters,
       path: '/admin/roster', 
       subtitle: isLoadingStats ? 'Loading...' : undefined
     },
@@ -694,6 +704,7 @@ export const AdminOverview = () => {
           ? `${formatEmailQuotaUsed(emailsQuota.day_count, emailsQuota.day_limit)} today`
           : '—',
       icon: <Mail size={20} />,
+      iconClass: DASHBOARD_NAV_ICON.settings,
       path: '/admin/emails',
       subtitle: isLoadingStats
         ? 'Loading...'
@@ -745,6 +756,7 @@ export const AdminOverview = () => {
           const card = (
             <OverviewStatCard
               icon={stat.icon}
+              iconClassName={stat.iconClass}
               label={stat.label}
               value={stat.value}
               description={description}

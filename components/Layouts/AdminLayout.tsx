@@ -29,6 +29,15 @@ import {
   DASHBOARD_NAV_ICON,
   orderPortalNavItems,
   portalNavNeedsDivider,
+  PORTAL_NAV_CHILD_ACTIVE,
+  PORTAL_NAV_CHILD_IDLE,
+  PORTAL_NAV_ITEM_ACTIVE,
+  PORTAL_NAV_ITEM_BASE,
+  PORTAL_NAV_ITEM_IDLE,
+  PORTAL_SIDEBAR_ASIDE,
+  PORTAL_SIDEBAR_DIVIDER,
+  PORTAL_SIDEBAR_FOOTER_BTN,
+  PORTAL_SIDEBAR_NAV,
 } from '../../lib/dashboardNav';
 import { PortalTopBar, flattenPortalSearchItems, portalPageTitle, usePortalSidebarCollapsed } from './PortalTopBar';
 import { AppDialogHost } from '../UI/AppDialogHost';
@@ -147,19 +156,20 @@ export const AdminLayout = () => {
           id="portal-sidebar"
           ref={sidebarRef}
           className={`
-          fixed bottom-0 left-0 top-[calc(4rem+env(safe-area-inset-top))] z-50 transform border-r border-gray-100 bg-white shadow-sm transition-[width,transform] duration-300 ease-in-out lg:static lg:top-auto lg:z-auto lg:h-full lg:translate-x-0 pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)]
+          fixed bottom-0 left-0 top-[calc(4rem+env(safe-area-inset-top))] z-50 transform transition-[width,transform] duration-300 ease-in-out lg:static lg:top-auto lg:z-auto lg:h-full lg:translate-x-0 pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)]
+          ${PORTAL_SIDEBAR_ASIDE}
           ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
           ${sidebarCollapsed ? 'w-72 lg:w-[72px]' : 'w-72'}
         `}>
           <div className="flex h-full min-w-0 flex-col">
-            <div className="flex items-center justify-end border-b border-gray-100 px-3 py-2 lg:hidden">
+            <div className="flex items-center justify-end border-b border-[#A8B774]/25 px-3 py-2 lg:hidden">
               <button type="button" className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-charcoal" onClick={() => setIsSidebarOpen(false)} aria-label="Close menu"><X /></button>
             </div>
 
-          <nav className={`flex-1 space-y-1 overflow-y-auto py-2 ${sidebarCollapsed ? 'px-2 lg:px-2' : 'px-3'}`}>
+          <nav className={`${PORTAL_SIDEBAR_NAV} ${sidebarCollapsed ? 'px-2 lg:px-2' : 'px-3'}`}>
             {navItems.map((item, index) => {
               const divider = portalNavNeedsDivider(index, navItems, ADMIN_NAV_DIVIDER_BEFORE) ? (
-                <div className="mx-1 my-2 border-t border-gray-300" role="separator" aria-hidden="true" />
+                <div className={PORTAL_SIDEBAR_DIVIDER} role="separator" aria-hidden="true" />
               ) : null;
               if ('children' in item && item.children) {
                 const childActive = item.children.some((child) => location.pathname === child.path);
@@ -180,31 +190,29 @@ export const AdminLayout = () => {
                         setUsersRolesOpen((open) => !open);
                       }}
                       className={`
-                        w-full flex min-h-[44px] items-center rounded-[4px] transition-all duration-300 group relative overflow-hidden
+                        w-full ${PORTAL_NAV_ITEM_BASE}
                         ${sidebarCollapsed ? 'lg:justify-center lg:space-x-0 lg:px-2 py-1.5' : 'space-x-2.5 px-3 py-1.5'}
-                        ${childActive
-                          ? 'bg-gold/10 text-charcoal font-bold'
-                          : 'text-neutral hover:text-charcoal hover:bg-gray-200'}
+                        ${childActive ? PORTAL_NAV_ITEM_ACTIVE : PORTAL_NAV_ITEM_IDLE}
                       `}
                       aria-expanded={isOpen}
                     >
-                      {childActive && <div className="absolute left-0 top-0 bottom-0 w-1 bg-gold"></div>}
+                      {childActive && <div className="absolute left-0 top-1.5 bottom-1.5 w-1 rounded-full bg-gold"></div>}
                       <span
-                        className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-transform duration-300 ${item.iconClass} ${
-                          childActive ? 'scale-110' : 'group-hover:scale-110'
+                        className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 transition-transform duration-300 ${item.iconClass} ${
+                          childActive ? 'scale-110' : 'group-hover:scale-105'
                         }`}
                       >
                         {item.icon}
                       </span>
-                      <span className={`tracking-wide flex-1 text-left ${sidebarCollapsed ? 'lg:hidden' : ''}`}>{item.label}</span>
+                      <span className={`text-sm tracking-wide flex-1 text-left ${sidebarCollapsed ? 'lg:hidden' : ''}`}>{item.label}</span>
                       {sidebarCollapsed ? null : isOpen ? (
-                        <ChevronUp size={19} strokeWidth={2.75} className="shrink-0 text-charcoal" />
+                        <ChevronUp size={18} strokeWidth={2.5} className="shrink-0 text-charcoal/70" />
                       ) : (
-                        <ChevronDown size={19} strokeWidth={2.75} className="shrink-0 text-charcoal" />
+                        <ChevronDown size={18} strokeWidth={2.5} className="shrink-0 text-charcoal/70" />
                       )}
                     </button>
                     {isOpen && (
-                      <div className="mt-0.5 ml-3 space-y-0.5">
+                      <div className="mt-0.5 ml-2 space-y-0.5 border-l border-[#A8B774]/30 pl-2">
                         {item.children.map((child) => {
                           const isChildActive = location.pathname === child.path;
                           return (
@@ -213,10 +221,8 @@ export const AdminLayout = () => {
                               to={child.path}
                               onClick={() => setIsSidebarOpen(false)}
                               className={`
-                                relative flex items-center pl-5 pr-3 py-1.5 rounded-[8px] text-sm transition-colors
-                                ${isChildActive
-                                  ? 'bg-gold/15 text-gold font-semibold'
-                                  : 'text-charcoal hover:bg-gray-200'}
+                                relative flex min-h-[40px] items-center pl-4 pr-3 py-1.5 rounded-[8px] text-sm transition-colors
+                                ${isChildActive ? PORTAL_NAV_CHILD_ACTIVE : PORTAL_NAV_CHILD_IDLE}
                               `}
                             >
                               {isChildActive && (
@@ -242,22 +248,20 @@ export const AdminLayout = () => {
                   title={item.label}
                   onClick={() => setIsSidebarOpen(false)}
                   className={`
-                    flex min-h-[44px] items-center rounded-[4px] transition-all duration-300 group relative overflow-hidden
+                    ${PORTAL_NAV_ITEM_BASE}
                     ${sidebarCollapsed ? 'lg:justify-center lg:space-x-0 lg:px-2 py-1.5' : 'space-x-2.5 px-3 py-1.5'}
-                    ${isActive 
-                      ? 'bg-gold/10 text-charcoal font-bold' 
-                      : 'text-neutral hover:text-charcoal hover:bg-gray-200'}
+                    ${isActive ? PORTAL_NAV_ITEM_ACTIVE : PORTAL_NAV_ITEM_IDLE}
                   `}
                 >
-                  {isActive && <div className="absolute left-0 top-0 bottom-0 w-1 bg-gold"></div>}
+                  {isActive && <div className="absolute left-0 top-1.5 bottom-1.5 w-1 rounded-full bg-gold"></div>}
                   <span
-                    className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-transform duration-300 ${item.iconClass} ${
-                      isActive ? 'scale-110' : 'group-hover:scale-110'
+                    className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 transition-transform duration-300 ${item.iconClass} ${
+                      isActive ? 'scale-110' : 'group-hover:scale-105'
                     }`}
                   >
                     {item.icon}
                   </span>
-                  <span className={`tracking-wide ${sidebarCollapsed ? 'lg:hidden' : ''}`}>{item.label}</span>
+                  <span className={`text-sm tracking-wide ${sidebarCollapsed ? 'lg:hidden' : ''}`}>{item.label}</span>
                 </Link>
                 </React.Fragment>
               );
@@ -265,19 +269,19 @@ export const AdminLayout = () => {
           </nav>
 
           <div className={`p-3 ${sidebarCollapsed ? 'lg:px-2' : ''}`}>
-            <div className="mx-1 my-2 border-t border-gray-300" role="separator" aria-hidden="true" />
+            <div className={PORTAL_SIDEBAR_DIVIDER} role="separator" aria-hidden="true" />
             <button 
               title="View as Member"
               onClick={() => {
                 sessionStorage.setItem('testRoleOverride', 'member');
                 navigate('/dashboard');
               }}
-              className={`w-full flex items-center py-2 text-neutral hover:bg-gold/10 hover:text-charcoal transition-colors rounded-[4px] ${
+              className={`${PORTAL_SIDEBAR_FOOTER_BTN} ${
                 sidebarCollapsed ? 'lg:justify-center lg:space-x-0 lg:px-2 space-x-3 px-4' : 'space-x-3 px-4'
               }`}
             >
-              <ArrowRightLeft size={18} />
-              <span className={`text-sm font-bold ${sidebarCollapsed ? 'lg:hidden' : ''}`}>View as Member</span>
+              <ArrowRightLeft size={18} className="text-[#738242]" />
+              <span className={`text-sm font-semibold ${sidebarCollapsed ? 'lg:hidden' : ''}`}>View as Member</span>
             </button>
           </div>
         </div>

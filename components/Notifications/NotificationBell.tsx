@@ -150,7 +150,7 @@ export const NotificationBell = ({ variant = 'default' }: NotificationBellProps)
         onClick={() => setOpen((value) => !value)}
       >
         {portal ? (
-          <Bell size={25} color="#ffffff" fill="#ffffff" stroke="#ffffff" />
+          <Bell size={22} color="#ffffff" fill="#ffffff" stroke="#ffffff" />
         ) : (
           <Bell size={22} />
         )}
