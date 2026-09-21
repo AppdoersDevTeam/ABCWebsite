@@ -7,6 +7,36 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2109-048 — Leadership photos: Senior Pastor first, then Elders A–Z
+
+**Date:** 2026-09-21
+**Time:** 18:00:49
+**Timezone:** Pacific/Auckland
+**Version:** 1.9.9
+**Type:** Changed
+
+**Request**
+
+> On the Webpage Leadership Meet our team ON https://ashburtonbaptist.co.nz/#/about#leadership arrange the photos order by Senior Pastor Role First and Elders in Alphabetic order after that. Push live
+
+**Changes**
+
+* The About page Meet the Team photos now list the Senior Pastor first, then Elders in alphabetic order (other staff after that, also A–Z).
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: Unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors.
+
 ## CHG-2026-2109-047 — People photo uploads now allow 1024KB
 
 **Date:** 2026-09-21

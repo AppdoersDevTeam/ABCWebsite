@@ -6,6 +6,35 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2109-048",
+      "date": "2026-09-21",
+      "time": "18:00:49",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-21T06:00:49.441Z",
+      "version": "1.9.9",
+      "type": "changed",
+      "area": "leadership",
+      "title": "Leadership photos: Senior Pastor first, then Elders A–Z",
+      "request": "On the Webpage Leadership Meet our team ON https://ashburtonbaptist.co.nz/#/about#leadership arrange the photos order by Senior Pastor Role First and Elders in Alphabetic order after that. Push live",
+      "changes": [
+        "The About page Meet the Team photos now list the Senior Pastor first, then Elders in alphabetic order (other staff after that, also A–Z)."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "Unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2109-047",
       "date": "2026-09-21",
       "time": "17:43:46",

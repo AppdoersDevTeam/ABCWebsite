@@ -7,6 +7,7 @@ import { ArrowRight, ArrowDownToLine, BookOpen, Church, Users } from 'lucide-rea
 import { supabase } from '../../lib/supabase';
 import { TeamMember } from '../../types';
 import { inferProfileType } from '../../lib/teamMemberUtils';
+import { sortLeadershipTeam } from '../../lib/leadershipOrder';
 import { VISION_FOCUS_CARDS } from '../../lib/visionFocusCards';
 import { STATEMENT_OF_FAITH_ARTICLES } from '../../lib/statementOfFaith';
 
@@ -39,7 +40,9 @@ export const About = () => {
       if (error) throw error;
 
       // Leadership / public site: only Staff (not attendees or members in directory)
-      const filteredMembers = (data || []).filter((member: TeamMember) => inferProfileType(member) === 'staff');
+      const filteredMembers = sortLeadershipTeam(
+        (data || []).filter((member: TeamMember) => inferProfileType(member) === 'staff')
+      );
 
       // Map database team members to the format expected by the component
       const mappedLeadership: LeadershipMember[] = filteredMembers.map((member: TeamMember) => {
