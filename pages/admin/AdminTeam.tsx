@@ -615,22 +615,48 @@ export const AdminTeam = () => {
   const runUpload = async (): Promise<string> => {
     if (!selectedFile) return formData.img;
 
-    const fileExt = selectedFile.name.split('.').pop() || 'png';
-    const fileName = `team-images/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+    let imageUrl = formData.img;
+    try {
+      const fileExt = selectedFile.name.split('.').pop() || 'png';
+      const fileName = `team-images/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
 
-    const { error: uploadError } = await supabase.storage
-      .from('team-images')
-      .upload(fileName, selectedFile, {
-        cacheControl: '3600',
-        upsert: false,
+      const { error: uploadError } = await supabase.storage
+        .from('team-images')
+        .upload(fileName, selectedFile, {
+          cacheControl: '3600',
+          upsert: false,
+        });
+
+      if (uploadError) {
+        console.warn('Storage upload failed, saving as base64:', uploadError.message);
+        const reader = new FileReader();
+        const base64Promise = new Promise<string>((resolve, reject) => {
+          reader.onloadend = () => {
+            if (reader.result) resolve(reader.result as string);
+            else reject(new Error('Failed to convert file to base64'));
+          };
+          reader.onerror = reject;
+        });
+        reader.readAsDataURL(selectedFile);
+        imageUrl = await base64Promise;
+      } else {
+        const { data: urlData } = supabase.storage.from('team-images').getPublicUrl(fileName);
+        imageUrl = urlData.publicUrl;
+      }
+    } catch (uploadError: unknown) {
+      console.warn('Storage upload failed, using base64 fallback:', uploadError);
+      const reader = new FileReader();
+      const base64Promise = new Promise<string>((resolve, reject) => {
+        reader.onloadend = () => {
+          if (reader.result) resolve(reader.result as string);
+          else reject(new Error('Failed to convert file to base64'));
+        };
+        reader.onerror = reject;
       });
-
-    if (uploadError) {
-      throw uploadError;
+      reader.readAsDataURL(selectedFile);
+      imageUrl = await base64Promise;
     }
-
-    const { data: urlData } = supabase.storage.from('team-images').getPublicUrl(fileName);
-    return urlData.publicUrl;
+    return imageUrl;
   };
 
   const buildRow = (imageUrl: string, trimmed: ReturnType<typeof trimForm>) => {
