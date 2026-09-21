@@ -29,6 +29,8 @@ test('Meet the Team and member People Directory list Senior Pastor first, then E
 
   const about = readFileSync(join(root, 'pages/public/About.tsx'), 'utf8');
   const memberDirectory = readFileSync(join(root, 'pages/dashboard/Team.tsx'), 'utf8');
+  const adminPeople = readFileSync(join(root, 'pages/admin/AdminTeam.tsx'), 'utf8');
   assert.match(about, /sortLeadershipTeam/);
   assert.match(memberDirectory, /sortLeadershipTeam/);
+  assert.doesNotMatch(adminPeople, /saving as base64/);
 });

@@ -7,6 +7,38 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2109-050 — Restore site load after people photos froze pages
+
+**Date:** 2026-09-21
+**Time:** 18:31:42
+**Timezone:** Pacific/Auckland
+**Version:** 1.9.11
+**Type:** Fixed
+
+**Request**
+
+> after this update the dashboards and website cannot load anymore find the issue and fix it.
+
+**Changes**
+
+* About, People Directory, and dashboards hung because people photos were stored as megabyte data URLs in the database after the 1024KB upload change. The team-images storage bucket did not exist, so Admin People silently saved photos as base64.
+* Created the team-images bucket (1MB limit), moved the five existing photos into storage, and pointed team_members.img at short public URLs.
+* Admin People photo upload now fails with an error if storage is unavailable instead of saving a data URL that can freeze the site.
+
+**Database**
+
+* 20260921063000_team_images_storage.sql
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: Unit tests and npm run validate passed. vite build passed. Live About Leadership loaded in Chrome with Senior Pastor first then Elders A-Z. Typecheck still fails on pre-existing app errors.
+
 ## CHG-2026-2109-049 — Member People Directory: Senior Pastor first, then Elders A–Z
 
 **Date:** 2026-09-21
