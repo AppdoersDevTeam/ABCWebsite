@@ -81,7 +81,7 @@ export const NotificationBell = ({ variant = 'default' }: NotificationBellProps)
           if (payload.eventType === 'INSERT') {
             const row = payload.new as AppNotification | undefined;
             if (row?.title) {
-              showLocalNotification({
+              void showLocalNotification({
                 title: row.title,
                 body: row.body || '',
                 href: row.href || '/dashboard',

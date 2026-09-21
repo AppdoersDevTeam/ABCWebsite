@@ -139,16 +139,32 @@ export const NotificationSettings = () => {
     const result = await sendTestPushNotification();
     setBusy(false);
     if (!result.ok) {
-      setError(result.error || 'Could not send a test notification.');
+      setError(result.error || result.localError || 'Could not send a test notification.');
+      return;
+    }
+    if (result.localShown) {
+      setMessage(
+        result.pushed && result.pushed > 0
+          ? 'Desktop toast shown on this laptop, and a push was also queued for when the browser is in the background.'
+          : 'Desktop toast shown on this laptop. If you still do not see it, open Windows notification settings for Chrome and turn Focus assist off.'
+      );
+      if (result.error && result.pushed === 0) {
+        setError(result.error);
+      }
       return;
     }
     if (result.pushed === 0) {
       setMessage(
-        'Test saved to your inbox, but no push was delivered. Click Enable on this device first (and on mobile, enable separately).'
+        'Test saved to your inbox, but no desktop toast appeared. Click Enable on this device, allow notifications, then try again.'
       );
+      if (result.localError) setError(result.localError);
       return;
     }
-    setMessage(`Test sent (${result.pushed} push delivery). Check your desktop or phone notification tray.`);
+    setMessage(
+      result.localError
+        ? `Push queued (${result.pushed}), but this laptop could not show a toast: ${result.localError}`
+        : `Test sent (${result.pushed} push delivery). Check the Windows notification tray.`
+    );
   };
 
   if (!user) return null;
@@ -179,6 +195,18 @@ export const NotificationSettings = () => {
       <p className="text-xs uppercase tracking-wider font-bold text-neutral">
         Browser permission: {permission}
       </p>
+      {permission === 'denied' ? (
+        <p className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-[8px] px-3 py-2">
+          Notifications are blocked for this site. In Chrome: padlock icon → Site settings → Notifications → Allow.
+          Also check Windows Settings → System → Notifications → Google Chrome is On.
+        </p>
+      ) : null}
+      {permission === 'granted' ? (
+        <p className="text-sm text-neutral bg-dash border border-gray-200 rounded-[8px] px-3 py-2">
+          If toasts still do not appear: Windows Settings → System → Notifications → ensure Google Chrome is On, and
+          turn Focus assist / Do not disturb Off. Chrome quieter messaging can also hide banners.
+        </p>
+      ) : null}
 
       {error ? (
         <div role="alert" className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-[4px] text-sm">

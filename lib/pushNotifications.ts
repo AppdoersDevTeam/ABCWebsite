@@ -15,22 +15,48 @@ function urlBase64ToUint8Array(base64String: string): ArrayBuffer {
   return output.buffer.slice(output.byteOffset, output.byteOffset + output.byteLength);
 }
 
-/** Show an OS toast from the open page (works when the tab is open; Web Push covers closed tabs). */
-export function showLocalNotification(input: {
+/** Show an OS toast. Prefers the service worker API (more reliable on Chrome/Windows). */
+export async function showLocalNotification(input: {
   title: string;
   body?: string;
   href?: string;
   tag?: string;
-}): void {
-  if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
+}): Promise<{ ok: boolean; error?: string }> {
+  if (typeof window === 'undefined' || typeof Notification === 'undefined') {
+    return { ok: false, error: 'Notifications are not supported in this browser.' };
+  }
+  if (Notification.permission !== 'granted') {
+    return {
+      ok: false,
+      error: `Browser permission is "${Notification.permission}". Click Enable on this device and allow notifications.`,
+    };
+  }
+
+  const title = input.title || 'Ashburton Baptist Church';
+  const options: NotificationOptions = {
+    body: input.body || '',
+    icon: '/abc-logo.png',
+    badge: '/abc-logo.png',
+    tag: input.tag || `abc-local-${Date.now()}`,
+    renotify: true,
+    requireInteraction: true,
+    data: { href: input.href || '/dashboard' },
+  };
+
   try {
-    const notification = new Notification(input.title, {
-      body: input.body || '',
-      icon: '/abc-logo.png',
-      badge: '/abc-logo.png',
-      tag: input.tag || 'abc-local',
-      data: { href: input.href || '/dashboard' },
-    });
+    const registration =
+      (await navigator.serviceWorker?.getRegistration()) ||
+      (await registerPushServiceWorker());
+    if (registration?.showNotification) {
+      await registration.showNotification(title, options);
+      return { ok: true };
+    }
+  } catch (err) {
+    console.error('Service worker notification failed', err);
+  }
+
+  try {
+    const notification = new Notification(title, options);
     notification.onclick = () => {
       window.focus();
       const href = input.href || '/dashboard';
@@ -39,8 +65,14 @@ export function showLocalNotification(input: {
       }
       notification.close();
     };
+    return { ok: true };
   } catch (err) {
     console.error('Local notification failed', err);
+    return {
+      ok: false,
+      error:
+        'Could not show a desktop alert. Check Windows Settings → System → Notifications → Google Chrome is On, and that Focus assist is Off.',
+    };
   }
 }
 
@@ -173,18 +205,41 @@ export async function subscribeCurrentDevice(): Promise<{ ok: boolean; error?: s
     console.error('Failed to enable push preference', prefError);
   }
 
-  showLocalNotification({
+  const shown = await showLocalNotification({
     title: 'Ashburton Baptist Church',
     body: 'Desktop notifications are enabled on this device.',
     href: '/dashboard',
     tag: 'abc-push-enabled',
   });
+  if (!shown.ok) {
+    return {
+      ok: true,
+      error: shown.error
+        ? `Device saved, but the confirmation toast failed: ${shown.error}`
+        : undefined,
+    };
+  }
 
   return { ok: true };
 }
 
 /** Ask the server to send a Web Push + inbox row only to the signed-in user. */
-export async function sendTestPushNotification(): Promise<{ ok: boolean; error?: string; pushed?: number }> {
+export async function sendTestPushNotification(): Promise<{
+  ok: boolean;
+  error?: string;
+  pushed?: number;
+  localShown?: boolean;
+  localError?: string;
+}> {
+  // Show a toast immediately from this browser — do not rely only on remote Web Push,
+  // which Chrome often suppresses while this tab is focused.
+  const local = await showLocalNotification({
+    title: 'Test notification',
+    body: 'If you see this alert, desktop notifications work on this laptop.',
+    href: '/dashboard',
+    tag: `abc-push-test-local-${Date.now()}`,
+  });
+
   const { data, error } = await supabase.functions.invoke('dispatch-notification', {
     body: {
       type: 'system.push_test',
@@ -206,13 +261,38 @@ export async function sendTestPushNotification(): Promise<{ ok: boolean; error?:
         // keep default
       }
     }
-    return { ok: false, error: detail };
+    if (local.ok) {
+      return {
+        ok: true,
+        pushed: 0,
+        localShown: true,
+        error: `Desktop toast shown on this laptop, but server push failed: ${detail}`,
+      };
+    }
+    return { ok: false, error: detail, localShown: false, localError: local.error };
   }
   if (data && typeof data === 'object' && 'error' in data && data.error) {
-    return { ok: false, error: String(data.error) };
+    if (local.ok) {
+      return {
+        ok: true,
+        pushed: 0,
+        localShown: true,
+        error: `Desktop toast shown on this laptop, but server push failed: ${String(data.error)}`,
+      };
+    }
+    return { ok: false, error: String(data.error), localShown: false, localError: local.error };
   }
   const pushed = data && typeof data === 'object' && 'pushed' in data ? Number(data.pushed) : undefined;
-  return { ok: true, pushed };
+  if (!local.ok) {
+    return {
+      ok: true,
+      pushed,
+      localShown: false,
+      localError: local.error,
+      error: local.error,
+    };
+  }
+  return { ok: true, pushed, localShown: true };
 }
 
 export async function unsubscribeCurrentDevice(): Promise<void> {

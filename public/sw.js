@@ -33,7 +33,7 @@ self.addEventListener('push', (event) => {
       badge: '/abc-logo.png',
       tag: data.tag || `abc-push-${Date.now()}`,
       renotify: true,
-      requireInteraction: false,
+      requireInteraction: true,
       data: { href },
     })
   );

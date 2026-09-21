@@ -6,6 +6,36 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2209-001",
+      "date": "2026-09-22",
+      "time": "08:03:25",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-21T20:03:25.023Z",
+      "version": "1.9.22",
+      "type": "fixed",
+      "area": "auth",
+      "title": "Show laptop desktop notification toasts reliably",
+      "request": "Test notification only appeared in the bell icon, not as an actual browser notification on the laptop.",
+      "changes": [
+        "Send test notification now shows an immediate desktop toast via the service worker on this laptop (Chrome often suppresses remote Web Push while the tab is focused).",
+        "Local/OS alerts use ServiceWorkerRegistration.showNotification with requireInteraction, and Account Settings explains Windows Chrome notification / Focus assist checks when permission is granted or denied."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "npm test, npm run validate, and vite build. Typecheck still fails on pre-existing app errors. Prior live push already returned pushed:1."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2109-060",
       "date": "2026-09-21",
       "time": "22:41:46",

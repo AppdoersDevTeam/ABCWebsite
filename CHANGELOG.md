@@ -7,6 +7,37 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2209-001 — Show laptop desktop notification toasts reliably
+
+**Date:** 2026-09-22
+**Time:** 08:03:25
+**Timezone:** Pacific/Auckland
+**Version:** 1.9.22
+**Type:** Fixed
+
+**Request**
+
+> Test notification only appeared in the bell icon, not as an actual browser notification on the laptop.
+
+**Changes**
+
+* Send test notification now shows an immediate desktop toast via the service worker on this laptop (Chrome often suppresses remote Web Push while the tab is focused).
+* Local/OS alerts use ServiceWorkerRegistration.showNotification with requireInteraction, and Account Settings explains Windows Chrome notification / Focus assist checks when permission is granted or denied.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: npm test, npm run validate, and vite build. Typecheck still fails on pre-existing app errors. Prior live push already returned pushed:1.
+
 ## CHG-2026-2109-060 — Allow system.push_test notification type
 
 **Date:** 2026-09-21
