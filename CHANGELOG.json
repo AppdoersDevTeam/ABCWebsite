@@ -6,6 +6,35 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2109-047",
+      "date": "2026-09-21",
+      "time": "17:43:46",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-21T05:43:46.828Z",
+      "version": "1.9.8",
+      "type": "changed",
+      "area": "admin",
+      "title": "People photo uploads now allow 1024KB",
+      "request": "People Photo when add a new people, there is a upload image with max of 300kb, change this option to up to 1024kb image size, update all system and push it live once completed.",
+      "changes": [
+        "Admin People photo uploads now accept PNG, JPEG, or PDF files up to 1024KB (was 300KB). The form label, helper text, and file-size check all use the same limit."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "Unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors. Admin People upload was not signed-in in a browser."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2109-046",
       "date": "2026-09-21",
       "time": "16:24:53",

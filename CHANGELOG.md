@@ -7,6 +7,36 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2109-047 — People photo uploads now allow 1024KB
+
+**Date:** 2026-09-21
+**Time:** 17:43:46
+**Timezone:** Pacific/Auckland
+**Version:** 1.9.8
+**Type:** Changed
+
+**Request**
+
+> People Photo when add a new people, there is a upload image with max of 300kb, change this option to up to 1024kb image size, update all system and push it live once completed.
+
+**Changes**
+
+* Admin People photo uploads now accept PNG, JPEG, or PDF files up to 1024KB (was 300KB). The form label, helper text, and file-size check all use the same limit.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: Unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors. Admin People upload was not signed-in in a browser.
+
 ## CHG-2026-2109-046 — Phase 5 report of the mobile layout work
 
 **Date:** 2026-09-21

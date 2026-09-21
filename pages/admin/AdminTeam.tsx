@@ -15,6 +15,7 @@ import { logAuditEventSafe } from '../../lib/auditLog';
 import { formatDdMmYyyy } from '../../lib/dateUtils';
 import { useAuth } from '../../context/AuthContext';
 import { CHURCH_NAME, displayInitials, displayName, isAccessHeld, isAdminUser, isOwnUserAccount, isServiceAccountEmail, PEOPLE_LABEL } from '../../lib/constants';
+import { PEOPLE_PHOTO, isPeoplePhotoTypeAllowed, isPeoplePhotoWithinLimit } from '../../lib/peoplePhotoSpec';
 import { deleteUserAccount } from '../../lib/deleteUserAccount';
 import { directoryPersonEmailNote, notifyDirectoryPerson } from '../../lib/notifyDirectoryPerson';
 import { accessHoldEmailNote, notifyUserAccessHold } from '../../lib/notifyUserAccessHold';
@@ -514,15 +515,13 @@ export const AdminTeam = () => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
 
-      const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'application/pdf'];
-      if (!validTypes.includes(file.type)) {
-        alert('Please choose a PNG, JPEG, or PDF file.');
+      if (!isPeoplePhotoTypeAllowed(file.type)) {
+        alert(PEOPLE_PHOTO.invalidTypeMessage);
         return;
       }
 
-      const maxSize = 300 * 1024;
-      if (file.size > maxSize) {
-        alert('Please choose a file smaller than 300KB.');
+      if (!isPeoplePhotoWithinLimit(file.size)) {
+        alert(PEOPLE_PHOTO.tooLargeMessage);
         return;
       }
 
@@ -1775,7 +1774,7 @@ export const AdminTeam = () => {
 
           <div>
             <label className="block text-sm font-bold text-charcoal mb-2">
-              Photo {photoRequired ? '*' : ''} (max 300KB
+              Photo {photoRequired ? '*' : ''} (max {PEOPLE_PHOTO.sizeLabel}
               {photoRequired ? ', required for Staff' : ', optional for Member and Attendee'})
             </label>
             <div className="flex items-center gap-4">
@@ -1847,7 +1846,7 @@ export const AdminTeam = () => {
                     Remove image
                   </button>
                 )}
-                <p className="text-xs text-neutral mt-1">PNG, JPEG, or PDF (max 300KB)</p>
+                <p className="text-xs text-neutral mt-1">{PEOPLE_PHOTO.uploadHint}</p>
               </div>
             </div>
           </div>
