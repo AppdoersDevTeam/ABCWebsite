@@ -7,6 +7,7 @@ import { cannotComplete, cannotSave } from '../../lib/systemMessage';
 import type { EventCategory, Group, JobRole } from '../../types';
 import { logAuditEvent } from '../../lib/auditLog';
 import { EVENTS_LABEL, PEOPLE_LABEL } from '../../lib/constants';
+import { TableScroll } from '../../components/UI/TableScroll';
 
 type Tab = 'groups' | 'job_roles' | 'event_categories';
 
@@ -410,7 +411,7 @@ export const AdminSettings = () => {
             </button>
           </div>
 
-          <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 overscroll-x-contain">
+          <TableScroll className="-mx-4 px-4 sm:mx-0 sm:px-0">
             <table className="min-w-[760px] w-full text-left">
               <thead className="bg-white/60">
                 <tr className="border-b border-gray-200">
@@ -476,7 +477,7 @@ export const AdminSettings = () => {
                 ))}
               </tbody>
             </table>
-          </div>
+          </TableScroll>
 
           {groups.length === 0 && (
             <div className="rounded-[8px] border border-dashed border-gray-200 bg-white/60 p-4 text-sm text-neutral">
@@ -511,7 +512,7 @@ export const AdminSettings = () => {
             </button>
           </div>
 
-          <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 overscroll-x-contain">
+          <TableScroll className="-mx-4 px-4 sm:mx-0 sm:px-0">
             <table className="min-w-[760px] w-full text-left">
               <thead className="bg-white/60">
                 <tr className="border-b border-gray-200">
@@ -577,7 +578,7 @@ export const AdminSettings = () => {
                 ))}
               </tbody>
             </table>
-          </div>
+          </TableScroll>
 
           {jobRoles.length === 0 && (
             <div className="rounded-[8px] border border-dashed border-gray-200 bg-white/60 p-4 text-sm text-neutral">
@@ -612,7 +613,7 @@ export const AdminSettings = () => {
             </button>
           </div>
 
-          <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 overscroll-x-contain">
+          <TableScroll className="-mx-4 px-4 sm:mx-0 sm:px-0">
             <table className="min-w-[760px] w-full text-left">
               <thead className="bg-white/60">
                 <tr className="border-b border-gray-200">
@@ -680,7 +681,7 @@ export const AdminSettings = () => {
                 ))}
               </tbody>
             </table>
-          </div>
+          </TableScroll>
 
           {eventCategories.length === 0 && (
             <div className="rounded-[8px] border border-dashed border-gray-200 bg-white/60 p-4 text-sm text-neutral">

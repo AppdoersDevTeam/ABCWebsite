@@ -8,6 +8,7 @@ import {
 } from '../../lib/authCallback';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { PasswordInput } from '../../components/UI/PasswordInput';
+import { AuthPageShell } from '../../components/UI/AuthPageShell';
 
 /** Fix malformed HashRouter recovery URLs like `#/reset-password#access_token=...`. */
 function normalizeRecoveryUrl(): void {
@@ -130,10 +131,9 @@ export const ResetPassword = () => {
   };
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4 relative pt-32 md:pt-40 pb-32 bg-[#A8B774]">
-      <div className="max-w-md w-full space-y-6 glass-card bg-white/80 p-10 shadow-xl border border-white/50 rounded-[16px] relative z-10 backdrop-blur-xl">
+    <AuthPageShell>
         <div className="text-center">
-          <h2 className="mt-6 text-4xl font-serif font-normal text-charcoal">
+          <h2 className="mt-2 text-3xl sm:text-4xl font-serif font-normal text-charcoal">
             Reset Password
           </h2>
           <p className="mt-2 text-sm text-neutral">
@@ -166,7 +166,7 @@ export const ResetPassword = () => {
                 name="new-password"
                 required
                 autoComplete="new-password"
-                className="appearance-none rounded-[4px] relative block w-full px-4 py-4 border border-gray-300 bg-white text-charcoal placeholder-gray-400 focus:outline-none focus:ring-gold focus:border-gold shadow-sm"
+                className="appearance-none rounded-[4px] relative block w-full px-4 py-4 text-base border border-gray-300 bg-white text-charcoal placeholder-gray-400 focus:outline-none focus:ring-gold focus:border-gold shadow-sm"
                 placeholder="New password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -183,7 +183,7 @@ export const ResetPassword = () => {
                 name="confirm-password"
                 required
                 autoComplete="new-password"
-                className="appearance-none rounded-[4px] relative block w-full px-4 py-4 border border-gray-300 bg-white text-charcoal placeholder-gray-400 focus:outline-none focus:ring-gold focus:border-gold shadow-sm"
+                className="appearance-none rounded-[4px] relative block w-full px-4 py-4 text-base border border-gray-300 bg-white text-charcoal placeholder-gray-400 focus:outline-none focus:ring-gold focus:border-gold shadow-sm"
                 placeholder="Confirm password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
@@ -201,7 +201,6 @@ export const ResetPassword = () => {
             </div>
           </form>
         )}
-      </div>
-    </div>
+    </AuthPageShell>
   );
 };

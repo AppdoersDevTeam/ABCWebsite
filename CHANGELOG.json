@@ -6,6 +6,97 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2109-046",
+      "date": "2026-09-21",
+      "time": "16:24:53",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-21T04:24:53.302Z",
+      "version": "1.9.7",
+      "type": "documentation",
+      "area": "system",
+      "title": "Phase 5 report of the mobile layout work",
+      "request": "yes do that",
+      "changes": [
+        "RESPONSIVE_CHANGES.md lists every file touched in the mobile/tablet work, why it changed, what was left alone, and recommended follow-up."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "Unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "CHG-2026-2109-045",
+      "date": "2026-09-21",
+      "time": "16:00:34",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-21T04:00:34.271Z",
+      "version": "1.9.6",
+      "type": "changed",
+      "area": "public",
+      "title": "Phase 4 device check; hamburger until 1280px",
+      "request": "Phase 4 is ready to go do it now device check (small phone, tablet, landscape).",
+      "changes": [
+        "Public pages were checked in Chrome at small-phone, iPhone, iPad, and landscape sizes (194 loads). None showed meaningful horizontal overflow. Results are in RESPONSIVE_DEVICE_MATRIX.md.",
+        "The public desktop menu now starts at 1280px so iPad-width screens keep the hamburger instead of a cramped top bar.",
+        "Admin People compiles again after a Lucide User / types User name clash that had blanked the Vite app."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "Headless Chrome device matrix: 194 public route/viewport checks, 0 overflow fails. Unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors. Member/admin layouts were not signed-in."
+      },
+      "breakingChange": false
+    },
+    {
+      "id": "CHG-2026-2109-044",
+      "date": "2026-09-21",
+      "time": "03:44:28",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-20T15:44:28.424Z",
+      "version": "1.9.5",
+      "type": "changed",
+      "area": "public",
+      "title": "Mobile layouts: menus, login, tables, and PDFs",
+      "request": "now",
+      "changes": [
+        "The public hamburger menu traps keyboard focus, closes with Escape, and stops the page behind it from scrolling. The same behaviour applies to portal sidebars and dialogs.",
+        "Login, sign-up, MFA, reset password, and login-error screens use tighter padding, 16px inputs, stacked name fields on phones, and a green canvas that fits the keyboard and notch.",
+        "Admin tables keep their columns but show a swipe hint on phones. Newsletter and roster PDFs offer an Open PDF action on small screens instead of a cramped inline viewer."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "Unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2109-043",
       "date": "2026-09-21",
       "time": "03:34:15",

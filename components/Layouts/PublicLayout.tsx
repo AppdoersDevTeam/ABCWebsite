@@ -10,9 +10,11 @@ import { getRouteMeta, ROUTE_META } from '../../lib/seoConfig';
 import { EVENTS_LABEL } from '../../lib/constants';
 import { MINISTRIES, MINISTRIES_LABEL, MINISTRY_MENU_ITEMS } from '../../lib/ministries';
 import { AppDialogHost } from '../UI/AppDialogHost';
+import { useFocusTrap } from '../UI/useFocusTrap';
 
 export const PublicLayout = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const mobileNavRef = useRef<HTMLDivElement>(null);
   const [scrolled, setScrolled] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [openMobileSubmenu, setOpenMobileSubmenu] = useState<string | null>(null);
@@ -38,6 +40,8 @@ export const PublicLayout = () => {
     setIsMenuOpen(false);
     setOpenMobileSubmenu(null);
   }, [location.pathname]);
+
+  useFocusTrap(isMenuOpen, mobileNavRef, () => setIsMenuOpen(false));
 
   // Refresh user profile when component mounts if user is logged in
   // This ensures we have the latest approval status for the header button
@@ -229,7 +233,7 @@ export const PublicLayout = () => {
             </Link>
 
             {/* Desktop Nav */}
-            <nav className="hidden lg:flex items-center space-x-[42px]">
+            <nav className="hidden xl:flex items-center space-x-[42px]">
               {navItems.map((item) => (
                 <div
                   key={item.path}
@@ -335,7 +339,7 @@ export const PublicLayout = () => {
                  ) : (
                    <Link 
                      to="/login"
-                     className="bg-gold px-[9px] py-[8px] lg:px-[17px] lg:py-[12px] xl:px-[25px] xl:py-[12px] rounded-[10px] font-sans font-normal text-xs lg:text-sm xl:text-base hover:bg-[#A8B774] transform hover:scale-105 transition-all duration-300 inline-flex items-center justify-center whitespace-nowrap"
+                     className="bg-gold inline-flex min-h-[44px] items-center justify-center whitespace-nowrap rounded-[10px] px-4 py-2.5 font-sans text-sm font-normal hover:bg-[#A8B774] transform hover:scale-105 transition-all duration-300 lg:px-[17px] lg:py-[12px] lg:text-sm xl:px-[25px] xl:text-base"
                    >
                      <LogIn size={18} className="mr-2 text-white" />
                      <span className="shine-text relative z-10 font-sans font-normal normal-case">Log in</span>
@@ -346,7 +350,7 @@ export const PublicLayout = () => {
 
             <button
               type="button"
-              className={`lg:hidden inline-flex min-h-[44px] min-w-[44px] items-center justify-center p-2 transition-colors ${
+              className={`xl:hidden inline-flex min-h-[44px] min-w-[44px] items-center justify-center p-2 transition-colors ${
                 isLoginPage || scrolled
                   ? 'text-[#738242] hover:text-gold'
                   : 'text-white hover:text-gold'
@@ -364,7 +368,11 @@ export const PublicLayout = () => {
         {isMenuOpen && (
           <div
             id="public-mobile-nav"
-            className="lg:hidden bg-white fixed inset-0 z-40 flex min-h-[100vh] min-h-[100dvh] flex-col justify-center space-y-6 overflow-y-auto pt-[max(5rem,env(safe-area-inset-top))] pb-[max(2rem,env(safe-area-inset-bottom))] pl-[max(2rem,env(safe-area-inset-left))] pr-[max(2rem,env(safe-area-inset-right))]"
+            ref={mobileNavRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Site menu"
+            className="xl:hidden bg-white fixed inset-0 z-40 flex min-h-[100vh] min-h-[100dvh] flex-col justify-center space-y-6 overflow-y-auto pt-[max(5rem,env(safe-area-inset-top))] pb-[max(2rem,env(safe-area-inset-bottom))] pl-[max(2rem,env(safe-area-inset-left))] pr-[max(2rem,env(safe-area-inset-right))]"
           >
              <button type="button" className="absolute top-[max(2rem,env(safe-area-inset-top))] right-[max(2rem,env(safe-area-inset-right))] inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-charcoal" onClick={() => setIsMenuOpen(false)} aria-label="Close menu"><X size={32}/></button>
             {navItems.map((item) => (
@@ -372,7 +380,7 @@ export const PublicLayout = () => {
                 {item.submenu && item.submenu.length > 0 ? (
                   <>
                     <div 
-                      className={`flex items-center justify-between text-[22px] sm:text-[24px] md:text-[26px] font-serif font-normal transition-all duration-300 cursor-pointer ${
+                      className={`flex min-h-[44px] items-center justify-between text-[22px] sm:text-[24px] md:text-[26px] font-serif font-normal transition-all duration-300 cursor-pointer ${
                         scrolled ? 'text-[#738242] hover:text-[#738242]' : 'text-[#A8B774] hover:text-gold'
                       }`}
                       onClick={() => setOpenMobileSubmenu(openMobileSubmenu === item.path ? null : item.path)}
@@ -469,7 +477,7 @@ export const PublicLayout = () => {
                    <Link 
                      to="/login" 
                      onClick={() => setIsMenuOpen(false)}
-                     className="bg-gold px-[9px] py-[8px] lg:px-[17px] lg:py-[12px] xl:px-[25px] xl:py-[12px] rounded-[10px] font-sans font-normal text-base lg:text-sm xl:text-base hover:bg-[#A8B774] transform hover:scale-105 transition-all duration-300 w-full inline-flex items-center justify-center whitespace-nowrap"
+                     className="bg-gold inline-flex min-h-[44px] w-full items-center justify-center whitespace-nowrap rounded-[10px] px-4 py-3 font-sans text-base font-normal hover:bg-[#A8B774] transform hover:scale-105 transition-all duration-300"
                    >
                      <LogIn size={18} className="mr-2 text-white" />
                      <span className="shine-text relative z-10 font-sans font-normal normal-case">Log in</span>
@@ -524,7 +532,7 @@ export const PublicLayout = () => {
             <div>
               <button
                 onClick={() => setOpenFooterSection(openFooterSection === 'explore' ? null : 'explore')}
-                className="md:pointer-events-none flex items-center justify-between w-full md:w-auto mb-6 uppercase tracking-widest text-xs font-bold text-gold"
+                className="md:pointer-events-none flex min-h-[44px] items-center justify-between w-full md:w-auto mb-6 uppercase tracking-widest text-xs font-bold text-gold"
                 aria-expanded={openFooterSection === 'explore'}
                 aria-controls="footer-explore-links"
               >
@@ -547,7 +555,7 @@ export const PublicLayout = () => {
             <div>
               <button
                 onClick={() => setOpenFooterSection(openFooterSection === 'resources' ? null : 'resources')}
-                className="md:pointer-events-none flex items-center justify-between w-full md:w-auto mb-6 uppercase tracking-widest text-xs font-bold text-gold"
+                className="md:pointer-events-none flex min-h-[44px] items-center justify-between w-full md:w-auto mb-6 uppercase tracking-widest text-xs font-bold text-gold"
                 aria-expanded={openFooterSection === 'resources'}
                 aria-controls="footer-resources-links"
               >
@@ -573,7 +581,7 @@ export const PublicLayout = () => {
             <div>
               <button
                 onClick={() => setOpenFooterSection(openFooterSection === 'contact' ? null : 'contact')}
-                className="md:pointer-events-none flex items-center justify-between w-full md:w-auto mb-6 uppercase tracking-widest text-xs font-bold text-gold"
+                className="md:pointer-events-none flex min-h-[44px] items-center justify-between w-full md:w-auto mb-6 uppercase tracking-widest text-xs font-bold text-gold"
                 aria-expanded={openFooterSection === 'contact'}
                 aria-controls="footer-contact-links"
               >
@@ -619,7 +627,7 @@ export const PublicLayout = () => {
             <div className="flex flex-col items-end gap-2">
               <button
                 onClick={() => setOpenFooterSection(openFooterSection === 'legal' ? null : 'legal')}
-                className="md:pointer-events-none flex items-center justify-between w-full md:w-auto uppercase tracking-widest text-xs font-bold text-gold"
+                className="md:pointer-events-none flex min-h-[44px] items-center justify-between w-full md:w-auto uppercase tracking-widest text-xs font-bold text-gold"
                 aria-expanded={openFooterSection === 'legal'}
                 aria-controls="footer-legal-links"
               >

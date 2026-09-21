@@ -7,6 +7,100 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2109-046 — Phase 5 report of the mobile layout work
+
+**Date:** 2026-09-21
+**Time:** 16:24:53
+**Timezone:** Pacific/Auckland
+**Version:** 1.9.7
+**Type:** Documentation
+
+**Request**
+
+> yes do that
+
+**Changes**
+
+* RESPONSIVE_CHANGES.md lists every file touched in the mobile/tablet work, why it changed, what was left alone, and recommended follow-up.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: Unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors.
+
+## CHG-2026-2109-045 — Phase 4 device check; hamburger until 1280px
+
+**Date:** 2026-09-21
+**Time:** 16:00:34
+**Timezone:** Pacific/Auckland
+**Version:** 1.9.6
+**Type:** Changed
+
+**Request**
+
+> Phase 4 is ready to go do it now device check (small phone, tablet, landscape).
+
+**Changes**
+
+* Public pages were checked in Chrome at small-phone, iPhone, iPad, and landscape sizes (194 loads). None showed meaningful horizontal overflow. Results are in RESPONSIVE_DEVICE_MATRIX.md.
+* The public desktop menu now starts at 1280px so iPad-width screens keep the hamburger instead of a cramped top bar.
+* Admin People compiles again after a Lucide User / types User name clash that had blanked the Vite app.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: Headless Chrome device matrix: 194 public route/viewport checks, 0 overflow fails. Unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors. Member/admin layouts were not signed-in.
+
+## CHG-2026-2109-044 — Mobile layouts: menus, login, tables, and PDFs
+
+**Date:** 2026-09-21
+**Time:** 03:44:28
+**Timezone:** Pacific/Auckland
+**Version:** 1.9.5
+**Type:** Changed
+
+**Request**
+
+> now
+
+**Changes**
+
+* The public hamburger menu traps keyboard focus, closes with Escape, and stops the page behind it from scrolling. The same behaviour applies to portal sidebars and dialogs.
+* Login, sign-up, MFA, reset password, and login-error screens use tighter padding, 16px inputs, stacked name fields on phones, and a green canvas that fits the keyboard and notch.
+* Admin tables keep their columns but show a swipe hint on phones. Newsletter and roster PDFs offer an Open PDF action on small screens instead of a cramped inline viewer.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: Unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors.
+
 ## CHG-2026-2109-043 — Overview card counters 3px smaller
 
 **Date:** 2026-09-21

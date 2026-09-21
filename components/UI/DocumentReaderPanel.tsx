@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Maximize2, Minimize2, X, ZoomIn, ZoomOut } from 'lucide-react';
+import { Download, Maximize2, Minimize2, X, ZoomIn, ZoomOut } from 'lucide-react';
 import { EmbeddedPdfViewer } from './EmbeddedPdfViewer';
+import { useMediaQuery } from './useMediaQuery';
 
 interface DocumentReaderPanelProps {
   label: string;
@@ -29,6 +30,7 @@ export const DocumentReaderPanel: React.FC<DocumentReaderPanelProps> = ({
 }) => {
   const [isMaximized, setIsMaximized] = useState(false);
   const [zoom, setZoom] = useState(ZOOM_MIN);
+  const isPhone = useMediaQuery('(max-width: 767px)');
 
   useEffect(() => {
     setIsMaximized(false);
@@ -157,14 +159,40 @@ export const DocumentReaderPanel: React.FC<DocumentReaderPanelProps> = ({
         {headerButtons}
       </div>
       <div className={isMaximized ? 'flex-1 min-h-0 px-0' : undefined}>
-        <EmbeddedPdfViewer
-          key={pdfUrl}
-          src={pdfUrl}
-          title={pdfTitle}
-          fillHeight={isMaximized}
-          zoom={isMaximized ? zoom : 1}
-          className={isMaximized ? 'h-full rounded-none border-0' : undefined}
-        />
+        {isPhone && !isMaximized ? (
+          <div className="rounded-[8px] border border-gray-200 bg-white p-4 space-y-3">
+            <p className="text-sm text-neutral">
+              PDFs are easier to read in a dedicated viewer on a phone.
+            </p>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <a
+                href={pdfUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-[4px] bg-charcoal px-4 text-sm font-bold text-white hover:bg-gold hover:text-charcoal"
+              >
+                <Download size={16} />
+                Open PDF
+              </a>
+              <button
+                type="button"
+                onClick={() => setIsMaximized(true)}
+                className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-[4px] border border-gray-200 px-4 text-sm font-bold text-charcoal hover:bg-gray-50"
+              >
+                Read here
+              </button>
+            </div>
+          </div>
+        ) : (
+          <EmbeddedPdfViewer
+            key={pdfUrl}
+            src={pdfUrl}
+            title={pdfTitle}
+            fillHeight={isMaximized}
+            zoom={isMaximized ? zoom : 1}
+            className={isMaximized ? 'h-full rounded-none border-0' : undefined}
+          />
+        )}
       </div>
     </div>
   );

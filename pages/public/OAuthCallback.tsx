@@ -121,7 +121,7 @@ export const OAuthCallback = () => {
   }, [user, isLoading]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-secondary text-white font-serif">
+    <div className="min-h-[100vh] min-h-[100dvh] flex items-center justify-center bg-[#A8B774] text-charcoal font-serif px-4">
       <div className="text-center">
         <div className="animate-pulse mb-4">Completing sign in...</div>
         <p className="text-sm opacity-75">Please wait while we redirect you.</p>

@@ -641,10 +641,20 @@ export const AdminRoster = () => {
           {previewUrl && selectedFile && (
             <div className="mt-4">
               <p className="text-sm font-bold text-charcoal mb-2">Preview:</p>
-              <div className="border border-gray-200 rounded-[4px] overflow-hidden">
+              <div className="border border-gray-200 rounded-[4px] overflow-hidden min-w-0">
+                {previewUrl && (
+                  <a
+                    href={previewUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="md:hidden inline-flex min-h-[44px] w-full items-center justify-center text-sm font-bold text-gold"
+                  >
+                    Open PDF preview
+                  </a>
+                )}
                 <iframe
                   src={previewUrl}
-                  className="w-full h-96 bg-gray-50"
+                  className="hidden w-full h-96 bg-gray-50 md:block"
                   title="PDF Preview"
                 />
               </div>
@@ -756,10 +766,18 @@ export const AdminRoster = () => {
           {editingRoster?.pdf_url && (
             <div className="mt-4">
               <p className="text-sm font-bold text-charcoal mb-2">Preview:</p>
-              <div className="border border-gray-200 rounded-[4px] overflow-hidden">
+              <div className="border border-gray-200 rounded-[4px] overflow-hidden min-w-0">
+                <a
+                  href={editPreviewUrl || editingRoster.pdf_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="md:hidden inline-flex min-h-[44px] w-full items-center justify-center text-sm font-bold text-gold"
+                >
+                  Open PDF preview
+                </a>
                 <iframe
                   src={editPreviewUrl || editingRoster.pdf_url}
-                  className="w-full h-96 bg-gray-50"
+                  className="hidden w-full h-96 bg-gray-50 md:block"
                   title="PDF Preview"
                 />
               </div>

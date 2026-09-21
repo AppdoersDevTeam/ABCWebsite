@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { Modal } from '../../components/UI/Modal';
-import { CalendarDays, Trash2, User, Upload, X, Download, Search, Archive, ArchiveRestore, Plus, MoreVertical, Pencil, Building2, UsersRound, Unlink } from 'lucide-react';
+import { CalendarDays, Trash2, User as UserIcon, Upload, X, Download, Search, Archive, ArchiveRestore, Plus, MoreVertical, Pencil, Building2, UsersRound, Unlink } from 'lucide-react';
 import type { Group, JobRole, TeamMember, User } from '../../types';
 import { supabase } from '../../lib/supabase';
 import { appConfirm } from '../../lib/appDialog';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
+import { TableScroll } from '../../components/UI/TableScroll';
 import { PortalDropdown } from '../../components/UI/PortalDropdown';
 import { LinkedToBadge } from '../../components/UI/LinkedToBadge';
 import { buildStoredRole, getDisplayRole, inferProfileType } from '../../lib/teamMemberUtils';
@@ -81,7 +82,7 @@ function ministryGroupLabel(member: TeamMember): string {
 }
 
 function StatusGlyph({ profileType }: { profileType: ProfileType }) {
-  if (profileType === 'member') return <User size={14} className="text-gold" />;
+  if (profileType === 'member') return <UserIcon size={14} className="text-gold" />;
   if (profileType === 'attendee') return <UsersRound size={14} className="text-gold" />;
   return <Building2 size={14} className="text-gold" />;
 }
@@ -1158,7 +1159,7 @@ export const AdminTeam = () => {
       <AdminPageHeader
         title={PEOPLE_LABEL}
         subtitle="Search, filter, and manage staff, attendees, and members."
-        icon={<User size={28} />}
+        icon={<UserIcon size={28} />}
       />
 
       {directorySetupWarning && (
@@ -1313,7 +1314,7 @@ export const AdminTeam = () => {
           </div>
         )}
 
-        <div className="overflow-x-auto">
+        <TableScroll>
           <table className="min-w-full text-left">
             <thead>
               <tr className="border-y border-gray-200 bg-white text-[11px] font-bold uppercase tracking-wider text-neutral">
@@ -1524,7 +1525,7 @@ export const AdminTeam = () => {
               )}
             </tbody>
           </table>
-        </div>
+        </TableScroll>
         <div className="border-t border-gray-100 bg-white px-6 py-3 text-right text-sm text-neutral">
           {listedMembers.length} {listedMembers.length === 1 ? 'item' : 'items'}
         </div>
@@ -1793,13 +1794,13 @@ export const AdminTeam = () => {
                   }
                   return (
                     <div className="w-full h-full bg-gold/10 flex items-center justify-center">
-                      <User size={32} className="text-gold" />
+                      <UserIcon size={32} className="text-gold" />
                     </div>
                   );
                 })()}
                 {!previewUrl && (
                   <div className="w-full h-full bg-gold/10 flex items-center justify-center">
-                    <User size={32} className="text-gold" />
+                    <UserIcon size={32} className="text-gold" />
                   </div>
                 )}
               </div>

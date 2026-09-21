@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Home, 
@@ -21,6 +21,8 @@ import { useAutoSectionReveal } from '../UI/useAutoSectionReveal';
 import { DASHBOARD_NAV_ICON, portalNavNeedsDivider, sortPortalNavItems } from '../../lib/dashboardNav';
 import { flattenPortalSearchItems, portalPageTitle, PortalTopBar, usePortalSidebarCollapsed } from './PortalTopBar';
 import { AppDialogHost } from '../UI/AppDialogHost';
+import { useFocusTrap } from '../UI/useFocusTrap';
+import { useMediaQuery } from '../UI/useMediaQuery';
 
 export const DashboardLayout = () => {
   const { user, logout } = useAuth();
@@ -28,7 +30,15 @@ export const DashboardLayout = () => {
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = usePortalSidebarCollapsed();
+  const sidebarRef = useRef<HTMLElement>(null);
+  const isDesktopNav = useMediaQuery('(min-width: 1024px)');
   useAutoSectionReveal();
+
+  useEffect(() => {
+    setIsSidebarOpen(false);
+  }, [location.pathname]);
+
+  useFocusTrap(isSidebarOpen && !isDesktopNav, sidebarRef, () => setIsSidebarOpen(false));
 
   const handleLogout = () => {
     sessionStorage.removeItem('testRoleOverride');
@@ -70,6 +80,7 @@ export const DashboardLayout = () => {
           }
           setIsSidebarOpen((open) => !open);
         }}
+        isMobileNavOpen={isSidebarOpen}
         showSwitchRole={isAdminUser(user)}
         onSwitchRole={() => {
           sessionStorage.removeItem('testRoleOverride');
@@ -86,7 +97,10 @@ export const DashboardLayout = () => {
           />
         )}
 
-        <aside className={`
+        <aside
+          id="portal-sidebar"
+          ref={sidebarRef}
+          className={`
           fixed bottom-0 left-0 top-[calc(4rem+env(safe-area-inset-top))] z-50 transform border-r border-gray-100 bg-white shadow-sm transition-[width,transform] duration-300 ease-in-out lg:static lg:top-auto lg:z-auto lg:h-full lg:translate-x-0 pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)]
           ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
           ${sidebarCollapsed ? 'w-72 lg:w-[72px]' : 'w-72'}

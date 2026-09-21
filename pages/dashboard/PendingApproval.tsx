@@ -97,7 +97,7 @@ export const PendingApproval = () => {
   };
 
   return (
-    <div className="min-h-screen page-shell page-shell-image flex flex-col items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-[100vh] min-h-[100dvh] page-shell page-shell-image flex flex-col items-center justify-center p-4 relative overflow-hidden">
       <BackgroundBlobs />
 
       <div className="page-shell-content max-w-lg w-full text-center glass-card bg-white/70 p-6 sm:p-12 rounded-[16px] shadow-xl">
@@ -137,10 +137,10 @@ export const PendingApproval = () => {
           <>
             <h1 className="text-3xl sm:text-5xl font-serif font-normal text-charcoal mb-4">Access Pending</h1>
             <div className="mb-10 space-y-1">
-              <p className="text-[11px] sm:text-[12px] md:text-[13px] text-neutral font-light leading-snug whitespace-nowrap">
+              <p className="text-sm sm:text-[12px] md:text-[13px] text-neutral font-light leading-snug">
                 Your account is currently under administrative review.
               </p>
-              <p className="text-[11px] sm:text-[12px] md:text-[13px] text-neutral font-light leading-snug whitespace-nowrap">
+              <p className="text-sm sm:text-[12px] md:text-[13px] text-neutral font-light leading-snug">
                 We ensure our community stays safe and secure.
               </p>
             </div>

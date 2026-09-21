@@ -393,10 +393,10 @@ export const Home = () => {
                             {VISION_FOCUS_CARDS.map((item, i) => (
                                 <ScrollReveal key={item.primary} direction="scale" delay={i * 50}>
                                   <div className="group flex min-h-[70px] min-w-0 flex-col items-center justify-center rounded-[12px] border border-gray-100 bg-white px-3 py-4 text-center shadow-sm transition-all duration-300 hover:border-gold hover:shadow-md min-[480px]:min-h-[90px] min-[480px]:px-2.5 md:min-h-[106px] md:px-3 md:py-5 lg:min-h-[122px] lg:px-4">
-                                      <span className="mb-1.5 font-serif text-base font-normal leading-tight text-charcoal min-[480px]:whitespace-nowrap md:text-lg lg:text-xl">
+                                      <span className="mb-1.5 font-serif text-base font-normal leading-tight text-charcoal md:whitespace-nowrap md:text-lg lg:text-xl">
                                         {item.primary}
                                       </span>
-                                      <span className="text-[11px] font-bold uppercase tracking-widest text-neutral min-[480px]:whitespace-nowrap group-hover:text-gold md:text-xs lg:text-sm">
+                                      <span className="text-[11px] font-bold uppercase tracking-widest text-neutral md:whitespace-nowrap group-hover:text-gold md:text-xs lg:text-sm">
                                         {item.secondary}
                                       </span>
                                   </div>

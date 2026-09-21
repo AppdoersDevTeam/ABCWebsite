@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
+import { useFocusTrap } from './useFocusTrap';
 
 interface ModalProps {
   isOpen: boolean;
@@ -23,17 +24,14 @@ export const Modal: React.FC<ModalProps> = ({
 }) => {
   const suppressBackdropCloseRef = useRef(false);
   const focusTimerRef = useRef<number>();
+  const dialogRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [isOpen]);
+  const requestClose = useCallback(() => {
+    if (preventClose) return;
+    onClose();
+  }, [onClose, preventClose]);
+
+  useFocusTrap(isOpen, dialogRef, requestClose);
 
   // Ignore ghost clicks on the backdrop after tab switch or native file picker.
   useEffect(() => {
@@ -70,11 +68,6 @@ export const Modal: React.FC<ModalProps> = ({
     };
   }, [isOpen]);
 
-  const requestClose = useCallback(() => {
-    if (preventClose) return;
-    onClose();
-  }, [onClose, preventClose]);
-
   const shouldIgnoreBackdrop = () =>
     !closeOnBackdropClick || preventClose || suppressBackdropCloseRef.current;
 
@@ -103,6 +96,7 @@ export const Modal: React.FC<ModalProps> = ({
       onPointerDown={handleBackdropPointerDown}
     >
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         className="relative min-w-0 w-full max-w-2xl overflow-y-auto bg-white shadow-2xl max-md:max-h-[100vh] max-md:max-h-[100dvh] max-md:rounded-t-[16px] md:max-h-[90vh] md:max-h-[90dvh] md:rounded-[16px]"

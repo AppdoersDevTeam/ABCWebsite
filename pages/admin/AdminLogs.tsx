@@ -9,6 +9,7 @@ import { downloadAuditLogsCsv } from '../../lib/exportAuditLogs';
 import { SkeletonPageHeader } from '../../components/UI/Skeleton';
 import { EVENTS_LABEL, PEOPLE_LABEL } from '../../lib/constants';
 import { cannotComplete, errorDetail } from '../../lib/systemMessage';
+import { TableScroll } from '../../components/UI/TableScroll';
 
 const PAGE_SIZE = 50;
 
@@ -338,7 +339,7 @@ export const AdminLogs = () => {
           </div>
         ) : (
           <>
-            <div className="overflow-x-auto overscroll-x-contain">
+            <TableScroll>
               <table className="min-w-[900px] w-full text-left text-sm">
                 <thead className="bg-white/60 sticky top-0 z-10">
                   <tr className="border-b border-gray-200">
@@ -433,7 +434,7 @@ export const AdminLogs = () => {
                   })}
                 </tbody>
               </table>
-            </div>
+            </TableScroll>
 
             {hasMore && (
               <div className="flex justify-center border-t border-gray-100 p-4">

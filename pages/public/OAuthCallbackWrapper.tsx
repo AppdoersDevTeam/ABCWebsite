@@ -42,7 +42,7 @@ export const OAuthCallbackWrapper = () => {
 
   if (user && !isLoading && user.is_approved) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-base text-charcoal font-serif">
+      <div className="min-h-[100vh] min-h-[100dvh] flex items-center justify-center bg-[#A8B774] text-charcoal font-serif px-4">
         <div className="animate-pulse text-xl">Redirecting...</div>
       </div>
     );

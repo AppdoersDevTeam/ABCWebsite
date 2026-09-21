@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Shield } from 'lucide-react';
 import { GlowingButton } from '../UI/GlowingButton';
+import { AuthPageShell } from '../UI/AuthPageShell';
 import {
   applyAuthSession,
   mfaLoginSendEmail,
@@ -20,7 +21,7 @@ export type MfaChallengeProps = {
 };
 
 function fieldInputClass(): string {
-  return 'appearance-none rounded-[4px] relative block w-full px-4 py-4 border border-gray-300 bg-white text-charcoal placeholder-gray-400 focus:outline-none focus:ring-gold focus:border-gold tracking-[0.4em] text-center text-lg';
+  return 'appearance-none rounded-[4px] relative block w-full px-4 py-4 border border-gray-300 bg-white text-charcoal placeholder-gray-400 focus:outline-none focus:ring-gold focus:border-gold tracking-widest text-center text-base sm:tracking-[0.4em] sm:text-lg';
 }
 
 export const MfaChallenge: React.FC<MfaChallengeProps> = ({
@@ -98,13 +99,12 @@ export const MfaChallenge: React.FC<MfaChallengeProps> = ({
   };
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4 relative pt-32 md:pt-40 pb-32 bg-[#A8B774]">
-      <div className="max-w-md w-full space-y-6 glass-card bg-white/80 p-10 shadow-xl border border-white/50 rounded-[16px] relative z-10 backdrop-blur-xl">
+    <AuthPageShell>
         <div className="text-center space-y-3">
           <div className="mx-auto w-16 h-16 rounded-full flex items-center justify-center bg-gold/20 text-gold">
             <Shield size={32} aria-hidden="true" />
           </div>
-          <h2 className="text-3xl font-serif font-normal text-charcoal">Verify your identity</h2>
+          <h2 className="text-2xl sm:text-3xl font-serif font-normal text-charcoal">Verify your identity</h2>
           <p className="text-sm text-neutral">
             Two-factor authentication is enabled on this account. Choose a verification method.
           </p>
@@ -127,7 +127,7 @@ export const MfaChallenge: React.FC<MfaChallengeProps> = ({
               type="button"
               role="tab"
               aria-selected={method === 'totp'}
-              className={`text-left px-4 py-3 rounded-[4px] border ${
+              className={`min-h-[44px] text-left px-4 py-3 rounded-[4px] border ${
                 method === 'totp' ? 'border-gold bg-gold/10 font-bold' : 'border-gray-200'
               }`}
               onClick={() => setMethod('totp')}
@@ -140,7 +140,7 @@ export const MfaChallenge: React.FC<MfaChallengeProps> = ({
               type="button"
               role="tab"
               aria-selected={method === 'email'}
-              className={`text-left px-4 py-3 rounded-[4px] border ${
+              className={`min-h-[44px] text-left px-4 py-3 rounded-[4px] border ${
                 method === 'email' ? 'border-gold bg-gold/10 font-bold' : 'border-gray-200'
               }`}
               onClick={() => setMethod('email')}
@@ -153,7 +153,7 @@ export const MfaChallenge: React.FC<MfaChallengeProps> = ({
             type="button"
             role="tab"
             aria-selected={method === 'recovery'}
-            className={`text-left px-4 py-3 rounded-[4px] border ${
+            className={`min-h-[44px] text-left px-4 py-3 rounded-[4px] border ${
               method === 'recovery' ? 'border-gold bg-gold/10 font-bold' : 'border-gray-200'
             }`}
             onClick={() => setMethod('recovery')}
@@ -192,13 +192,12 @@ export const MfaChallenge: React.FC<MfaChallengeProps> = ({
           </GlowingButton>
           <button
             type="button"
-            className="w-full text-sm text-gold hover:text-charcoal font-bold"
+            className="w-full min-h-[44px] text-sm text-gold hover:text-charcoal font-bold"
             onClick={onCancel}
           >
             Back to sign in
           </button>
         </form>
-      </div>
-    </div>
+    </AuthPageShell>
   );
 };

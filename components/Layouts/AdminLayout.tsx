@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Home, 
@@ -26,6 +26,8 @@ import { useAutoSectionReveal } from '../UI/useAutoSectionReveal';
 import { DASHBOARD_NAV_ICON, portalNavNeedsDivider, sortPortalNavItems } from '../../lib/dashboardNav';
 import { PortalTopBar, flattenPortalSearchItems, portalPageTitle, usePortalSidebarCollapsed } from './PortalTopBar';
 import { AppDialogHost } from '../UI/AppDialogHost';
+import { useFocusTrap } from '../UI/useFocusTrap';
+import { useMediaQuery } from '../UI/useMediaQuery';
 
 export const AdminLayout = () => {
   const { user, logout } = useAuth();
@@ -33,6 +35,8 @@ export const AdminLayout = () => {
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = usePortalSidebarCollapsed();
+  const sidebarRef = useRef<HTMLElement>(null);
+  const isDesktopNav = useMediaQuery('(min-width: 1024px)');
   const usersRolesActive =
     location.pathname === '/admin/users' || location.pathname === '/admin/roles';
   const [usersRolesOpen, setUsersRolesOpen] = useState(usersRolesActive);
@@ -41,6 +45,12 @@ export const AdminLayout = () => {
   useEffect(() => {
     if (usersRolesActive) setUsersRolesOpen(true);
   }, [usersRolesActive]);
+
+  useEffect(() => {
+    setIsSidebarOpen(false);
+  }, [location.pathname]);
+
+  useFocusTrap(isSidebarOpen && !isDesktopNav, sidebarRef, () => setIsSidebarOpen(false));
 
   const handleLogout = () => {
     sessionStorage.removeItem('testRoleOverride');
@@ -106,6 +116,7 @@ export const AdminLayout = () => {
           }
           setIsSidebarOpen((open) => !open);
         }}
+        isMobileNavOpen={isSidebarOpen}
         showSwitchRole
         onSwitchRole={() => {
           sessionStorage.setItem('testRoleOverride', 'member');
@@ -122,7 +133,10 @@ export const AdminLayout = () => {
           />
         )}
 
-        <aside className={`
+        <aside
+          id="portal-sidebar"
+          ref={sidebarRef}
+          className={`
           fixed bottom-0 left-0 top-[calc(4rem+env(safe-area-inset-top))] z-50 transform border-r border-gray-100 bg-white shadow-sm transition-[width,transform] duration-300 ease-in-out lg:static lg:top-auto lg:z-auto lg:h-full lg:translate-x-0 pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)]
           ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
           ${sidebarCollapsed ? 'w-72 lg:w-[72px]' : 'w-72'}

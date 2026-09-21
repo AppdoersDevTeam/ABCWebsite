@@ -318,7 +318,7 @@ export const Roster = () => {
                       href={selectedRoster.pdf_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-gold hover:text-charcoal font-bold text-sm transition-colors inline-flex items-center gap-2"
+                      className="text-gold hover:text-charcoal font-bold text-sm transition-colors inline-flex min-h-[44px] items-center gap-2"
                     >
                       <FileText size={16} />
                       Open PDF in new tab
@@ -327,7 +327,7 @@ export const Roster = () => {
 
                   <iframe
                     src={selectedRoster.pdf_url}
-                    className="w-full h-[50vh] min-h-[320px] md:h-[800px] rounded-[4px] border border-gray-200"
+                    className="hidden w-full min-h-[320px] rounded-[4px] border border-gray-200 md:block md:h-[800px]"
                     title={`Roster ${formatRangeShort(selectedRoster)}`}
                   />
                 </>

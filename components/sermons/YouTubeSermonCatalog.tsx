@@ -462,9 +462,9 @@ export const YouTubeSermonCatalog = ({ variant = 'public' }: YouTubeSermonCatalo
 
       {!loading && !loadingVideos && watchId && !videos.some((video) => video.id === watchId) && (
         <div id={`sermon-${watchId}`} className={`${videoCardClass} mb-6 max-w-2xl`}>
-          <div className="relative w-full pb-[56.25%] bg-gray-100">
+          <div className="relative w-full min-w-0 overflow-hidden pb-[56.25%] bg-gray-100">
             <iframe
-              className="absolute top-0 left-0 w-full h-full"
+              className="absolute top-0 left-0 h-full w-full max-w-full"
               src={`https://www.youtube.com/embed/${watchId}?autoplay=1`}
               title="Sermon"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -509,7 +509,7 @@ export const YouTubeSermonCatalog = ({ variant = 'public' }: YouTubeSermonCatalo
             return (
               <Reveal key={video.id || i} variant={variant} direction="up" delay={i * 100}>
                 <div id={`sermon-${video.id}`} className={videoCardClass}>
-                  <div className="relative w-full pb-[56.25%] bg-gray-100">
+                  <div className="relative w-full min-w-0 overflow-hidden pb-[56.25%] bg-gray-100">
                     {isPlaceholder ? (
                       <div className="absolute inset-0 flex flex-col items-center justify-center bg-gold/10 p-6 text-center">
                         <Youtube className="text-gold mb-4" size={48} />
@@ -518,7 +518,7 @@ export const YouTubeSermonCatalog = ({ variant = 'public' }: YouTubeSermonCatalo
                       </div>
                     ) : isActive ? (
                       <iframe
-                        className="absolute top-0 left-0 w-full h-full"
+                        className="absolute top-0 left-0 h-full w-full max-w-full"
                         src={`https://www.youtube.com/embed/${video.id}?autoplay=1`}
                         title={video.title}
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

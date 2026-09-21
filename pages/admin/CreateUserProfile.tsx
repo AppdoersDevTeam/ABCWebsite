@@ -152,7 +152,7 @@ export const CreateUserProfile: React.FC<CreateUserProfileProps> = ({ isOpen, on
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="block text-sm font-bold text-charcoal mb-2">First Name *</label>
             <input

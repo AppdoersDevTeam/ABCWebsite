@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Building2, MoreVertical, Pencil, Plus, Shield, Trash2, User as UserIcon, UsersRound } from 'lucide-react';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
+import { TableScroll } from '../../components/UI/TableScroll';
 import { Modal } from '../../components/UI/Modal';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { supabase } from '../../lib/supabase';
@@ -259,7 +260,7 @@ export const AdminRoles = () => {
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-gray-100 bg-gray-50 shadow-sm">
-        <div className="overflow-x-auto">
+        <TableScroll>
           <table className="min-w-full text-left">
             <thead>
               <tr className="border-b border-gray-200 bg-white text-[11px] font-bold uppercase tracking-wider text-neutral">
@@ -354,7 +355,7 @@ export const AdminRoles = () => {
               )}
             </tbody>
           </table>
-        </div>
+        </TableScroll>
         <div className="border-t border-gray-100 bg-white px-6 py-3 text-right text-sm text-neutral">
           {listed.length} {listed.length === 1 ? 'item' : 'items'}
         </div>

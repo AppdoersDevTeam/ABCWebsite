@@ -20,6 +20,7 @@ import {
 import { logAuditEvent } from '../../lib/auditLog';
 import { notifyCalendarChanged } from '../../lib/calendarItems';
 import { EVENTS_LABEL } from '../../lib/constants';
+import { TableScroll } from '../../components/UI/TableScroll';
 import metadata from '../../metadata.json';
 
 const DEFAULT_THUMB = '/ABC Logo.png';
@@ -778,7 +779,7 @@ export const AdminEvents = () => {
           ) : filteredRsvps.length === 0 ? (
             <p className="text-neutral text-sm">No RSVPs yet.</p>
           ) : (
-            <div className="max-h-80 overflow-x-auto overflow-y-auto border border-gray-100 rounded-[8px]">
+            <TableScroll className="max-h-80 overflow-y-auto border border-gray-100 rounded-[8px]">
               <table className="w-full text-left">
                 <thead className="bg-white sticky top-0">
                   <tr className="border-b border-gray-100">
@@ -799,7 +800,7 @@ export const AdminEvents = () => {
                   ))}
                 </tbody>
               </table>
-            </div>
+            </TableScroll>
           )}
         </div>
       </Modal>

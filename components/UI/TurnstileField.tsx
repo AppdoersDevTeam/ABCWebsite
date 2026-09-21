@@ -33,7 +33,7 @@ export const TurnstileField = forwardRef<TurnstileFieldHandle, TurnstileFieldPro
     }
 
     return (
-      <div className={className}>
+      <div className={className ? `${className} max-w-full overflow-x-auto` : 'max-w-full overflow-x-auto'}>
         <Turnstile
           ref={widgetRef}
           siteKey={SITE_KEY}

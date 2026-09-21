@@ -20,6 +20,7 @@ import {
 } from '../../lib/emailSends';
 import { getUserTimezone } from '../../lib/dateUtils';
 import { PEOPLE_LABEL } from '../../lib/constants';
+import { TableScroll } from '../../components/UI/TableScroll';
 
 type KindFilter = 'all' | EmailRecipientKind;
 
@@ -71,7 +72,7 @@ function PeriodPanel({
         </div>
       ) : null}
       {timezoneNote ? <p className="mt-2 text-xs text-neutral">{timezoneNote}</p> : null}
-      <dl className="mt-5 grid grid-cols-2 gap-3 text-sm">
+      <dl className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
         <div className="rounded-lg bg-sky-50 px-3 py-2">
           <dt className="text-sky-800 font-semibold">Users</dt>
           <dd className="text-xl font-serif text-charcoal mt-1">{users}</dd>
@@ -220,7 +221,7 @@ export const AdminEmails = () => {
         ) : filtered.length === 0 ? (
           <p className="text-sm text-neutral py-8">No emails in this view yet.</p>
         ) : (
-          <div className="overflow-x-auto">
+          <TableScroll>
             <table className="min-w-full text-left">
               <thead>
                 <tr className="border-b border-gray-100 text-xs uppercase tracking-wider text-neutral">
@@ -258,7 +259,7 @@ export const AdminEmails = () => {
                 ))}
               </tbody>
             </table>
-          </div>
+          </TableScroll>
         )}
       </div>
     </div>

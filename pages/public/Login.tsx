@@ -19,10 +19,11 @@ import { normalizePhoneForAuth, sanitizePhoneInput } from '../../lib/validatePho
 import { getAuthEmailErrorMessage } from '../../lib/authEmailErrors';
 import { clearPendingPublicBrowse } from '../../lib/pendingAccess';
 import { appConfirm } from '../../lib/appDialog';
+import { AuthPageShell } from '../../components/UI/AuthPageShell';
 
 function fieldInputClass(hasError: boolean): string {
   const base =
-    'appearance-none rounded-[4px] relative block w-full px-4 py-4 border bg-white text-charcoal placeholder-gray-400 focus:outline-none focus:ring-gold focus:z-10 shadow-sm';
+    'appearance-none rounded-[4px] relative block w-full px-4 py-4 text-base border bg-white text-charcoal placeholder-gray-400 focus:outline-none focus:ring-gold focus:z-10 shadow-sm';
   return hasError
     ? `${base} border-red-400 focus:border-red-500`
     : `${base} border-gray-300 focus:border-gold`;
@@ -38,7 +39,7 @@ function FormField({
   return (
     <div className="space-y-1">
       {children}
-      {error && <p className="text-xs text-red-600 px-1">{error}</p>}
+      {error && <p className="text-sm text-red-600 px-1">{error}</p>}
     </div>
   );
 }
@@ -422,27 +423,24 @@ export const Login = () => {
 
   if (loginFlash) {
     return (
-      <div className="min-h-[80vh] flex items-center justify-center px-4 relative pt-32 md:pt-40 pb-32 bg-[#A8B774]">
-        <div className="max-w-md w-full glass-card bg-white/80 p-10 shadow-xl border border-white/50 rounded-[16px] relative z-10 backdrop-blur-xl text-center space-y-4 animate-pulse">
+      <AuthPageShell className="text-center space-y-4 animate-pulse">
           <div className="mx-auto w-16 h-16 rounded-full flex items-center justify-center bg-gold/20 text-gold">
             {loginFlash.role === 'admin' ? <Shield size={32} /> : <UserIcon size={32} />}
           </div>
-          <h2 className="text-3xl font-serif font-normal text-charcoal">
+          <h2 className="text-2xl sm:text-3xl font-serif font-normal text-charcoal break-words">
             Welcome, {loginFlash.name}
           </h2>
           <span className="inline-block text-xs font-bold text-charcoal bg-gold px-4 py-2 rounded-full border border-gold uppercase tracking-widest shadow-sm">
             Signing in as {loginFlash.role === 'admin' ? 'Admin' : 'Member'}
           </span>
-        </div>
-      </div>
+      </AuthPageShell>
     );
   }
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4 relative pt-32 md:pt-40 pb-32 bg-[#A8B774]">
-      <div className="max-w-md w-full space-y-8 glass-card bg-white/80 p-10 shadow-xl border border-white/50 rounded-[16px] relative z-10 backdrop-blur-xl">
+    <AuthPageShell>
         <div className="text-center">
-          <h2 className="mt-6 text-4xl font-serif font-normal text-charcoal">
+          <h2 className="mt-2 text-3xl sm:text-4xl font-serif font-normal text-charcoal">
             {isSignUp ? 'Create Account' : 'Member Login'}
           </h2>
           <p className="mt-2 text-sm text-neutral">
@@ -494,6 +492,7 @@ export const Login = () => {
             )}
             <TurnstileField
               ref={turnstileRef}
+              className="w-full max-w-full overflow-x-auto"
               onToken={setCaptchaToken}
               onExpire={() => setCaptchaToken(null)}
               onError={() => setCaptchaToken(null)}
@@ -563,7 +562,7 @@ export const Login = () => {
           )}
 
           {isSignUp && (
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <FormField error={fieldErrors.firstName}>
                 <label htmlFor="first-name" className="block text-sm font-bold text-charcoal mb-2">
                   First Name *
@@ -662,7 +661,7 @@ export const Login = () => {
           )}
 
           {!isSignUp && !isResettingPassword && (
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
               <button
                 type="button"
                 className="text-sm text-neutral hover:text-charcoal font-bold text-left"
@@ -679,7 +678,7 @@ export const Login = () => {
               </button>
               <Link
                 to="#"
-                className="text-sm text-gold hover:text-charcoal font-bold"
+                className="min-h-[44px] text-sm text-gold hover:text-charcoal font-bold sm:min-h-0 sm:text-right"
                 onClick={(e) => {
                   e.preventDefault();
                   setIsResettingPassword(true);
@@ -696,6 +695,7 @@ export const Login = () => {
 
           <TurnstileField
             ref={turnstileRef}
+            className="w-full max-w-full overflow-x-auto"
             onToken={setCaptchaToken}
             onExpire={() => setCaptchaToken(null)}
             onError={() => setCaptchaToken(null)}
@@ -759,7 +759,6 @@ export const Login = () => {
           </div>
         </form>
         )}
-      </div>
-    </div>
+    </AuthPageShell>
   );
 };

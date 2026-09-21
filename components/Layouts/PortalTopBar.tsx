@@ -44,6 +44,7 @@ type PortalTopBarProps = {
   showSwitchRole: boolean;
   onSwitchRole: () => void;
   onSignOut: () => void;
+  isMobileNavOpen?: boolean;
 };
 
 export function flattenPortalSearchItems(
@@ -79,6 +80,7 @@ export const PortalTopBar = ({
   sidebarCollapsed,
   onToggleSidebar,
   onSignOut,
+  isMobileNavOpen = false,
 }: PortalTopBarProps) => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -155,8 +157,8 @@ export const PortalTopBar = ({
     if (box) {
       setMenuPos({
         top: box.bottom + 4,
-        left: box.left,
-        width: Math.max(box.width, 280),
+        left: Math.min(Math.max(8, box.left), Math.max(8, window.innerWidth - Math.min(Math.max(box.width, 280), window.innerWidth - 16) - 8)),
+        width: Math.min(Math.max(box.width, 280), window.innerWidth - 16),
       });
     }
     setMenuOpen(true);
@@ -280,8 +282,10 @@ export const PortalTopBar = ({
         type="button"
         onClick={onToggleSidebar}
         className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md p-2 text-white hover:bg-black/10"
-        aria-label={sidebarCollapsed ? 'Expand menu' : 'Collapse menu'}
+        aria-label={isMobileNavOpen ? 'Close menu' : sidebarCollapsed ? 'Expand menu' : 'Open menu'}
         aria-pressed={sidebarCollapsed}
+        aria-expanded={isMobileNavOpen}
+        aria-controls="portal-sidebar"
       >
         <Menu size={22} strokeWidth={2.75} />
       </button>
@@ -313,12 +317,12 @@ export const PortalTopBar = ({
             />
           </form>
           {searchOpen && matches.length > 0 && (
-            <div className="absolute right-0 top-full z-40 mt-1 w-56 overflow-hidden rounded-xl border border-gray-200 bg-white py-1 shadow-lg">
+            <div className="absolute right-0 top-full z-40 mt-1 w-56 max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-gray-200 bg-white py-1 shadow-lg">
               {matches.map((item) => (
                 <button
                   key={item.path}
                   type="button"
-                  className="block w-full px-3 py-2 text-left text-sm text-charcoal hover:bg-gray-200"
+                  className="block w-full min-h-[44px] px-3 py-2 text-left text-sm text-charcoal hover:bg-gray-200"
                   onClick={() => goToSearchMatch(item.path)}
                 >
                   {item.label}
@@ -331,7 +335,7 @@ export const PortalTopBar = ({
           <button
             type="button"
             onClick={() => setNotifyOpen((open) => !open)}
-            className="rounded-full p-2 text-white hover:bg-black/10"
+            className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full p-2 text-white hover:bg-black/10"
             aria-label="Notifications"
             aria-expanded={notifyOpen}
             title="Notifications"
@@ -339,14 +343,14 @@ export const PortalTopBar = ({
             <Bell size={25} color="#ffffff" fill="#ffffff" stroke="#ffffff" />
           </button>
           {notifyOpen && (
-            <div className="absolute right-0 top-full z-40 mt-1 w-64 rounded-[11px] border border-gray-200 bg-white px-4 py-3 text-sm text-neutral shadow-lg">
+            <div className="absolute right-0 top-full z-40 mt-1 w-64 max-w-[calc(100vw-2rem)] rounded-[11px] border border-gray-200 bg-white px-4 py-3 text-sm text-neutral shadow-lg">
               No new notifications
             </div>
           )}
         </div>
         <Link
           to={helpPath}
-          className="rounded-full p-2 text-white hover:bg-black/10"
+          className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full p-2 text-white hover:bg-black/10"
           aria-label="Help"
           title="Help"
         >

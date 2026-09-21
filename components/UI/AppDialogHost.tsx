@@ -1,12 +1,14 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { registerAppDialogHost, type AppDialogRequest } from '../../lib/appDialog';
 import { inferDialogTitle } from '../../lib/systemMessage';
 import { CHURCH_NAME } from '../../lib/constants';
+import { useFocusTrap } from './useFocusTrap';
 
 export const AppDialogHost: React.FC = () => {
   const [queue, setQueue] = useState<AppDialogRequest[]>([]);
   const current = queue[0] || null;
+  const dialogRef = useRef<HTMLDivElement>(null);
 
   const enqueue = useCallback((request: AppDialogRequest) => {
     setQueue((existing) => [...existing, request]);
@@ -38,6 +40,11 @@ export const AppDialogHost: React.FC = () => {
     setQueue((existing) => existing.slice(1));
   };
 
+  useFocusTrap(Boolean(current), dialogRef, () => {
+    if (current?.kind === 'confirm') finishConfirm(false);
+    else finishAlert();
+  });
+
   if (!current || typeof document === 'undefined') return null;
 
   const title = inferDialogTitle(current.kind, current.message, current.title);
@@ -58,6 +65,7 @@ export const AppDialogHost: React.FC = () => {
       }}
     >
       <div
+        ref={dialogRef}
         role="alertdialog"
         aria-modal="true"
         aria-labelledby="abc-app-dialog-title"

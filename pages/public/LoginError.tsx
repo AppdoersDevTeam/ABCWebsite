@@ -34,18 +34,18 @@ export const LoginError = () => {
   };
 
   return (
-    <div className="min-h-screen bg-base flex flex-col items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-[100vh] min-h-[100dvh] bg-[#A8B774] flex flex-col items-center justify-center p-4 relative overflow-hidden pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))]">
       <BackgroundBlobs />
       
-      <div className="relative z-10 max-w-lg w-full text-center glass-card bg-white/70 p-12 rounded-[16px] shadow-xl">
+      <div className="relative z-10 max-w-lg w-full min-w-0 text-center glass-card bg-white/70 p-6 sm:p-12 rounded-[16px] shadow-xl">
         
         {/* Error Icon */}
         <div className="w-24 h-24 bg-red-50 border border-red-200 rounded-full flex items-center justify-center mx-auto mb-8 shadow-lg">
           <AlertCircle size={40} className="text-red-500" />
         </div>
 
-        <h1 className="text-5xl font-serif font-normal text-charcoal mb-4">Login Error</h1>
-        <p className="text-xl text-neutral font-light mb-10 leading-relaxed">
+        <h1 className="text-3xl sm:text-5xl font-serif font-normal text-charcoal mb-4">Login Error</h1>
+        <p className="text-base sm:text-xl text-neutral font-light mb-10 leading-relaxed break-words">
           {getErrorMessage()}
         </p>
 

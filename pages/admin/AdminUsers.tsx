@@ -13,6 +13,7 @@ import { formatLastAccessParts } from '../../lib/dateUtils';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { LinkedToBadge } from '../../components/UI/LinkedToBadge';
 import { PortalDropdown } from '../../components/UI/PortalDropdown';
+import { TableScroll } from '../../components/UI/TableScroll';
 import { GlowingButton } from '../../components/UI/GlowingButton';
 import { Modal } from '../../components/UI/Modal';
 import { TurnstileField, type TurnstileFieldHandle } from '../../components/UI/TurnstileField';
@@ -1023,7 +1024,7 @@ export const AdminUsers = () => {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        <TableScroll>
           <table className="min-w-full text-left">
             <thead>
               <tr className="border-y border-gray-200 bg-white text-[11px] font-bold uppercase tracking-wider text-neutral">
@@ -1285,7 +1286,7 @@ export const AdminUsers = () => {
               )}
             </tbody>
           </table>
-        </div>
+        </TableScroll>
         <div className="border-t border-gray-100 bg-white px-6 py-3 text-right text-sm text-neutral">
           {listedUsers.length} {listedUsers.length === 1 ? 'item' : 'items'}
         </div>
