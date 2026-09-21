@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Bell, ChevronDown, ChevronUp, HelpCircle, LogOut, Menu, Search, Shield } from 'lucide-react';
+import { ChevronDown, ChevronUp, HelpCircle, LogOut, Menu, Search, Shield } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { CHURCH_NAME, displayInitials, displayName } from '../../lib/constants';
 import { supabase } from '../../lib/supabase';
+import { NotificationBell } from '../Notifications/NotificationBell';
 
 export const PORTAL_TOP_BAR_PX = 64;
 const SIDEBAR_COLLAPSED_KEY = 'abc-portal-sidebar-collapsed';
@@ -88,10 +89,8 @@ export const PortalTopBar = ({
   const [menuPos, setMenuPos] = useState({ top: 0, left: 0, width: 280 });
   const [searchText, setSearchText] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
-  const [notifyOpen, setNotifyOpen] = useState(false);
   const identityRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
-  const notifyRef = useRef<HTMLDivElement>(null);
   const profilePath = variant === 'admin' ? '/admin/profile' : '/dashboard/profile';
   const securityPath = variant === 'admin' ? '/admin/security' : '/dashboard/security';
   const [directory, setDirectory] = useState<{ img: string | null; staff_role: string | null; role: string | null } | null>(null);
@@ -135,13 +134,11 @@ export const PortalTopBar = ({
       const target = event.target as Node;
       if (identityRef.current && !identityRef.current.contains(target)) setMenuOpen(false);
       if (searchRef.current && !searchRef.current.contains(target)) setSearchOpen(false);
-      if (notifyRef.current && !notifyRef.current.contains(target)) setNotifyOpen(false);
     };
     const onKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         setMenuOpen(false);
         setSearchOpen(false);
-        setNotifyOpen(false);
       }
     };
     document.addEventListener('mousedown', onPointer);
@@ -331,23 +328,7 @@ export const PortalTopBar = ({
             </div>
           )}
         </div>
-        <div className="relative" ref={notifyRef}>
-          <button
-            type="button"
-            onClick={() => setNotifyOpen((open) => !open)}
-            className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full p-2 text-white hover:bg-black/10"
-            aria-label="Notifications"
-            aria-expanded={notifyOpen}
-            title="Notifications"
-          >
-            <Bell size={25} color="#ffffff" fill="#ffffff" stroke="#ffffff" />
-          </button>
-          {notifyOpen && (
-            <div className="absolute right-0 top-full z-40 mt-1 w-64 max-w-[calc(100vw-2rem)] rounded-[11px] border border-gray-200 bg-white px-4 py-3 text-sm text-neutral shadow-lg">
-              No new notifications
-            </div>
-          )}
-        </div>
+        <NotificationBell variant="portal" />
         <Link
           to={helpPath}
           className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full p-2 text-white hover:bg-black/10"

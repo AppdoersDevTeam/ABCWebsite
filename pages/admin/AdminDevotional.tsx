@@ -13,6 +13,7 @@ import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { logAuditEventSafe } from '../../lib/auditLog';
 import { formatWeekDate } from '../../lib/dateUtils';
 import { notifyCalendarChanged } from '../../lib/calendarItems';
+import { dispatchAppNotification } from '../../lib/dispatchNotification';
 import {
   ADMIN_DRAFT_KEYS,
   clearFormDraft,
@@ -249,6 +250,14 @@ export const AdminDevotional = () => {
         entityType: 'devotionals',
         entityId: data.id,
         summary: `Uploaded devotional ${uploadData.title.trim()} — ${uploadData.subtitle.trim()} (${uploadData.weekDate})`,
+      });
+
+      dispatchAppNotification({
+        type: 'content.devotional',
+        title: 'New devotional',
+        body: `${uploadData.title.trim()} — ${uploadData.subtitle.trim()}`,
+        href: '/dashboard/devotional',
+        entityId: data.id,
       });
 
       setDevotionals([data, ...devotionals].sort((a, b) => b.week_date.localeCompare(a.week_date)));

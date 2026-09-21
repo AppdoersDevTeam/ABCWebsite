@@ -7,6 +7,43 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2109-052 — Member and admin browser and PWA notifications
+
+**Date:** 2026-09-21
+**Time:** 21:50:25
+**Timezone:** Pacific/Auckland
+**Version:** 1.9.13
+**Type:** Added
+
+**Request**
+
+> Create a new feature. notifications. web browser notifications on desktop and mobile notifications for PWA apps. notifications should be for members and admins accordingly. Push everything.
+
+**Changes**
+
+* Added an in-app notification inbox on the member and admin portal top bar (Realtime unread list and mark-as-read), replacing the previous placeholder bell.
+* Added Web Push via a push-focused service worker so desktop browsers and installed PWAs can show OS notifications. iPhone and iPad require Add to Home Screen (iOS 16.4+).
+* Members are notified when newsletters, devotionals, What’s On listings, or rosters are published, when someone prays for their request, and for their own account approval, hold, restore, or role change.
+* Admins are notified of new prayer requests (including confidential), event RSVPs, pending signups, and their own account lifecycle changes.
+* User Security now includes enable/disable on this device and per-type notification toggles.
+* New dispatch-notification Edge Function fans out inbox rows and Web Push. New tables: notifications, push_subscriptions, notification_preferences.
+* Applied the notification schema on the live ABC Website database and deployed dispatch-notification. VAPID keys are stored in Vault and read via service-role get_vapid_config. VITE_VAPID_PUBLIC_KEY is set on Vercel.
+
+**Database**
+
+* supabase/migrations/20260921085000_create_notifications.sql
+* supabase/migrations/20260921093200_get_vapid_config.sql
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: Notification audience unit tests plus existing governance/nav/ui tests. npm run validate and vite build. Typecheck still fails on pre-existing app errors. Live ABC schema, dispatch-notification, Vault VAPID keys, and Vercel VITE_VAPID_PUBLIC_KEY are in place.
+
 ## CHG-2026-2109-051 — Tighter footer Legal spacing under the divider
 
 **Date:** 2026-09-21

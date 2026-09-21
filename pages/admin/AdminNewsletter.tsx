@@ -15,6 +15,7 @@ import { logAuditEventSafe } from '../../lib/auditLog';
 import { notifyCalendarChanged } from '../../lib/calendarItems';
 import { formatWeekDate, monthYearFromWeekDate, resolveNewsletterWeekDate } from '../../lib/dateUtils';
 import { fetchNewslettersOrdered, sortNewslettersLatestFirst } from '../../lib/newsletters';
+import { dispatchAppNotification } from '../../lib/dispatchNotification';
 import {
   ADMIN_DRAFT_KEYS,
   clearFormDraft,
@@ -240,6 +241,14 @@ export const AdminNewsletter = () => {
         entityType: 'newsletters',
         entityId: data.id,
         summary: `Uploaded newsletter ${uploadData.title.trim()} (${uploadData.weekDate})`,
+      });
+
+      dispatchAppNotification({
+        type: 'content.newsletter',
+        title: 'New newsletter',
+        body: uploadData.title.trim(),
+        href: '/dashboard/newsletter',
+        entityId: data.id,
       });
 
       setNewsletters(sortNewslettersLatestFirst([data, ...newsletters]));

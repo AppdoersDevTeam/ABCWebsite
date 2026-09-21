@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { dispatchAppNotification } from './dispatchNotification';
 
 export type NotifyUserReviewKind = 'received' | 'denied';
 
@@ -88,6 +89,8 @@ export async function notifyUserReview(
       return { ok: false, error: String(data.error) };
     }
 
+    dispatchReviewNotification(userId, kind);
+
     return {
       ok: true,
       skipped: Boolean(data?.skipped),
@@ -100,4 +103,26 @@ export async function notifyUserReview(
       error: err instanceof Error ? err.message : 'Failed to send email',
     };
   }
+}
+
+function dispatchReviewNotification(userId: string, kind: NotifyUserReviewKind): void {
+  if (kind === 'received') {
+    dispatchAppNotification({
+      type: 'user.signup',
+      title: 'New member signup',
+      body: 'A new account is waiting for approval.',
+      href: '/admin/users',
+      entityId: userId,
+      targetUserId: userId,
+    });
+    return;
+  }
+  dispatchAppNotification({
+    type: 'user.denied',
+    title: 'Account not approved',
+    body: 'Your Ashburton Baptist Church website request was not approved.',
+    href: '/login',
+    entityId: userId,
+    targetUserId: userId,
+  });
 }

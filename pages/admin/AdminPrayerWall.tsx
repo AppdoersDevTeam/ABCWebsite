@@ -11,6 +11,7 @@ import { SkeletonPageHeader, SkeletonPrayerCard } from '../../components/UI/Skel
 import { getUserTimezone, formatRelativeDateInTimezone } from '../../lib/dateUtils';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { logAuditEventSafe } from '../../lib/auditLog';
+import { dispatchAppNotification } from '../../lib/dispatchNotification';
 
 export const AdminPrayerWall = () => {
   const [requests, setRequests] = useState<PrayerRequest[]>([]);
@@ -71,6 +72,18 @@ export const AdminPrayerWall = () => {
         entityType: 'prayer_requests',
         entityId: data.id,
         summary: `Admin posted a prayer request${formData.isAnonymous ? ' (anonymous)' : ''}`,
+      });
+
+      dispatchAppNotification({
+        type: 'prayer.request_created',
+        title: formData.isConfidential ? 'New confidential prayer request' : 'New prayer request',
+        body: formData.isConfidential
+          ? 'A confidential prayer request was submitted.'
+          : formData.isAnonymous
+            ? 'An anonymous prayer request was submitted.'
+            : `${formData.name} submitted a prayer request.`,
+        href: '/admin/prayer',
+        entityId: data.id,
       });
 
       setRequests([data, ...requests]);

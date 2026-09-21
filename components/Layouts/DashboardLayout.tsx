@@ -23,6 +23,7 @@ import { flattenPortalSearchItems, portalPageTitle, PortalTopBar, usePortalSideb
 import { AppDialogHost } from '../UI/AppDialogHost';
 import { useFocusTrap } from '../UI/useFocusTrap';
 import { useMediaQuery } from '../UI/useMediaQuery';
+import { NotificationPrompt } from '../Notifications/NotificationPrompt';
 
 export const DashboardLayout = () => {
   const { user, logout } = useAuth();
@@ -167,6 +168,7 @@ export const DashboardLayout = () => {
 
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden bg-dash">
           <main className="min-h-0 min-w-0 flex-1 overflow-x-auto overflow-y-auto p-4 md:p-6 lg:p-8">
+            <NotificationPrompt />
             <Outlet />
           </main>
         </div>

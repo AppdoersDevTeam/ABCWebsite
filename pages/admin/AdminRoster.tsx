@@ -9,6 +9,7 @@ import { cannotComplete, cannotDelete, cannotLoad, errorDetail, pleaseChooseFile
 import { SkeletonPageHeader } from '../../components/UI/Skeleton';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { logAuditEventSafe } from '../../lib/auditLog';
+import { dispatchAppNotification } from '../../lib/dispatchNotification';
 import { formatDdMmYyyy, formatDdMmYyyyHHmm } from '../../lib/dateUtils';
 
 type RosterRow = RosterImage & { groups?: Pick<Group, 'id' | 'name'> | null };
@@ -385,6 +386,14 @@ export const AdminRoster = () => {
         entityType: 'roster_images',
         entityId: result?.id,
         summary: `Uploaded roster PDF for ${group.name} (${dateFrom} – ${dateTo})`,
+      });
+
+      dispatchAppNotification({
+        type: 'content.roster',
+        title: 'New roster',
+        body: `${group.name} (${dateFrom} – ${dateTo})`,
+        href: '/dashboard/roster',
+        entityId: result?.id,
       });
       
       setSelectedFile(null);

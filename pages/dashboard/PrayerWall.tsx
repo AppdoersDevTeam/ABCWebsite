@@ -13,6 +13,7 @@ import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { getUserTimezone, formatRelativeDateInTimezone } from '../../lib/dateUtils';
 import { logAuditEventSafe } from '../../lib/auditLog';
 import { displayName } from '../../lib/constants';
+import { dispatchAppNotification } from '../../lib/dispatchNotification';
 
 export const PrayerWall = () => {
   const { user } = useAuth();
@@ -99,6 +100,14 @@ export const PrayerWall = () => {
         entityType: 'prayer_requests',
         entityId: data.id,
         summary: `${user ? displayName(user) : formData.name || 'Member'} submitted a prayer request${formData.isAnonymous ? ' (anonymous)' : ''}`,
+      });
+
+      dispatchAppNotification({
+        type: 'prayer.request_created',
+        title: 'New prayer request',
+        body: formData.isAnonymous ? 'An anonymous prayer request was submitted.' : `${formData.name} submitted a prayer request.`,
+        href: '/admin/prayer',
+        entityId: data.id,
       });
 
       setRequests([data, ...requests]);
@@ -303,6 +312,16 @@ export const PrayerWall = () => {
           entityId: requestId,
           summary: `${displayName(user)} is praying for a request`,
         });
+        if (request?.user_id && request.user_id !== user.id) {
+          dispatchAppNotification({
+            type: 'prayer.count_added',
+            title: 'Someone is praying for you',
+            body: 'A church member prayed for your request.',
+            href: '/dashboard/prayer',
+            entityId: requestId,
+            targetUserId: request.user_id,
+          });
+        }
       }
 
       // Refresh requests and user prayer counts to get updated state

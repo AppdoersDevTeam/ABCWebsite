@@ -15,6 +15,7 @@ import {
 import { usePageMeta } from '../../lib/usePageMeta';
 import { EVENTS_LABEL } from '../../lib/constants';
 import { logAuditEventSafe } from '../../lib/auditLog';
+import { dispatchAppNotification } from '../../lib/dispatchNotification';
 
 /** Light-card body copy — use text-charcoal + a single size class; responsive sizes break custom colors on Tailwind CDN. */
 const CARD_BODY_TEXT = 'text-charcoal leading-relaxed text-sm';
@@ -235,6 +236,16 @@ export const EventDetail = () => {
         summary: `${name} RSVP'd for "${event.title}"`,
         details: { email, event_id: event.id },
         actorRoleOverride: user ? undefined : 'anonymous',
+      });
+      dispatchAppNotification({
+        type: 'event.rsvp_submitted',
+        title: 'New event RSVP',
+        body: `${name} RSVPd for "${event.title}".`,
+        href: '/admin/events',
+        entityId: event.id,
+        eventTitle: event.title,
+        rsvpName: name,
+        rsvpEmail: email,
       });
     } catch (e: unknown) {
       console.error('Error submitting RSVP:', e);

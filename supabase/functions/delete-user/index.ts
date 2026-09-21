@@ -230,6 +230,18 @@ Deno.serve(async (req: Request) => {
       "prayer_counts",
     );
     await ignoreMissingTable(
+      adminClient.from("notifications").delete().eq("user_id", userId),
+      "notifications",
+    );
+    await ignoreMissingTable(
+      adminClient.from("push_subscriptions").delete().eq("user_id", userId),
+      "push_subscriptions",
+    );
+    await ignoreMissingTable(
+      adminClient.from("notification_preferences").delete().eq("user_id", userId),
+      "notification_preferences",
+    );
+    await ignoreMissingTable(
       adminClient.from("prayer_requests").delete().eq("user_id", userId),
       "prayer_requests",
     );

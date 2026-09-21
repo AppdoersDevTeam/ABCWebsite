@@ -1,14 +1,14 @@
 {
   "name": "ashburton-baptist-church",
   "private": true,
-  "version": "1.9.12",
+  "version": "1.9.13",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "test": "node --experimental-strip-types --test scripts/changelog/*.test.mjs scripts/mfa/*.test.mjs scripts/hub/*.test.mjs scripts/email/*.test.mjs scripts/nav/*.test.mjs scripts/ui/*.test.mjs",
+    "test": "node --experimental-strip-types --test scripts/changelog/*.test.mjs scripts/mfa/*.test.mjs scripts/hub/*.test.mjs scripts/email/*.test.mjs scripts/nav/*.test.mjs scripts/ui/*.test.mjs scripts/notifications/*.test.mjs",
     "validate": "node scripts/validate.mjs",
     "validate:changelog": "node scripts/changelog/validate.mjs",
     "validate:version": "node scripts/validate-version.mjs",

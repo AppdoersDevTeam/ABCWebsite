@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { dispatchAppNotification } from './dispatchNotification';
 
 export type AdminRoleKind = 'granted' | 'revoked';
 
@@ -60,6 +61,18 @@ export async function notifyUserAdminRole(
       console.error('notifyUserAdminRole function error:', data);
       return { ok: false, error: String(data.error) };
     }
+
+    dispatchAppNotification({
+      type: kind === 'revoked' ? 'user.admin_revoked' : 'user.admin_granted',
+      title: kind === 'revoked' ? 'Admin access removed' : 'You are now an admin',
+      body:
+        kind === 'revoked'
+          ? 'Your administrative access on the Ashburton Baptist Church website has been removed.'
+          : 'You now have administrative access on the Ashburton Baptist Church website.',
+      href: kind === 'revoked' ? '/dashboard' : '/admin',
+      entityId: userId,
+      targetUserId: userId,
+    });
 
     return {
       ok: true,

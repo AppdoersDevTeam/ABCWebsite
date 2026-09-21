@@ -20,6 +20,7 @@ import {
   type MfaStatus,
 } from '../../lib/mfaClient';
 import { otpauthQrSvg } from '../../lib/mfaQr';
+import { NotificationSettings } from '../../components/Notifications/NotificationSettings';
 
 type Dialog =
   | 'password'
@@ -350,9 +351,11 @@ export const UserSecurity = () => {
     <div className="space-y-8">
       <AdminPageHeader
         title="User Security"
-        subtitle="Protect your member account with a password and two-factor authentication."
+        subtitle="Protect your member account with a password, two-factor authentication, and notification preferences."
         icon={<Shield size={28} />}
       />
+
+      <NotificationSettings />
 
       {error && !dialog && (
         <div role="alert" className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-[4px] text-sm">

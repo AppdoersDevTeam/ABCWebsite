@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { dispatchAppNotification } from './dispatchNotification';
 
 export type AccessHoldKind = 'held' | 'restored';
 
@@ -60,6 +61,18 @@ export async function notifyUserAccessHold(
       console.error('notifyUserAccessHold function error:', data);
       return { ok: false, error: String(data.error) };
     }
+
+    dispatchAppNotification({
+      type: kind === 'restored' ? 'user.access_restored' : 'user.access_held',
+      title: kind === 'restored' ? 'Website access restored' : 'Website access on hold',
+      body:
+        kind === 'restored'
+          ? 'Your Ashburton Baptist Church website access has been restored.'
+          : 'Your Ashburton Baptist Church website access has been placed on hold.',
+      href: kind === 'restored' ? '/dashboard' : '/login',
+      entityId: userId,
+      targetUserId: userId,
+    });
 
     return {
       ok: true,

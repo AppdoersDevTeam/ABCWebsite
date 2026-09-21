@@ -152,6 +152,8 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode, isSuperAdmin = f
             <Section title="User Security">
               <li>Admins can also open User Security to enable authenticator or email two-factor authentication on their own account.</li>
               <li>2FA is required at sign-in once enabled. Recovery codes are shown only when generated.</li>
+              <li>Turn on browser or Home Screen notifications and choose which admin alerts you receive: new prayer requests, RSVPs, and pending signups.</li>
+              <li>On iPhone and iPad, add the site to your Home Screen first, then enable notifications from User Security.</li>
             </Section>
           </>
         ) : (
@@ -206,6 +208,8 @@ export const HelpContent: React.FC<HelpContentProps> = ({ mode, isSuperAdmin = f
               <li>Change your password and turn on two-factor authentication (2FA) for your approved member account.</li>
               <li>Authenticator app uses a standard TOTP code (Google Authenticator, Microsoft Authenticator, Authy, 1Password, and similar apps).</li>
               <li>Email verification sends a short-lived one-time code to your registered email. Recovery codes are shown once when you first enable 2FA.</li>
+              <li>Enable browser or Home Screen notifications for newsletters, devotionals, What's On, rosters, and when someone prays for your request.</li>
+              <li>On a computer, allow notifications when asked. On Android, they work in Chrome or after Add to Home Screen. On iPhone and iPad (16.4+), add the site to your Home Screen first.</li>
             </Section>
           </>
         )}

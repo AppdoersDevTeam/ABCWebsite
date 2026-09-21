@@ -270,6 +270,42 @@ export interface EmailSend {
   metadata?: Record<string, unknown>;
 }
 
+export interface AppNotificationRow {
+  id: string;
+  user_id: string;
+  type: string;
+  title: string;
+  body: string;
+  href: string;
+  entity_id?: string | null;
+  read_at?: string | null;
+  created_at: string;
+}
+
+export interface PushSubscriptionRow {
+  id: string;
+  user_id: string;
+  endpoint: string;
+  p256dh: string;
+  auth: string;
+  user_agent?: string | null;
+  created_at: string;
+}
+
+export interface NotificationPreferenceRow {
+  user_id: string;
+  push_enabled: boolean;
+  content_newsletter: boolean;
+  content_devotional: boolean;
+  content_event: boolean;
+  content_roster: boolean;
+  prayer: boolean;
+  admin_rsvp: boolean;
+  admin_signup: boolean;
+  user_lifecycle: boolean;
+  updated_at?: string;
+}
+
 export interface Database {
   public: {
     Tables: {
@@ -342,6 +378,21 @@ export interface Database {
         Row: EmailSend;
         Insert: never;
         Update: never;
+      };
+      notifications: {
+        Row: AppNotificationRow;
+        Insert: never;
+        Update: Partial<Pick<AppNotificationRow, 'read_at'>>;
+      };
+      push_subscriptions: {
+        Row: PushSubscriptionRow;
+        Insert: Omit<PushSubscriptionRow, 'id' | 'created_at'>;
+        Update: Partial<Omit<PushSubscriptionRow, 'id' | 'created_at'>>;
+      };
+      notification_preferences: {
+        Row: NotificationPreferenceRow;
+        Insert: Omit<NotificationPreferenceRow, 'updated_at'> & { updated_at?: string };
+        Update: Partial<Omit<NotificationPreferenceRow, 'user_id'>>;
       };
     };
     Functions: {

@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { dispatchAppNotification } from './dispatchNotification';
 
 export type NotifyUserApprovedResult = {
   ok: boolean;
@@ -57,6 +58,15 @@ export async function notifyUserApproved(
       console.error('notifyUserApproved function error:', data);
       return { ok: false, error: String(data.error) };
     }
+
+    dispatchAppNotification({
+      type: 'user.approved',
+      title: 'Your account is approved',
+      body: 'You can now log in to the member portal.',
+      href: '/dashboard',
+      entityId: userId,
+      targetUserId: userId,
+    });
 
     return {
       ok: true,

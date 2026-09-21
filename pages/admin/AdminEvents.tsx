@@ -21,6 +21,7 @@ import { logAuditEvent } from '../../lib/auditLog';
 import { notifyCalendarChanged } from '../../lib/calendarItems';
 import { EVENTS_LABEL } from '../../lib/constants';
 import { TableScroll } from '../../components/UI/TableScroll';
+import { dispatchAppNotification } from '../../lib/dispatchNotification';
 import metadata from '../../metadata.json';
 
 const DEFAULT_THUMB = '/ABC Logo.png';
@@ -173,6 +174,14 @@ export const AdminEvents = () => {
 
       setEvents([...events, data]);
       notifyCalendarChanged();
+      dispatchAppNotification({
+        type: 'content.event',
+        title: `New ${EVENTS_LABEL} listing`,
+        body: formData.title.trim(),
+        href: '/dashboard/events',
+        entityId: data.id,
+        audience: formData.is_public ? 'members' : 'staff',
+      });
       resetModal();
       setIsModalOpen(false);
     } catch (error: any) {
