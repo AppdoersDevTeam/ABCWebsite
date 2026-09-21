@@ -792,7 +792,7 @@ export const AdminOverview = () => {
       </div>
 
       {/* Pending User Approvals Section */}
-      <div id="pending-users" className="glass-card bg-white border border-gray-200 p-6 md:p-8 rounded-[8px] shadow-sm">
+      <div id="pending-users" className="bg-white border border-gray-200 p-6 md:p-8 rounded-[12px] shadow-sm">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div className="flex items-center gap-3">
             <div className="p-3 bg-gold/10 rounded-full">
@@ -963,7 +963,7 @@ export const AdminOverview = () => {
 
       {/* Quick Actions */}
       <div className="grid md:grid-cols-2 gap-6">
-        <div className="glass-card bg-white/60 p-6 md:p-7 rounded-[8px] border border-gray-100">
+        <div className="bg-white p-6 md:p-7 rounded-[12px] border border-gray-200 shadow-sm">
           <h3 className="font-serif text-xl mb-4 text-charcoal font-normal">Quick Actions</h3>
           <div className="space-y-3">
             {visiblePendingCount > 0 && (
@@ -1006,7 +1006,7 @@ export const AdminOverview = () => {
           </div>
         </div>
 
-        <div className="glass-card bg-white/60 p-6 md:p-7 rounded-[8px] border border-gray-100">
+        <div className="bg-white p-6 md:p-7 rounded-[12px] border border-gray-200 shadow-sm">
           <h3 className="font-serif text-xl mb-4 text-charcoal font-normal">Recent Activity</h3>
           {isLoadingActivities ? (
             <div className="space-y-4">

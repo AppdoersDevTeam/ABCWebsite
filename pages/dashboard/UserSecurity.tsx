@@ -350,8 +350,8 @@ export const UserSecurity = () => {
   return (
     <div className="space-y-8">
       <AdminPageHeader
-        title="User Security"
-        subtitle="Protect your member account with a password, two-factor authentication, and notification preferences."
+        title="Account Settings"
+        subtitle="Manage your password, two-factor authentication, and notification preferences."
         icon={<Shield size={28} />}
       />
 

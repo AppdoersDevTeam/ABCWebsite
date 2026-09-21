@@ -64,7 +64,7 @@ export function portalPageTitle(
   items: Array<{ label: string; path?: string; children?: { label: string; path: string }[] }>
 ): string {
   if (pathname.endsWith('/profile')) return 'My Profile';
-  if (pathname.endsWith('/security')) return 'User Security';
+  if (pathname.endsWith('/security')) return 'Account Settings';
   for (const item of items) {
     if (item.path === pathname) return item.label;
     const child = item.children?.find((entry) => entry.path === pathname);
@@ -226,7 +226,7 @@ export const PortalTopBar = ({
         <span className="flex h-9 w-9 items-center justify-center rounded-full bg-charcoal/5 text-charcoal">
           <Shield size={18} />
         </span>
-        User Security
+        Account Settings
       </Link>
       <div className="mx-3 border-t border-gray-200" />
       <button

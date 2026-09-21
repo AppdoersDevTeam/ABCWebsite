@@ -22,32 +22,35 @@ export const DASHBOARD_NAV_ICON = {
   changelog: 'bg-charcoal/5 text-charcoal',
 } as const;
 
-/** Shared portal sidebar chrome — aligns with public glass / gold / dash surfaces. */
+/** Shared portal sidebar chrome — white rail against the dash canvas. */
 export const PORTAL_SIDEBAR_ASIDE =
-  'border-r border-white/70 bg-dash/90 backdrop-blur-md shadow-[inset_-1px_0_0_rgba(251,203,5,0.12)]';
+  'border-r border-gray-200 bg-white shadow-[2px_0_12px_rgba(34,34,34,0.04)]';
+
+/** Main portal content canvas — cooler gray so white cards lift clearly. */
+export const PORTAL_MAIN_BG = 'bg-[#e4eaee]';
 
 export const PORTAL_SIDEBAR_NAV = 'flex-1 space-y-0.5 overflow-y-auto py-3';
 
 export const PORTAL_SIDEBAR_DIVIDER =
-  'mx-2 my-2.5 border-t border-[#A8B774]/35';
+  'mx-2 my-2.5 border-t border-gray-200';
 
 export const PORTAL_NAV_ITEM_BASE =
   'flex min-h-[44px] items-center rounded-[10px] transition-all duration-300 group relative overflow-hidden';
 
 export const PORTAL_NAV_ITEM_IDLE =
-  'text-neutral hover:text-charcoal hover:bg-white/70';
+  'text-neutral hover:text-charcoal hover:bg-[#e4eaee]/80';
 
 export const PORTAL_NAV_ITEM_ACTIVE =
-  'bg-white text-charcoal font-bold shadow-sm border border-gold/40';
+  'bg-gold/15 text-charcoal font-bold shadow-sm border border-gold/50';
 
 export const PORTAL_NAV_CHILD_IDLE =
-  'text-charcoal hover:bg-white/70';
+  'text-charcoal hover:bg-[#e4eaee]/80';
 
 export const PORTAL_NAV_CHILD_ACTIVE =
   'bg-gold/15 text-charcoal font-semibold';
 
 export const PORTAL_SIDEBAR_FOOTER_BTN =
-  'w-full flex items-center min-h-[44px] py-2 text-neutral hover:bg-white/70 hover:text-charcoal transition-colors rounded-[10px]';
+  'w-full flex items-center min-h-[44px] py-2 text-neutral hover:bg-[#e4eaee]/80 hover:text-charcoal transition-colors rounded-[10px]';
 
 type PortalNavChild = { label: string };
 

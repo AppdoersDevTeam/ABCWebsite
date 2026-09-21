@@ -240,7 +240,7 @@ export const DashboardHome = () => {
             </Link>
         </div>
 
-        <div className="glass-card bg-white/60 p-6 md:p-9 rounded-[8px] relative overflow-hidden">
+        <div className="bg-white border border-gray-200 shadow-sm p-6 md:p-9 rounded-[12px] relative overflow-hidden">
              <div className="relative z-10">
                 <h3 className="font-serif text-xl md:text-2xl mb-4 text-charcoal font-normal">Verse of the Day</h3>
                 <p className="text-base md:text-lg text-charcoal/80 italic font-serif leading-relaxed max-w-3xl">

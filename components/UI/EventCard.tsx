@@ -69,12 +69,12 @@ export const EventCard: React.FC<EventCardProps> = ({
     (evt.audience || 'members').charAt(0).toUpperCase() + (evt.audience || 'members').slice(1);
 
   const cardBody = (
-    <div className="bg-white rounded-[24px] overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 h-full flex flex-col">
+    <div className="bg-white rounded-[24px] overflow-hidden shadow-md border border-gray-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 h-full flex flex-col">
       <div className="relative">
         <EventCardImage evt={evt} />
       </div>
 
-      <div className="bg-[#f2f2eb] p-6 flex-1 flex flex-col">
+      <div className="bg-white p-6 flex-1 flex flex-col">
         <h4 className="text-xl font-bold text-charcoal group-hover:text-gold transition-colors line-clamp-2">
           {evt.title}
         </h4>
@@ -129,7 +129,7 @@ export const EventCard: React.FC<EventCardProps> = ({
         </div>
 
         {adminControls && (
-          <div className="mt-4 pt-4 border-t border-gray-300/60 flex items-center justify-center gap-2">
+          <div className="mt-4 pt-4 border-t border-gray-200 flex items-center justify-center gap-2">
             {adminControls}
           </div>
         )}

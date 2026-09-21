@@ -6,6 +6,37 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2109-056",
+      "date": "2026-09-21",
+      "time": "22:17:53",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-21T10:17:53.996Z",
+      "version": "1.9.17",
+      "type": "changed",
+      "area": "admin",
+      "title": "Clearer portal surface contrast for sidebar and cards",
+      "request": "The background is nearly the same colour as the cards. Also the left menu and right-hand side backgrounds are the same — needs differentiating for good UI/UX.",
+      "changes": [
+        "Left sidebar is solid white with a gray edge and light shadow; main content uses a cooler gray canvas (#e4eaee) so the two areas read as separate panels.",
+        "Portal page headers, overview cards, event cards, and overview sections use solid white with gray borders/shadows instead of translucent or cream fills that blended into the page.",
+        "Sidebar hover/active states use the canvas gray and gold accents so they remain visible on the white rail."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "npm test, npm run validate, and vite build. Typecheck still fails on pre-existing app errors."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2109-055",
       "date": "2026-09-21",
       "time": "22:12:17",

@@ -181,7 +181,7 @@ export const MyProfile = () => {
           className="mt-6 inline-flex items-center gap-2 rounded-[4px] bg-gold/15 px-4 py-2 text-sm font-semibold text-charcoal hover:bg-gold/25"
         >
           <Shield size={16} />
-          User Security
+          Account Settings
         </Link>
       </div>
     </div>

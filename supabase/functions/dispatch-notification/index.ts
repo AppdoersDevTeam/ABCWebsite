@@ -223,6 +223,8 @@ async function resolveRecipients(
     return data ? [data as UserRow] : [];
   }
 
+  // Admin operational alerts: notify every approved admin, including the actor.
+  // Solo-admin churches and self-tests otherwise get an empty inbox after posting.
   if (
     type === "prayer.request_created" ||
     type === "event.rsvp_submitted" ||
@@ -233,7 +235,7 @@ async function resolveRecipients(
       .select("id, email, role, is_approved, is_access_held, is_super_admin")
       .eq("role", "admin")
       .eq("is_approved", true);
-    return ((data || []) as UserRow[]).filter((row) => row.id !== actorId);
+    return (data || []) as UserRow[];
   }
 
   if (type === "content.event") {

@@ -8,6 +8,7 @@ export const MENU_LOCATION_LABELS = [
   'Annual Calendar',
   'Users & Roles',
   'User Management',
+  'Account Settings',
   'User Security',
   'Prayers',
   'Newsletters',
@@ -28,7 +29,7 @@ export type MenuLocationLabel = (typeof MENU_LOCATION_LABELS)[number];
 const MENU_LOCATION_SET = new Set<string>(MENU_LOCATION_LABELS);
 
 const PATH_RULES: { test: RegExp; label: MenuLocationLabel }[] = [
-  { test: /pages\/dashboard\/UserSecurity|lib\/mfa|components\/Auth\/Mfa|supabase\/functions\/mfa/, label: 'User Security' },
+  { test: /pages\/dashboard\/UserSecurity|lib\/mfa|components\/Auth\/Mfa|supabase\/functions\/mfa|NotificationSettings|NotificationBell|dispatch-notification|notificationTypes|pushNotifications/, label: 'Account Settings' },
   { test: /pages\/admin\/AdminTeam|pages\/dashboard\/Team|exportDirectoryPeople|teamMemberUtils/, label: PEOPLE_LABEL },
   { test: /pages\/admin\/AdminChangelog|lib\/changelog|lib\/githubChangelog|lib\/exportChangelog|CHANGELOG\.(json|md)|scripts\/changelog/, label: 'Changelog' },
   { test: /pages\/admin\/AdminOverview|pages\/dashboard\/DashboardHome|pages\/admin\/AdminEmails|PortalTopBar|Layouts\/AdminLayout|Layouts\/DashboardLayout/, label: 'Overview' },
@@ -100,7 +101,7 @@ function locationFromAreaCode(area: string): MenuLocationLabel {
     case 'sermons':
       return 'Sermons';
     case 'auth':
-      return 'User Security';
+      return 'Account Settings';
     default:
       return INTERNAL_APP_LOCATION;
   }
@@ -118,8 +119,15 @@ export function locationFromArea(area: string, hint = ''): MenuLocationLabel {
   if (h.includes('system log') || h.includes('audit trail')) addHit('Logs');
   if (h.includes('system setup') || h.includes('adminsettings')) addHit('System Setup');
   if (h.includes('overview') || h.includes('verse of the day')) addHit('Overview');
-  if (h.includes('user security') || h.includes('mfa') || h.includes('two-factor') || h.includes('2fa')) {
-    addHit('User Security');
+  if (
+    h.includes('user security') ||
+    h.includes('account settings') ||
+    h.includes('mfa') ||
+    h.includes('two-factor') ||
+    h.includes('2fa') ||
+    h.includes('notification')
+  ) {
+    addHit('Account Settings');
   }
   if (
     h.includes('user management') ||

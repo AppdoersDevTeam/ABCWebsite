@@ -54,6 +54,18 @@ export const NotificationBell = ({ variant = 'default' }: NotificationBellProps)
   }, [load]);
 
   useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') void load();
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    window.addEventListener('focus', onVisible);
+    return () => {
+      document.removeEventListener('visibilitychange', onVisible);
+      window.removeEventListener('focus', onVisible);
+    };
+  }, [load]);
+
+  useEffect(() => {
     if (!user?.id) return;
     const channel = supabase
       .channel(`notifications-inbox-${user.id}`)

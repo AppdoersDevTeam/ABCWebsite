@@ -31,6 +31,7 @@ import {
   PORTAL_SIDEBAR_DIVIDER,
   PORTAL_SIDEBAR_FOOTER_BTN,
   PORTAL_SIDEBAR_NAV,
+  PORTAL_MAIN_BG,
 } from '../../lib/dashboardNav';
 import { flattenPortalSearchItems, portalPageTitle, PortalTopBar, usePortalSidebarCollapsed } from './PortalTopBar';
 import { AppDialogHost } from '../UI/AppDialogHost';
@@ -77,7 +78,7 @@ export const DashboardLayout = () => {
   );
 
   return (
-    <div className="flex h-[100vh] h-[100dvh] min-w-0 flex-col bg-dash font-sans text-charcoal">
+    <div className={`flex h-[100vh] h-[100dvh] min-w-0 flex-col ${PORTAL_MAIN_BG} font-sans text-charcoal`}>
       <ScrollToTop />
       <AppDialogHost />
       <PortalTopBar
@@ -86,7 +87,7 @@ export const DashboardLayout = () => {
         searchItems={[
           ...flattenPortalSearchItems(navItems),
           { label: 'My Profile', path: '/dashboard/profile' },
-          { label: 'User Security', path: '/dashboard/security' },
+          { label: 'Account Settings', path: '/dashboard/security' },
         ]}
         helpPath="/dashboard/help"
         sidebarCollapsed={sidebarCollapsed}
@@ -182,7 +183,7 @@ export const DashboardLayout = () => {
         </div>
         </aside>
 
-        <div className="flex min-w-0 flex-1 flex-col overflow-hidden bg-dash">
+        <div className={`flex min-w-0 flex-1 flex-col overflow-hidden ${PORTAL_MAIN_BG}`}>
           <main className="min-h-0 min-w-0 flex-1 overflow-x-auto overflow-y-auto p-4 md:p-6 lg:p-8">
             <NotificationPrompt />
             <Outlet />

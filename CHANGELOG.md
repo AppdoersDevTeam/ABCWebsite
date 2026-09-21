@@ -7,6 +7,38 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2109-056 — Clearer portal surface contrast for sidebar and cards
+
+**Date:** 2026-09-21
+**Time:** 22:17:53
+**Timezone:** Pacific/Auckland
+**Version:** 1.9.17
+**Type:** Changed
+
+**Request**
+
+> The background is nearly the same colour as the cards. Also the left menu and right-hand side backgrounds are the same — needs differentiating for good UI/UX.
+
+**Changes**
+
+* Left sidebar is solid white with a gray edge and light shadow; main content uses a cooler gray canvas (#e4eaee) so the two areas read as separate panels.
+* Portal page headers, overview cards, event cards, and overview sections use solid white with gray borders/shadows instead of translucent or cream fills that blended into the page.
+* Sidebar hover/active states use the canvas gray and gold accents so they remain visible on the white rail.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: npm test, npm run validate, and vite build. Typecheck still fails on pre-existing app errors.
+
 ## CHG-2026-2109-055 — Portal top bar responsive across screen sizes
 
 **Date:** 2026-09-21

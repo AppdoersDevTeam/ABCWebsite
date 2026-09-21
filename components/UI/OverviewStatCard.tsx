@@ -39,7 +39,7 @@ export const OverviewStatCard: React.FC<OverviewStatCardProps> = ({
 }) => {
   return (
     <div
-      className={`h-full min-h-0 glass-card rounded-[12px] px-4 py-4 md:px-5 md:py-5 relative flex flex-col gap-3 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-lg group bg-white border border-gray-100 ${highlight ? 'border-2 border-gold shadow-sm' : ''} ${className}`}
+      className={`h-full min-h-0 rounded-[12px] px-4 py-4 md:px-5 md:py-5 relative flex flex-col gap-3 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-md group bg-white border border-gray-200 shadow-sm ${highlight ? 'border-2 border-gold shadow-md' : ''} ${className}`}
     >
       <div className="absolute top-3 right-3 text-gold pointer-events-none">
         <ArrowUpRight size={CARD_ARROW_SIZE} strokeWidth={3} />
