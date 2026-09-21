@@ -501,7 +501,7 @@ export const PublicLayout = () => {
       <footer className="footer-gradient text-white pt-24 pb-[max(3rem,calc(2rem+env(safe-area-inset-bottom)))] border-t border-transparent relative z-10 w-full min-w-0 pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]">
         <div className="page-container">
           {/* Main Footer Content */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12 border-b border-gray-100 pb-6 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12 border-b border-gray-100 pb-3">
             {/* Brand Section */}
             <div className="lg:col-span-2">
               <h3 className="font-serif text-3xl md:text-5xl mb-6 leading-tight">Encounter. Connect.<br /><span className="text-gold">Equip. Impact.</span></h3>
@@ -620,8 +620,8 @@ export const PublicLayout = () => {
           </div>
 
           {/* Bottom Bar */}
-          <div className="flex flex-col md:flex-row justify-between items-center text-white text-sm gap-4">
-            <p className="text-center md:text-left">
+          <div className="flex flex-col md:flex-row justify-between items-start text-white text-sm gap-2 pt-3">
+            <p className="text-center md:text-left leading-normal">
               <span className="text-gold">&copy; 2026 Ashburton Baptist Church.</span>
               <br />
               <span className="text-white">Developed by </span>
@@ -634,17 +634,17 @@ export const PublicLayout = () => {
                 Appdoers.co.nz
               </a>
             </p>
-            <div className="flex flex-col items-end gap-2">
+            <div className="flex w-full flex-col items-center md:w-auto md:items-end leading-normal">
               <button
                 onClick={() => setOpenFooterSection(openFooterSection === 'legal' ? null : 'legal')}
-                className="md:pointer-events-none flex min-h-[44px] items-center justify-between w-full md:w-auto uppercase tracking-widest text-xs font-bold text-gold"
+                className="md:pointer-events-none flex min-h-[44px] md:min-h-0 items-center justify-between w-full md:w-auto uppercase tracking-widest text-xs font-bold text-gold py-0"
                 aria-expanded={openFooterSection === 'legal'}
                 aria-controls="footer-legal-links"
               >
                 <span>Legal</span>
                 <ChevronDown size={16} className={`md:hidden transition-transform duration-300 ${openFooterSection === 'legal' ? 'rotate-180' : ''}`} />
               </button>
-              <div id="footer-legal-links" className={`flex flex-col md:flex-row md:space-x-6 ${openFooterSection === 'legal' ? 'gap-2' : 'hidden'} md:flex`}>
+              <div id="footer-legal-links" className={`flex flex-col md:flex-row md:gap-x-6 ${openFooterSection === 'legal' ? '' : 'hidden'} md:flex`}>
                 <Link to="/privacy" className="hover:text-gold transition-colors">Privacy Policy</Link>
                 <Link to="/terms" className="hover:text-gold transition-colors">Terms & Conditions</Link>
               </div>

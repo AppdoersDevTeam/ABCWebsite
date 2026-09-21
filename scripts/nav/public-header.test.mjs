@@ -27,3 +27,16 @@ test('public footer Explore menu matches the header including Sermons', () => {
   assert.match(layout, /label: 'Sermons'/);
   assert.match(layout, /path: '\/events\/sermons'/);
 });
+
+test('public footer Legal sits tight under the divider like the copyright block', () => {
+  assert.match(layout, /border-b border-gray-100 pb-3/);
+  assert.doesNotMatch(layout, /border-b border-gray-100 pb-6 mb-6/);
+  assert.match(layout, /justify-between items-start text-white text-sm gap-2 pt-3/);
+  assert.match(layout, /min-h-\[44px\] md:min-h-0/);
+  const legalStart = layout.indexOf('id="footer-legal-links"');
+  assert.ok(legalStart > 0);
+  const legalChunk = layout.slice(legalStart, legalStart + 400);
+  assert.match(legalChunk, /Privacy Policy/);
+  assert.match(legalChunk, /Terms & Conditions/);
+  assert.doesNotMatch(legalChunk, /gap-2/);
+});

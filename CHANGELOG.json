@@ -6,6 +6,36 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2109-051",
+      "date": "2026-09-21",
+      "time": "18:59:49",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-21T06:59:49.818Z",
+      "version": "1.9.12",
+      "type": "changed",
+      "area": "public",
+      "title": "Tighter footer Legal spacing under the divider",
+      "request": "On footer Bring Privacy Policy and Terms & Condition close to Legal decreasse the line space between just like the left side , also remove the space between the line and writings. Push live.",
+      "changes": [
+        "Privacy Policy and Terms & Conditions now sit directly under the Legal heading with the same tight line spacing as the copyright block.",
+        "The gap between the footer divider line and the copyright/legal row is reduced."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "Unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2109-050",
       "date": "2026-09-21",
       "time": "18:50:28",

@@ -7,6 +7,37 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2109-051 — Tighter footer Legal spacing under the divider
+
+**Date:** 2026-09-21
+**Time:** 18:59:49
+**Timezone:** Pacific/Auckland
+**Version:** 1.9.12
+**Type:** Changed
+
+**Request**
+
+> On footer Bring Privacy Policy and Terms & Condition close to Legal decreasse the line space between just like the left side , also remove the space between the line and writings. Push live.
+
+**Changes**
+
+* Privacy Policy and Terms & Conditions now sit directly under the Legal heading with the same tight line spacing as the copyright block.
+* The gap between the footer divider line and the copyright/legal row is reduced.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: Unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors.
+
 ## CHG-2026-2109-050 — Footer Explore menu matches the header including Sermons
 
 **Date:** 2026-09-21
