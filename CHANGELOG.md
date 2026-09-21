@@ -7,6 +7,36 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2109-058 — Portal user menu Profile and Account Settings clicks
+
+**Date:** 2026-09-21
+**Time:** 22:28:04
+**Timezone:** Pacific/Auckland
+**Version:** 1.9.19
+**Type:** Fixed
+
+**Request**
+
+> The Account Settings button does not let me click it. Same with My Profile.
+
+**Changes**
+
+* Outside-click handling now treats the fixed user menu as inside the menu, so My Profile and Account Settings links receive the click instead of the menu closing on mousedown first.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: npm test, npm run validate, and vite build. Typecheck still fails on pre-existing app errors.
+
 ## CHG-2026-2109-057 — Account Settings rename and admin notification fan-out
 
 **Date:** 2026-09-21

@@ -92,6 +92,7 @@ export const PortalTopBar = ({
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const identityRef = useRef<HTMLDivElement>(null);
   const mobileIdentityRef = useRef<HTMLDivElement>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
   const mobileSearchInputRef = useRef<HTMLInputElement>(null);
   const profilePath = variant === 'admin' ? '/admin/profile' : '/dashboard/profile';
@@ -137,7 +138,9 @@ export const PortalTopBar = ({
       const target = event.target as Node;
       const inDesktopIdentity = identityRef.current?.contains(target);
       const inMobileIdentity = mobileIdentityRef.current?.contains(target);
-      if (!inDesktopIdentity && !inMobileIdentity) setMenuOpen(false);
+      const inUserMenu = userMenuRef.current?.contains(target);
+      // Menu is fixed outside the identity refs — do not close on its own links/buttons.
+      if (!inDesktopIdentity && !inMobileIdentity && !inUserMenu) setMenuOpen(false);
       if (searchRef.current && !searchRef.current.contains(target)) setSearchOpen(false);
     };
     const onKey = (event: KeyboardEvent) => {
@@ -195,6 +198,7 @@ export const PortalTopBar = ({
 
   const userMenu = menuOpen ? (
     <div
+      ref={userMenuRef}
       role="menu"
       style={{ top: menuPos.top, left: menuPos.left, width: menuPos.width }}
       className="fixed z-[90] overflow-hidden rounded-[11px] border border-gold/25 bg-white/95 py-1 shadow-lg backdrop-blur-md"

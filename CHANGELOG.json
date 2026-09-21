@@ -6,6 +6,35 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2109-058",
+      "date": "2026-09-21",
+      "time": "22:28:04",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-21T10:28:04.741Z",
+      "version": "1.9.19",
+      "type": "fixed",
+      "area": "admin",
+      "title": "Portal user menu Profile and Account Settings clicks",
+      "request": "The Account Settings button does not let me click it. Same with My Profile.",
+      "changes": [
+        "Outside-click handling now treats the fixed user menu as inside the menu, so My Profile and Account Settings links receive the click instead of the menu closing on mousedown first."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "npm test, npm run validate, and vite build. Typecheck still fails on pre-existing app errors."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2109-057",
       "date": "2026-09-21",
       "time": "22:18:47",
