@@ -7,6 +7,38 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2109-057 — Account Settings rename and admin notification fan-out
+
+**Date:** 2026-09-21
+**Time:** 22:18:47
+**Timezone:** Pacific/Auckland
+**Version:** 1.9.18
+**Type:** Fixed
+
+**Request**
+
+> Notification settings sit under User Security which does not make sense — change the title to cover all settings there. As an admin who created a prayer request, I received no notifications — ensure all notifications work correctly.
+
+**Changes**
+
+* Renamed the User Security page and menu labels to Account Settings so password, MFA, and notification preferences share one clear home.
+* dispatch-notification now includes the acting admin on prayer, RSVP, and signup alerts so solo-admin posts still create an inbox row (previously the creator was filtered out).
+* Redeployed dispatch-notification (v5) with verify_jwt false; notification bell refreshes when the window regains focus.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: npm test, npm run validate, and vite build. Typecheck still fails on pre-existing app errors. Live edge function verified ACTIVE v5 with actor-include fix.
+
 ## CHG-2026-2109-056 — Clearer portal surface contrast for sidebar and cards
 
 **Date:** 2026-09-21

@@ -6,6 +6,37 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2109-057",
+      "date": "2026-09-21",
+      "time": "22:18:47",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-21T10:18:47.367Z",
+      "version": "1.9.18",
+      "type": "fixed",
+      "area": "auth",
+      "title": "Account Settings rename and admin notification fan-out",
+      "request": "Notification settings sit under User Security which does not make sense — change the title to cover all settings there. As an admin who created a prayer request, I received no notifications — ensure all notifications work correctly.",
+      "changes": [
+        "Renamed the User Security page and menu labels to Account Settings so password, MFA, and notification preferences share one clear home.",
+        "dispatch-notification now includes the acting admin on prayer, RSVP, and signup alerts so solo-admin posts still create an inbox row (previously the creator was filtered out).",
+        "Redeployed dispatch-notification (v5) with verify_jwt false; notification bell refreshes when the window regains focus."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "npm test, npm run validate, and vite build. Typecheck still fails on pre-existing app errors. Live edge function verified ACTIVE v5 with actor-include fix."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2109-056",
       "date": "2026-09-21",
       "time": "22:17:53",

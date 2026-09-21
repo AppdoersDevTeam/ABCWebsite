@@ -744,7 +744,7 @@ async function handlePasswordChange(req: Request, admin: AdminClient, body: Body
     actorId: caller.user.id,
     actorEmail: profile.email,
     action: "password_change",
-    summary: "Password changed from User Security",
+    summary: "Password changed from Account Settings",
     entityId: caller.user.id,
   });
   return jsonResponse({ ok: true });
