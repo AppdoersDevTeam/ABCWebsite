@@ -4,6 +4,7 @@ import { Mail, Phone, User, Users } from 'lucide-react';
 import { TeamMember } from '../../types';
 import { supabase } from '../../lib/supabase';
 import { getDisplayRole, inferProfileType } from '../../lib/teamMemberUtils';
+import { sortLeadershipTeam } from '../../lib/leadershipOrder';
 import { SkeletonPageHeader } from '../../components/UI/Skeleton';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { PEOPLE_LABEL } from '../../lib/constants';
@@ -26,7 +27,7 @@ export const Team = () => {
 
       if (error) throw error;
       const all = (data || []) as TeamMember[];
-      const staffOnly = all.filter((m) => inferProfileType(m) === 'staff');
+      const staffOnly = sortLeadershipTeam(all.filter((m) => inferProfileType(m) === 'staff'));
       setMembers(staffOnly);
     } catch (error) {
       console.error('Error fetching team members:', error);

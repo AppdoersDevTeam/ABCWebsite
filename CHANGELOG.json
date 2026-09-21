@@ -6,6 +6,35 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2109-049",
+      "date": "2026-09-21",
+      "time": "18:08:05",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-21T06:08:05.830Z",
+      "version": "1.9.10",
+      "type": "changed",
+      "area": "leadership",
+      "title": "Member People Directory: Senior Pastor first, then Elders A–Z",
+      "request": "Also do the same on the Members Dashboard people's Directory page. Push live",
+      "changes": [
+        "The member dashboard People's Directory now uses the same order as public Leadership: Senior Pastor first, then Elders A–Z (other staff after that, also A–Z)."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "Unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors. Member directory was not signed-in in a browser."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2109-048",
       "date": "2026-09-21",
       "time": "18:00:49",

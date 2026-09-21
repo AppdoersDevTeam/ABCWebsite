@@ -7,6 +7,36 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2109-049 — Member People Directory: Senior Pastor first, then Elders A–Z
+
+**Date:** 2026-09-21
+**Time:** 18:08:05
+**Timezone:** Pacific/Auckland
+**Version:** 1.9.10
+**Type:** Changed
+
+**Request**
+
+> Also do the same on the Members Dashboard people's Directory page. Push live
+
+**Changes**
+
+* The member dashboard People's Directory now uses the same order as public Leadership: Senior Pastor first, then Elders A–Z (other staff after that, also A–Z).
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: Unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors. Member directory was not signed-in in a browser.
+
 ## CHG-2026-2109-048 — Leadership photos: Senior Pastor first, then Elders A–Z
 
 **Date:** 2026-09-21
