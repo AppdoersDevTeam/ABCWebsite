@@ -540,14 +540,24 @@ export const PublicLayout = () => {
                 <ChevronDown size={16} className={`md:hidden transition-transform duration-300 ${openFooterSection === 'explore' ? 'rotate-180' : ''}`} />
               </button>
               <ul id="footer-explore-links" className={`space-y-3 ${openFooterSection === 'explore' ? 'block' : 'hidden'} md:block`}>
-                <li><Link to="/" className="text-white hover:text-gold transition-colors text-sm">Home</Link></li>
-                <li><Link to="/about" className="text-white hover:text-gold transition-colors text-sm">About</Link></li>
-                <li><Link to="/events" className="text-white hover:text-gold transition-colors text-sm">{EVENTS_LABEL}</Link></li>
-                <li><Link to="/ministries" className="text-white hover:text-gold transition-colors text-sm">{MINISTRIES_LABEL}</Link></li>
-                <li><Link to="/im-new" className="text-white hover:text-gold transition-colors text-sm">I'm New</Link></li>
-                <li><Link to="/need-prayer" className="text-white hover:text-gold transition-colors text-sm">Prayer</Link></li>
-                <li><Link to="/giving" className="text-white hover:text-gold transition-colors text-sm">Giving</Link></li>
-                <li><Link to="/contact" className="text-white hover:text-gold transition-colors text-sm">Contact</Link></li>
+                {navItems.map((item) => (
+                  <li key={item.path}>
+                    {item.external ? (
+                      <a
+                        href={item.path}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-white hover:text-gold transition-colors text-sm"
+                      >
+                        {item.label}
+                      </a>
+                    ) : (
+                      <Link to={item.path} className="text-white hover:text-gold transition-colors text-sm">
+                        {item.label}
+                      </Link>
+                    )}
+                  </li>
+                ))}
               </ul>
             </div>
 

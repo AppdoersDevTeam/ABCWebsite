@@ -17,3 +17,13 @@ test('public header logo sits left of the menu and labels stay on one line', () 
   assert.match(layout, /label: "I'm New"/);
   assert.match(layout, /whitespace-nowrap text-base font-sans font-bold/);
 });
+
+test('public footer Explore menu matches the header including Sermons', () => {
+  const footerStart = layout.indexOf('id="footer-explore-links"');
+  assert.ok(footerStart > 0);
+  const footerChunk = layout.slice(footerStart, footerStart + 900);
+  assert.match(footerChunk, /navItems\.map/);
+  assert.match(footerChunk, /\{item\.label\}/);
+  assert.match(layout, /label: 'Sermons'/);
+  assert.match(layout, /path: '\/events\/sermons'/);
+});

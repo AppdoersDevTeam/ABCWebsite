@@ -6,6 +6,35 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2109-050",
+      "date": "2026-09-21",
+      "time": "18:50:28",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-21T06:50:28.753Z",
+      "version": "1.9.11",
+      "type": "changed",
+      "area": "public",
+      "title": "Footer Explore menu matches the header including Sermons",
+      "request": "Update the Menu on the footer with the menu links on the menu heater, it looks like there is no Sermons on the footer menu. push it live once completede.",
+      "changes": [
+        "The footer Explore list now uses the same links as the public header, including Sermons, in the same order."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "Unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2109-049",
       "date": "2026-09-21",
       "time": "18:43:05",

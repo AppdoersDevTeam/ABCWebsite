@@ -7,6 +7,36 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2109-050 — Footer Explore menu matches the header including Sermons
+
+**Date:** 2026-09-21
+**Time:** 18:50:28
+**Timezone:** Pacific/Auckland
+**Version:** 1.9.11
+**Type:** Changed
+
+**Request**
+
+> Update the Menu on the footer with the menu links on the menu heater, it looks like there is no Sermons on the footer menu. push it live once completede.
+
+**Changes**
+
+* The footer Explore list now uses the same links as the public header, including Sermons, in the same order.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: Unit tests and npm run validate passed. vite build passed. Typecheck still fails on pre-existing app errors.
+
 ## CHG-2026-2109-049 — Header logo left; Sermons; I'm New on one line
 
 **Date:** 2026-09-21
