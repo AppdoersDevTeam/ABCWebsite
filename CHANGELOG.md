@@ -7,6 +7,37 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2109-060 — Allow system.push_test notification type
+
+**Date:** 2026-09-21
+**Time:** 22:41:46
+**Timezone:** Pacific/Auckland
+**Version:** 1.9.21
+**Type:** Fixed
+
+**Request**
+
+> Test notification failed: Edge Function returned a non-2xx status code
+
+**Changes**
+
+* Added system.push_test to the notifications.type check constraint so Account Settings Send test notification can insert an inbox row and send Web Push.
+* Surfaced the Edge Function error body in the test-notification failure message when available.
+
+**Database**
+
+* supabase/migrations/20260921104100_notifications_allow_push_test.sql
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: npm test, npm run validate, and vite build. Typecheck still fails on pre-existing app errors. Migration applied on live ABC via Supabase MCP.
+
 ## CHG-2026-2109-059 — Desktop and mobile push notification delivery
 
 **Date:** 2026-09-21

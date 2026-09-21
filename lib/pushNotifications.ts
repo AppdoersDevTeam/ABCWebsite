@@ -194,7 +194,19 @@ export async function sendTestPushNotification(): Promise<{ ok: boolean; error?:
     },
   });
   if (error) {
-    return { ok: false, error: error.message || 'Could not send a test notification.' };
+    const context = (error as { context?: Response }).context;
+    let detail = error.message || 'Could not send a test notification.';
+    if (context) {
+      try {
+        const body = await context.json();
+        if (body && typeof body === 'object' && 'error' in body && body.error) {
+          detail = String(body.error);
+        }
+      } catch {
+        // keep default
+      }
+    }
+    return { ok: false, error: detail };
   }
   if (data && typeof data === 'object' && 'error' in data && data.error) {
     return { ok: false, error: String(data.error) };

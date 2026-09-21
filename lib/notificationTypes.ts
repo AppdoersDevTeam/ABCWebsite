@@ -13,6 +13,7 @@ export const NOTIFICATION_TYPES = [
   'user.access_restored',
   'user.admin_granted',
   'user.admin_revoked',
+  'system.push_test',
 ] as const;
 
 export type NotificationType = (typeof NOTIFICATION_TYPES)[number];
@@ -83,6 +84,7 @@ const PREFERENCE_BY_TYPE: Record<NotificationType, NotificationPreferenceColumn>
   'user.access_restored': 'user_lifecycle',
   'user.admin_granted': 'user_lifecycle',
   'user.admin_revoked': 'user_lifecycle',
+  'system.push_test': 'user_lifecycle',
 };
 
 export function isNotificationType(value: string): value is NotificationType {

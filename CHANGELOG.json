@@ -6,6 +6,38 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2109-060",
+      "date": "2026-09-21",
+      "time": "22:41:46",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-21T10:41:46.370Z",
+      "version": "1.9.21",
+      "type": "fixed",
+      "area": "auth",
+      "title": "Allow system.push_test notification type",
+      "request": "Test notification failed: Edge Function returned a non-2xx status code",
+      "changes": [
+        "Added system.push_test to the notifications.type check constraint so Account Settings Send test notification can insert an inbox row and send Web Push.",
+        "Surfaced the Edge Function error body in the test-notification failure message when available."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": [
+          "supabase/migrations/20260921104100_notifications_allow_push_test.sql"
+        ]
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "npm test, npm run validate, and vite build. Typecheck still fails on pre-existing app errors. Migration applied on live ABC via Supabase MCP."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2109-059",
       "date": "2026-09-21",
       "time": "22:36:29",
