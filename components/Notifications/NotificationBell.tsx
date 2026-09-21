@@ -5,7 +5,7 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { formatRelativeDateInTimezone } from '../../lib/dateUtils';
 import type { AppNotification } from '../../lib/notificationTypes';
-import { registerPushServiceWorker } from '../../lib/pushNotifications';
+import { registerPushServiceWorker, showLocalNotification } from '../../lib/pushNotifications';
 
 const PAGE_SIZE = 30;
 
@@ -77,7 +77,18 @@ export const NotificationBell = ({ variant = 'default' }: NotificationBellProps)
           table: 'notifications',
           filter: `user_id=eq.${user.id}`,
         },
-        () => {
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            const row = payload.new as AppNotification | undefined;
+            if (row?.title) {
+              showLocalNotification({
+                title: row.title,
+                body: row.body || '',
+                href: row.href || '/dashboard',
+                tag: `abc-inbox-${row.id}`,
+              });
+            }
+          }
           void load();
         }
       )

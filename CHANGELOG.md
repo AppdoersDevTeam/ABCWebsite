@@ -7,6 +7,38 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2109-059 — Desktop and mobile push notification delivery
+
+**Date:** 2026-09-21
+**Time:** 22:36:29
+**Timezone:** Pacific/Auckland
+**Version:** 1.9.20
+**Type:** Fixed
+
+**Request**
+
+> Notifications show in the bell icon but I am not getting any desktop or mobile notifications.
+
+**Changes**
+
+* OS toasts now also fire from the open portal tab when a new inbox row arrives (Realtime), so alerts appear even when Web Push is quiet.
+* Enable on this device refreshes the push subscription with a correct VAPID key buffer, shows an immediate confirmation toast, and Account Settings has a Send test notification action.
+* dispatch-notification v6: system.push_test, higher push urgency, aes128gcm encoding, and clearer push logging; sw.js and Vercel headers hardened for the service worker.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: npm test, npm run validate, and vite build. Typecheck still fails on pre-existing app errors. Live dispatch-notification ACTIVE v6.
+
 ## CHG-2026-2109-058 — Portal user menu Profile and Account Settings clicks
 
 **Date:** 2026-09-21

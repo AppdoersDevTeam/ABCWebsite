@@ -26,6 +26,7 @@ const NOTIFICATION_TYPES = [
   "user.access_restored",
   "user.admin_granted",
   "user.admin_revoked",
+  "system.push_test",
 ] as const;
 
 type NotificationType = (typeof NOTIFICATION_TYPES)[number];
@@ -40,7 +41,7 @@ type PreferenceColumn =
   | "admin_signup"
   | "user_lifecycle";
 
-const PREFERENCE_BY_TYPE: Record<NotificationType, PreferenceColumn> = {
+const PREFERENCE_BY_TYPE: Record<NotificationType, PreferenceColumn | null> = {
   "content.newsletter": "content_newsletter",
   "content.devotional": "content_devotional",
   "content.event": "content_event",
@@ -55,6 +56,7 @@ const PREFERENCE_BY_TYPE: Record<NotificationType, PreferenceColumn> = {
   "user.access_restored": "user_lifecycle",
   "user.admin_granted": "user_lifecycle",
   "user.admin_revoked": "user_lifecycle",
+  "system.push_test": null,
 };
 
 type DispatchBody = {
@@ -145,6 +147,8 @@ function defaultHref(type: NotificationType, role: "member" | "admin"): string {
       return "/admin";
     case "user.admin_revoked":
       return "/dashboard";
+    case "system.push_test":
+      return member ? "/dashboard" : "/admin";
     default:
       return member ? "/dashboard" : "/admin";
   }
@@ -173,6 +177,10 @@ async function authorizedForType(
   }
 
   if (isAdminProfile(caller)) return true;
+
+  if (type === "system.push_test") {
+    return caller.is_approved === true || isAdminProfile(caller);
+  }
 
   if (type === "user.signup") {
     return !body.targetUserId || body.targetUserId === caller.id;
@@ -208,6 +216,16 @@ async function resolveRecipients(
       .from("users")
       .select("id, email, role, is_approved, is_access_held, is_super_admin")
       .eq("id", targetId)
+      .maybeSingle();
+    return data ? [data as UserRow] : [];
+  }
+
+  if (type === "system.push_test") {
+    if (!actorId) return [];
+    const { data } = await adminClient
+      .from("users")
+      .select("id, email, role, is_approved, is_access_held, is_super_admin")
+      .eq("id", actorId)
       .maybeSingle();
     return data ? [data as UserRow] : [];
   }
@@ -331,16 +349,17 @@ async function sendPushToUsers(
           keys: { p256dh: sub.p256dh, auth: sub.auth },
         },
         jsonPayload,
-        { TTL: 60 * 60 * 24, urgency: "normal" },
+        { TTL: 60 * 60 * 24, urgency: "high", contentEncoding: "aes128gcm" },
       );
       sent += 1;
+      console.log("Web Push sent", sub.id);
     } catch (err) {
-      const status = (err as { statusCode?: number }).statusCode;
+      const status = (err as { statusCode?: number; body?: string; message?: string }).statusCode;
+      const message = (err as { message?: string }).message || String(err);
+      console.error("Web Push send failed", status, message, err);
       if (status === 404 || status === 410) {
         staleIds.push(sub.id);
         removed += 1;
-      } else {
-        console.error("Web Push send failed", status, err);
       }
     }
   }
@@ -436,6 +455,7 @@ Deno.serve(async (req: Request) => {
     );
 
     const inboxRecipients = recipients.filter((row) => {
+      if (!column) return true;
       const prefs = prefsByUser.get(row.id);
       if (!prefs) return true;
       return prefs[column] !== false;
@@ -463,10 +483,14 @@ Deno.serve(async (req: Request) => {
     }
 
     const pushUserIds = inboxRecipients
-      .filter((row) => prefsByUser.get(row.id)?.push_enabled === true)
+      .filter((row) => {
+        if (type === "system.push_test") return true;
+        return prefsByUser.get(row.id)?.push_enabled === true;
+      })
       .map((row) => row.id);
 
     let pushed = 0;
+    let removed = 0;
     if (pushUserIds.length > 0) {
       const href = rows[0]?.href || "/dashboard";
       const result = await sendPushToUsers(adminClient, pushUserIds, {
@@ -475,12 +499,17 @@ Deno.serve(async (req: Request) => {
         href,
       });
       pushed = result.sent;
+      removed = result.removed;
+      console.log("dispatch-notification push result", { type, pushUserIds: pushUserIds.length, pushed, removed });
+    } else {
+      console.log("dispatch-notification skipped push (no push_enabled recipients)", { type });
     }
 
     return jsonResponse({
       ok: true,
       inserted: rows.length,
       pushed,
+      pushRemoved: removed,
     });
   } catch (err) {
     console.error("dispatch-notification unexpected error", err);

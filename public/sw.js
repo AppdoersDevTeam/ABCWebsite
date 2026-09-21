@@ -7,7 +7,12 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('push', (event) => {
-  let data = { title: 'Ashburton Baptist Church', body: '', href: '/dashboard', icon: '/abc-logo.png' };
+  let data = {
+    title: 'Ashburton Baptist Church',
+    body: '',
+    href: '/dashboard',
+    icon: '/abc-logo.png',
+  };
   try {
     if (event.data) {
       data = { ...data, ...event.data.json() };
@@ -23,9 +28,12 @@ self.addEventListener('push', (event) => {
   const href = data.href || '/dashboard';
   event.waitUntil(
     self.registration.showNotification(data.title || 'Ashburton Baptist Church', {
-      body: data.body || '',
+      body: data.body || 'You have a new notification.',
       icon: data.icon || '/abc-logo.png',
       badge: '/abc-logo.png',
+      tag: data.tag || `abc-push-${Date.now()}`,
+      renotify: true,
+      requireInteraction: false,
       data: { href },
     })
   );

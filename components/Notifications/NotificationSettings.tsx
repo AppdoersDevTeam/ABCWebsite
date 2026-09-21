@@ -10,6 +10,7 @@ import {
 import {
   iosNeedsHomeScreenInstall,
   isPushSupported,
+  sendTestPushNotification,
   subscribeCurrentDevice,
   unsubscribeCurrentDevice,
 } from '../../lib/pushNotifications';
@@ -131,6 +132,25 @@ export const NotificationSettings = () => {
     }
   };
 
+  const sendTest = async () => {
+    setBusy(true);
+    setError(null);
+    setMessage(null);
+    const result = await sendTestPushNotification();
+    setBusy(false);
+    if (!result.ok) {
+      setError(result.error || 'Could not send a test notification.');
+      return;
+    }
+    if (result.pushed === 0) {
+      setMessage(
+        'Test saved to your inbox, but no push was delivered. Click Enable on this device first (and on mobile, enable separately).'
+      );
+      return;
+    }
+    setMessage(`Test sent (${result.pushed} push delivery). Check your desktop or phone notification tray.`);
+  };
+
   if (!user) return null;
 
   return (
@@ -143,7 +163,8 @@ export const NotificationSettings = () => {
           <div>
             <h2 className="text-xl font-bold text-charcoal">Notifications</h2>
             <p className="text-sm text-neutral">
-              In-app inbox is always available. Browser and Home Screen alerts need permission on each device.
+              In-app inbox is always available. Desktop and phone alerts need “Enable on this device” on each browser
+              (phone and computer are separate). On iPhone/iPad, use Add to Home Screen first.
             </p>
           </div>
         </div>
@@ -171,6 +192,9 @@ export const NotificationSettings = () => {
       <div className="flex flex-wrap gap-2">
         <GlowingButton type="button" size="sm" onClick={() => void enablePush()} disabled={busy || !isPushSupported()}>
           Enable on this device
+        </GlowingButton>
+        <GlowingButton type="button" size="sm" variant="outline" onClick={() => void sendTest()} disabled={busy}>
+          Send test notification
         </GlowingButton>
         <GlowingButton type="button" size="sm" variant="outline" onClick={() => void disablePush()} disabled={busy}>
           Disable on this device
