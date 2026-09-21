@@ -23,7 +23,13 @@ import { useAuth } from '../../context/AuthContext';
 import { isSuperAdminUser, EVENTS_LABEL, PEOPLE_NAV_LABEL } from '../../lib/constants';
 import { ScrollToTop } from '../ScrollToTop';
 import { useAutoSectionReveal } from '../UI/useAutoSectionReveal';
-import { DASHBOARD_NAV_ICON, portalNavNeedsDivider, sortPortalNavItems } from '../../lib/dashboardNav';
+import {
+  ADMIN_NAV_DIVIDER_BEFORE,
+  ADMIN_NAV_ORDER,
+  DASHBOARD_NAV_ICON,
+  orderPortalNavItems,
+  portalNavNeedsDivider,
+} from '../../lib/dashboardNav';
 import { PortalTopBar, flattenPortalSearchItems, portalPageTitle, usePortalSidebarCollapsed } from './PortalTopBar';
 import { AppDialogHost } from '../UI/AppDialogHost';
 import { useFocusTrap } from '../UI/useFocusTrap';
@@ -63,38 +69,41 @@ export const AdminLayout = () => {
     | { label: string; path: string; icon: React.ReactNode; iconClass: string; children?: undefined }
     | { label: string; icon: React.ReactNode; iconClass: string; children: { label: string; path: string }[] };
 
-  const navItems: AdminNavItem[] = sortPortalNavItems([
-    { label: 'Overview', path: '/admin', icon: <Home size={16} />, iconClass: DASHBOARD_NAV_ICON.overview },
-    { label: 'Annual Calendar', path: '/admin/calendar', icon: <CalendarDays size={16} />, iconClass: DASHBOARD_NAV_ICON.calendar },
-    {
-      label: 'Users & Roles',
-      icon: <UserCog size={16} />,
-      iconClass: DASHBOARD_NAV_ICON.users,
-      children: [
-        { label: 'Users', path: '/admin/users' },
-        { label: 'Roles & Permissions', path: '/admin/roles' },
-      ],
-    },
-    { label: 'Prayers', path: '/admin/prayer', icon: <HandHeart size={16} />, iconClass: DASHBOARD_NAV_ICON.prayers },
-    { label: 'Newsletters', path: '/admin/newsletter', icon: <Newspaper size={16} />, iconClass: DASHBOARD_NAV_ICON.newsletters },
-    { label: 'Devotionals', path: '/admin/devotional', icon: <BookOpen size={16} />, iconClass: DASHBOARD_NAV_ICON.devotionals },
-    { label: PEOPLE_NAV_LABEL, path: '/admin/team', icon: <Users size={16} />, iconClass: DASHBOARD_NAV_ICON.team },
-    { label: EVENTS_LABEL, path: '/admin/events', icon: <Calendar size={16} />, iconClass: DASHBOARD_NAV_ICON.events },
-    { label: 'Rosters (Beta)', path: '/admin/roster', icon: <ClipboardList size={16} />, iconClass: DASHBOARD_NAV_ICON.rosters },
-    { label: 'System Setup', path: '/admin/settings', icon: <Settings size={16} />, iconClass: DASHBOARD_NAV_ICON.settings },
-    { label: 'Help', path: '/admin/help', icon: <HelpCircle size={16} />, iconClass: DASHBOARD_NAV_ICON.help },
-    { label: 'Logs', path: '/admin/logs', icon: <ScrollText size={16} />, iconClass: DASHBOARD_NAV_ICON.logs },
-    ...(isSuperAdminUser(user)
-      ? [
-          {
-            label: 'Changelog',
-            path: '/admin/changelog',
-            icon: <History size={16} />,
-            iconClass: DASHBOARD_NAV_ICON.changelog,
-          },
-        ]
-      : []),
-  ]);
+  const navItems: AdminNavItem[] = orderPortalNavItems(
+    [
+      { label: 'Overview', path: '/admin', icon: <Home size={16} />, iconClass: DASHBOARD_NAV_ICON.overview },
+      { label: EVENTS_LABEL, path: '/admin/events', icon: <Calendar size={16} />, iconClass: DASHBOARD_NAV_ICON.events },
+      { label: 'Annual Calendar', path: '/admin/calendar', icon: <CalendarDays size={16} />, iconClass: DASHBOARD_NAV_ICON.calendar },
+      { label: 'Prayers', path: '/admin/prayer', icon: <HandHeart size={16} />, iconClass: DASHBOARD_NAV_ICON.prayers },
+      { label: 'Newsletters', path: '/admin/newsletter', icon: <Newspaper size={16} />, iconClass: DASHBOARD_NAV_ICON.newsletters },
+      { label: 'Devotionals', path: '/admin/devotional', icon: <BookOpen size={16} />, iconClass: DASHBOARD_NAV_ICON.devotionals },
+      { label: 'Rosters (Beta)', path: '/admin/roster', icon: <ClipboardList size={16} />, iconClass: DASHBOARD_NAV_ICON.rosters },
+      { label: PEOPLE_NAV_LABEL, path: '/admin/team', icon: <Users size={16} />, iconClass: DASHBOARD_NAV_ICON.team },
+      {
+        label: 'Users & Roles',
+        icon: <UserCog size={16} />,
+        iconClass: DASHBOARD_NAV_ICON.users,
+        children: [
+          { label: 'Users', path: '/admin/users' },
+          { label: 'Roles & Permissions', path: '/admin/roles' },
+        ],
+      },
+      { label: 'System Setup', path: '/admin/settings', icon: <Settings size={16} />, iconClass: DASHBOARD_NAV_ICON.settings },
+      { label: 'Logs', path: '/admin/logs', icon: <ScrollText size={16} />, iconClass: DASHBOARD_NAV_ICON.logs },
+      ...(isSuperAdminUser(user)
+        ? [
+            {
+              label: 'Changelog',
+              path: '/admin/changelog',
+              icon: <History size={16} />,
+              iconClass: DASHBOARD_NAV_ICON.changelog,
+            },
+          ]
+        : []),
+      { label: 'Help', path: '/admin/help', icon: <HelpCircle size={16} />, iconClass: DASHBOARD_NAV_ICON.help },
+    ],
+    ADMIN_NAV_ORDER,
+  );
 
   return (
     <div className="flex h-[100vh] h-[100dvh] min-w-0 flex-col bg-dash font-sans text-charcoal">
@@ -149,7 +158,7 @@ export const AdminLayout = () => {
 
           <nav className={`flex-1 space-y-1 overflow-y-auto py-2 ${sidebarCollapsed ? 'px-2 lg:px-2' : 'px-3'}`}>
             {navItems.map((item, index) => {
-              const divider = portalNavNeedsDivider(index, navItems) ? (
+              const divider = portalNavNeedsDivider(index, navItems, ADMIN_NAV_DIVIDER_BEFORE) ? (
                 <div className="mx-1 my-2 border-t border-gray-300" role="separator" aria-hidden="true" />
               ) : null;
               if ('children' in item && item.children) {
@@ -263,7 +272,7 @@ export const AdminLayout = () => {
                 sessionStorage.setItem('testRoleOverride', 'member');
                 navigate('/dashboard');
               }}
-              className={`w-full flex items-center py-2 text-neutral hover:bg-blue-50 hover:text-blue-600 transition-colors rounded-[4px] ${
+              className={`w-full flex items-center py-2 text-neutral hover:bg-gold/10 hover:text-charcoal transition-colors rounded-[4px] ${
                 sidebarCollapsed ? 'lg:justify-center lg:space-x-0 lg:px-2 space-x-3 px-4' : 'space-x-3 px-4'
               }`}
             >

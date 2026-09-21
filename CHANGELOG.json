@@ -6,6 +6,39 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2109-053",
+      "date": "2026-09-21",
+      "time": "22:00:56",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-21T10:00:56.440Z",
+      "version": "1.9.14",
+      "type": "changed",
+      "area": "admin",
+      "title": "Portal menu order and overview dashboard UX",
+      "request": "Order admin and member menus for best UI/UX, fix dashboard colours to match the public website, and repair overlapping non-responsive admin overview cards.",
+      "changes": [
+        "Replaced alphabetical left-menu sorting with intentional UX order and section dividers for admin and member portals.",
+        "Unified portal nav and overview card icon colours to the public site gold/charcoal language (removed rainbow icon chips).",
+        "Rebuilt OverviewStatCard layout: left-aligned icon and label, readable sans-serif charcoal stats, full-width responsive grids.",
+        "Admin Overview cards no longer shrink to 72% width in a cramped five-column layout; approval actions use gold/charcoal/red styling aligned with the public site.",
+        "Admin and member page headers use charcoal Kaushan Script titles with gold accents, matching public section headings."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": true,
+        "notes": "Portal nav unit tests plus npm test and npm run validate. vite build. Typecheck still fails on pre-existing app errors."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2109-052",
       "date": "2026-09-21",
       "time": "21:50:25",

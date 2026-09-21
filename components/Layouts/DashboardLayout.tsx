@@ -18,7 +18,13 @@ import { useAuth } from '../../context/AuthContext';
 import { isAdminUser, EVENTS_LABEL, PEOPLE_NAV_LABEL } from '../../lib/constants';
 import { ScrollToTop } from '../ScrollToTop';
 import { useAutoSectionReveal } from '../UI/useAutoSectionReveal';
-import { DASHBOARD_NAV_ICON, portalNavNeedsDivider, sortPortalNavItems } from '../../lib/dashboardNav';
+import {
+  DASHBOARD_NAV_ICON,
+  MEMBER_NAV_DIVIDER_BEFORE,
+  MEMBER_NAV_ORDER,
+  orderPortalNavItems,
+  portalNavNeedsDivider,
+} from '../../lib/dashboardNav';
 import { flattenPortalSearchItems, portalPageTitle, PortalTopBar, usePortalSidebarCollapsed } from './PortalTopBar';
 import { AppDialogHost } from '../UI/AppDialogHost';
 import { useFocusTrap } from '../UI/useFocusTrap';
@@ -47,18 +53,21 @@ export const DashboardLayout = () => {
     navigate('/login');
   };
 
-  const navItems = sortPortalNavItems([
-    { label: 'Overview', path: '/dashboard', icon: <Home size={16} />, iconClass: DASHBOARD_NAV_ICON.overview },
-    { label: 'Annual Calendar', path: '/dashboard/calendar', icon: <CalendarDays size={16} />, iconClass: DASHBOARD_NAV_ICON.calendar },
-    { label: 'Prayers', path: '/dashboard/prayer', icon: <HandHeart size={16} />, iconClass: DASHBOARD_NAV_ICON.prayers },
-    { label: 'Newsletters', path: '/dashboard/newsletter', icon: <Newspaper size={16} />, iconClass: DASHBOARD_NAV_ICON.newsletters },
-    { label: 'Devotionals', path: '/dashboard/devotional', icon: <BookOpen size={16} />, iconClass: DASHBOARD_NAV_ICON.devotionals },
-    { label: 'Sermons', path: '/dashboard/sermons', icon: <Youtube size={16} />, iconClass: DASHBOARD_NAV_ICON.sermons },
-    { label: PEOPLE_NAV_LABEL, path: '/dashboard/team', icon: <Users size={16} />, iconClass: DASHBOARD_NAV_ICON.team },
-    { label: EVENTS_LABEL, path: '/dashboard/events', icon: <Calendar size={16} />, iconClass: DASHBOARD_NAV_ICON.events },
-    { label: 'Rosters (Beta)', path: '/dashboard/roster', icon: <ClipboardList size={16} />, iconClass: DASHBOARD_NAV_ICON.rosters },
-    { label: 'Help', path: '/dashboard/help', icon: <HelpCircle size={16} />, iconClass: DASHBOARD_NAV_ICON.help },
-  ]);
+  const navItems = orderPortalNavItems(
+    [
+      { label: 'Overview', path: '/dashboard', icon: <Home size={16} />, iconClass: DASHBOARD_NAV_ICON.overview },
+      { label: EVENTS_LABEL, path: '/dashboard/events', icon: <Calendar size={16} />, iconClass: DASHBOARD_NAV_ICON.events },
+      { label: 'Annual Calendar', path: '/dashboard/calendar', icon: <CalendarDays size={16} />, iconClass: DASHBOARD_NAV_ICON.calendar },
+      { label: 'Prayers', path: '/dashboard/prayer', icon: <HandHeart size={16} />, iconClass: DASHBOARD_NAV_ICON.prayers },
+      { label: 'Newsletters', path: '/dashboard/newsletter', icon: <Newspaper size={16} />, iconClass: DASHBOARD_NAV_ICON.newsletters },
+      { label: 'Devotionals', path: '/dashboard/devotional', icon: <BookOpen size={16} />, iconClass: DASHBOARD_NAV_ICON.devotionals },
+      { label: 'Sermons', path: '/dashboard/sermons', icon: <Youtube size={16} />, iconClass: DASHBOARD_NAV_ICON.sermons },
+      { label: 'Rosters (Beta)', path: '/dashboard/roster', icon: <ClipboardList size={16} />, iconClass: DASHBOARD_NAV_ICON.rosters },
+      { label: PEOPLE_NAV_LABEL, path: '/dashboard/team', icon: <Users size={16} />, iconClass: DASHBOARD_NAV_ICON.team },
+      { label: 'Help', path: '/dashboard/help', icon: <HelpCircle size={16} />, iconClass: DASHBOARD_NAV_ICON.help },
+    ],
+    MEMBER_NAV_ORDER,
+  );
 
   return (
     <div className="flex h-[100vh] h-[100dvh] min-w-0 flex-col bg-dash font-sans text-charcoal">
@@ -116,7 +125,7 @@ export const DashboardLayout = () => {
               const isActive = location.pathname === item.path;
               return (
                 <React.Fragment key={item.path}>
-                  {portalNavNeedsDivider(index, navItems) ? (
+                  {portalNavNeedsDivider(index, navItems, MEMBER_NAV_DIVIDER_BEFORE) ? (
                     <div className="mx-1 my-2 border-t border-gray-300" role="separator" aria-hidden="true" />
                   ) : null}
                 <Link
@@ -154,7 +163,7 @@ export const DashboardLayout = () => {
                   sessionStorage.removeItem('testRoleOverride');
                   navigate('/admin');
                 }}
-                className={`w-full flex items-center py-2 text-neutral hover:bg-blue-50 hover:text-blue-600 transition-colors rounded-[4px] ${
+                className={`w-full flex items-center py-2 text-neutral hover:bg-gold/10 hover:text-charcoal transition-colors rounded-[4px] ${
                   sidebarCollapsed ? 'lg:justify-center lg:space-x-0 lg:px-2 space-x-3 px-4' : 'space-x-3 px-4'
                 }`}
               >

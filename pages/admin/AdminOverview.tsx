@@ -619,7 +619,6 @@ export const AdminOverview = () => {
       value: isLoadingUsers ? '...' : visibleUsers.length.toString(), 
       icon: <UserCog size={20} />, 
       path: '/admin/users', 
-      color: 'text-gold', 
       highlight: false,
       subtitle: isLoadingUsers
         ? undefined
@@ -636,39 +635,41 @@ export const AdminOverview = () => {
       value: isLoadingStats ? '...' : teamMembersCount.toString(), 
       icon: <Users size={20} />, 
       path: '/admin/team', 
-      color: 'text-teal-600',
       subtitle: undefined,
     },
     { 
-      label: 'Prayer Requests', 
-      value: isLoadingStats ? '...' : prayerRequestsCount.toString(), 
-      icon: <HandHeart size={20} />, 
-      path: '/admin/prayer', 
-      color: 'text-blue-600',
-      subtitle: isLoadingStats ? 'Loading...' : undefined
+      label: EVENTS_LABEL,
+      value: isLoadingStats ? '...' : eventsCount.toString(),
+      icon: <Calendar size={20} />,
+      path: '/admin/events',
+      subtitle: isLoadingStats ? 'Loading...' : undefined,
     },
     { 
       label: 'Next Service', 
       value: isLoadingStats ? '...' : (nextService || 'Sunday 10AM'), 
       icon: <Church size={20} />, 
       path: '/admin/events', 
-      color: 'text-gray-700',
       subtitle: isLoadingStats ? 'Loading...' : undefined
     },
-    {
-      label: EVENTS_LABEL,
-      value: isLoadingStats ? '...' : eventsCount.toString(),
-      icon: <Calendar size={20} />,
-      path: '/admin/events',
-      color: 'text-green-600',
+    { 
+      label: 'Annual Calendar',
+      value: new Date().getFullYear().toString(),
+      icon: <CalendarDays size={20} />,
+      path: '/admin/calendar',
       subtitle: isLoadingStats ? 'Loading...' : undefined,
+    },
+    { 
+      label: 'Prayer Requests', 
+      value: isLoadingStats ? '...' : prayerRequestsCount.toString(), 
+      icon: <HandHeart size={20} />, 
+      path: '/admin/prayer', 
+      subtitle: isLoadingStats ? 'Loading...' : undefined
     },
     { 
       label: 'Newsletters', 
       value: isLoadingStats ? '...' : newsletterCount.toString(), 
       icon: <Newspaper size={20} />,
-      path: '/admin/newsletter',
-      color: 'text-orange-600',
+      path: '/admin/newsletter', 
       subtitle: isLoadingStats ? 'Loading...' : undefined,
     },
     { 
@@ -676,7 +677,6 @@ export const AdminOverview = () => {
       value: isLoadingStats ? '...' : devotionalsCount.toString(), 
       icon: <BookOpen size={20} />,
       path: '/admin/devotional', 
-      color: 'text-purple-600',
       subtitle: isLoadingStats ? 'Loading...' : undefined
     },
     { 
@@ -684,7 +684,6 @@ export const AdminOverview = () => {
       value: isLoadingStats ? '...' : rosterAssignmentsCount.toString(), 
       icon: <ClipboardList size={20} />, 
       path: '/admin/roster', 
-      color: 'text-indigo-600',
       subtitle: isLoadingStats ? 'Loading...' : undefined
     },
     {
@@ -696,21 +695,12 @@ export const AdminOverview = () => {
           : '—',
       icon: <Mail size={20} />,
       path: '/admin/emails',
-      color: emailsQuota?.blocked ? 'text-red-700' : 'text-amber-700',
       subtitle: isLoadingStats
         ? 'Loading...'
         : emailsQuota
           ? `${formatEmailQuotaUsed(emailsQuota.month_count, emailsQuota.month_limit)} this month · NZ time`
           : undefined,
       highlight: Boolean(emailsQuota && emailQuotaNearLimit(emailsQuota)),
-    },
-    {
-      label: 'Annual Calendar',
-      value: new Date().getFullYear().toString(),
-      icon: <CalendarDays size={20} />,
-      path: '/admin/calendar',
-      color: 'text-emerald-600',
-      subtitle: isLoadingStats ? 'Loading...' : undefined,
     },
   ], [visibleUsers.length, visibleApprovedCount, visiblePendingCount, visibleNotLinkedCount, isLoadingUsers, prayerRequestsCount, nextService, eventsCount, newsletterCount, devotionalsCount, isLoadingStats, teamMembersCount, rosterAssignmentsCount, emailsQuota]);
 
@@ -721,7 +711,7 @@ export const AdminOverview = () => {
     return (
       <div className="space-y-8">
         <SkeletonPageHeader />
-        <div className="grid md:grid-cols-2 xl:grid-cols-5 gap-6">
+        <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-6">
           {Array.from({ length: 10 }).map((_, i) => (
             <SkeletonCard key={i} />
           ))}
@@ -745,7 +735,7 @@ export const AdminOverview = () => {
       />
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 auto-rows-fr items-stretch justify-items-center gap-5 md:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-fr items-stretch gap-4 md:gap-5">
         {stats.map((stat, i) => {
           const description =
             stat.label === 'E-mails Sent' && !isLoadingStats && emailsQuota?.blocked
@@ -755,13 +745,10 @@ export const AdminOverview = () => {
           const card = (
             <OverviewStatCard
               icon={stat.icon}
-              iconClassName={`${stat.color} bg-gray-50`}
               label={stat.label}
               value={stat.value}
               description={description}
               highlight={stat.highlight}
-              valueSize={stat.valueSize}
-              valueClassName={stat.valueSize === 'title' ? 'line-clamp-2' : undefined}
             />
           );
 
@@ -777,7 +764,7 @@ export const AdminOverview = () => {
                     element.scrollIntoView({ behavior: 'smooth' });
                   }
                 }}
-                className="mx-auto flex h-full w-[72.45%] flex-col"
+                className="flex h-full w-full min-w-0 flex-col"
               >
                 {card}
               </a>
@@ -785,7 +772,7 @@ export const AdminOverview = () => {
           }
 
           return (
-            <Link key={i} to={stat.path} className="mx-auto flex h-full w-[72.45%] flex-col">
+            <Link key={i} to={stat.path} className="flex h-full w-full min-w-0 flex-col">
               {card}
             </Link>
           );
@@ -866,9 +853,9 @@ export const AdminOverview = () => {
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
-                          <h3 className="truncate font-medium text-base text-gold">{displayNameLastFirst(pendingUser)}</h3>
+                          <h3 className="truncate font-medium text-base text-charcoal">{displayNameLastFirst(pendingUser)}</h3>
                           {pendingUser.role === 'admin' && (
-                            <span className="bg-red-100 text-red-700 text-[10px] px-1.5 py-0.5 rounded uppercase font-bold">
+                            <span className="bg-gold/20 text-charcoal text-[10px] px-1.5 py-0.5 rounded uppercase font-bold">
                               Admin
                             </span>
                           )}
@@ -887,10 +874,10 @@ export const AdminOverview = () => {
                       </div>
                     </div>
                   </div>
-                  <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto flex-shrink-0">
+                  <div className="flex flex-wrap items-center gap-2 w-full md:w-auto flex-shrink-0">
                     <button
                       onClick={() => handleApproveUser(pendingUser.id)}
-                      className="bg-gold text-charcoal px-3 py-1.5 rounded-[4px] text-sm font-bold hover:bg-gold/80 transition-colors shadow-sm flex items-center gap-1.5"
+                      className="inline-flex min-h-[44px] flex-1 sm:flex-none items-center justify-center gap-1.5 bg-gold text-charcoal px-3 py-2 rounded-[4px] text-sm font-bold hover:bg-[#A8B774] transition-colors shadow-sm"
                     >
                       <UserCheck size={14} />
                       Approve
@@ -898,7 +885,7 @@ export const AdminOverview = () => {
                     {pendingUser.role !== 'admin' && (
                       <button
                         onClick={() => handleApproveUser(pendingUser.id, true)}
-                        className="bg-white border border-purple-200 text-purple-700 px-3 py-1.5 rounded-[4px] text-sm font-bold hover:bg-purple-50 transition-colors shadow-sm flex items-center gap-1.5"
+                        className="inline-flex min-h-[44px] flex-1 sm:flex-none items-center justify-center gap-1.5 bg-white border border-charcoal text-charcoal px-3 py-2 rounded-[4px] text-sm font-bold hover:bg-gray-50 transition-colors shadow-sm"
                       >
                         <Shield size={14} />
                         Approve as Admin
@@ -907,7 +894,7 @@ export const AdminOverview = () => {
                     <button
                       type="button"
                       onClick={() => setEmailModalUser(pendingUser)}
-                      className="bg-white border border-gray-200 text-charcoal px-3 py-1.5 rounded-[4px] text-sm font-bold hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-1.5"
+                      className="inline-flex min-h-[44px] flex-1 sm:flex-none items-center justify-center gap-1.5 bg-white border border-gray-200 text-charcoal px-3 py-2 rounded-[4px] text-sm font-bold hover:bg-gray-50 transition-colors shadow-sm"
                       title="Email this person"
                     >
                       <Mail size={14} />
@@ -915,7 +902,7 @@ export const AdminOverview = () => {
                     </button>
                     <button
                       onClick={() => handleRejectUser(pendingUser.id)}
-                      className="bg-white border border-red-200 text-red-600 px-3 py-1.5 rounded-[4px] text-sm font-bold hover:bg-red-50 transition-colors shadow-sm flex items-center gap-1.5"
+                      className="inline-flex min-h-[44px] flex-1 sm:flex-none items-center justify-center gap-1.5 bg-white border border-red-200 text-red-600 px-3 py-2 rounded-[4px] text-sm font-bold hover:bg-red-50 transition-colors shadow-sm"
                     >
                       <X size={14} />
                       Reject
@@ -980,7 +967,7 @@ export const AdminOverview = () => {
                 <p className="text-sm text-neutral mt-1">{visiblePendingCount} {visiblePendingCount === 1 ? 'user' : 'users'} awaiting approval</p>
               </a>
             )}
-            <Link to="/admin/users" className="block p-4 bg-white border border-gray-100 rounded-[4px] hover:border-blue-300 hover:shadow-md transition-all">
+            <Link to="/admin/users" className="block p-4 bg-white border border-gray-100 rounded-[4px] hover:border-gold hover:shadow-md transition-all">
               <span className="font-semibold text-base text-charcoal">Manage All Users</span>
               <p className="text-sm text-neutral mt-1">View and manage user roles and permissions</p>
             </Link>

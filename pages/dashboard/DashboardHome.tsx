@@ -137,32 +137,10 @@ export const DashboardHome = () => {
           }
         />
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
-            <Link to="/dashboard/team" className="block h-full">
-              <OverviewStatCard
-                icon={<Users size={20} />}
-                iconClassName="bg-teal-50 text-teal-600"
-                label="People's Directory"
-                value={isLoadingStats ? '...' : peopleCount}
-                footerLabel={`View ${PEOPLE_LABEL} →`}
-              />
-            </Link>
-
-            <Link to="/dashboard/calendar" className="block h-full">
-              <OverviewStatCard
-                icon={<CalendarDays size={20} />}
-                iconClassName="bg-emerald-50 text-emerald-600"
-                label="Annual Calendar"
-                value={new Date().getFullYear()}
-                description="Year, month, or week — events, sermons, devotionals, and newsletters"
-                footerLabel="Open Calendar →"
-              />
-            </Link>
-
-            <Link to="/dashboard/events" className="block h-full">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
+            <Link to="/dashboard/events" className="block h-full min-w-0">
               <OverviewStatCard
                 icon={<Calendar size={20} />}
-                iconClassName="bg-green-50 text-green-600"
                 label="Next Service"
                 value={isLoadingStats ? '...' : (nextService || 'Sunday')}
                 description={isLoadingStats ? 'Loading...' : 'Every Sunday at 10:00 AM'}
@@ -170,10 +148,19 @@ export const DashboardHome = () => {
               />
             </Link>
 
-            <Link to="/dashboard/prayer" className="block h-full">
+            <Link to="/dashboard/calendar" className="block h-full min-w-0">
+              <OverviewStatCard
+                icon={<CalendarDays size={20} />}
+                label="Annual Calendar"
+                value={new Date().getFullYear()}
+                description="Year, month, or week — events, sermons, devotionals, and newsletters"
+                footerLabel="Open Calendar →"
+              />
+            </Link>
+
+            <Link to="/dashboard/prayer" className="block h-full min-w-0">
               <OverviewStatCard
                 icon={<HandHeart size={20} />}
-                iconClassName="bg-blue-50 text-blue-600"
                 label="Prayers"
                 value={isLoadingStats ? '...' : prayerRequests24h}
                 description={
@@ -185,10 +172,9 @@ export const DashboardHome = () => {
               />
             </Link>
 
-            <Link to="/dashboard/newsletter" className="block h-full">
+            <Link to="/dashboard/newsletter" className="block h-full min-w-0">
               <OverviewStatCard
                 icon={<Newspaper size={20} />}
-                iconClassName="bg-orange-50 text-orange-600"
                 label="Newsletter"
                 value={isLoadingStats ? '...' : (lastNewsletterTitle || 'None')}
                 valueSize="title"
@@ -206,10 +192,9 @@ export const DashboardHome = () => {
               />
             </Link>
 
-            <Link to="/dashboard/devotional" className="block h-full">
+            <Link to="/dashboard/devotional" className="block h-full min-w-0">
               <OverviewStatCard
                 icon={<BookOpen size={20} />}
-                iconClassName="bg-purple-50 text-purple-600"
                 label="Devotional of the Week"
                 value={isLoadingStats ? '...' : (lastDevotionalLabel || 'None')}
                 valueSize="title"
@@ -227,14 +212,22 @@ export const DashboardHome = () => {
               />
             </Link>
 
-            <Link to="/dashboard/sermons" className="block h-full">
+            <Link to="/dashboard/sermons" className="block h-full min-w-0">
               <OverviewStatCard
                 icon={<Youtube size={20} />}
-                iconClassName="bg-red-50 text-red-600"
                 label="Watch Sermons"
                 value="YouTube"
                 description="Catch up on our latest messages"
                 footerLabel="Watch Now →"
+              />
+            </Link>
+
+            <Link to="/dashboard/team" className="block h-full min-w-0">
+              <OverviewStatCard
+                icon={<Users size={20} />}
+                label="People's Directory"
+                value={isLoadingStats ? '...' : peopleCount}
+                footerLabel={`View ${PEOPLE_LABEL} →`}
               />
             </Link>
         </div>
