@@ -54,17 +54,23 @@ Never guess client, project, or person. Never pick a project by name alone (name
 
 If blocked: keep the current stage and add a note starting with `BLOCKED:`
 
-## Time
+## Time (mandatory)
 
 Timer starts on `claim-ticket` or `move-ticket --stage developer`.
 
-Gaps over 5 minutes are idle and must not be logged.
+Gaps over 5 minutes are idle and are not counted toward active ms.
 
-When implementation for a user request is complete, run `flush-ticket-time --ticket-id "<id>"` before the final reply.
+**Before every final reply** on a ticketed request:
 
-Moving to `qa`, `reviewer`, or `done` auto-flushes.
+```
+node tools/hub-workflow-cli.mjs flush-ticket-time --ticket-id "<id>"
+```
 
-Never pass hours or `time_spent` yourself. Time belongs to the token owner.
+Confirm the response shows hours logged. Moving to `qa`, `reviewer`, or `done` auto-flushes.
+
+**Minimum billable time is 0.1 hours** — the CLI rounds any smaller amount up to 0.1 and always logs it. Never skip flush. Never pass hours or `time_spent` yourself. Time belongs to the token owner.
+
+Also follow `.cursor/rules/agent-completion-checklist.mdc` for commits + flush.
 
 ## Commands
 

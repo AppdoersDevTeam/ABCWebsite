@@ -12,6 +12,8 @@ const ALWAYS_APPLY_HUB_RULES = [
   '.cursor/rules/hub-workflow-enforcement.mdc',
   '.cursor/rules/hub-project-map.mdc',
   '.cursor/rules/hub-agent-behavior.mdc',
+  '.cursor/rules/agent-completion-checklist.mdc',
+  '.cursor/rules/commit-messages.mdc',
 ];
 
 test('Hub always-apply rules exist and are always applied', () => {
@@ -30,6 +32,25 @@ test('hub-always.mdc forbids skipping Hub and requires CLI-only tickets', () => 
   assert.match(contents, /Never call Hub HTTP endpoints/);
   assert.match(contents, /AskQuestion/);
   assert.match(contents, /flush-ticket-time/);
+  assert.match(contents, /0\.1/);
+});
+
+test('agent-completion-checklist requires flush and work-based commits', () => {
+  const contents = fs.readFileSync(
+    path.join(repoRoot, '.cursor/rules/agent-completion-checklist.mdc'),
+    'utf8'
+  );
+  assert.match(contents, /flush-ticket-time/);
+  assert.match(contents, /0\.1/);
+  assert.match(contents, /type\(scope\):/);
+  assert.match(contents, /updates changelogs/);
+});
+
+test('commit-messages.mdc forbids generic changelog subjects', () => {
+  const contents = fs.readFileSync(path.join(repoRoot, '.cursor/rules/commit-messages.mdc'), 'utf8');
+  assert.match(contents, /alwaysApply:\s*true/);
+  assert.match(contents, /updates changelogs DDMMYYYY/);
+  assert.match(contents, /push:live/);
 });
 
 test('ticket hook fails closed so edits cannot bypass Hub', () => {

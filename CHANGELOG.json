@@ -6,6 +6,38 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2309-002",
+      "date": "2026-09-23",
+      "time": "13:25:02",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-23T01:25:02.489Z",
+      "version": "1.9.25",
+      "type": "infrastructure",
+      "area": "system",
+      "title": "Enforce Hub 0.1h minimum and agent commit/time checklist",
+      "request": "Agents stopped using work-based commit messages and Hub time logging correctly. Update repo instructions so every agent does both correctly; any time under 0.1h must round up to 0.1 and always be logged.",
+      "changes": [
+        "hub-ticket-time: MIN_LOG_HOURS is 0.1; any flush below that rounds up and posts to Hub (no below-minimum skip).",
+        "Added always-apply agent-completion-checklist.mdc (mandatory flush-ticket-time + work-based commits).",
+        "Strengthened hub-always, hub-workflow-enforcement, appdoers-hub skill, commit-messages.mdc, and AGENTS.md.",
+        "Added hub-ticket-time unit tests and extended hub-always-rule governance tests."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": true,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "npm test (hub + full suite); npm run validate after changelog render."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2309-001",
       "date": "2026-09-23",
       "time": "13:20:30",

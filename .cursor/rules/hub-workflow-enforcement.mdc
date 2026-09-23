@@ -33,10 +33,12 @@ alwaysApply: true
 
 - Active work time is tracked locally in `.hub-ticket-time.json` (gitignored).
 - Timer starts on `claim-ticket` or `move-ticket --stage developer`.
-- Gaps longer than 5 minutes between Hub CLI touches count as idle and are **not** logged.
-- When implementation for a user request is complete, run `flush-ticket-time --ticket-id "<id>"` before responding.
+- Gaps longer than 5 minutes between Hub CLI touches count as idle and are not counted.
+- **Required:** when implementation for a user request is complete, run `flush-ticket-time --ticket-id "<id>"` before the final reply. Confirm hours appear in the CLI output.
 - Moving to `qa`, `reviewer`, or `done` auto-flushes and logs active time to the ticket.
+- **Minimum 0.1h:** any flush below 0.1 hours is rounded **up to 0.1** and logged. Never skip flush for “too little time”.
 - **Never** manually pass hours or time_spent — the CLI calculates and logs active time automatically.
 - Time is attributed to the token owner; each team member should use their own `APPDOERS_CURSOR_TOKEN`.
+- Commit messages must be work-based (`type(scope): description [CHG-ID]`). See `commit-messages.mdc` and `agent-completion-checklist.mdc`.
 
 If blocked, keep stage and add note prefixed with `BLOCKED:`.

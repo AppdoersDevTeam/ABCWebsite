@@ -73,7 +73,8 @@ If that fails on token/setup, or this is a **new laptop / new teammate**, STOP. 
 3. If they gave an id, `get-ticket` and use it. If it is on the wrong client/project, `update-ticket --project-id "<correct-uuid>"` with a note.
 4. Include the ticket id in progress notes and the final response.
 5. Stages: `pm` → `developer` → `qa` → `reviewer` → `done`. Move to `done` only after explicit QA pass AND reviewer approval.
-6. Flush time with `flush-ticket-time --ticket-id "<id>"` when implementation for a request is complete. Never pass hours yourself.
+6. **Mandatory:** flush time with `flush-ticket-time --ticket-id "<id>"` when implementation for a request is complete (before the final reply). Confirm hours appear in the CLI output. Never pass hours yourself. **Minimum billable time is 0.1h** — the CLI rounds any smaller amount up to 0.1 and always logs it; never skip flush because time looks small.
+7. Commit messages must be work-based: `type(scope): description [CHG-ID]`. Never use `updates changelogs DDMMYYYY` or other generic subjects. See `.cursor/rules/commit-messages.mdc` and `.cursor/rules/agent-completion-checklist.mdc`.
 
 Read-only work (inspect, git pull, answering questions) does not need a ticket. Any Write, StrReplace, Delete, migration, or commit does.
 
@@ -247,6 +248,16 @@ refactor(api): simplify customer service architecture [CHG-2026-1609-003]
 
 Create the commit when the change is complete unless the user forbade committing. Report the Change ID and the actual commit hash. Do not claim a commit exists unless `git log` shows it.
 
+When the user asks to push / go live, use a work-based message:
+
+```bash
+npm run push:live -- "type(scope): short description [CHG-YYYY-DDMM-NNN]"
+```
+
+Never use `updates changelogs DDMMYYYY` as the commit subject.
+
+Before the final reply on a ticketed request, run `flush-ticket-time` (or move to `qa`/`reviewer`/`done` for auto-flush). Minimum logged time is 0.1 hours.
+
 ---
 
 ## 8. Security
@@ -278,12 +289,14 @@ If validation fails, CI fails. Do not add extra workflows unless a new pipeline 
 
 When the task is done, report:
 
+- Hub ticket id
+- That Hub time was flushed (hours logged, ≥ 0.1)
 - Change ID
 - Version
 - What actually changed
 - Migrations (or none)
 - Commands you ran and their real results
-- Commit hash
+- Commit hash and **the exact commit message used** (must be work-based)
 - Known issues / partial work
 
 ---

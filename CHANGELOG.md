@@ -7,6 +7,39 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2309-002 — Enforce Hub 0.1h minimum and agent commit/time checklist
+
+**Date:** 2026-09-23
+**Time:** 13:25:02
+**Timezone:** Pacific/Auckland
+**Version:** 1.9.25
+**Type:** Infrastructure
+
+**Request**
+
+> Agents stopped using work-based commit messages and Hub time logging correctly. Update repo instructions so every agent does both correctly; any time under 0.1h must round up to 0.1 and always be logged.
+
+**Changes**
+
+* hub-ticket-time: MIN_LOG_HOURS is 0.1; any flush below that rounds up and posts to Hub (no below-minimum skip).
+* Added always-apply agent-completion-checklist.mdc (mandatory flush-ticket-time + work-based commits).
+* Strengthened hub-always, hub-workflow-enforcement, appdoers-hub skill, commit-messages.mdc, and AGENTS.md.
+* Added hub-ticket-time unit tests and extended hub-always-rule governance tests.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: not run or failed
+* Notes: npm test (hub + full suite); npm run validate after changelog render.
+
 ## CHG-2026-2309-001 — Require work-based git messages on push
 
 **Date:** 2026-09-23

@@ -99,7 +99,7 @@ Session:
   create-ticket uses the session project when --project-id is omitted.
   claim-ticket uses session team member for assignment when --assigned-to is omitted.
   claim-ticket / move-ticket --stage developer start the active timer.
-  flush-ticket-time logs unlogged active time; move-ticket --stage qa|reviewer|done auto-flushes.
+  flush-ticket-time logs unlogged active time (minimum 0.1h, rounded up); move-ticket --stage qa|reviewer|done auto-flushes.
 
 Required env vars (in ~/.appdoers/hub.env on your laptop, or legacy .env.hub):
   APPDOERS_HUB_URL
