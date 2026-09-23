@@ -10,6 +10,7 @@ import { getAuthEmailRedirectUrl } from '../lib/authRedirect';
 import { notifySignupReceivedOnce } from '../lib/notifyUserReview';
 import { clearPendingPublicBrowse } from '../lib/pendingAccess';
 import { applyAuthSession, mfaLoginBegin, mfaSessionStatus, MfaRequiredError } from '../lib/mfaClient';
+import { allowAfterInterval } from '../lib/minInterval';
 import type { AuthError, Session, User as SupabaseUser } from '@supabase/supabase-js';
 
 export type MfaPendingState = {
@@ -81,7 +82,15 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
   const [mfaPending, setMfaPending] = useState<MfaPendingState | null>(null);
   // Cache user profile to avoid redundant fetches
   const userProfileCache = React.useRef<{ userId: string; profile: User; timestamp: number } | null>(null);
+  const directorySyncedForUserId = React.useRef<string | null>(null);
+  const lastFocusProfileRefreshAt = React.useRef(0);
   const CACHE_DURATION = 30000; // 30 seconds cache
+
+  const syncDirectoryOncePerSession = (supabaseUser: SupabaseUser, profile: User) => {
+    if (directorySyncedForUserId.current === supabaseUser.id) return;
+    directorySyncedForUserId.current = supabaseUser.id;
+    void syncDirectoryUserLink(supabaseUser, profile);
+  };
 
   // Fetch user profile from database with caching and optimizations
   const fetchUserProfile = async (supabaseUser: SupabaseUser, useCache: boolean = true): Promise<User | null> => {
@@ -91,7 +100,7 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
         const { userId, profile, timestamp } = userProfileCache.current;
         if (userId === supabaseUser.id && Date.now() - timestamp < CACHE_DURATION) {
           console.log('fetchUserProfile - Using cached profile');
-          void syncDirectoryUserLink(supabaseUser, profile);
+          syncDirectoryOncePerSession(supabaseUser, profile);
           return profile;
         }
       }
@@ -114,7 +123,7 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
       if (!result) {
         console.warn('fetchUserProfile - Query timed out, using fallback');
         const fb = buildFallbackUser(supabaseUser);
-        void syncDirectoryUserLink(supabaseUser, fb);
+        syncDirectoryOncePerSession(supabaseUser, fb);
         return fb;
       }
 
@@ -142,13 +151,13 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
 
           // Cache and return immediately
           userProfileCache.current = { userId: supabaseUser.id, profile: newUser, timestamp: Date.now() };
-          void syncDirectoryUserLink(supabaseUser, newUser);
+          syncDirectoryOncePerSession(supabaseUser, newUser);
           return newUser;
         }
         
         const fallbackUser = buildFallbackUser(supabaseUser);
         userProfileCache.current = { userId: supabaseUser.id, profile: fallbackUser, timestamp: Date.now() };
-        void syncDirectoryUserLink(supabaseUser, fallbackUser);
+        syncDirectoryOncePerSession(supabaseUser, fallbackUser);
         return fallbackUser;
       }
 
@@ -198,12 +207,12 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
 
       // Cache the profile
       userProfileCache.current = { userId: supabaseUser.id, profile: userData, timestamp: Date.now() };
-      void syncDirectoryUserLink(supabaseUser, userData);
+      syncDirectoryOncePerSession(supabaseUser, userData);
       return userData;
     } catch (error) {
       console.error('Error in fetchUserProfile:', error);
       const fb = buildFallbackUser(supabaseUser);
-      void syncDirectoryUserLink(supabaseUser, fb);
+      syncDirectoryOncePerSession(supabaseUser, fb);
       return fb;
     }
   };
@@ -347,8 +356,9 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
       console.log('AuthContext - Auth state changed:', event, session ? 'has session' : 'no session');
 
       if (event === 'SIGNED_OUT') {
-        userProfileCache.current = null;
-        setUser(null);
+      userProfileCache.current = null;
+      directorySyncedForUserId.current = null;
+      setUser(null);
         setMfaPending(null);
         setIsLoading(false);
         return;
@@ -728,6 +738,7 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       userProfileCache.current = null;
+      directorySyncedForUserId.current = null;
       clearPendingPublicBrowse();
       setUser(null);
     } catch (error) {
@@ -789,9 +800,10 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
       .subscribe();
 
     const onVisible = () => {
-      if (document.visibilityState === 'visible') {
-        void refreshUserProfile();
-      }
+      if (document.visibilityState !== 'visible') return;
+      // window focus also fires when switching apps; throttle to avoid Rest storms
+      if (!allowAfterInterval(lastFocusProfileRefreshAt, 60_000)) return;
+      void refreshUserProfile();
     };
     document.addEventListener('visibilitychange', onVisible);
     window.addEventListener('focus', onVisible);

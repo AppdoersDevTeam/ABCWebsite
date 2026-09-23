@@ -1,5 +1,3 @@
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
 import type { User } from '../types';
 import { displayName, isAccessHeld, PEOPLE_LABEL } from './constants';
 import { formatDdMmYyyy, formatDdMmYyyyHHmm } from './dateUtils';
@@ -106,12 +104,14 @@ export function downloadAdminUsersCsv(
   downloadBlob(`${filenameBase}.csv`, new Blob([csv], { type: 'text/csv;charset=utf-8' }));
 }
 
-export function downloadAdminUsersPdf(
+export async function downloadAdminUsersPdf(
   users: User[],
   filenameBase: string,
   meta: ExportMeta,
   context: UserExportContext
 ) {
+  const { default: jsPDF } = await import('jspdf');
+  const { default: autoTable } = await import('jspdf-autotable');
   const rows = toRows(users, context);
   const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
 

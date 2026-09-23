@@ -1,11 +1,13 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { CalendarDays } from 'lucide-react';
 import { AnnualCalendarView } from '../../components/calendar/AnnualCalendarView';
 import { AdminPageHeader } from '../../components/UI/AdminPageHeader';
 import { SkeletonPageHeader, SkeletonCard } from '../../components/UI/Skeleton';
 import { supabase } from '../../lib/supabase';
-import { fetchCalendarItems, type CalendarAudience, type CalendarItem } from '../../lib/calendarItems';
+import { fetchCalendarItems, type CalendarAudience } from '../../lib/calendarItems';
 import { useAuth } from '../../context/AuthContext';
+import { queryKeys } from '../../lib/queryClient';
 
 interface AnnualCalendarPageProps {
   audience: CalendarAudience;
@@ -13,55 +15,53 @@ interface AnnualCalendarPageProps {
 
 export const AnnualCalendarPage: React.FC<AnnualCalendarPageProps> = ({ audience }) => {
   const { user } = useAuth();
-  const [items, setItems] = useState<CalendarItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const isAdmin = user?.role === 'admin';
+  const queryKey = queryKeys.calendar(audience, !!isAdmin);
 
-  const load = useCallback(async () => {
-    try {
-      const data = await fetchCalendarItems(audience, user?.role === 'admin');
-      setItems(data);
-    } catch (error) {
-      console.error('Error loading annual calendar:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [audience, user?.role]);
+  const { data: items = [], isLoading } = useQuery({
+    queryKey,
+    queryFn: () => fetchCalendarItems(audience, !!isAdmin),
+    staleTime: 60_000,
+  });
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  const invalidate = useCallback(() => {
+    void queryClient.invalidateQueries({ queryKey });
+  }, [queryClient, queryKey]);
 
   useEffect(() => {
+    let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+    const scheduleInvalidate = () => {
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        invalidate();
+      }, 400);
+    };
+
     const channel = supabase
       .channel(`annual-calendar-${audience}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'events' }, () => {
-        void load();
+        scheduleInvalidate();
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'devotionals' }, () => {
-        void load();
+        scheduleInvalidate();
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'newsletters' }, () => {
-        void load();
+        scheduleInvalidate();
       })
       .subscribe();
 
-    const onVisible = () => {
-      if (document.visibilityState === 'visible') void load();
-    };
-    document.addEventListener('visibilitychange', onVisible);
-    window.addEventListener('focus', onVisible);
     const onContentChanged = () => {
-      void load();
+      scheduleInvalidate();
     };
     window.addEventListener('abc-calendar-changed', onContentChanged);
 
     return () => {
+      if (debounceTimer) clearTimeout(debounceTimer);
       supabase.removeChannel(channel);
-      document.removeEventListener('visibilitychange', onVisible);
-      window.removeEventListener('focus', onVisible);
       window.removeEventListener('abc-calendar-changed', onContentChanged);
     };
-  }, [audience, load]);
+  }, [audience, invalidate]);
 
   if (isLoading && items.length === 0) {
     return (
@@ -76,10 +76,10 @@ export const AnnualCalendarPage: React.FC<AnnualCalendarPageProps> = ({ audience
     <div className="space-y-6 md:space-y-8 min-w-0">
       <AdminPageHeader
         title="Annual Calendar"
-        subtitle="This year’s events, sermons, devotionals, and newsletters. Choose year, month, or week view."
+        subtitle="This years events, sermons, devotionals, and newsletters. Choose year, month, or week view."
         icon={<CalendarDays size={28} />}
       />
-      <AnnualCalendarView items={items} isLoading={isLoading && items.length > 0} />
+      <AnnualCalendarView items={items} audience={audience} />
     </div>
   );
 };

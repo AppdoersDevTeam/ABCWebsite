@@ -7,6 +7,40 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2209-002 — Cut dashboard Supabase load and free-tier request storms
+
+**Date:** 2026-09-22
+**Time:** 20:21:00
+**Timezone:** Pacific/Auckland
+**Version:** 1.9.23
+**Type:** Performance
+
+**Request**
+
+> Complete site audit: dashboards felt slow and Supabase free-tier request limits were being hit with 100+ regular users. No functionality or layout changes.
+
+**Changes**
+
+* Admin Overview: single users scan (pending derived), parallel stats fallback, and admin_overview_bundle RPC (counts + recent activity in one call) with client fallback if RPC missing.
+* Debounced Auth profile, NotificationBell, and Overview email-quota focus/visibility refetches (60s); calendar realtime debounced and focus refetch removed while subscribed.
+* NotificationBell patches inbox from realtime INSERT/UPDATE/DELETE instead of full reload; PortalTopBar uses getSession instead of getUser.
+* Added TanStack Query with shared calendar cache; route-level React.lazy code-splitting; dynamic PDF viewer and jspdf imports; Vite vendor manualChunks. Main JS ~169KB vs prior ~2.3MB monolith.
+* Narrowed calendar event select columns; Auth directory sync once per session on cache hits.
+
+**Database**
+
+* supabase/migrations/20260922080000_admin_overview_bundle.sql
+
+**Validation**
+
+* Unit tests: passed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: passed
+* Notes: npm test (87 pass), npm run validate, vite build. Migration applied on live ABC via Supabase MCP. Typecheck still fails on pre-existing app errors. Zero intentional UI/layout changes.
+
 ## CHG-2026-2209-001 — Show laptop desktop notification toasts reliably
 
 **Date:** 2026-09-22

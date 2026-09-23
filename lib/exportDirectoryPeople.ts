@@ -1,5 +1,3 @@
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
 import type { TeamMember } from '../types';
 import { PEOPLE_LABEL } from './constants';
 import { getDisplayRole, inferProfileType } from './teamMemberUtils';
@@ -80,7 +78,9 @@ export function downloadDirectoryCsv(members: TeamMember[], filenameBase: string
   downloadBlob(`${filenameBase}.csv`, new Blob([csv], { type: 'text/csv;charset=utf-8' }));
 }
 
-export function downloadDirectoryPdf(members: TeamMember[], filenameBase: string, meta: ExportMeta) {
+export async function downloadDirectoryPdf(members: TeamMember[], filenameBase: string, meta: ExportMeta) {
+  const { default: jsPDF } = await import('jspdf');
+  const { default: autoTable } = await import('jspdf-autotable');
   const rows = toRows(members);
   const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
 

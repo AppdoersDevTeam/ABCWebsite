@@ -1,8 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { Suspense, lazy, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Download, Maximize2, Minimize2, X, ZoomIn, ZoomOut } from 'lucide-react';
-import { EmbeddedPdfViewer } from './EmbeddedPdfViewer';
 import { useMediaQuery } from './useMediaQuery';
+
+const EmbeddedPdfViewer = lazy(() =>
+  import('./EmbeddedPdfViewer').then((m) => ({ default: m.EmbeddedPdfViewer }))
+);
 
 interface DocumentReaderPanelProps {
   label: string;
@@ -184,14 +187,22 @@ export const DocumentReaderPanel: React.FC<DocumentReaderPanelProps> = ({
             </div>
           </div>
         ) : (
-          <EmbeddedPdfViewer
-            key={pdfUrl}
-            src={pdfUrl}
-            title={pdfTitle}
-            fillHeight={isMaximized}
-            zoom={isMaximized ? zoom : 1}
-            className={isMaximized ? 'h-full rounded-none border-0' : undefined}
-          />
+          <Suspense
+            fallback={
+              <div className="flex h-48 items-center justify-center text-sm text-charcoal/70 animate-pulse">
+                Loading...
+              </div>
+            }
+          >
+            <EmbeddedPdfViewer
+              key={pdfUrl}
+              src={pdfUrl}
+              title={pdfTitle}
+              fillHeight={isMaximized}
+              zoom={isMaximized ? zoom : 1}
+              className={isMaximized ? 'h-full rounded-none border-0' : undefined}
+            />
+          </Suspense>
         )}
       </div>
     </div>

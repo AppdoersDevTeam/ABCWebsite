@@ -115,11 +115,11 @@ export const PortalTopBar = ({
     let cancelled = false;
     void Promise.all([
       supabase.from('team_members').select('img, staff_role, role').eq('user_id', user.id).limit(1).maybeSingle(),
-      supabase.auth.getUser(),
-    ]).then(([{ data }, auth]) => {
+      supabase.auth.getSession(),
+    ]).then(([{ data }, sessionResult]) => {
       if (cancelled) return;
       setDirectory(data || null);
-      const meta = auth.data.user?.user_metadata || {};
+      const meta = sessionResult.data.session?.user?.user_metadata || {};
       setAuthPhoto(String(meta.avatar_url || meta.picture || ''));
     });
     return () => {

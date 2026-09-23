@@ -1,5 +1,3 @@
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
 import {
   CHANGELOG_AREA_LABELS,
   CHANGELOG_KIND_LABELS,
@@ -89,11 +87,13 @@ export function downloadChangelogCsv(
   downloadBlob(`${filenameBase}.csv`, new Blob([lines.join('\r\n')], { type: 'text/csv;charset=utf-8' }));
 }
 
-export function downloadChangelogPdf(
+export async function downloadChangelogPdf(
   entries: ChangelogEntry[],
   filenameBase: string,
   meta: ChangelogExportMeta
 ) {
+  const { default: jsPDF } = await import('jspdf');
+  const { default: autoTable } = await import('jspdf-autotable');
   const rows = toRows(entries, meta);
   const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
 

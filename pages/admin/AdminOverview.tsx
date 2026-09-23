@@ -25,6 +25,8 @@ import {
   formatEmailQuotaUsed,
   type EmailQuotaStatus,
 } from '../../lib/emailSends';
+import { allowAfterInterval } from '../../lib/minInterval';
+import { fetchAdminOverviewBundle } from '../../lib/adminOverviewBundle';
 
 export const AdminOverview = () => {
   const { user } = useAuth();
@@ -55,25 +57,76 @@ export const AdminOverview = () => {
   const [isLoadingActivities, setIsLoadingActivities] = useState(true);
 
   useEffect(() => {
-    console.log('AdminOverview - useEffect triggered, fetching pending users');
     fetchPendingUsers();
-    fetchStats();
-    fetchRecentActivities();
+    void loadOverviewData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const applyOverviewBundle = (bundle: NonNullable<Awaited<ReturnType<typeof fetchAdminOverviewBundle>>>) => {
+    setPrayerRequestsCount(bundle.prayer_count);
+    setPendingPrayerRequestsCount(bundle.pending_prayer_7d);
+    setTeamMembersCount(bundle.team_count);
+    setRosterAssignmentsCount(bundle.roster_count);
+    setEventsCount(bundle.events_count);
+    setNewsletterCount(bundle.newsletter_count);
+    setDevotionalsCount(bundle.devotionals_count);
+    setRecentActivities(bundle.recent);
+
+    const today = new Date();
+    const currentDay = today.getDay();
+    let daysUntilSunday;
+    if (currentDay === 0) {
+      const currentHour = today.getHours();
+      daysUntilSunday = currentHour < 10 ? 0 : 7;
+    } else {
+      daysUntilSunday = 7 - currentDay;
+    }
+    const nextSunday = new Date(today);
+    nextSunday.setDate(today.getDate() + daysUntilSunday);
+    nextSunday.setHours(10, 0, 0, 0);
+    setNextService(formatDdMmYyyy(nextSunday));
+  };
+
+  const loadOverviewData = async () => {
+    setIsLoadingStats(true);
+    setIsLoadingActivities(true);
+    try {
+      const [bundle, quota] = await Promise.all([
+        fetchAdminOverviewBundle(),
+        fetchEmailQuotaStatus(),
+      ]);
+      setEmailsQuota(quota);
+      if (bundle) {
+        applyOverviewBundle(bundle);
+        return;
+      }
+      await Promise.all([fetchStats(), fetchRecentActivities()]);
+    } catch (error) {
+      console.error('Error loading overview data:', error);
+      await Promise.all([fetchStats(), fetchRecentActivities()]);
+    } finally {
+      setIsLoadingStats(false);
+      setIsLoadingActivities(false);
+    }
+  };
+
   useEffect(() => {
+    const lastQuotaFetchAt = { current: 0 };
+    const refreshQuota = () => {
+      if (!allowAfterInterval(lastQuotaFetchAt, 60_000)) return;
+      void fetchEmailQuotaStatus().then(setEmailsQuota);
+    };
+
     const channel = supabase
       .channel('overview-email-sends')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'email_sends' }, () => {
-        void fetchEmailQuotaStatus().then(setEmailsQuota);
+        lastQuotaFetchAt.current = 0;
+        refreshQuota();
       })
       .subscribe();
 
     const onVisible = () => {
-      if (document.visibilityState === 'visible') {
-        void fetchEmailQuotaStatus().then(setEmailsQuota);
-      }
+      if (document.visibilityState === 'visible') refreshQuota();
     };
     document.addEventListener('visibilitychange', onVisible);
 
@@ -85,52 +138,25 @@ export const AdminOverview = () => {
 
 
   const fetchPendingUsers = async () => {
-    console.log('AdminOverview - fetchPendingUsers called');
     setIsLoadingUsers(true);
     try {
-      console.log('AdminOverview - Making Supabase query for pending users');
-      
-      // First, let's check ALL users to see what we have
-      const { data: allUsers, error: allUsersError } = await supabase
+      // Single users scan — pending list + "show all users" derive from the same rows
+      const { data: usersRows, error } = await supabase
         .from('users')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      console.log('AdminOverview - All users in database:', allUsers);
-      if (allUsersError) {
-        console.error('AdminOverview - Error fetching all users:', allUsersError);
-      }
-
-      // Now get pending users
-      const { data, error } = await supabase
-        .from('users')
-        .select('*')
-        .eq('is_approved', false)
-        .or('is_access_held.eq.false,is_access_held.is.null')
+        .select(
+          'id, email, phone, first_name, last_name, name, is_approved, is_access_held, access_held_at, role, is_super_admin, created_at, user_timezone, account_role_id'
+        )
         .order('created_at', { ascending: false });
 
-      console.log('AdminOverview - Supabase response for pending users:', { data, error });
-      console.log('AdminOverview - Query filter: is_approved = false');
+      if (error) throw error;
 
-      if (error) {
-        console.error('AdminOverview - Supabase error:', error);
-        throw error;
-      }
-      
-      // Log each user's approval status
-      if (allUsers && allUsers.length > 0) {
-        console.log('AdminOverview - User approval statuses:');
-        allUsers.forEach((u: User) => {
-          console.log(`  - ${u.email}: is_approved=${u.is_approved}, role=${u.role}, created_at=${u.created_at}`);
-        });
-        setAllUsers(allUsers);
-      }
-      
-      setPendingUsers(data || []);
-      setPendingCount(data?.length || 0);
-      console.log('AdminOverview - Set pending users:', data?.length || 0);
+      const rows = (usersRows || []) as User[];
+      const pending = rows.filter((u) => isPendingApproval(u));
+      setAllUsers(rows);
+      setPendingUsers(pending);
+      setPendingCount(pending.length);
 
-      const photoIds = [...new Set((allUsers || data || []).map((u) => u.id).filter(Boolean))];
+      const photoIds = [...new Set(rows.map((u) => u.id).filter(Boolean))];
       if (photoIds.length) {
         const { data: dirRows, error: dirErr } = await supabase
           .from('team_members')
@@ -160,11 +186,11 @@ export const AdminOverview = () => {
       console.error('AdminOverview - Error fetching pending users:', error);
       setPendingUsers([]);
       setPendingCount(0);
+      setAllUsers([]);
       setPhotoByUserId({});
       setLinkedByUserId({});
     } finally {
       setIsLoadingUsers(false);
-      console.log('AdminOverview - fetchPendingUsers completed');
     }
   };
 
@@ -288,120 +314,91 @@ export const AdminOverview = () => {
 
 
   const fetchStats = async () => {
-    setIsLoadingStats(true);
+    // Fallback path when admin_overview_bundle RPC is not deployed yet
     try {
-      const { count: prayerTotal, error: prayerError } = await supabase
-        .from('prayer_requests')
-        .select('id', { count: 'exact', head: true });
-
-      if (prayerError) {
-        console.error('Error fetching prayer requests:', prayerError);
-        setPrayerRequestsCount(0);
-      } else {
-        setPrayerRequestsCount(prayerTotal || 0);
-      }
-
-      // Fetch pending prayer requests (recent ones from last 7 days for "pending review")
       const sevenDaysAgo = new Date();
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-      const { data: recentPrayerRequests, error: recentPrayerError } = await supabase
-        .from('prayer_requests')
-        .select('id')
-        .gte('created_at', sevenDaysAgo.toISOString());
 
-      if (!recentPrayerError) {
-        setPendingPrayerRequestsCount(recentPrayerRequests?.length || 0);
-      }
+      const [
+        prayerResult,
+        recentPrayerResult,
+        teamResult,
+        rosterResult,
+        eventsResult,
+        newsletterResult,
+        devotionalsResult,
+      ] = await Promise.allSettled([
+        supabase.from('prayer_requests').select('id', { count: 'exact', head: true }),
+        supabase
+          .from('prayer_requests')
+          .select('id')
+          .gte('created_at', sevenDaysAgo.toISOString()),
+        supabase
+          .from('team_members')
+          .select('id', { count: 'exact', head: true })
+          .or('is_archived.eq.false,is_archived.is.null'),
+        supabase.from('roster').select('id', { count: 'exact', head: true }),
+        supabase.from('events').select('id', { count: 'exact', head: true }),
+        supabase.from('newsletters').select('id', { count: 'exact', head: true }),
+        supabase.from('devotionals').select('id', { count: 'exact', head: true }),
+      ]);
 
-      // Fetch active People directory count (exclude archived)
-      const { count: teamCount, error: teamError } = await supabase
-        .from('team_members')
-        .select('id', { count: 'exact', head: true })
-        .or('is_archived.eq.false,is_archived.is.null');
-
-      if (!teamError) {
-        setTeamMembersCount(teamCount || 0);
-      }
-
-      // Fetch roster assignments count
-      const { count: rosterCount, error: rosterError } = await supabase
-        .from('roster')
-        .select('*', { count: 'exact', head: true });
-
-      if (!rosterError) {
-        setRosterAssignmentsCount(rosterCount || 0);
-      }
-
-      const { count: eventsTotal, error: eventsCountError } = await supabase
-        .from('events')
-        .select('id', { count: 'exact', head: true });
-
-      if (eventsCountError) {
-        console.error('Error counting events:', eventsCountError);
-        setEventsCount(0);
+      if (prayerResult.status === 'fulfilled' && !prayerResult.value.error) {
+        setPrayerRequestsCount(prayerResult.value.count || 0);
       } else {
-        setEventsCount(eventsTotal || 0);
+        setPrayerRequestsCount(0);
       }
 
-      // Calculate next Sunday service (Sunday at 10AM)
+      if (recentPrayerResult.status === 'fulfilled' && !recentPrayerResult.value.error) {
+        setPendingPrayerRequestsCount(recentPrayerResult.value.data?.length || 0);
+      }
+
+      if (teamResult.status === 'fulfilled' && !teamResult.value.error) {
+        setTeamMembersCount(teamResult.value.count || 0);
+      }
+
+      if (rosterResult.status === 'fulfilled' && !rosterResult.value.error) {
+        setRosterAssignmentsCount(rosterResult.value.count || 0);
+      }
+
+      if (eventsResult.status === 'fulfilled' && !eventsResult.value.error) {
+        setEventsCount(eventsResult.value.count || 0);
+      } else {
+        setEventsCount(0);
+      }
+
       const today = new Date();
-      const currentDay = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
-      
-      // Calculate days until next Sunday
+      const currentDay = today.getDay();
       let daysUntilSunday;
       if (currentDay === 0) {
-        // If today is Sunday, check if it's before 10 AM
         const currentHour = today.getHours();
-        if (currentHour < 10) {
-          // Today's service hasn't happened yet
-          daysUntilSunday = 0;
-        } else {
-          // Today's service already happened, get next Sunday
-          daysUntilSunday = 7;
-        }
+        daysUntilSunday = currentHour < 10 ? 0 : 7;
       } else {
-        // Get next Sunday
         daysUntilSunday = 7 - currentDay;
       }
-      
       const nextSunday = new Date(today);
       nextSunday.setDate(today.getDate() + daysUntilSunday);
-      nextSunday.setHours(10, 0, 0, 0); // 10 AM
-      
-      // Always use calculated next Sunday - format as "dd month"
+      nextSunday.setHours(10, 0, 0, 0);
       setNextService(formatDdMmYyyy(nextSunday));
 
-      const { count: newsletterTotal, error: newsletterCountError } = await supabase
-        .from('newsletters')
-        .select('id', { count: 'exact', head: true });
-      if (newsletterCountError) {
-        console.error('Error counting newsletters:', newsletterCountError);
+      if (newsletterResult.status === 'fulfilled' && !newsletterResult.value.error) {
+        setNewsletterCount(newsletterResult.value.count || 0);
+      } else {
         setNewsletterCount(0);
-      } else {
-        setNewsletterCount(newsletterTotal || 0);
       }
 
-      const { count: devotionalsTotal, error: devotionalsCountError } = await supabase
-        .from('devotionals')
-        .select('id', { count: 'exact', head: true });
-      if (devotionalsCountError) {
-        console.error('Error counting devotionals:', devotionalsCountError);
+      if (devotionalsResult.status === 'fulfilled' && !devotionalsResult.value.error) {
+        setDevotionalsCount(devotionalsResult.value.count || 0);
+      } else {
         setDevotionalsCount(0);
-      } else {
-        setDevotionalsCount(devotionalsTotal || 0);
       }
-
-      const quota = await fetchEmailQuotaStatus();
-      setEmailsQuota(quota);
     } catch (error) {
       console.error('Error fetching stats:', error);
-    } finally {
-      setIsLoadingStats(false);
     }
   };
 
   const fetchRecentActivities = async () => {
-    setIsLoadingActivities(true);
+    // Fallback path when admin_overview_bundle RPC is not deployed yet
     try {
       // Fetch recent activities from multiple tables
       const thirtyDaysAgo = new Date();
@@ -582,8 +579,6 @@ export const AdminOverview = () => {
     } catch (error) {
       console.error('Error fetching recent activities:', error);
       setRecentActivities([]);
-    } finally {
-      setIsLoadingActivities(false);
     }
   };
 

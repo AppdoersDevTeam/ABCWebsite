@@ -1,11 +1,12 @@
-import { useEffect, useState } from 'react';
+import { Suspense, lazy, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Home } from './Home';
 import { OAuthCallback } from './OAuthCallback';
 import { useAuth } from '../../context/AuthContext';
 import { isAdminUser } from '../../lib/constants';
 import { hasAuthCallbackParams } from '../../lib/authCallback';
 import { canPendingUserBrowsePublic } from '../../lib/pendingAccess';
+
+const Home = lazy(() => import('./Home').then((m) => ({ default: m.Home })));
 
 export const OAuthCallbackWrapper = () => {
   const navigate = useNavigate();
@@ -48,5 +49,15 @@ export const OAuthCallbackWrapper = () => {
     );
   }
 
-  return <Home />;
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen page-shell page-shell-image flex items-center justify-center text-charcoal font-serif">
+          <div className="page-shell-content animate-pulse text-xl">Loading...</div>
+        </div>
+      }
+    >
+      <Home />
+    </Suspense>
+  );
 };

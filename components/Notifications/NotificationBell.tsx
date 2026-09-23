@@ -6,6 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import { formatRelativeDateInTimezone } from '../../lib/dateUtils';
 import type { AppNotification } from '../../lib/notificationTypes';
 import { registerPushServiceWorker, showLocalNotification } from '../../lib/pushNotifications';
+import { allowAfterInterval } from '../../lib/minInterval';
 
 const PAGE_SIZE = 30;
 
@@ -54,8 +55,11 @@ export const NotificationBell = ({ variant = 'default' }: NotificationBellProps)
   }, [load]);
 
   useEffect(() => {
+    const lastFocusLoadAt = { current: 0 };
     const onVisible = () => {
-      if (document.visibilityState === 'visible') void load();
+      if (document.visibilityState !== 'visible') return;
+      if (!allowAfterInterval(lastFocusLoadAt, 60_000)) return;
+      void load();
     };
     document.addEventListener('visibilitychange', onVisible);
     window.addEventListener('focus', onVisible);
@@ -87,6 +91,27 @@ export const NotificationBell = ({ variant = 'default' }: NotificationBellProps)
                 href: row.href || '/dashboard',
                 tag: `abc-inbox-${row.id}`,
               });
+            }
+            if (row?.id) {
+              setItems((prev) => {
+                if (prev.some((item) => item.id === row.id)) return prev;
+                return [row, ...prev].slice(0, PAGE_SIZE);
+              });
+              return;
+            }
+          }
+          if (payload.eventType === 'UPDATE') {
+            const row = payload.new as AppNotification | undefined;
+            if (row?.id) {
+              setItems((prev) => prev.map((item) => (item.id === row.id ? { ...item, ...row } : item)));
+              return;
+            }
+          }
+          if (payload.eventType === 'DELETE') {
+            const row = payload.old as { id?: string } | undefined;
+            if (row?.id) {
+              setItems((prev) => prev.filter((item) => item.id !== row.id));
+              return;
             }
           }
           void load();

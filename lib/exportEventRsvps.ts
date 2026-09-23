@@ -1,5 +1,3 @@
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
 import { formatDdMmYyyyHHmm } from './dateUtils';
 
 export type EventRsvpRow = {
@@ -55,7 +53,9 @@ export function downloadEventRsvpsCsv(rows: EventRsvpRow[], filenameBase: string
   downloadBlob(`${filenameBase}.csv`, new Blob([lines.join('\r\n')], { type: 'text/csv;charset=utf-8' }));
 }
 
-export function downloadEventRsvpsPdf(rows: EventRsvpRow[], filenameBase: string, title: string, meta: ExportMeta) {
+export async function downloadEventRsvpsPdf(rows: EventRsvpRow[], filenameBase: string, title: string, meta: ExportMeta) {
+  const { default: jsPDF } = await import('jspdf');
+  const { default: autoTable } = await import('jspdf-autotable');
   const doc = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'a4' });
 
   autoTable(doc, {

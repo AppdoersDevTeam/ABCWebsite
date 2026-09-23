@@ -127,7 +127,10 @@ export async function fetchCalendarItems(
   audience: CalendarAudience,
   isAdmin: boolean
 ): Promise<CalendarItem[]> {
-  const eventsQuery = supabase.from('events').select('*').order('date', { ascending: true });
+  const eventsQuery = supabase
+    .from('events')
+    .select('id, title, location, time, date, start_date, end_date, is_public, audience')
+    .order('date', { ascending: true });
   const scopedEvents = isAdmin
     ? eventsQuery
     : eventsQuery.or('is_public.eq.true,audience.in.(all,members),audience.is.null');
