@@ -7,6 +7,37 @@ Never delete historical entries. Never rewrite historical entries unless explici
 
 Timezone for new entries: **Pacific/Auckland**. Authoritative version: `package.json`.
 
+## CHG-2026-2309-001 — Require work-based git messages on push
+
+**Date:** 2026-09-23
+**Time:** 13:20:30
+**Timezone:** Pacific/Auckland
+**Version:** 1.9.24
+**Type:** Infrastructure
+
+**Request**
+
+> Pushes were using a generic updates changelogs DDMMYYYY subject. Messages must describe the work done; persist that as agent rules.
+
+**Changes**
+
+* push:live now requires an explicit work-based message (CLI arg or PUSH_LIVE_MESSAGE) and refuses generic updates changelogs DDMMYYYY subjects.
+* Added always-apply Cursor rule commit-messages.mdc; updated push-to-live rule/skill and auto-run push guidance.
+
+**Database**
+
+* None
+
+**Validation**
+
+* Unit tests: not run or failed
+* Integration tests: not run or failed
+* End-to-end tests: not run or failed
+* Type checking: not run or failed
+* Lint: not run or failed
+* Build: not run or failed
+* Notes: Governance/tooling only; npm run validate after changelog render.
+
 ## CHG-2026-2209-002 — Cut dashboard Supabase load and free-tier request storms
 
 **Date:** 2026-09-22

@@ -1,0 +1,34 @@
+---
+description: Git commit messages must describe the actual work done — never use generic push/changelog-only messages.
+alwaysApply: true
+---
+
+# Work-based commit messages
+
+Every git commit (including when pushing to live / GitHub) **must** describe the work that was done.
+
+## Required
+
+- Use the project convention: `type(scope): description [CHG-ID]` when a Change ID exists (see `AGENTS.md`).
+- The subject must be specific to this change (what improved, fixed, or shipped).
+- When the user asks to push / go live / push all changes: stage, **commit with a work-based message**, then push. Do not use a generic message.
+
+## Forbidden
+
+- `updates changelogs DDMMYYYY` as the sole commit message
+- Vague messages like `updates`, `changes`, `wip`, `fix stuff`
+- Reusing the previous commit message when the work is different
+
+## Push to live
+
+Prefer:
+
+```bash
+git add .
+git commit -m "type(scope): short description of the work [CHG-YYYY-DDMM-NNN]"
+git push -u origin main
+```
+
+Or: `npm run push:live -- "type(scope): short description of the work [CHG-ID]"`
+
+If `push:live` is run with no message argument, still pass an explicit work-based `-m` via the script’s message argument — never fall back to a generic changelog-date-only subject.

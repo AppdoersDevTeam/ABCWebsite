@@ -6,6 +6,36 @@
   "versionSource": "package.json",
   "entries": [
     {
+      "id": "CHG-2026-2309-001",
+      "date": "2026-09-23",
+      "time": "13:20:30",
+      "timezone": "Pacific/Auckland",
+      "changedAt": "2026-09-23T01:20:30.321Z",
+      "version": "1.9.24",
+      "type": "infrastructure",
+      "area": "system",
+      "title": "Require work-based git messages on push",
+      "request": "Pushes were using a generic updates changelogs DDMMYYYY subject. Messages must describe the work done; persist that as agent rules.",
+      "changes": [
+        "push:live now requires an explicit work-based message (CLI arg or PUSH_LIVE_MESSAGE) and refuses generic updates changelogs DDMMYYYY subjects.",
+        "Added always-apply Cursor rule commit-messages.mdc; updated push-to-live rule/skill and auto-run push guidance."
+      ],
+      "changedBy": "Appdoers Dev Team",
+      "database": {
+        "migrations": []
+      },
+      "validation": {
+        "unitTests": false,
+        "integrationTests": false,
+        "e2eTests": false,
+        "typeCheck": false,
+        "lint": false,
+        "build": false,
+        "notes": "Governance/tooling only; npm run validate after changelog render."
+      },
+      "breakingChange": false
+    },
+    {
       "id": "CHG-2026-2209-002",
       "date": "2026-09-22",
       "time": "20:21:00",

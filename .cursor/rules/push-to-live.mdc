@@ -1,14 +1,20 @@
 ---
-description: When the user says Push to live, stage, commit, and push to GitHub main in one go.
+description: When the user says Push to live, stage, commit with a work-based message, and push to GitHub main.
 alwaysApply: true
 ---
 
 # Push to live
 
-When the user says **Push to live**, **push live**, **deploy live to GitHub**, or **go live**:
+When the user says **Push to live**, **push live**, **deploy live to GitHub**, **go live**, or **push all changes**:
 
-1. Run `npm run push:live` immediately. Do not ask for confirmation. Do not run extra changelog, validate, or other git commands first.
-2. That script is `git add .`, then `git commit -m "updates changelogs DDMMYYYY"` (Auckland day/month/year), then `git push -u origin main`.
-3. Report the commit result and whether the push succeeded.
+1. Draft a **work-based** commit message from what was actually implemented (include Change ID when one exists), e.g. `perf(admin): cut dashboard Supabase request storms [CHG-2026-2209-002]`.
+2. Run immediately (do not ask for confirmation):
 
-Do not use this flow unless the user used one of those phrases.
+```bash
+npm run push:live -- "type(scope): short description of the work [CHG-ID]"
+```
+
+3. Do **not** use `updates changelogs DDMMYYYY` or any other generic subject.
+4. Report the commit hash, message, and whether the push succeeded.
+
+If there is nothing to commit, still push if the branch is ahead; say so clearly.

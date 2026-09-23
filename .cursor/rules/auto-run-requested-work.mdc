@@ -10,4 +10,4 @@ The user does not want to click Run or Allow.
 1. Do not stop in chat to ask the user to run a command or approve a step.
 2. Commands on the Cursor allowlist (git, npm, node, Hub CLI, changelog, validate, push) must run automatically.
 3. If Auto-review still blocks a Shell command, immediately retry the exact same command with `request_smart_mode_approval` set to true and the exact block reason. Do not rewrite the command. Do not ask in chat.
-4. When the user asks to push to live / GitHub, run `npm run push:live` or `git push` without asking.
+4. When the user asks to push to live / GitHub, run `npm run push:live -- "type(scope): work description [CHG-ID]"` (or `git commit` with that message then `git push`) without asking. Never use a generic `updates changelogs` subject.
